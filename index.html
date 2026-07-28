@@ -418,8 +418,8 @@ body.light-mode .ship-lab{background:rgba(146,64,14,.05);}
       <div class="field"><span class="f-label">Avg Marine (hourly)</span><span class="f-val" id="fAvgMarine">0<span class="u">m³/hr</span></span></div>
       <div class="field"><span class="f-label">Total Land</span><span class="f-val" id="fLandRaw">0<span class="u">m³/d</span></span></div>
       <div class="field"><span class="f-label">Total Marine</span><span class="f-val" id="fMarineRaw">0<span class="u">m³/d</span></span></div>
-      <div class="field"><span class="f-label">Net Land (− Zeitco)</span><span class="f-val" id="fLandNet">0<span class="u">m³/d</span></span></div>
-      <div class="field"><span class="f-label">Net Marine (− Shedwan &amp; Condensate)</span><span class="f-val" id="fMarineNet">0<span class="u">m³/d</span></span></div>
+      <div class="field"><span class="f-label">Net Land (− Zeitco − Drain)</span><span class="f-val" id="fLandNet">0<span class="u">m³/d</span></span></div>
+      <div class="field"><span class="f-label">Net Marine (− Shedwan &amp; Cond. − Drain)</span><span class="f-val" id="fMarineNet">0<span class="u">m³/d</span></span></div>
     </div>
 
     <!-- Daily inputs: Zeitco / Shedwan / Condensate -->
@@ -833,11 +833,14 @@ function compute(state){
 
   const drain = computeDrain(state.drain);
 
-  // Drain comes off both totals (per your call), split by stream.
-  const landAfterDrain_m3   = landRaw_m3 - drain.landDrain_m3;
-  const marineAfterDrain_m3 = marineRaw_m3 - drain.marineDrain_m3;
-
-  const receivedFeiran_m3  = landAfterDrain_m3 + marineAfterDrain_m3;
+  // GROSS "Received at Feiran" = what physically arrived at the terminal,
+  // BEFORE any deduction. Drain is NOT taken out here.
+  //
+  // (Earlier this subtracted drain from both gross and net. That was wrong:
+  // deducting it from both meant it cancelled out, so the visible Gross→Net
+  // difference only ever contained Zeitco/Shedwan/Condensate and the drain
+  // never showed up as a deduction at all.)
+  const receivedFeiran_m3  = landRaw_m3 + marineRaw_m3;
   const receivedFeiran_bbl = receivedFeiran_m3 * CONV;
 
   // Zeitco / Shedwan / Condensate are entered in BBL — convert to m³ before
@@ -849,8 +852,12 @@ function compute(state){
   const zeitco_m3   = zeitco_bbl / CONV;
   const shedCond_m3 = shedCond_bbl / CONV;
 
-  const netLand_m3   = landAfterDrain_m3 - zeitco_m3;
-  const netMarine_m3 = marineAfterDrain_m3 - shedCond_m3;
+  // NET = Gross − imported streams − drain, split by stream so each
+  // deduction comes off the side it belongs to. The full chain is now
+  // visible and auditable:
+  //   Net = Received at Feiran − Zeitco − (Shedwan + Condensate) − Drain
+  const netLand_m3   = landRaw_m3   - zeitco_m3   - drain.landDrain_m3;
+  const netMarine_m3 = marineRaw_m3 - shedCond_m3 - drain.marineDrain_m3;
   const netLand_bbl   = netLand_m3 * CONV;
   const netMarine_bbl = netMarine_m3 * CONV;
 
@@ -1373,8 +1380,8 @@ function buildReportBodyHtml(){
       '<tr><th>Avg Marine (hourly)</th><td colspan="2">' + fmtNum(r.avgMarine,2) + ' m³/hr</td></tr>' +
       '<tr><th>Total Land</th><td colspan="2">' + fmtNum(r.landRaw_m3,1) + ' m³/d</td></tr>' +
       '<tr><th>Total Marine</th><td colspan="2">' + fmtNum(r.marineRaw_m3,1) + ' m³/d</td></tr>' +
-      '<tr><th>Net Land (− Zeitco)</th><td colspan="2">' + fmtNum(r.netLand_m3,1) + ' m³/d</td></tr>' +
-      '<tr><th>Net Marine (− Shedwan &amp; Condensate)</th><td colspan="2">' + fmtNum(r.netMarine_m3,1) + ' m³/d</td></tr>' +
+      '<tr><th>Net Land (− Zeitco − Drain)</th><td colspan="2">' + fmtNum(r.netLand_m3,1) + ' m³/d</td></tr>' +
+      '<tr><th>Net Marine (− Shedwan &amp; Cond. − Drain)</th><td colspan="2">' + fmtNum(r.netMarine_m3,1) + ' m³/d</td></tr>' +
     '</table>' +
 
     '<table class="pr-table"><caption>🧮 Full Breakdown</caption>' +
@@ -1523,8 +1530,8 @@ function generateReportPdf(){
   dataRow('Avg Marine (hourly)', fmtNum(r.avgMarine,2)+' m3/hr');
   dataRow('Total Land', fmtNum(r.landRaw_m3,1)+' m3/d');
   dataRow('Total Marine', fmtNum(r.marineRaw_m3,1)+' m3/d');
-  dataRow('Net Land (- Zeitco)', fmtNum(r.netLand_m3,1)+' m3/d');
-  dataRow('Net Marine (- Shedwan & Condensate)', fmtNum(r.netMarine_m3,1)+' m3/d');
+  dataRow('Net Land (- Zeitco - Drain)', fmtNum(r.netLand_m3,1)+' m3/d');
+  dataRow('Net Marine (- Shedwan & Cond. - Drain)', fmtNum(r.netMarine_m3,1)+' m3/d');
   y += 4;
 
   sectionTitle('FULL BREAKDOWN');
