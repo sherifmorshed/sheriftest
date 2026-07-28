@@ -300,6 +300,18 @@ body.light-mode .ship-results{background:rgba(7,94,84,.04);border-color:rgba(7,9
 .ship-subtotal{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);border-top:1px solid var(--border);flex-wrap:wrap;}
 .ship-subtotal b{color:var(--accent);font-size:14px;}
 .ship-subtotal .sep{color:var(--border);}
+.ship-gauge-pair{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
+.ship-gauge-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 10px;}
+.ship-gauge-box.start{border-left:3px solid var(--green);}
+.ship-gauge-box.end{border-left:3px solid var(--red);}
+.ship-gauge-lbl{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;font-family:'JetBrains Mono',monospace;}
+.ship-gauge-box.start .ship-gauge-lbl{color:var(--green);}
+.ship-gauge-box.end .ship-gauge-lbl{color:var(--red);}
+.ship-out .val{font-size:11px;color:var(--muted);}
+.ship-lab{padding:10px 14px;background:rgba(245,158,11,.05);border-bottom:1px solid var(--border);}
+body.light-mode .ship-lab{background:rgba(146,64,14,.05);}
+.ship-lab-title{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--accent2);font-family:'JetBrains Mono',monospace;margin-bottom:8px;font-weight:700;}
+.ship-lab .ship-field .val{color:var(--accent2);font-weight:700;}
 </style>
 </head>
 <body>
@@ -456,10 +468,11 @@ body.light-mode .ship-results{background:rgba(7,94,84,.04);border-color:rgba(7,9
     <!-- Shipping summary cards -->
     <div class="result-cards">
       <div class="result-card received">
-        <div class="rc-lbl">🚢 Total Quantity Loaded</div>
+        <div class="rc-lbl">🚢 Total Net Oil Loaded</div>
         <div class="rc-val" id="shipTotalM3">0</div>
-        <div class="rc-sub">m³</div>
+        <div class="rc-sub">m³ (net)</div>
         <div class="rc-bbl" id="shipTotalBbl">0 bbl</div>
+        <div class="rc-bbl" id="shipTotalMT">0 MT</div>
       </div>
     </div>
 
@@ -469,12 +482,31 @@ body.light-mode .ship-results{background:rgba(7,94,84,.04);border-color:rgba(7,9
         <span>⛽ Land — Tanks</span>
         <button class="ship-add-btn" onclick="addShipRow('land')">+ Add Tank</button>
       </div>
+      <div class="ship-lab">
+        <div class="ship-lab-title">🔬 Land Laboratory Data</div>
+        <div class="ship-grid">
+          <div class="ship-field">
+            <label>Density @15°C</label>
+            <input type="text" inputmode="decimal" lang="en" id="shipLandDensity" placeholder="0.9243" oninput="sanitizeNumInput(this); computeShipping()">
+          </div>
+          <div class="ship-field">
+            <label>W/C %</label>
+            <input type="text" inputmode="decimal" lang="en" id="shipLandWC" placeholder="0.20" oninput="sanitizeNumInput(this); computeShipping()">
+          </div>
+          <div class="ship-field">
+            <label>API (calc)</label>
+            <div class="val" id="shipLandAPI">—</div>
+          </div>
+        </div>
+      </div>
       <div id="shipLandRows"></div>
       <div class="ship-subtotal" id="shipLandSubtotal">
-        <span>Land Total Loaded:</span>
+        <span>Land Net Oil:</span>
         <b id="shipLandM3">0 m³</b>
         <span class="sep">·</span>
         <b id="shipLandBbl">0 bbl</b>
+        <span class="sep">·</span>
+        <b id="shipLandMT">0 MT</b>
       </div>
     </div>
 
@@ -484,29 +516,31 @@ body.light-mode .ship-results{background:rgba(7,94,84,.04);border-color:rgba(7,9
         <span>🌊 Marine — Tanks</span>
         <button class="ship-add-btn" onclick="addShipRow('marine')">+ Add Tank</button>
       </div>
+      <div class="ship-lab">
+        <div class="ship-lab-title">🔬 Marine Laboratory Data</div>
+        <div class="ship-grid">
+          <div class="ship-field">
+            <label>Density @15°C</label>
+            <input type="text" inputmode="decimal" lang="en" id="shipMarineDensity" placeholder="0.8850" oninput="sanitizeNumInput(this); computeShipping()">
+          </div>
+          <div class="ship-field">
+            <label>W/C %</label>
+            <input type="text" inputmode="decimal" lang="en" id="shipMarineWC" placeholder="0.05" oninput="sanitizeNumInput(this); computeShipping()">
+          </div>
+          <div class="ship-field">
+            <label>API (calc)</label>
+            <div class="val" id="shipMarineAPI">—</div>
+          </div>
+        </div>
+      </div>
       <div id="shipMarineRows"></div>
       <div class="ship-subtotal" id="shipMarineSubtotal">
-        <span>Marine Total Loaded:</span>
+        <span>Marine Net Oil:</span>
         <b id="shipMarineM3">0 m³</b>
         <span class="sep">·</span>
         <b id="shipMarineBbl">0 bbl</b>
-      </div>
-    </div>
-
-    <!-- Shipping lab inputs (shared density/temp/API) -->
-    <div class="section">
-      <div class="sec-title">🔬 Laboratory Data</div>
-      <div class="daily-grid" style="grid-template-columns:1fr 1fr;">
-        <div class="daily-field">
-          <label>Density @ 15°C</label>
-          <input type="text" inputmode="decimal" lang="en" id="shipDensity" placeholder="0.9225" oninput="sanitizeNumInput(this); computeShipping()">
-          <div class="unit">g/cm³</div>
-        </div>
-        <div class="daily-field">
-          <label>W/C %</label>
-          <input type="text" inputmode="decimal" lang="en" id="shipWC" placeholder="0.1" oninput="sanitizeNumInput(this); computeShipping()">
-          <div class="unit">%</div>
-        </div>
+        <span class="sep">·</span>
+        <b id="shipMarineMT">0 MT</b>
       </div>
     </div>
 
@@ -1013,26 +1047,50 @@ function addShipRow(stream){
   var html =
     '<div class="ship-row" id="' + id + '">' +
       '<div class="ship-row-hdr">' +
-        '<span class="ship-row-title">' + (stream === 'land' ? '⛽' : '🌊') + ' Tank Reading</span>' +
+        '<span class="ship-row-title">' + (stream === 'land' ? '⛽' : '🌊') + ' Tank Loading</span>' +
         '<button class="ship-row-del" onclick="removeShipRow(\'' + id + '\')" title="Remove">✕</button>' +
       '</div>' +
-      '<div class="ship-grid">' +
+      '<div class="ship-grid" style="grid-template-columns:1fr 1fr;">' +
         '<div class="ship-field"><label>Tank</label><select data-role="tank" onchange="computeShipping()">' + optionsHtml + '</select></div>' +
-        '<div class="ship-field"><label>Before (mm)</label><input type="text" inputmode="decimal" lang="en" data-role="before" placeholder="0" oninput="sanitizeNumInput(this); computeShipping()"></div>' +
-        '<div class="ship-field"><label>After (mm)</label><input type="text" inputmode="decimal" lang="en" data-role="after" placeholder="0" oninput="sanitizeNumInput(this); computeShipping()"></div>' +
+        '<div class="ship-field"><label>Density (optional)</label><input type="text" inputmode="decimal" lang="en" data-role="density" placeholder="use lab" oninput="sanitizeNumInput(this); computeShipping()"></div>' +
       '</div>' +
-      '<div class="ship-grid-2">' +
-        '<div class="ship-field"><label>Temp °C</label><input type="text" inputmode="decimal" lang="en" data-role="temp" placeholder="0" oninput="sanitizeNumInput(this); computeShipping()"></div>' +
-        '<div class="ship-field"><label>Density g/cm³</label><input type="text" inputmode="decimal" lang="en" data-role="density" placeholder="0.9225" oninput="sanitizeNumInput(this); computeShipping()"></div>' +
+      '<div class="ship-gauge-pair">' +
+        '<div class="ship-gauge-box start">' +
+          '<div class="ship-gauge-lbl">▲ START</div>' +
+          '<div class="ship-grid-2">' +
+            '<div class="ship-field"><label>Gauge (m)</label><input type="text" inputmode="decimal" lang="en" data-role="startGauge" placeholder="12.840" oninput="sanitizeNumInput(this); computeShipping()"></div>' +
+            '<div class="ship-field"><label>Temp °C</label><input type="text" inputmode="decimal" lang="en" data-role="startTemp" placeholder="0" oninput="sanitizeNumInput(this); computeShipping()"></div>' +
+          '</div>' +
+          '<div class="ship-grid-2 ship-out">' +
+            '<div class="ship-field"><label>Volume m³</label><div class="val" data-role="startVol">—</div></div>' +
+            '<div class="ship-field"><label>VCF</label><div class="val" data-role="startVCF">—</div></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="ship-gauge-box end">' +
+          '<div class="ship-gauge-lbl">▼ END</div>' +
+          '<div class="ship-grid-2">' +
+            '<div class="ship-field"><label>Gauge (m)</label><input type="text" inputmode="decimal" lang="en" data-role="endGauge" placeholder="04.000" oninput="sanitizeNumInput(this); computeShipping()"></div>' +
+            '<div class="ship-field"><label>Temp °C</label><input type="text" inputmode="decimal" lang="en" data-role="endTemp" placeholder="0" oninput="sanitizeNumInput(this); computeShipping()"></div>' +
+          '</div>' +
+          '<div class="ship-grid-2 ship-out">' +
+            '<div class="ship-field"><label>Volume m³</label><div class="val" data-role="endVol">—</div></div>' +
+            '<div class="ship-field"><label>VCF</label><div class="val" data-role="endVCF">—</div></div>' +
+          '</div>' +
+        '</div>' +
       '</div>' +
       '<div class="ship-results">' +
-        '<div class="ship-field"><label>Observed m³</label><div class="val" data-role="obsVol">—</div></div>' +
-        '<div class="ship-field"><label>VCF</label><div class="val" data-role="vcf">—</div></div>' +
-        '<div class="ship-field"><label>Adjusted m³</label><div class="val" data-role="adjVol">—</div></div>' +
+        '<div class="ship-field"><label>Adj Start m³</label><div class="val" data-role="adjStart">—</div></div>' +
+        '<div class="ship-field"><label>Adj End m³</label><div class="val" data-role="adjEnd">—</div></div>' +
+        '<div class="ship-field"><label>Qty Loaded m³</label><div class="val" data-role="qtyLoaded">—</div></div>' +
+      '</div>' +
+      '<div class="ship-results" style="margin-top:4px;">' +
+        '<div class="ship-field"><label>Net Oil m³</label><div class="val" data-role="netOil">—</div></div>' +
+        '<div class="ship-field"><label>Net Oil bbl</label><div class="val" data-role="netBbl">—</div></div>' +
+        '<div class="ship-field"><label>Metric Tons</label><div class="val" data-role="mt">—</div></div>' +
       '</div>' +
     '</div>';
   container.insertAdjacentHTML('beforeend', html);
-  computeShipping();
+  if(!_shipLocalWrite) computeShipping();
 }
 
 function removeShipRow(id){
@@ -1041,66 +1099,220 @@ function removeShipRow(id){
   computeShipping();
 }
 
+// API gravity from density at 15°C (standard petroleum formula).
+// Shown for reference/cross-check against the lab sheet — the VCF math
+// itself uses density, not API.
+function densityToAPI(densGcm3){
+  if(!densGcm3 || densGcm3 <= 0) return null;
+  return (141.5 / densGcm3) - 131.5;
+}
+
 function computeShipping(){
   var CONV_BBL = 6.292316;
 
-  function processRows(containerId){
+  // Per-stream laboratory data — Land and Marine are different crudes with
+  // different densities and APIs, so they must never share one value.
+  var landDens = parseFloat(toWesternDigits(document.getElementById('shipLandDensity').value));
+  var landWC = parseFloat(toWesternDigits(document.getElementById('shipLandWC').value));
+  var marineDens = parseFloat(toWesternDigits(document.getElementById('shipMarineDensity').value));
+  var marineWC = parseFloat(toWesternDigits(document.getElementById('shipMarineWC').value));
+
+  // Live API display per stream
+  var landAPI = densityToAPI(landDens);
+  var marineAPI = densityToAPI(marineDens);
+  document.getElementById('shipLandAPI').textContent = landAPI !== null ? landAPI.toFixed(1) : '—';
+  document.getElementById('shipMarineAPI').textContent = marineAPI !== null ? marineAPI.toFixed(1) : '—';
+
+  function processRows(containerId, streamDens, streamWC){
     var container = document.getElementById(containerId);
-    if(!container) return { totalAdjM3: 0, totalObsM3: 0 };
+    if(!container) return { totalQtyM3:0, totalNetM3:0, totalMT:0 };
     var rows = container.querySelectorAll('.ship-row');
-    var totalAdjM3 = 0, totalObsM3 = 0;
+    var totalQtyM3=0, totalNetM3=0, totalMT=0;
+    var wcFraction = (!isNaN(streamWC) && streamWC >= 0) ? streamWC / 100 : 0;
 
     rows.forEach(function(row){
       var tankSel = row.querySelector('[data-role=tank]');
-      var beforeIn = row.querySelector('[data-role=before]');
-      var afterIn = row.querySelector('[data-role=after]');
-      var tempIn = row.querySelector('[data-role=temp]');
       var densIn = row.querySelector('[data-role=density]');
-      var obsEl = row.querySelector('[data-role=obsVol]');
-      var vcfEl = row.querySelector('[data-role=vcf]');
-      var adjEl = row.querySelector('[data-role=adjVol]');
+      var startGaugeIn = row.querySelector('[data-role=startGauge]');
+      var startTempIn = row.querySelector('[data-role=startTemp]');
+      var endGaugeIn = row.querySelector('[data-role=endGauge]');
+      var endTempIn = row.querySelector('[data-role=endTemp]');
+
+      var startVolEl = row.querySelector('[data-role=startVol]');
+      var startVCFEl = row.querySelector('[data-role=startVCF]');
+      var endVolEl = row.querySelector('[data-role=endVol]');
+      var endVCFEl = row.querySelector('[data-role=endVCF]');
+      var adjStartEl = row.querySelector('[data-role=adjStart]');
+      var adjEndEl = row.querySelector('[data-role=adjEnd]');
+      var qtyEl = row.querySelector('[data-role=qtyLoaded]');
+      var netEl = row.querySelector('[data-role=netOil]');
+      var netBblEl = row.querySelector('[data-role=netBbl]');
+      var mtEl = row.querySelector('[data-role=mt]');
 
       var tankNum = parseInt(tankSel.value.replace(/[^0-9]/g, ''), 10);
-      var beforeMM = parseFloat(toWesternDigits(beforeIn.value));
-      var afterMM = parseFloat(toWesternDigits(afterIn.value));
-      var temp = parseFloat(toWesternDigits(tempIn.value));
-      var densGcm3 = parseFloat(toWesternDigits(densIn.value));
+      var startGaugeM = parseFloat(toWesternDigits(startGaugeIn.value));
+      var startTemp = parseFloat(toWesternDigits(startTempIn.value));
+      var endGaugeM = parseFloat(toWesternDigits(endGaugeIn.value));
+      var endTemp = parseFloat(toWesternDigits(endTempIn.value));
 
-      // Auto-fill density from lab data if the per-row field is empty
-      if(isNaN(densGcm3)){
-        var labDens = parseFloat(toWesternDigits(document.getElementById('shipDensity').value));
-        if(!isNaN(labDens)) densGcm3 = labDens;
-      }
+      // Per-tank density overrides the stream's lab density when provided —
+      // real shipment reports show density varying between tanks in the same
+      // parcel (e.g. 0.9255 on one tank, 0.9243 on the next).
+      var rowDens = parseFloat(toWesternDigits(densIn.value));
+      var densGcm3 = !isNaN(rowDens) ? rowDens : streamDens;
 
-      var volBefore = (!isNaN(beforeMM) && TANK_CAL) ? calLookup(tankNum, beforeMM) : null;
-      var volAfter = (!isNaN(afterMM) && TANK_CAL) ? calLookup(tankNum, afterMM) : null;
-      var obsM3 = (volBefore !== null && volAfter !== null) ? Math.abs(volBefore - volAfter) : null;
+      // Gauge is entered in meters (e.g. 12.840) → convert to mm for calibration lookup
+      var startMM = !isNaN(startGaugeM) ? Math.round(startGaugeM * 1000) : NaN;
+      var endMM = !isNaN(endGaugeM) ? Math.round(endGaugeM * 1000) : NaN;
+
+      var volStart = (!isNaN(startMM) && TANK_CAL) ? calLookup(tankNum, startMM) : null;
+      var volEnd = (!isNaN(endMM) && TANK_CAL) ? calLookup(tankNum, endMM) : null;
 
       var densKgm3 = !isNaN(densGcm3) ? densGcm3 * 1000 : null;
-      var vcf = (densKgm3 && !isNaN(temp)) ? astm54aVCF(densKgm3, temp) : null;
-      var adjM3 = (obsM3 !== null && vcf !== null) ? obsM3 * vcf : null;
+      var vcfStart = (densKgm3 && !isNaN(startTemp)) ? astm54aVCF(densKgm3, startTemp) : null;
+      var vcfEnd = (densKgm3 && !isNaN(endTemp)) ? astm54aVCF(densKgm3, endTemp) : null;
 
-      obsEl.textContent = obsM3 !== null ? fmtNum(obsM3, 3) : '—';
-      vcfEl.textContent = vcf !== null ? vcf.toFixed(4) : '—';
-      adjEl.textContent = adjM3 !== null ? fmtNum(adjM3, 3) : '—';
+      var adjStart = (volStart !== null && vcfStart !== null) ? volStart * vcfStart : null;
+      var adjEnd = (volEnd !== null && vcfEnd !== null) ? volEnd * vcfEnd : null;
+      var qtyM3 = (adjStart !== null && adjEnd !== null) ? adjStart - adjEnd : null;
 
-      if(obsM3 !== null) totalObsM3 += obsM3;
-      if(adjM3 !== null) totalAdjM3 += adjM3;
+      var netM3 = (qtyM3 !== null) ? qtyM3 * (1 - wcFraction) : null;
+      var mt = (netM3 !== null && densKgm3) ? netM3 * densKgm3 / 1000 : null;
+
+      startVolEl.textContent = volStart !== null ? fmtNum(volStart, 3) : '—';
+      startVCFEl.textContent = vcfStart !== null ? vcfStart.toFixed(4) : '—';
+      endVolEl.textContent = volEnd !== null ? fmtNum(volEnd, 3) : '—';
+      endVCFEl.textContent = vcfEnd !== null ? vcfEnd.toFixed(4) : '—';
+      adjStartEl.textContent = adjStart !== null ? fmtNum(adjStart, 3) : '—';
+      adjEndEl.textContent = adjEnd !== null ? fmtNum(adjEnd, 3) : '—';
+      qtyEl.textContent = qtyM3 !== null ? fmtNum(qtyM3, 3) : '—';
+      netEl.textContent = netM3 !== null ? fmtNum(netM3, 3) : '—';
+      netBblEl.textContent = netM3 !== null ? fmtNum(netM3 * CONV_BBL, 0) : '—';
+      mtEl.textContent = mt !== null ? fmtNum(mt, 3) : '—';
+
+      if(qtyM3 !== null) totalQtyM3 += qtyM3;
+      if(netM3 !== null) totalNetM3 += netM3;
+      if(mt !== null) totalMT += mt;
     });
 
-    return { totalAdjM3: totalAdjM3, totalObsM3: totalObsM3 };
+    return { totalQtyM3:totalQtyM3, totalNetM3:totalNetM3, totalMT:totalMT };
   }
 
-  var land = processRows('shipLandRows');
-  var marine = processRows('shipMarineRows');
-  var totalM3 = land.totalAdjM3 + marine.totalAdjM3;
+  var land = processRows('shipLandRows', landDens, landWC);
+  var marine = processRows('shipMarineRows', marineDens, marineWC);
+  var totalNetM3 = land.totalNetM3 + marine.totalNetM3;
+  var totalMT = land.totalMT + marine.totalMT;
 
-  document.getElementById('shipLandM3').textContent = fmtNum(land.totalAdjM3, 3) + ' m³';
-  document.getElementById('shipLandBbl').textContent = fmtNum(land.totalAdjM3 * CONV_BBL, 0) + ' bbl';
-  document.getElementById('shipMarineM3').textContent = fmtNum(marine.totalAdjM3, 3) + ' m³';
-  document.getElementById('shipMarineBbl').textContent = fmtNum(marine.totalAdjM3 * CONV_BBL, 0) + ' bbl';
-  document.getElementById('shipTotalM3').textContent = fmtNum(totalM3, 3);
-  document.getElementById('shipTotalBbl').textContent = fmtNum(totalM3 * CONV_BBL, 0) + ' bbl';
+  document.getElementById('shipLandM3').textContent = fmtNum(land.totalNetM3, 3) + ' m³';
+  document.getElementById('shipLandBbl').textContent = fmtNum(land.totalNetM3 * CONV_BBL, 0) + ' bbl';
+  document.getElementById('shipLandMT').textContent = fmtNum(land.totalMT, 3) + ' MT';
+  document.getElementById('shipMarineM3').textContent = fmtNum(marine.totalNetM3, 3) + ' m³';
+  document.getElementById('shipMarineBbl').textContent = fmtNum(marine.totalNetM3 * CONV_BBL, 0) + ' bbl';
+  document.getElementById('shipMarineMT').textContent = fmtNum(marine.totalMT, 3) + ' MT';
+  document.getElementById('shipTotalM3').textContent = fmtNum(totalNetM3, 3);
+  document.getElementById('shipTotalBbl').textContent = fmtNum(totalNetM3 * CONV_BBL, 0) + ' bbl';
+  document.getElementById('shipTotalMT').textContent = fmtNum(totalMT, 3) + ' MT';
+
+  scheduleShipSave();
+}
+
+// ── Shipping Firestore persistence ──
+var _shipSaveTimer = null;
+var _shipLocalWrite = false; // true while we're saving OUR OWN edit — prevents
+                             // the onSnapshot callback from tearing down and
+                             // rebuilding every row (which kills focus/keyboard)
+
+function scheduleShipSave(){
+  if(_shipSaveTimer) clearTimeout(_shipSaveTimer);
+  _shipSaveTimer = setTimeout(saveShippingToFirestore, 800);
+}
+function readShipRows(containerId){
+  var container = document.getElementById(containerId);
+  if(!container) return [];
+  var rows = container.querySelectorAll('.ship-row');
+  var result = [];
+  rows.forEach(function(row){
+    result.push({
+      tank: row.querySelector('[data-role=tank]').value,
+      density: row.querySelector('[data-role=density]').value || null,
+      startGauge: row.querySelector('[data-role=startGauge]').value || null,
+      startTemp: row.querySelector('[data-role=startTemp]').value || null,
+      endGauge: row.querySelector('[data-role=endGauge]').value || null,
+      endTemp: row.querySelector('[data-role=endTemp]').value || null
+    });
+  });
+  return result;
+}
+function saveShippingToFirestore(){
+  if(!currentUser) return;
+  _shipLocalWrite = true;
+  var data = {
+    landRows: readShipRows('shipLandRows'),
+    marineRows: readShipRows('shipMarineRows'),
+    landDensity: document.getElementById('shipLandDensity').value || null,
+    landWC: document.getElementById('shipLandWC').value || null,
+    marineDensity: document.getElementById('shipMarineDensity').value || null,
+    marineWC: document.getElementById('shipMarineWC').value || null,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    updatedBy: currentUser ? currentUser.email : null
+  };
+  db.collection('accountingShipping').doc(currentDate).set(data).then(function(){
+    setTimeout(function(){ _shipLocalWrite = false; }, 500);
+  }).catch(function(err){
+    _shipLocalWrite = false;
+    console.error('[Firestore] shipping save failed', err);
+  });
+}
+function restoreShipRows(stream, savedRows){
+  var containerId = (stream === 'land') ? 'shipLandRows' : 'shipMarineRows';
+  document.getElementById(containerId).innerHTML = '';
+  if(!savedRows || !savedRows.length) return;
+  savedRows.forEach(function(sr){
+    addShipRow(stream);
+    var container = document.getElementById(containerId);
+    var row = container.lastElementChild;
+    if(!row) return;
+    var tankSel = row.querySelector('[data-role=tank]');
+    if(sr.tank) tankSel.value = sr.tank;
+    if(sr.density) row.querySelector('[data-role=density]').value = sr.density;
+    if(sr.startGauge) row.querySelector('[data-role=startGauge]').value = sr.startGauge;
+    if(sr.startTemp) row.querySelector('[data-role=startTemp]').value = sr.startTemp;
+    if(sr.endGauge) row.querySelector('[data-role=endGauge]').value = sr.endGauge;
+    if(sr.endTemp) row.querySelector('[data-role=endTemp]').value = sr.endTemp;
+  });
+}
+var _shipUnsub = null;
+function startShipListener(dateStr){
+  if(_shipUnsub) _shipUnsub();
+  _shipLocalWrite = false;
+  _shipUnsub = db.collection('accountingShipping').doc(dateStr).onSnapshot(function(doc){
+    if(_shipLocalWrite) return;
+
+    if(doc.exists){
+      var d = doc.data();
+      restoreShipRows('land', d.landRows);
+      restoreShipRows('marine', d.marineRows);
+      document.getElementById('shipLandDensity').value = d.landDensity || '';
+      document.getElementById('shipLandWC').value = d.landWC || '';
+      document.getElementById('shipMarineDensity').value = d.marineDensity || '';
+      document.getElementById('shipMarineWC').value = d.marineWC || '';
+      computeShipping();
+    } else {
+      document.getElementById('shipLandRows').innerHTML = '';
+      document.getElementById('shipMarineRows').innerHTML = '';
+      document.getElementById('shipLandDensity').value = '';
+      document.getElementById('shipLandWC').value = '';
+      document.getElementById('shipMarineDensity').value = '';
+      document.getElementById('shipMarineWC').value = '';
+      computeShipping();
+    }
+  }, function(err){
+    console.error('[Firestore] shipping listener error', err);
+  });
+}
+function stopShipListener(){
+  if(_shipUnsub){ _shipUnsub(); _shipUnsub = null; }
+  _shipLocalWrite = false;
 }
 
 // ══════════════════════════════════════════
@@ -1803,6 +2015,7 @@ function onDateChange(){
   currentDate = document.getElementById('prodDate').value || today();
   updateDateDisplay();
   startListener(currentDate);
+  startShipListener(currentDate);
 }
 
 // ══════════════════════════════════════════
@@ -1866,6 +2079,7 @@ function showApp(user){
   updateDateDisplay();
   startExtrasListener();
   startListener(currentDate);
+  startShipListener(currentDate);
 
   loadJsPdfLib().catch(function(){});
   loadTankCalibration().catch(function(err){ console.warn('[Cal] failed to load tank calibration', err); });
@@ -1875,6 +2089,7 @@ function showApp(user){
 function showLogin(){
   stopListener();
   stopExtrasListener();
+  stopShipListener();
   document.getElementById('login-page').classList.remove('hidden');
   document.getElementById('userBar').classList.add('hidden');
   document.getElementById('appPage').style.display = 'none';
