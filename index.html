@@ -292,6 +292,7 @@ table.ocr-review input:focus{border-color:var(--accent);}
 .inv-diff b{font-size:13px;}
 .inv-diff b.pos{color:var(--green);}
 .inv-diff b.neg{color:var(--red);}
+.ship-hint{color:var(--accent);}
 .inv-nocal{font-size:11px;color:var(--yellow);background:rgba(251,191,36,.08);border:1px dashed rgba(251,191,36,.4);border-radius:8px;padding:8px 10px;line-height:1.5;}
 .tab-btn:active{background:rgba(34,211,238,.06);}
 
@@ -517,10 +518,10 @@ body.light-mode .ship-lab{background:rgba(146,64,14,.05);}
         <div class="rc-bbl" id="aInvChangeBbl">0 bbl</div>
       </div>
       <div class="result-card received">
-        <div class="rc-lbl">⚖️ vs Daily Production (Net)</div>
+        <div class="rc-lbl">⛽ Production (from tank measurements)</div>
         <div class="rc-val" id="aVariance">—</div>
-        <div class="rc-sub">variance bbl</div>
-        <div class="rc-bbl" id="aVarianceNote">enter production first</div>
+        <div class="rc-sub">m³</div>
+        <div class="rc-bbl" id="aVarianceNote">enter tank levels</div>
       </div>
     </div>
 
@@ -560,15 +561,56 @@ body.light-mode .ship-lab{background:rgba(146,64,14,.05);}
       </div>
     </div>
 
-    <!-- Grand totals -->
+    <!-- Movements in / out of the terminal -->
     <div class="section">
-      <div class="sec-title">🧮 Terminal Grand Total</div>
-      <div class="field"><span class="f-label">Yesterday — All Tanks</span><span class="f-val" id="aGrandYest">0<span class="u">m³</span></span></div>
+      <div class="sec-title">🔁 Movements (m³) — same day as the tank readings</div>
+      <div class="daily-grid" style="grid-template-columns:1fr 1fr;">
+        <div class="daily-field">
+          <label>Shipped (loaded out)</label>
+          <input type="text" inputmode="decimal" lang="en" id="aMovShip" placeholder="0" oninput="sanitizeNumInput(this); computeInventory()">
+          <div class="unit">m³ · <span id="aShipHint" class="ship-hint">—</span></div>
+        </div>
+        <div class="daily-field">
+          <label>Condensate</label>
+          <input type="text" inputmode="decimal" lang="en" id="aMovCond" placeholder="0" oninput="sanitizeNumInput(this); computeInventory()">
+          <div class="unit">m³</div>
+        </div>
+        <div class="daily-field">
+          <label>Received — Shadwan</label>
+          <input type="text" inputmode="decimal" lang="en" id="aMovShadwan" placeholder="0" oninput="sanitizeNumInput(this); computeInventory()">
+          <div class="unit">m³</div>
+        </div>
+        <div class="daily-field">
+          <label>Received — Nefertiti</label>
+          <input type="text" inputmode="decimal" lang="en" id="aMovNefertiti" placeholder="0" oninput="sanitizeNumInput(this); computeInventory()">
+          <div class="unit">m³</div>
+        </div>
+        <div class="daily-field">
+          <label>Diesel injected</label>
+          <input type="text" inputmode="decimal" lang="en" id="aMovDiesel" placeholder="0" oninput="sanitizeNumInput(this); computeInventory()">
+          <div class="unit">m³</div>
+        </div>
+        <div class="daily-field">
+          <label>Other received</label>
+          <input type="text" inputmode="decimal" lang="en" id="aMovOther" placeholder="0" oninput="sanitizeNumInput(this); computeInventory()">
+          <div class="unit">m³</div>
+        </div>
+      </div>
+      <button class="ship-add-btn" style="margin:0 14px 12px;width:calc(100% - 28px);padding:8px;" onclick="pullShippedFromShipping()">⬇ Pull shipped total from Shipping tab</button>
+    </div>
+
+    <!-- Grand totals + reconciliation -->
+    <div class="section">
+      <div class="sec-title">🧮 Production Reconciliation</div>
       <div class="field"><span class="f-label">Today — All Tanks</span><span class="f-val" id="aGrandToday">0<span class="u">m³</span></span></div>
-      <div class="field"><span class="f-label">Change (received into terminal)</span><span class="f-val" id="aGrandChange">0<span class="u">m³</span></span></div>
-      <div class="field"><span class="f-label">Change in barrels</span><span class="f-val" id="aGrandChangeBbl">0<span class="u">bbl</span></span></div>
-      <div class="field"><span class="f-label">Daily Production (net, from tab 1)</span><span class="f-val" id="aDailyProd">0<span class="u">bbl</span></span></div>
-      <div class="field"><span class="f-label">Variance (inventory − production)</span><span class="f-val" id="aVarianceRow">0<span class="u">bbl</span></span></div>
+      <div class="field"><span class="f-label">Yesterday — All Tanks</span><span class="f-val" id="aGrandYest">0<span class="u">m³</span></span></div>
+      <div class="field"><span class="f-label">Inventory change (today − yest.)</span><span class="f-val" id="aGrandChange">0<span class="u">m³</span></span></div>
+      <div class="field"><span class="f-label">+ Shipped out</span><span class="f-val" id="aRecShip">0<span class="u">m³</span></span></div>
+      <div class="field"><span class="f-label">− Condensate</span><span class="f-val" id="aRecCond">0<span class="u">m³</span></span></div>
+      <div class="field"><span class="f-label">− Received (Shadwan + Nefertiti + other)</span><span class="f-val" id="aRecRecv">0<span class="u">m³</span></span></div>
+      <div class="field"><span class="f-label">− Diesel injected</span><span class="f-val" id="aRecDiesel">0<span class="u">m³</span></span></div>
+      <div class="field" style="border-top:2px solid var(--accent);"><span class="f-label"><b>= PRODUCTION</b></span><span class="f-val" id="aProdM3" style="color:var(--accent);font-size:17px;">0<span class="u">m³</span></span></div>
+      <div class="field"><span class="f-label">Production in barrels</span><span class="f-val" id="aProdBbl">0<span class="u">bbl</span></span></div>
     </div>
 
   </div>
@@ -1871,25 +1913,48 @@ function computeInventory(){
   setInvField('aGrandYest', grandY, 3);
   setInvField('aGrandToday', grandT, 3);
   setInvField('aGrandChange', grandChange, 3);
-  setInvField('aGrandChangeBbl', grandChangeBbl, 1);
 
-  // Compare against the Daily Production tab's net figure (bbl/d)
-  var prod = compute(readState());
-  var prodBbl = prod.totalNet_bbl;
-  setInvField('aDailyProd', prodBbl, 1);
-  var variance = grandChangeBbl - prodBbl;
-  setInvField('aVarianceRow', variance, 1);
+  // ── Production reconciliation ──
+  // Taken from the source workbook's own rows (verified exactly against it):
+  //   Production = (Today − Yesterday) + Shipped − Condensate
+  //                − Received(Shadwan + Nefertiti + other) − Diesel injected
+  // Oil that left the terminal (shipped) must be ADDED back, because it was
+  // produced but is no longer sitting in the tanks. Oil that arrived from
+  // elsewhere is SUBTRACTED, because it isn't our own production.
+  var mShip   = numOrNull(document.getElementById('aMovShip').value) || 0;
+  var mCond   = numOrNull(document.getElementById('aMovCond').value) || 0;
+  var mShad   = numOrNull(document.getElementById('aMovShadwan').value) || 0;
+  var mNef    = numOrNull(document.getElementById('aMovNefertiti').value) || 0;
+  var mDiesel = numOrNull(document.getElementById('aMovDiesel').value) || 0;
+  var mOther  = numOrNull(document.getElementById('aMovOther').value) || 0;
+  var recvTotal = mShad + mNef + mOther;
+
+  var prodM3 = grandChange + mShip - mCond - recvTotal - mDiesel;
+  var prodBblCalc = prodM3 * CONV;
+
+  setInvField('aRecShip', mShip, 3);
+  setInvField('aRecCond', mCond, 3);
+  setInvField('aRecRecv', recvTotal, 3);
+  setInvField('aRecDiesel', mDiesel, 3);
+  setInvField('aProdM3', prodM3, 3);
+  setInvField('aProdBbl', prodBblCalc, 1);
 
   var vEl = document.getElementById('aVariance');
   var vNote = document.getElementById('aVarianceNote');
-  if(!prodBbl){
+  var anyTankData = (grandT !== 0 || grandY !== 0);
+  if(!anyTankData){
     vEl.textContent = '—';
-    vNote.textContent = 'enter production first';
+    vNote.textContent = 'enter tank levels';
   } else {
-    vEl.textContent = (variance >= 0 ? '+' : '') + fmtNum(variance, 0);
-    var pct = Math.abs(variance / prodBbl * 100);
-    vNote.textContent = pct.toFixed(2) + '% of production' +
-      (Math.abs(variance) < Math.abs(prodBbl) * 0.01 ? ' · matches well' : '');
+    vEl.textContent = fmtNum(prodM3, 1);
+    vNote.textContent = fmtNum(prodBblCalc, 0) + ' bbl';
+  }
+
+  // Show what the Shipping tab currently totals, as a convenience hint
+  var hintEl = document.getElementById('aShipHint');
+  if(hintEl){
+    var shipTot = _shippingGrossTotalM3();
+    hintEl.textContent = shipTot > 0 ? ('shipping tab: ' + fmtNum(shipTot, 3)) : '—';
   }
 
   scheduleInvSave();
@@ -1903,6 +1968,29 @@ function setInvField(id, val, dec){
 
 // Copies today's readings into the yesterday column — handy at the start of
 // a new day, when today's closing figures become tomorrow's opening ones.
+// Sums the quantity loaded across every tank row in the Shipping tab
+// (Land + Marine), so the shipped figure can be pulled in with one tap
+// instead of re-typing it.
+function _shippingGrossTotalM3(){
+  var tot = 0;
+  ['shipLandRows','shipMarineRows'].forEach(function(cid){
+    var c = document.getElementById(cid);
+    if(!c) return;
+    c.querySelectorAll('[data-role=qtyLoaded]').forEach(function(el){
+      var v = parseFloat(String(el.textContent).replace(/,/g,''));
+      if(!isNaN(v)) tot += v;
+    });
+  });
+  return tot;
+}
+function pullShippedFromShipping(){
+  var t = _shippingGrossTotalM3();
+  if(!t){ showToast('⚠️ Shipping tab has no quantity loaded yet', true); return; }
+  document.getElementById('aMovShip').value = t.toFixed(3);
+  computeInventory();
+  showToast('✅ Pulled ' + fmtNum(t,3) + ' m³ from Shipping');
+}
+
 function copyInvTodayToYesterday(stream){
   if(!confirm("Copy TODAY's readings into the YESTERDAY column for " + stream + " tanks?")) return;
   invTanksFor(stream).forEach(function(t){
@@ -1936,10 +2024,20 @@ function _invReadAll(){
   });
   return out;
 }
+var INV_MOV_IDS = ['aMovShip','aMovCond','aMovShadwan','aMovNefertiti','aMovDiesel','aMovOther'];
+function _invReadMovements(){
+  var m = {};
+  INV_MOV_IDS.forEach(function(id){
+    var el = document.getElementById(id);
+    m[id] = el ? (el.value || null) : null;
+  });
+  return m;
+}
 function saveInventoryToFirestore(){
   if(!currentUser) return;
   db.collection('accountingInventory').doc(currentDate).set({
     tanks: _invReadAll(),
+    movements: _invReadMovements(),
     updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
     updatedBy: currentUser ? currentUser.email : null
   }).catch(function(err){ console.error('[Firestore] inventory save failed', err); });
@@ -1960,6 +2058,11 @@ function _invApply(d){
     document.getElementById('invT_g_' + id).value = v.tG || '';
     document.getElementById('invT_t_' + id).value = v.tT || '';
   });
+  var mv = (d && d.movements) || {};
+  INV_MOV_IDS.forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) el.value = mv[id] || '';
+  });
   computeInventory();
 }
 var _invUnsub = null;
@@ -1968,7 +2071,8 @@ function startInvListener(dateStr){
   _invPendingDoc = null;
   _invUnsub = db.collection('accountingInventory').doc(dateStr).onSnapshot(function(doc){
     var d = doc.exists ? doc.data() : {};
-    if(JSON.stringify(d.tanks || {}) === JSON.stringify(_invReadAll())) return;
+    if(JSON.stringify(d.tanks || {}) === JSON.stringify(_invReadAll())
+       && JSON.stringify(d.movements || {}) === JSON.stringify(_invReadMovements())) return;
     if(_invHasFocus()){ _invPendingDoc = d; return; }
     _invApply(d);
   }, function(err){ console.error('[Firestore] inventory listener error', err); });

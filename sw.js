@@ -4,7 +4,7 @@
 //  requests are NEVER cached to prevent stale data.
 // ══════════════════════════════════════════
 
-const CACHE_NAME = 'accounting-prod-v31';
+const CACHE_NAME = 'accounting-prod-v32';
 
 // Only cache static files that don't change between sessions
 const STATIC_ASSETS = [
