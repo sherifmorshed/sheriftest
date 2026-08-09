@@ -179,10 +179,8 @@ body.light-mode .result-card.net{background:linear-gradient(135deg, rgba(16,185,
 }
 .print-btn:active{background:rgba(34,211,238,.12);}
 
-.action-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;}
+.action-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
 .action-row .print-btn{padding:12px 4px;font-size:12px;margin-bottom:0;}
-.ocr-btn{background:var(--surface);border:1.5px solid var(--accent2);color:var(--accent2);}
-.ocr-btn:active{background:rgba(245,158,11,.12);}
 .drain-btn{background:var(--surface);border:1.5px solid var(--green);color:var(--green);}
 .drain-btn:active{background:rgba(16,185,129,.12);}
 
@@ -196,58 +194,32 @@ body.light-mode .stream-toggle.land{color:#fff;}
 .drain-tot-row.grand{border-top:2px solid var(--accent);margin-top:2px;font-size:13px;}
 .drain-tot-row.grand b{color:var(--accent);}
 
-/* ── OCR IMPORT MODAL ── */
-.ocr-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9500;display:none;align-items:flex-start;justify-content:center;padding:0;overflow-y:auto;}
-.ocr-overlay.show{display:flex;}
-.ocr-modal{background:var(--card);width:100%;max-width:640px;min-height:100%;border-left:1px solid var(--border);border-right:1px solid var(--border);}
-.ocr-modal-hdr{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--surface);border-bottom:1px solid var(--border);}
-.ocr-modal-hdr h2{font-size:14px;letter-spacing:1px;color:var(--accent);text-transform:uppercase;}
-.ocr-close{background:none;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:16px;width:32px;height:32px;cursor:pointer;line-height:1;}
-.ocr-body{padding:16px;}
-.ocr-step-lbl{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-family:'JetBrains Mono',monospace;margin:18px 0 8px;}
-.ocr-step-lbl:first-child{margin-top:0;}
-.ocr-hint{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:12px;}
-.ocr-capture-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.ocr-cap-btn{padding:16px 10px;background:var(--surface);border:1.5px dashed var(--border);border-radius:10px;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;text-align:center;}
-.ocr-cap-btn:active{border-color:var(--accent);background:rgba(34,211,238,.06);}
-.ocr-cap-btn .ico{font-size:26px;display:block;margin-bottom:6px;}
-.ocr-preview-wrap{margin-top:14px;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:#000;}
-.ocr-preview-wrap img{width:100%;display:block;max-height:340px;object-fit:contain;background:#111;}
-.ocr-extract-btn{width:100%;margin-top:12px;padding:13px;background:var(--accent);color:#04121a;border:none;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;font-family:'Inter',sans-serif;}
-body.light-mode .ocr-extract-btn{color:#fff;}
-.ocr-extract-btn:disabled{opacity:.5;}
-.ocr-progress-wrap{margin-top:12px;display:none;}
-.ocr-progress-wrap.show{display:block;}
-.ocr-progress-lbl{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:6px;text-align:center;}
-.ocr-progress-bar{height:6px;border-radius:4px;background:var(--surface);border:1px solid var(--border);overflow:hidden;}
-.ocr-progress-fill{height:100%;width:0%;background:var(--accent);transition:width .25s;}
+/* ── SLIDE-UP SHEET (drain modal) ── */
+.sheet-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9500;display:none;align-items:flex-start;justify-content:center;padding:0;overflow-y:auto;}
+.sheet-overlay.show{display:flex;}
+.sheet-modal{background:var(--card);width:100%;max-width:640px;min-height:100%;border-left:1px solid var(--border);border-right:1px solid var(--border);}
+.sheet-hdr{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--surface);border-bottom:1px solid var(--border);}
+.sheet-hdr h2{font-size:14px;letter-spacing:1px;color:var(--accent);text-transform:uppercase;}
+.sheet-close{background:none;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:16px;width:32px;height:32px;cursor:pointer;line-height:1;}
+.sheet-body{padding:16px;}
+.sheet-hint{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:12px;}
 
-.ocr-map-toggle{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:12px;}
-.ocr-map-toggle .lbl{color:var(--muted);font-family:'JetBrains Mono',monospace;}
-.ocr-map-toggle .val{color:var(--accent);font-weight:700;}
-.ocr-swap-btn{background:none;border:1px solid var(--accent);border-radius:6px;color:var(--accent);font-size:11px;padding:5px 10px;cursor:pointer;font-family:'JetBrains Mono',monospace;font-weight:700;}
-.ocr-swap-btn:active{background:rgba(34,211,238,.12);}
 
-table.ocr-review{width:100%;border-collapse:collapse;font-size:12.5px;}
-table.ocr-review th{background:var(--surface);color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-size:9px;padding:7px 6px;border-bottom:1px solid var(--border);text-align:center;}
-table.ocr-review td{padding:4px 6px;border-bottom:1px solid var(--border);text-align:center;}
-table.ocr-review tr.blk-b td{background:rgba(245,158,11,.05);}
-body.light-mode table.ocr-review tr.blk-b td{background:rgba(146,64,14,.05);}
-table.ocr-review td.hr-lbl{font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:11px;white-space:nowrap;text-align:left;padding-left:10px;}
-table.ocr-review input{
+table.sheet-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+table.sheet-table th{background:var(--surface);color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-size:9px;padding:7px 6px;border-bottom:1px solid var(--border);text-align:center;}
+table.sheet-table td{padding:4px 6px;border-bottom:1px solid var(--border);text-align:center;}
+table.sheet-table tr.blk-b td{background:rgba(245,158,11,.05);}
+body.light-mode table.sheet-table tr.blk-b td{background:rgba(146,64,14,.05);}
+table.sheet-table td.hr-lbl{font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:11px;white-space:nowrap;text-align:left;padding-left:10px;}
+table.sheet-table input{
   width:100%;max-width:78px;background:var(--surface);border:1px solid var(--border);
   border-radius:6px;color:var(--text);font-family:'JetBrains Mono',monospace;
   font-size:13px;padding:5px 4px;text-align:center;outline:none;
 }
-table.ocr-review input.ocr-low-conf{border-color:var(--yellow);}
-table.ocr-review input:focus{border-color:var(--accent);}
-.ocr-legend{font-size:10.5px;color:var(--muted);margin:8px 0 4px;font-family:'JetBrains Mono',monospace;}
-.ocr-legend .dot{display:inline-block;width:9px;height:9px;border-radius:2px;background:var(--yellow);margin-right:4px;vertical-align:-1px;}
+table.sheet-table input:focus{border-color:var(--accent);}
 
-.ocr-footer{position:sticky;bottom:0;display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px 16px;background:var(--surface);border-top:1px solid var(--border);}
-.ocr-apply-btn{padding:13px;background:var(--green);border:none;border-radius:10px;color:#04150e;font-weight:700;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;}
-.ocr-cancel-btn{padding:13px;background:none;border:1.5px solid var(--border);border-radius:10px;color:var(--muted);font-weight:700;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;}
-.ocr-loading-note{font-size:12px;color:var(--muted);text-align:center;padding:10px;}
+.sheet-footer{position:sticky;bottom:0;display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px 16px;background:var(--surface);border-top:1px solid var(--border);}
+.sheet-done-btn{padding:13px;background:var(--green);border:none;border-radius:10px;color:#04150e;font-weight:700;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;}
 
 /* ── PRINT REPORT (hidden on screen, shown only when printing) ── */
 #printArea{display:none;}
@@ -293,6 +265,13 @@ table.ocr-review input:focus{border-color:var(--accent);}
 .inv-diff b.pos{color:var(--green);}
 .inv-diff b.neg{color:var(--red);}
 .ship-hint{color:var(--accent);}
+.inv-auto{font-size:9.5px;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:.3px;}
+.inv-col.yest.linked{border-left-color:var(--accent);}
+.inv-col.yest.linked .inv-col-lbl::after{content:' · from ' attr(data-prev);color:var(--accent);}
+.cal-warn{font-size:11.5px;color:var(--red);background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.35);border-radius:8px;padding:9px 12px;margin-bottom:12px;line-height:1.5;}
+.inv-linked-note{font-size:10.5px;color:var(--accent);background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.25);border-radius:8px;padding:7px 10px;margin:0 14px 10px;font-family:'JetBrains Mono',monospace;}
+body.light-mode .cal-warn{font-size:11.5px;color:var(--red);background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.35);border-radius:8px;padding:9px 12px;margin-bottom:12px;line-height:1.5;}
+.inv-linked-note{background:rgba(7,94,84,.06);border-color:rgba(7,94,84,.25);}
 .inv-nocal{font-size:11px;color:var(--yellow);background:rgba(251,191,36,.08);border:1px dashed rgba(251,191,36,.4);border-radius:8px;padding:8px 10px;line-height:1.5;}
 .tab-btn:active{background:rgba(34,211,238,.06);}
 
@@ -355,6 +334,43 @@ body.light-mode .ship-lab{background:rgba(146,64,14,.05);}
 .ship-sum-row.water b{color:var(--accent2);}
 .ship-sum-row.net{border-top:2px solid var(--accent);margin-top:3px;padding-top:8px;}
 .ship-sum-row.net b{color:var(--accent);font-size:14px;font-weight:800;}
+
+/* ══ NUMERALS: tabular figures so digits align in columns ══ */
+.f-val,.qty-vals b,.inv-out,.ship-field .val,.rc-val,.rc-bbl,.drain-out,
+table.hr-tbl input,.ship-field input,.daily-field input,.z-sample input,
+.inv-diff b,.ship-sum-row b{font-variant-numeric:tabular-nums;font-feature-settings:'tnum' 1;}
+
+/* ══ MANIFEST GRID — the certificate of quantity ══ */
+.qty-sheet{margin:10px 12px 12px;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--surface);}
+.qty-sheet-hd{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);padding:8px 12px;border-bottom:1px solid var(--border);background:rgba(128,128,128,.04);}
+.qty-block{padding:10px 12px;border-bottom:1px solid rgba(128,128,128,.12);}
+.qty-block:last-child{border-bottom:none;}
+.qty-lbl{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
+.qty-lbl .cnt{font-style:normal;letter-spacing:0;text-transform:none;opacity:.75;margin-left:5px;}
+.qty-vals{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.qty-vals.one{grid-template-columns:1fr;}
+.qty-vals>div{display:flex;flex-direction:column;gap:2px;min-width:0;}
+.qty-vals b{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.3px;line-height:1.15;overflow-wrap:anywhere;}
+.qty-vals i{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted);}
+.qty-block.water{background:rgba(245,158,11,.05);}
+.qty-block.water .qty-vals b{color:var(--accent2);}
+.qty-block.net{background:rgba(34,211,238,.06);border-top:2px solid var(--accent);}
+body.light-mode .qty-block.net{background:rgba(7,94,84,.06);}
+.qty-block.net .qty-lbl{color:var(--accent);}
+.qty-block.net .qty-vals b{color:var(--accent);font-size:17px;}
+
+/* ══ SIGHT GLASS — tank level at a glance ══ */
+.inv-hd{display:flex;align-items:center;gap:9px;margin-bottom:8px;}
+.gauge{position:relative;width:13px;height:34px;border:1.5px solid var(--border);border-radius:3px;background:var(--surface);overflow:hidden;flex-shrink:0;}
+.gauge-fill{position:absolute;left:0;right:0;bottom:0;height:0%;background:linear-gradient(180deg,var(--accent),rgba(34,211,238,.45));transition:height .35s cubic-bezier(.4,0,.2,1);}
+body.light-mode .gauge-fill{background:linear-gradient(180deg,var(--accent),rgba(7,94,84,.45));}
+.gauge-mark{position:absolute;left:0;right:0;top:50%;height:1px;background:var(--border);}
+.inv-tank{font-family:'JetBrains Mono',monospace;font-size:13.5px;font-weight:700;color:var(--accent);letter-spacing:.4px;margin:0;}
+.inv-pct{display:block;font-size:8.5px;font-weight:400;color:var(--muted);letter-spacing:.8px;margin-top:1px;}
+
+/* ══ Breathing room between value and unit ══ */
+.f-val .u{margin-left:7px;}
+.rc-val{letter-spacing:-1px;}
 </style>
 </head>
 <body>
@@ -425,7 +441,6 @@ body.light-mode .ship-lab{background:rgba(146,64,14,.05);}
 
     <div class="action-row">
       <button class="print-btn" onclick="printReport()">🖨️ Print</button>
-      <button class="print-btn ocr-btn" onclick="openOcrModal()">📷 Photo</button>
       <button class="print-btn drain-btn" onclick="openDrainModal()">🛢️ Drain</button>
     </div>
 
@@ -533,17 +548,33 @@ body.light-mode .ship-lab{background:rgba(146,64,14,.05);}
       </div>
     </div>
 
+    <div class="cal-warn" id="calWarnAcct" style="display:none;"></div>
+
+    <div class="action-row" style="grid-template-columns:1fr;">
+      <button class="print-btn" onclick="printTabReport('acct')">🖨️ Print Accounting</button>
+    </div>
+    <div class="inv-linked-note" id="aLinkNote">🔗 Yesterday is linked automatically to the previous date.</div>
+
     <!-- Land tanks -->
     <div class="section">
       <div class="sec-title">
         <span>⛽ Land Tanks</span>
-        <button class="ship-add-btn" onclick="copyInvTodayToYesterday('land')">⇐ Today → Yest.</button>
+        <span class="inv-auto">auto-linked by date</span>
       </div>
       <div id="aLandRows"></div>
-      <div class="ship-summary">
-        <div class="ship-sum-row"><span class="lbl">Land — Yesterday</span><b id="aLandYestTotal">0</b><span class="u">m³</span></div>
-        <div class="ship-sum-row"><span class="lbl">Land — Today</span><b id="aLandTodayTotal">0</b><span class="u">m³</span></div>
-        <div class="ship-sum-row net"><span class="lbl">Land — Change</span><b id="aLandChange">0</b><span class="u">m³</span><b id="aLandChangeBbl">0</b><span class="u">bbl</span></div>
+      <div class="qty-sheet">
+        <div class="qty-block">
+          <div class="qty-lbl">Yesterday</div>
+          <div class="qty-vals one"><div><b id="aLandYestTotal">0</b><i>m³</i></div></div>
+        </div>
+        <div class="qty-block">
+          <div class="qty-lbl">Today</div>
+          <div class="qty-vals one"><div><b id="aLandTodayTotal">0</b><i>m³</i></div></div>
+        </div>
+        <div class="qty-block net">
+          <div class="qty-lbl">Land Change</div>
+          <div class="qty-vals"><div><b id="aLandChange">0</b><i>m³</i></div><div><b id="aLandChangeBbl">0</b><i>bbl</i></div></div>
+        </div>
       </div>
     </div>
 
@@ -551,13 +582,22 @@ body.light-mode .ship-lab{background:rgba(146,64,14,.05);}
     <div class="section">
       <div class="sec-title">
         <span>🌊 Marine Tanks</span>
-        <button class="ship-add-btn" onclick="copyInvTodayToYesterday('marine')">⇐ Today → Yest.</button>
+        <span class="inv-auto">auto-linked by date</span>
       </div>
       <div id="aMarineRows"></div>
-      <div class="ship-summary">
-        <div class="ship-sum-row"><span class="lbl">Marine — Yesterday</span><b id="aMarineYestTotal">0</b><span class="u">m³</span></div>
-        <div class="ship-sum-row"><span class="lbl">Marine — Today</span><b id="aMarineTodayTotal">0</b><span class="u">m³</span></div>
-        <div class="ship-sum-row net"><span class="lbl">Marine — Change</span><b id="aMarineChange">0</b><span class="u">m³</span><b id="aMarineChangeBbl">0</b><span class="u">bbl</span></div>
+      <div class="qty-sheet">
+        <div class="qty-block">
+          <div class="qty-lbl">Yesterday</div>
+          <div class="qty-vals one"><div><b id="aMarineYestTotal">0</b><i>m³</i></div></div>
+        </div>
+        <div class="qty-block">
+          <div class="qty-lbl">Today</div>
+          <div class="qty-vals one"><div><b id="aMarineTodayTotal">0</b><i>m³</i></div></div>
+        </div>
+        <div class="qty-block net">
+          <div class="qty-lbl">Marine Change</div>
+          <div class="qty-vals"><div><b id="aMarineChange">0</b><i>m³</i></div><div><b id="aMarineChangeBbl">0</b><i>bbl</i></div></div>
+        </div>
       </div>
     </div>
 
@@ -620,6 +660,12 @@ body.light-mode .ship-lab{background:rgba(146,64,14,.05);}
   <div class="tab-content" id="tabContentShip" style="display:none;">
   <div class="wrap">
 
+    <div class="cal-warn" id="calWarnShip" style="display:none;"></div>
+
+    <div class="action-row" style="grid-template-columns:1fr;">
+      <button class="print-btn" onclick="printTabReport('ship')">🖨️ Print Shipping</button>
+    </div>
+
     <!-- Two INDEPENDENT shipment certificates. Land and Marine are separate
          shipments (separate Shipment NO on the real report) with their own
          blended density and W/C — they are never summed into one figure. -->
@@ -664,11 +710,24 @@ body.light-mode .ship-lab{background:rgba(146,64,14,.05);}
         </div>
       </div>
       <div id="shipLandRows"></div>
-      <div class="ship-summary">
-        <div class="ship-sum-row qty"><span class="lbl">&Sigma; Quantity Loaded <span id="shipLandTankCount" class="cnt">(0 tanks)</span></span><b id="shipLandQtySum">0</b><span class="u">m³</span></div>
-        <div class="ship-sum-row"><span class="lbl">Gross Oil Loaded</span><b id="shipLandGrossM3">0</b><span class="u">m³</span><b id="shipLandGrossMT">0</b><span class="u">MT</span><b id="shipLandGrossBbl">0</b><span class="u">bbl</span></div>
-        <div class="ship-sum-row water"><span class="lbl">Water Loaded (W/C avg)</span><b id="shipLandWaterM3">0</b><span class="u">m³</span></div>
-        <div class="ship-sum-row net"><span class="lbl">Net Oil Loaded</span><b id="shipLandNetM3">0</b><span class="u">m³</span><b id="shipLandNetMT">0</b><span class="u">MT</span><b id="shipLandNetBbl">0</b><span class="u">bbl</span></div>
+      <div class="qty-sheet">
+        <div class="qty-sheet-hd">Land — Certificate Quantities</div>
+        <div class="qty-block">
+          <div class="qty-lbl">&Sigma; Quantity Loaded <i class="cnt" id="shipLandTankCount">(0 tanks)</i></div>
+          <div class="qty-vals one"><div><b id="shipLandQtySum">0</b><i>m³</i></div></div>
+        </div>
+        <div class="qty-block">
+          <div class="qty-lbl">Gross Oil Loaded</div>
+          <div class="qty-vals"><div><b id="shipLandGrossM3">0</b><i>m³</i></div><div><b id="shipLandGrossMT">0</b><i>MT</i></div><div><b id="shipLandGrossBbl">0</b><i>bbl</i></div></div>
+        </div>
+        <div class="qty-block water">
+          <div class="qty-lbl">Water Loaded <i class="cnt">blended W/C</i></div>
+          <div class="qty-vals one"><div><b id="shipLandWaterM3">0</b><i>m³</i></div></div>
+        </div>
+        <div class="qty-block net">
+          <div class="qty-lbl">Net Oil Loaded</div>
+          <div class="qty-vals"><div><b id="shipLandNetM3">0</b><i>m³</i></div><div><b id="shipLandNetMT">0</b><i>MT</i></div><div><b id="shipLandNetBbl">0</b><i>bbl</i></div></div>
+        </div>
       </div>
     </div>
 
@@ -696,11 +755,24 @@ body.light-mode .ship-lab{background:rgba(146,64,14,.05);}
         </div>
       </div>
       <div id="shipMarineRows"></div>
-      <div class="ship-summary">
-        <div class="ship-sum-row qty"><span class="lbl">&Sigma; Quantity Loaded <span id="shipMarineTankCount" class="cnt">(0 tanks)</span></span><b id="shipMarineQtySum">0</b><span class="u">m³</span></div>
-        <div class="ship-sum-row"><span class="lbl">Gross Oil Loaded</span><b id="shipMarineGrossM3">0</b><span class="u">m³</span><b id="shipMarineGrossMT">0</b><span class="u">MT</span><b id="shipMarineGrossBbl">0</b><span class="u">bbl</span></div>
-        <div class="ship-sum-row water"><span class="lbl">Water Loaded (W/C avg)</span><b id="shipMarineWaterM3">0</b><span class="u">m³</span></div>
-        <div class="ship-sum-row net"><span class="lbl">Net Oil Loaded</span><b id="shipMarineNetM3">0</b><span class="u">m³</span><b id="shipMarineNetMT">0</b><span class="u">MT</span><b id="shipMarineNetBbl">0</b><span class="u">bbl</span></div>
+      <div class="qty-sheet">
+        <div class="qty-sheet-hd">Marine — Certificate Quantities</div>
+        <div class="qty-block">
+          <div class="qty-lbl">&Sigma; Quantity Loaded <i class="cnt" id="shipMarineTankCount">(0 tanks)</i></div>
+          <div class="qty-vals one"><div><b id="shipMarineQtySum">0</b><i>m³</i></div></div>
+        </div>
+        <div class="qty-block">
+          <div class="qty-lbl">Gross Oil Loaded</div>
+          <div class="qty-vals"><div><b id="shipMarineGrossM3">0</b><i>m³</i></div><div><b id="shipMarineGrossMT">0</b><i>MT</i></div><div><b id="shipMarineGrossBbl">0</b><i>bbl</i></div></div>
+        </div>
+        <div class="qty-block water">
+          <div class="qty-lbl">Water Loaded <i class="cnt">blended W/C</i></div>
+          <div class="qty-vals one"><div><b id="shipMarineWaterM3">0</b><i>m³</i></div></div>
+        </div>
+        <div class="qty-block net">
+          <div class="qty-lbl">Net Oil Loaded</div>
+          <div class="qty-vals"><div><b id="shipMarineNetM3">0</b><i>m³</i></div><div><b id="shipMarineNetMT">0</b><i>MT</i></div><div><b id="shipMarineNetBbl">0</b><i>bbl</i></div></div>
+        </div>
       </div>
     </div>
 
@@ -761,6 +833,10 @@ body.light-mode .ship-lab{background:rgba(146,64,14,.05);}
       <div class="field"><span class="f-label">Received Water</span><span class="f-val" id="zfWater">0<span class="u">bbls</span></span></div>
     </div>
 
+    <div class="action-row" style="grid-template-columns:1fr;">
+      <button class="print-btn" onclick="printTabReport('zeit')">🖨️ Print Zeitco</button>
+    </div>
+
     <button class="print-btn" style="border-color:var(--green);color:var(--green);" onclick="pushZeitcoToProduction()">➡️ Use Net Oil as Zeitco in Production</button>
 
   </div>
@@ -773,80 +849,24 @@ body.light-mode .ship-lab{background:rgba(146,64,14,.05);}
 
 <div id="printArea"></div>
 
-<!-- ══════════════ OCR IMPORT MODAL ══════════════ -->
-<div class="ocr-overlay" id="ocrOverlay">
-  <div class="ocr-modal">
-    <div class="ocr-modal-hdr">
-      <h2>📷 Import from Photo</h2>
-      <button class="ocr-close" onclick="closeOcrModal()">✕</button>
-    </div>
-    <div class="ocr-body">
-
-      <div class="ocr-step-lbl">Step 1 — Photo of the table</div>
-      <div class="ocr-hint">Take a clear, well-lit photo straight-on over the table, or upload one from your gallery. Handwritten numbers are read automatically — you'll review and can correct every value before it's applied.</div>
-      <div class="ocr-capture-row">
-        <button class="ocr-cap-btn" onclick="document.getElementById('ocrCameraInput').click()">
-          <span class="ico">📷</span>Take Photo
-        </button>
-        <button class="ocr-cap-btn" onclick="document.getElementById('ocrGalleryInput').click()">
-          <span class="ico">🖼️</span>Choose from Gallery
-        </button>
-      </div>
-      <input type="file" id="ocrCameraInput" accept="image/*" capture="environment" style="display:none" onchange="handleOcrFileSelected(this.files[0])">
-      <input type="file" id="ocrGalleryInput" accept="image/*" style="display:none" onchange="handleOcrFileSelected(this.files[0])">
-
-      <div class="ocr-preview-wrap" id="ocrPreviewWrap" style="display:none;">
-        <img id="ocrPreviewImg" alt="Selected table photo">
-      </div>
-
-      <button class="ocr-extract-btn" id="ocrExtractBtn" style="display:none;" onclick="runOcrExtraction()">🔍 Extract Data</button>
-
-      <div class="ocr-progress-wrap" id="ocrProgressWrap">
-        <div class="ocr-progress-lbl" id="ocrProgressLbl">Loading recognition engine…</div>
-        <div class="ocr-progress-bar"><div class="ocr-progress-fill" id="ocrProgressFill"></div></div>
-      </div>
-
-      <div id="ocrReviewSection" style="display:none;">
-        <div class="ocr-step-lbl">Step 2 — Column mapping</div>
-        <div class="ocr-map-toggle">
-          <span class="lbl">Col 5 (M3 · MARIN) → <span class="val" id="ocrMapCol5">MARINE</span> &nbsp;|&nbsp; Col 9 (M3 · LAND) → <span class="val" id="ocrMapCol9">LAND</span></span>
-          <button class="ocr-swap-btn" onclick="swapOcrMapping()">⇄ Swap</button>
-        </div>
-
-        <div class="ocr-step-lbl">Step 3 — Review &amp; correct</div>
-        <div class="ocr-hint">Extracted values are matched to hours in top-to-bottom order. This sheet may start at a different hour than the app's 7 AM cycle — check alignment below and edit any row. Blank = not applied for that hour.</div>
-        <div class="ocr-legend"><span class="dot"></span>Amber border = low-confidence read, please double-check</div>
-        <table class="ocr-review">
-          <thead><tr><th style="text-align:left;padding-left:10px;">Hour</th><th id="ocrThMarine">Marine</th><th id="ocrThPetreco">Land</th></tr></thead>
-          <tbody id="ocrReviewBody"></tbody>
-        </table>
-      </div>
-
-    </div>
-    <div class="ocr-footer" id="ocrFooter" style="display:none;">
-      <button class="ocr-cancel-btn" onclick="closeOcrModal()">Cancel</button>
-      <button class="ocr-apply-btn" onclick="applyOcrToForm()">✅ Apply to Form</button>
-    </div>
-  </div>
-</div>
 
 <!-- ══════════════ TANK DRAIN MODAL ══════════════ -->
-<div class="ocr-overlay" id="drainOverlay">
-  <div class="ocr-modal">
-    <div class="ocr-modal-hdr">
+<div class="sheet-overlay" id="drainOverlay">
+  <div class="sheet-modal">
+    <div class="sheet-hdr">
       <h2>🛢️ Tank Drain Calculation</h2>
-      <button class="ocr-close" onclick="closeDrainModal()">✕</button>
+      <button class="sheet-close" onclick="closeDrainModal()">✕</button>
     </div>
-    <div class="ocr-body">
-      <div class="ocr-hint">Enter the CM drained for any tank(s) used today. Each tank converts at its own cm→m³ factor, matching the reference sheet. The total is subtracted from <b>both</b> Received at Feiran and Total Production per Day, split by stream (Land/Marine assignment shown below). Tap LAND/MARINE to override for a specific day if ever needed.</div>
-      <table class="ocr-review">
+    <div class="sheet-body">
+      <div class="sheet-hint">Enter the CM drained for any tank(s) used today. Each tank converts at its own cm→m³ factor, matching the reference sheet. The total is subtracted from <b>both</b> Received at Feiran and Total Production per Day, split by stream (Land/Marine assignment shown below). Tap LAND/MARINE to override for a specific day if ever needed.</div>
+      <table class="sheet-table">
         <thead><tr><th style="text-align:left;padding-left:10px;">Tank</th><th>CM</th><th>M³</th><th>BBL</th><th>Stream</th></tr></thead>
         <tbody id="drainBody"></tbody>
       </table>
       <div id="drainTotals" style="margin-top:6px;"></div>
     </div>
-    <div class="ocr-footer" style="grid-template-columns:1fr;">
-      <button class="ocr-apply-btn" onclick="closeDrainModal()">✅ Done</button>
+    <div class="sheet-footer" style="grid-template-columns:1fr;">
+      <button class="sheet-done-btn" onclick="closeDrainModal()">✅ Done</button>
     </div>
   </div>
 </div>
@@ -918,6 +938,30 @@ function tankByKey(k){ for(var i=0;i<TANKS.length;i++){ if(TANKS[i].key===k) ret
 // Fixed densities @15°C used for the daily tank inventory (Accounting Prod.)
 const INV_DENS_LAND = 0.9298;
 const INV_DENS_MARINE = 0.8822;
+
+// Per-tank FIXED volume deduction applied to absolute tank stock only.
+//
+// Derived from your accounting sheets: the difference between the raw
+// calibration table and the sheet's own CAL. SCALE is an exact constant per
+// tank — zero variation across completely different levels (verified at
+// 3.000/12.160 m for TK-1, 6.740/8.680 for TK-6, 3.000/8.000 for TK-8,
+// 7.700/14.950 for TK-9). A constant, level-independent offset is a fixed
+// volume deduction (dead stock / floating-roof displacement), not a
+// different calibration table.
+//
+// Note TK-8 and TK-9 share both the same deduction (596.200) and the same
+// tank size (44.35 m³/cm) — consistent with identical roof/bottom geometry.
+//
+// Applied to INVENTORY only, never to SHIPPING: shipping measures a
+// difference (start − end) where any constant cancels out, and your own
+// TK-8 @6.390 = 28,896 check confirmed shipping uses the raw table.
+const TANK_INV_DEDUCTION = {
+  'TK-1':  251.062,
+  'TK-6':  143.816,
+  'TK-8':  596.200,
+  'TK-9':  596.200
+};
+function invDeduction(tankKey){ return TANK_INV_DEDUCTION[tankKey] || 0; }
 function tankIdSafe(key){ return key.replace(/[^A-Za-z0-9_-]/g, '_'); }
 
 let currentDate = today();
@@ -1216,10 +1260,73 @@ let TANK_CAL = null;  // loaded from tank_calibration.json
 let _shipRowId = 0;
 
 // Load calibration data (cached by SW for offline use)
+// ══════════════════════════════════════════
+//  SHARED EDIT-SAFETY GUARD
+//  A Firestore snapshot arriving while someone is mid-entry must never
+//  overwrite the field they're typing in. Every tab uses this one helper
+//  rather than its own ad-hoc timer, which was unreliable on slow links.
+//  Pattern: if the tab has focus, park the update; apply it on focusout.
+// ══════════════════════════════════════════
+function tabHasFocus(tabId){
+  var a = document.activeElement;
+  if(!a) return false;
+  var tab = document.getElementById(tabId);
+  return !!(tab && tab.contains(a) &&
+            (a.tagName === 'INPUT' || a.tagName === 'SELECT' || a.tagName === 'TEXTAREA'));
+}
+// Registers a "apply this parked update once the user stops typing" handler.
+// getPending/clearPending let each caller keep its own parked doc.
+function onTabIdle(tabId, apply){
+  document.addEventListener('focusout', function(e){
+    var tab = document.getElementById(tabId);
+    if(!tab || !tab.contains(e.target)) return;
+    setTimeout(function(){
+      if(tabHasFocus(tabId)) return;   // moved to another field — still editing
+      apply();
+    }, 120);
+  });
+}
+
+var CAL_LOAD_FAILED = false;
 function loadTankCalibration(){
   if (TANK_CAL) return Promise.resolve();
-  return fetch('./tank_calibration.json').then(function(r){ return r.json(); }).then(function(data){
+  return fetch('./tank_calibration.json').then(function(r){
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  }).then(function(data){
     TANK_CAL = data;
+    CAL_LOAD_FAILED = false;
+    _renderCalWarning();
+    // Recompute anything that was waiting on the table
+    try{ if(document.getElementById('aGrandToday')) computeInventory(); }catch(_){}
+    try{ if(document.getElementById('shipLandRows')) computeShipping(); }catch(_){}
+  }).catch(function(err){
+    CAL_LOAD_FAILED = true;
+    _renderCalWarning();
+    throw err;
+  });
+}
+// Without the calibration table every tank volume silently reads "—", which
+// looks like missing input rather than a broken deploy. Surface it loudly.
+function _renderCalWarning(){
+  ['calWarnShip','calWarnAcct'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(!el) return;
+    if(CAL_LOAD_FAILED){
+      el.style.display = '';
+      el.innerHTML = '⚠️ Tank calibration data failed to load — volumes cannot be calculated. ' +
+        '<u style="cursor:pointer" onclick="retryCalLoad()">Tap to retry</u>';
+    } else {
+      el.style.display = 'none';
+    }
+  });
+}
+function retryCalLoad(){
+  showToast('⏳ Reloading calibration…');
+  loadTankCalibration().then(function(){
+    showToast('✅ Calibration loaded');
+  }).catch(function(){
+    showToast('⚠️ Still cannot load calibration — check connection', true);
   });
 }
 
@@ -1271,7 +1378,7 @@ function addShipRow(stream){
 
   var optionsHtml = tanks.map(function(t){
     return '<option value="' + escHtml(t.key) + '"' + (t.noCal ? ' disabled' : '') + '>' +
-      escHtml(t.key) + (t.noCal ? ' (no calibration)' : '') + '</option>';
+      escHtml(t.key) + (t.noCal ? ' (not calibrated)' : '') + '</option>';
   }).join('');
 
   var html =
@@ -1767,22 +1874,47 @@ function saveZeitcoToFirestore(){
   });
 }
 var _zeitUnsub = null;
+function _zeitSignature(){
+  var o = { scanner: document.getElementById('zScanner').value || null, s: {} };
+  for(var i = 1; i <= ZEIT_SAMPLE_COUNT; i++){
+    var el = document.getElementById('zS' + i);
+    o.s['s' + i] = el ? (el.value || null) : null;
+  }
+  return JSON.stringify(o);
+}
+function _zeitDocSignature(d){
+  var o = { scanner: d.scanner || null, s: {} };
+  for(var i = 1; i <= ZEIT_SAMPLE_COUNT; i++){
+    o.s['s' + i] = (d.samples && d.samples['s' + i]) ? d.samples['s' + i] : null;
+  }
+  return JSON.stringify(o);
+}
+var _zeitPendingDoc = null;
+function _applyZeitDoc(d){
+  document.getElementById('zScanner').value = d.scanner || '';
+  for(var i = 1; i <= ZEIT_SAMPLE_COUNT; i++){
+    var el = document.getElementById('zS' + i);
+    if(el) el.value = (d.samples && d.samples['s' + i]) ? d.samples['s' + i] : '';
+  }
+  computeZeitco();
+}
 function startZeitListener(dateStr){
   if(_zeitUnsub) _zeitUnsub();
-  _zeitLocalWrite = false;
+  _zeitPendingDoc = null;
   _zeitUnsub = db.collection('accountingZeitco').doc(dateStr).onSnapshot(function(doc){
-    if(_zeitLocalWrite) return; // skip echo of our own write (keeps focus)
     var d = doc.exists ? doc.data() : {};
-    document.getElementById('zScanner').value = d.scanner || '';
-    for(var i = 1; i <= ZEIT_SAMPLE_COUNT; i++){
-      var el = document.getElementById('zS' + i);
-      if(el) el.value = (d.samples && d.samples['s' + i]) ? d.samples['s' + i] : '';
-    }
-    computeZeitco();
+    if(_zeitDocSignature(d) === _zeitSignature()) return;   // echo of our own write
+    if(tabHasFocus('tabContentZeit')){ _zeitPendingDoc = d; return; }
+    _applyZeitDoc(d);
   }, function(err){
     console.error('[Firestore] zeitco listener error', err);
   });
 }
+onTabIdle('tabContentZeit', function(){
+  if(!_zeitPendingDoc) return;
+  var d = _zeitPendingDoc; _zeitPendingDoc = null;
+  if(_zeitDocSignature(d) !== _zeitSignature()) _applyZeitDoc(d);
+});
 function stopZeitListener(){
   if(_zeitUnsub){ _zeitUnsub(); _zeitUnsub = null; }
   _zeitLocalWrite = false;
@@ -1809,12 +1941,16 @@ function buildInventoryRows(){
       if(t.noCal){
         return '<div class="inv-row">' +
           '<div class="inv-tank">' + escHtml(t.key) + '</div>' +
-          '<div class="inv-nocal">⚠️ No calibration table for this tank yet — cannot compute volume. ' +
-          'Send the calibration data and it will be included automatically.</div>' +
+          '<div class="inv-nocal">⚠️ Not calibrated</div>' +
         '</div>';
       }
       return '<div class="inv-row">' +
-        '<div class="inv-tank">' + escHtml(t.key) + '</div>' +
+        '<div class="inv-hd">' +
+          '<div class="gauge" id="gauge_' + id + '"><div class="gauge-fill" id="gaugef_' + id + '"></div><div class="gauge-mark"></div></div>' +
+          '<div class="inv-tank">' + escHtml(t.key) +
+            '<span class="inv-pct" id="invpct_' + id + '">—</span>' +
+          '</div>' +
+        '</div>' +
         '<div class="inv-cols">' +
           '<div class="inv-col yest">' +
             '<div class="inv-col-lbl">YESTERDAY</div>' +
@@ -1849,11 +1985,16 @@ function invTankVolume(tankKey, levelM, tempC, densGcm3){
   if(isNaN(levelM) || levelM === null) return null;
   if(!TANK_CAL) return null;
   var tankNum = parseInt(String(tankKey).replace(/[^0-9]/g, ''), 10);
-  var vol = calLookup(tankNum, Math.round(levelM * 1000));
-  if(vol === null) return null;
-  if(isNaN(tempC) || tempC === null) return { vol: vol, vcf: null, corrected: null };
+  var raw = calLookup(tankNum, Math.round(levelM * 1000));
+  if(raw === null) return null;
+  // Fixed per-tank deduction (dead stock / roof displacement) comes off the
+  // gross table volume BEFORE the VCF correction — this is the order the
+  // accounting sheet uses, and reproduces its CAL. SCALE column exactly.
+  var vol = raw - invDeduction(tankKey);
+  if(vol < 0) vol = 0;
+  if(isNaN(tempC) || tempC === null) return { raw: raw, vol: vol, vcf: null, corrected: null };
   var vcf = astm54aVCF(densGcm3 * 1000, tempC);
-  return { vol: vol, vcf: vcf, corrected: vol * vcf };
+  return { raw: raw, vol: vol, vcf: vcf, corrected: vol * vcf };
 }
 
 function computeInventory(){
@@ -1880,6 +2021,21 @@ function computeInventory(){
       document.getElementById('invT_v_' + id).textContent = tCorr !== null ? fmtNum(tCorr, 3) : '—';
       document.getElementById('invY_f_' + id).textContent = (yRes && yRes.vcf) ? ('VCF ' + yRes.vcf.toFixed(4)) : '';
       document.getElementById('invT_f_' + id).textContent = (tRes && tRes.vcf) ? ('VCF ' + tRes.vcf.toFixed(4)) : '';
+
+      // Sight-glass fill: today's level as a share of the tank's full range
+      var gf = document.getElementById('gaugef_' + id);
+      var gp = document.getElementById('invpct_' + id);
+      if(gf && TANK_CAL){
+        var arr = TANK_CAL[String(parseInt(t.key.replace(/[^0-9]/g,''),10))];
+        if(arr && tG !== null && tG > 0){
+          var pct = Math.max(0, Math.min(100, (tG * 1000) / (arr.length - 1) * 100));
+          gf.style.height = pct.toFixed(1) + '%';
+          if(gp) gp.textContent = pct.toFixed(0) + '% full';
+        } else {
+          gf.style.height = '0%';
+          if(gp) gp.textContent = '—';
+        }
+      }
 
       var diff = (yCorr !== null && tCorr !== null) ? tCorr - yCorr : null;
       var dEl = document.getElementById('invD_' + id);
@@ -1991,16 +2147,46 @@ function pullShippedFromShipping(){
   showToast('✅ Pulled ' + fmtNum(t,3) + ' m³ from Shipping');
 }
 
-function copyInvTodayToYesterday(stream){
-  if(!confirm("Copy TODAY's readings into the YESTERDAY column for " + stream + " tanks?")) return;
-  invTanksFor(stream).forEach(function(t){
-    if(t.noCal) return;
-    var id = tankIdSafe(t.key);
-    document.getElementById('invY_g_' + id).value = document.getElementById('invT_g_' + id).value;
-    document.getElementById('invY_t_' + id).value = document.getElementById('invT_t_' + id).value;
-  });
-  computeInventory();
-  showToast('✅ Copied today → yesterday');
+// ── Date chaining ──
+// The YESTERDAY column is pulled automatically from the PREVIOUS date's saved
+// TODAY readings, so once today's figures are entered they appear as
+// tomorrow's "yesterday" with nothing to copy by hand. A manually-typed
+// yesterday is only needed when the previous day has no saved record.
+function _prevDateStr(dateStr){
+  var p = (dateStr || '').split('-').map(Number);
+  if(p.length !== 3 || p.some(isNaN)) return null;
+  var d = new Date(p[0], p[1] - 1, p[2]);
+  d.setDate(d.getDate() - 1);
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function _setYesterdayLinked(on){
+  var els = document.querySelectorAll('.inv-col.yest');
+  for(var i=0;i<els.length;i++) els[i].classList.toggle('linked', !!on);
+}
+function loadPreviousDayInventory(dateStr){
+  var prev = _prevDateStr(dateStr);
+  var noteEl = document.getElementById('aLinkNote');
+  if(!prev) return;
+  db.collection('accountingInventory').doc(prev).get().then(function(doc){
+    if(!doc.exists){
+      if(noteEl) noteEl.textContent = '\ud83d\udd17 No saved record for ' + prev + ' \u2014 enter yesterday manually this once.';
+      _setYesterdayLinked(false);
+      return;
+    }
+    var tanks = (doc.data() && doc.data().tanks) || {};
+    TANKS.forEach(function(t){
+      if(t.noCal) return;
+      var id = tankIdSafe(t.key);
+      var v = tanks[t.key] || {};
+      var gEl = document.getElementById('invY_g_' + id);
+      var tEl = document.getElementById('invY_t_' + id);
+      if(gEl) gEl.value = v.tG || '';
+      if(tEl) tEl.value = v.tT || '';
+    });
+    if(noteEl) noteEl.textContent = '\ud83d\udd17 Yesterday auto-filled from ' + prev + ' (that day\u2019s Today readings).';
+    _setYesterdayLinked(true);
+    computeInventory();
+  }).catch(function(err){ console.error('[Firestore] prev-day load failed', err); });
 }
 
 // ── Inventory Firestore persistence ──
@@ -2064,11 +2250,14 @@ function _invApply(d){
     if(el) el.value = mv[id] || '';
   });
   computeInventory();
+  // The previous day's TODAY always wins for the yesterday column.
+  loadPreviousDayInventory(currentDate);
 }
 var _invUnsub = null;
 function startInvListener(dateStr){
   if(_invUnsub) _invUnsub();
   _invPendingDoc = null;
+  loadPreviousDayInventory(dateStr);
   _invUnsub = db.collection('accountingInventory').doc(dateStr).onSnapshot(function(doc){
     var d = doc.exists ? doc.data() : {};
     if(JSON.stringify(d.tanks || {}) === JSON.stringify(_invReadAll())
@@ -2090,6 +2279,134 @@ document.addEventListener('focusout', function(e){
     _invApply(p);
   }, 120);
 });
+
+// ══════════════════════════════════════════
+//  PER-TAB REPORTS (Shipping · Zeitco · Accounting Prod.)
+//  Each builds the same certificate-style HTML as the Production report and
+//  goes out through the identical PDF→Share→print fallback chain, so all
+//  four tabs print the same way on the same devices.
+// ══════════════════════════════════════════
+function _prHead(title, sub){
+  var iconUrl = new URL('icon-192.png', document.baseURI).href;
+  return '<div class="pr-header">' +
+      '<img src="' + escHtml(iconUrl) + '" class="pr-logo" alt="">' +
+      '<div><h1>PETROBEL — ' + escHtml(title) + '</h1>' +
+      '<div class="pr-sub">' + escHtml(sub) + '</div></div></div>' +
+    '<div class="pr-meta">Date: <b>' + escHtml(currentDate || today()) + '</b> &nbsp;|&nbsp; Printed: ' +
+      escHtml(new Date().toLocaleString('en-US')) + ' &nbsp;|&nbsp; By: ' +
+      escHtml(currentUser ? currentUser.email : '') + '</div>';
+}
+function _txt(id){ var e = document.getElementById(id); return e ? e.textContent : '—'; }
+function _val(id){ var e = document.getElementById(id); return e ? (e.value || '—') : '—'; }
+
+function _shipReportHtml(){
+  var h = _prHead('SHIPPING', 'Certificate of Quantity — Wadi Feiran');
+  [['Land','shipLand','shipLandRows'],['Marine','shipMarine','shipMarineRows']].forEach(function(st){
+    var rows = document.querySelectorAll('#' + st[2] + ' .ship-row');
+    if(!rows.length) return;
+    h += '<table class="pr-table"><caption>' + st[0] + ' — Tank Loadings</caption>' +
+      '<tr><th>Tank</th><td>Start (m / °C)</td><td>End (m / °C)</td></tr>';
+    rows.forEach(function(row){
+      var q = row.querySelector('[data-role=qtyLoaded]').textContent;
+      h += '<tr><th>' + escHtml(row.querySelector('[data-role=tank]').value) +
+           ' &nbsp;·&nbsp; dens ' + escHtml(row.querySelector('[data-role=density]').value || '—') + '</th>' +
+           '<td>' + escHtml(row.querySelector('[data-role=startGauge]').value || '—') + ' / ' +
+                    escHtml(row.querySelector('[data-role=startTemp]').value || '—') +
+                    ' &nbsp; VCF ' + escHtml(row.querySelector('[data-role=startVCF]').textContent) + '</td>' +
+           '<td>' + escHtml(row.querySelector('[data-role=endGauge]').value || '—') + ' / ' +
+                    escHtml(row.querySelector('[data-role=endTemp]').value || '—') +
+                    ' &nbsp; VCF ' + escHtml(row.querySelector('[data-role=endVCF]').textContent) + '</td></tr>' +
+           '<tr><th>&nbsp;&nbsp;Quantity loaded</th><td colspan="2">' + escHtml(q) + ' m³</td></tr>';
+    });
+    h += '</table>';
+    h += '<table class="pr-table"><caption>' + st[0] + ' — Certificate Quantities</caption>' +
+      '<tr><th>Σ Quantity Loaded ' + escHtml(_txt(st[1] + 'TankCount')) + '</th><td colspan="2">' + escHtml(_txt(st[1] + 'QtySum')) + ' m³</td></tr>' +
+      '<tr><th>Gross Oil Loaded</th><td>' + escHtml(_txt(st[1] + 'GrossM3')) + ' m³</td><td>' + escHtml(_txt(st[1] + 'GrossMT')) + ' MT &nbsp;·&nbsp; ' + escHtml(_txt(st[1] + 'GrossBbl')) + ' bbl</td></tr>' +
+      '<tr><th>Water Loaded (blended W/C ' + escHtml(_val(st[1] + 'WC')) + '%)</th><td colspan="2">' + escHtml(_txt(st[1] + 'WaterM3')) + ' m³</td></tr>' +
+      '<tr class="pr-total"><th>Net Oil Loaded</th><td>' + escHtml(_txt(st[1] + 'NetM3')) + ' m³</td><td>' + escHtml(_txt(st[1] + 'NetMT')) + ' MT &nbsp;·&nbsp; ' + escHtml(_txt(st[1] + 'NetBbl')) + ' bbl</td></tr>' +
+      '<tr><th>Density in Air (blend)</th><td colspan="2">' + escHtml(_val(st[1] + 'Density')) + ' &nbsp;·&nbsp; API ' + escHtml(_txt(st[1] + 'API')) + '</td></tr>' +
+      '</table>';
+  });
+  h += '<div class="pr-footer">PETROBEL — Shipping · ASTM Table 54A · 1 m³ = 6.292316 bbl</div>';
+  return h;
+}
+
+function _zeitReportHtml(){
+  var h = _prHead('ZEITCO RECEIPT', 'Coriolis meter — daily received oil');
+  h += '<table class="pr-table"><caption>Meter</caption>' +
+    '<tr><th>Gross Oil Rate (scanner)</th><td colspan="2">' + escHtml(_val('zScanner')) + ' bbls</td></tr>' +
+    '<tr><th>Correction Factor (fixed)</th><td colspan="2">' + escHtml(_txt('zCorrFactorDisp')) + '</td></tr>' +
+    '<tr><th>Gross Oil Rate (corrected)</th><td colspan="2">' + escHtml(_txt('zfCorrected')) + '</td></tr></table>';
+  h += '<table class="pr-table"><caption>BS&amp;W Samples</caption>';
+  for(var i = 1; i <= ZEIT_SAMPLE_COUNT; i++){
+    var v = _val('zS' + i);
+    if(v !== '—') h += '<tr><th>Sample #' + i + '</th><td colspan="2">' + escHtml(v) + ' %</td></tr>';
+  }
+  h += '<tr class="pr-total"><th>Average W.C % ' + escHtml(_txt('zSampleCount')) + '</th><td colspan="2">' + escHtml(_txt('zAvgWC')) + ' %</td></tr></table>';
+  h += '<table class="pr-table"><caption>Result</caption>' +
+    '<tr class="pr-total"><th>Net Received Oil</th><td colspan="2">' + escHtml(_txt('zfNetOil')) + '</td></tr>' +
+    '<tr><th>Received Water</th><td colspan="2">' + escHtml(_txt('zfWater')) + '</td></tr></table>';
+  h += '<div class="pr-footer">PETROBEL — Zeitco receipt</div>';
+  return h;
+}
+
+function _acctReportHtml(){
+  var h = _prHead('ACCOUNTING PROD.', 'Fieran terminal — tank inventory &amp; production');
+  [['Land','aLand','aLandRows'],['Marine','aMarine','aMarineRows']].forEach(function(st){
+    h += '<table class="pr-table"><caption>' + st[0] + ' — Tank Stock (m³ after VCF)</caption>' +
+         '<tr><th>Tank</th><td>Yesterday</td><td>Today</td></tr>';
+    document.querySelectorAll('#' + st[2] + ' .inv-row').forEach(function(row){
+      var name = row.querySelector('.inv-tank');
+      if(!name) return;
+      var key = name.childNodes[0].nodeValue.trim();
+      var id = tankIdSafe(key);
+      if(!document.getElementById('invT_v_' + id)){
+        h += '<tr><th>' + escHtml(key) + '</th><td colspan="2">not calibrated</td></tr>';
+        return;
+      }
+      h += '<tr><th>' + escHtml(key) + '</th><td>' + escHtml(_txt('invY_v_' + id)) +
+           '</td><td>' + escHtml(_txt('invT_v_' + id)) + '</td></tr>';
+    });
+    h += '<tr class="pr-total"><th>' + st[0] + ' total</th><td>' + escHtml(_txt(st[1] + 'YestTotal')) +
+         '</td><td>' + escHtml(_txt(st[1] + 'TodayTotal')) + '</td></tr>' +
+         '<tr><th>' + st[0] + ' change</th><td colspan="2">' + escHtml(_txt(st[1] + 'Change')) + ' m³ · ' + escHtml(_txt(st[1] + 'ChangeBbl')) + ' bbl</td></tr></table>';
+  });
+  h += '<table class="pr-table"><caption>Production Reconciliation</caption>' +
+    '<tr><th>Today — all tanks</th><td colspan="2">' + escHtml(_txt('aGrandToday')) + '</td></tr>' +
+    '<tr><th>Yesterday — all tanks</th><td colspan="2">' + escHtml(_txt('aGrandYest')) + '</td></tr>' +
+    '<tr><th>Inventory change</th><td colspan="2">' + escHtml(_txt('aGrandChange')) + '</td></tr>' +
+    '<tr><th>+ Shipped out</th><td colspan="2">' + escHtml(_txt('aRecShip')) + '</td></tr>' +
+    '<tr><th>− Condensate</th><td colspan="2">' + escHtml(_txt('aRecCond')) + '</td></tr>' +
+    '<tr><th>− Received (Shadwan + Nefertiti + other)</th><td colspan="2">' + escHtml(_txt('aRecRecv')) + '</td></tr>' +
+    '<tr><th>− Diesel injected</th><td colspan="2">' + escHtml(_txt('aRecDiesel')) + '</td></tr>' +
+    '<tr class="pr-total"><th>= PRODUCTION</th><td>' + escHtml(_txt('aProdM3')) + '</td><td>' + escHtml(_txt('aProdBbl')) + '</td></tr></table>';
+  h += '<div class="pr-footer">PETROBEL — Accounting Prod. · Land 0.9298 / Marine 0.8822 @15°C · ASTM Table 54A</div>';
+  return h;
+}
+
+function printTabReport(which){
+  var body, title;
+  if(which === 'ship'){ body = _shipReportHtml(); title = 'Shipping'; }
+  else if(which === 'zeit'){ body = _zeitReportHtml(); title = 'Zeitco'; }
+  else { body = _acctReportHtml(); title = 'AccountingProd'; }
+
+  var doc =
+    '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+    '<title>' + escHtml(title) + ' ' + escHtml(currentDate || today()) + '</title>' +
+    '<style>' + PRINT_STYLE_CSS + '</style></head><body>' + body +
+    '<scr' + 'ipt>window.onload=function(){setTimeout(function(){window.print();},250);};' +
+    'window.onafterprint=function(){window.close();};</scr' + 'ipt></body></html>';
+
+  var w = null;
+  try { w = window.open('', '_blank'); } catch(_e) { w = null; }
+  if(w){
+    try { w.document.open(); w.document.write(doc); w.document.close(); return; } catch(_e){}
+  }
+  document.getElementById('printArea').innerHTML = body;
+  showToast('ℹ️ Pop-up blocked — printing from this page instead', true);
+  setTimeout(function(){ window.print(); }, 80);
+}
 
 // ══════════════════════════════════════════
 //  PRINT / SAVE REPORT
@@ -2377,273 +2694,6 @@ function printReport(){
 }
 
 // ══════════════════════════════════════════
-//  OCR IMPORT FROM PHOTO
-//  100% client-side (Tesseract.js, lazy-loaded from CDN — no backend,
-//  no API key, matches this app's static-file architecture).
-//  Column 5 (M3 · MARIN level) and Column 9 (M3 · first LAND level)
-//  are read per the attached reference sheet's layout, then matched
-//  top-to-bottom to the app's 24 hourly slots for manual review.
-// ══════════════════════════════════════════
-let _ocrCanvas = null;
-let _ocrRawRows = [];                                  // parsed {col5:{text,conf}, col9:{text,conf}} per row
-let _ocrMapping = { col5: 'marine', col9: 'petreco' };  // which physical column feeds which form field
-// Internal key stays 'petreco' (drives the existing pet_/mar_ wiring below
-// unchanged) — this only controls what the toggle/label DISPLAYS as.
-function ocrStreamLabel(key){ return key === 'petreco' ? 'LAND' : (key || '').toUpperCase(); }
-let _tesseractLoading = null;
-
-function loadTesseractLib(){
-  if (window.Tesseract) return Promise.resolve();
-  if (_tesseractLoading) return _tesseractLoading;
-  _tesseractLoading = new Promise(function(resolve, reject){
-    const s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
-    s.onload = function(){ resolve(); };
-    s.onerror = function(){ reject(new Error('Failed to load OCR engine — check internet connection')); };
-    document.head.appendChild(s);
-  });
-  return _tesseractLoading;
-}
-
-function openOcrModal(){ document.getElementById('ocrOverlay').classList.add('show'); }
-function closeOcrModal(){ document.getElementById('ocrOverlay').classList.remove('show'); }
-
-function resetOcrReviewUI(){
-  document.getElementById('ocrReviewSection').style.display = 'none';
-  document.getElementById('ocrFooter').style.display = 'none';
-  _ocrRawRows = [];
-}
-
-function handleOcrFileSelected(file){
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e){
-    const img = new Image();
-    img.onload = function(){
-      const maxW = 1600;
-      const scale = Math.min(1, maxW / img.width);
-      const w = Math.max(1, Math.round(img.width * scale));
-      const h = Math.max(1, Math.round(img.height * scale));
-      const canvas = document.createElement('canvas');
-      canvas.width = w; canvas.height = h;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, w, h);
-
-      // Grayscale + contrast stretch — improves OCR accuracy on handwritten
-      // pencil/pen entries against a printed grid.
-      const imgData = ctx.getImageData(0, 0, w, h);
-      const d = imgData.data;
-      let min = 255, max = 0;
-      for (let i = 0; i < d.length; i += 4) {
-        const g = 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2];
-        d[i] = d[i+1] = d[i+2] = g;
-        if (g < min) min = g;
-        if (g > max) max = g;
-      }
-      const range = Math.max(1, max - min);
-      for (let i = 0; i < d.length; i += 4) {
-        const v = Math.min(255, Math.max(0, ((d[i] - min) / range) * 255));
-        d[i] = d[i+1] = d[i+2] = v;
-      }
-      ctx.putImageData(imgData, 0, 0);
-
-      _ocrCanvas = canvas;
-      document.getElementById('ocrPreviewImg').src = canvas.toDataURL('image/jpeg', 0.85);
-      document.getElementById('ocrPreviewWrap').style.display = '';
-      document.getElementById('ocrExtractBtn').style.display = '';
-      resetOcrReviewUI();
-    };
-    img.onerror = function(){ showToast('⚠️ Could not read that image', true); };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
-}
-
-// Cluster OCR word boxes into table rows (by vertical position), then take
-// the 5th and 9th numeric token left-to-right within each row.
-function parseOcrWordsIntoRows(words){
-  const toks = [];
-  for (const w of (words || [])) {
-    if (!w || !w.text) continue;
-    const cleaned = w.text.trim().replace(/[^0-9.,]/g, '').replace(/,/g, '');
-    if (!cleaned || !/^[0-9]+(\.[0-9]+)?$/.test(cleaned)) continue;
-    const bbox = w.bbox || {};
-    const y0 = bbox.y0 != null ? bbox.y0 : 0;
-    const y1 = bbox.y1 != null ? bbox.y1 : y0;
-    const x0 = bbox.x0 != null ? bbox.x0 : 0;
-    toks.push({
-      text: cleaned,
-      conf: (typeof w.confidence === 'number' ? w.confidence : 50),
-      x0: x0, yc: (y0 + y1) / 2, h: Math.max(1, y1 - y0)
-    });
-  }
-  if (!toks.length) return [];
-
-  toks.sort(function(a, b){ return a.yc - b.yc; });
-  const hs = toks.map(function(t){ return t.h; }).sort(function(a, b){ return a - b; });
-  const medianH = hs[Math.floor(hs.length / 2)] || 20;
-  const rowGap = medianH * 1.1;
-
-  // Skip the header band (column titles) near the top of the photo.
-  const imgH = _ocrCanvas ? _ocrCanvas.height : 0;
-  const headerCutoff = imgH * 0.12;
-
-  const rows = [];
-  let current = null;
-  for (const t of toks) {
-    if (t.yc < headerCutoff) continue;
-    if (!current || (t.yc - current.yc) > rowGap) {
-      current = { yc: t.yc, items: [] };
-      rows.push(current);
-    }
-    current.items.push(t);
-    current.yc = (current.yc + t.yc) / 2;
-  }
-
-  return rows.map(function(r){
-    const items = r.items.slice().sort(function(a, b){ return a.x0 - b.x0; });
-    const col5 = items[4];
-    const col9 = items[8];
-    return {
-      col5: col5 ? { text: col5.text, conf: col5.conf } : null,
-      col9: col9 ? { text: col9.text, conf: col9.conf } : null
-    };
-  }).slice(0, HOURS.length);
-}
-
-async function runOcrExtraction(){
-  if (!_ocrCanvas) { showToast('⚠️ Select a photo first', true); return; }
-  const extractBtn = document.getElementById('ocrExtractBtn');
-  const progWrap   = document.getElementById('ocrProgressWrap');
-  const progFill   = document.getElementById('ocrProgressFill');
-  const progLbl    = document.getElementById('ocrProgressLbl');
-
-  extractBtn.disabled = true;
-  progWrap.classList.add('show');
-  progLbl.textContent = 'Loading recognition engine…';
-  progFill.style.width = '5%';
-
-  try {
-    await loadTesseractLib();
-    progLbl.textContent = 'Reading table…';
-    const worker = await Tesseract.createWorker('eng', 1, {
-      logger: function(m){
-        if (m.status === 'recognizing text' && typeof m.progress === 'number') {
-          const pct = Math.round(10 + m.progress * 85);
-          progFill.style.width = pct + '%';
-          progLbl.textContent = 'Reading table… ' + pct + '%';
-        }
-      }
-    });
-    await worker.setParameters({ tessedit_char_whitelist: '0123456789., ' });
-    const { data } = await worker.recognize(_ocrCanvas);
-    await worker.terminate();
-
-    progFill.style.width = '100%';
-    progLbl.textContent = 'Parsing columns…';
-
-    _ocrRawRows = parseOcrWordsIntoRows(data.words || []);
-    _ocrMapping = { col5: 'marine', col9: 'petreco' };
-    renderOcrReviewTable();
-
-    document.getElementById('ocrReviewSection').style.display = '';
-    document.getElementById('ocrFooter').style.display = '';
-    setTimeout(function(){ progWrap.classList.remove('show'); }, 400);
-
-    const found = _ocrRawRows.filter(function(r){ return r.col5 || r.col9; }).length;
-    if (found === 0) {
-      showToast('⚠️ No numbers recognized — enter values manually below', true);
-    } else {
-      showToast('✅ Extracted ' + found + ' row(s) — please review');
-    }
-  } catch (err) {
-    console.error('[OCR] extraction failed', err);
-    progWrap.classList.remove('show');
-    showToast('⚠️ Extraction failed — you can still enter values manually below', true);
-    _ocrRawRows = [];
-    renderOcrReviewTable();
-    document.getElementById('ocrReviewSection').style.display = '';
-    document.getElementById('ocrFooter').style.display = '';
-  }
-  extractBtn.disabled = false;
-}
-
-function renderOcrReviewTable(){
-  const petCol = (_ocrMapping.col9 === 'petreco') ? 'col9' : 'col5';
-  const marCol = (petCol === 'col9') ? 'col5' : 'col9';
-  document.getElementById('ocrMapCol5').textContent = ocrStreamLabel(_ocrMapping.col5);
-  document.getElementById('ocrMapCol9').textContent = ocrStreamLabel(_ocrMapping.col9);
-
-  const body = document.getElementById('ocrReviewBody');
-  body.innerHTML = HOURS.map(function(h, i){
-    const row = _ocrRawRows[i] || {};
-    const pet = row[petCol]; const mar = row[marCol];
-    const petVal = pet ? pet.text : ''; const petConf = pet ? pet.conf : 100;
-    const marVal = mar ? mar.text : ''; const marConf = mar ? mar.conf : 100;
-    const block = Math.floor(i / 3);
-    const rowCls = (block % 2 === 1) ? ' class="blk-b"' : '';
-    const petLow = (petVal && petConf < 60) ? ' ocr-low-conf' : '';
-    const marLow = (marVal && marConf < 60) ? ' ocr-low-conf' : '';
-    return '<tr' + rowCls + '>' +
-      '<td class="hr-lbl">' + h.l + '</td>' +
-      '<td><input type="text" inputmode="decimal" lang="en" data-i="' + i + '" data-col="' + marCol + '" class="' + marLow + '" value="' + escHtml(marVal) + '" oninput="onOcrCellEdit(this)"></td>' +
-      '<td><input type="text" inputmode="decimal" lang="en" data-i="' + i + '" data-col="' + petCol + '" class="' + petLow + '" value="' + escHtml(petVal) + '" oninput="onOcrCellEdit(this)"></td>' +
-    '</tr>';
-  }).join('');
-}
-
-function onOcrCellEdit(el){
-  sanitizeNumInput(el);
-  const i = parseInt(el.getAttribute('data-i'), 10);
-  const col = el.getAttribute('data-col');
-  if (!_ocrRawRows[i]) _ocrRawRows[i] = {};
-  _ocrRawRows[i][col] = { text: el.value, conf: 100 }; // user-confirmed → full confidence
-  el.classList.remove('ocr-low-conf');
-}
-
-function swapOcrMapping(){
-  const tmp = _ocrMapping.col5;
-  _ocrMapping.col5 = _ocrMapping.col9;
-  _ocrMapping.col9 = tmp;
-  renderOcrReviewTable();
-}
-
-function applyOcrToForm(){
-  const petCol = (_ocrMapping.col9 === 'petreco') ? 'col9' : 'col5';
-  const marCol = (petCol === 'col9') ? 'col5' : 'col9';
-
-  let filledCount = 0, overwriteCount = 0;
-  HOURS.forEach(function(h, i){
-    const row = _ocrRawRows[i] || {};
-    const petVal = row[petCol] ? toWesternDigits(row[petCol].text) : '';
-    const marVal = row[marCol] ? toWesternDigits(row[marCol].text) : '';
-    const petOk = petVal !== '' && !isNaN(parseFloat(petVal));
-    const marOk = marVal !== '' && !isNaN(parseFloat(marVal));
-    if (petOk) filledCount++;
-    if (marOk) filledCount++;
-    const petEl = document.getElementById('pet_' + h.k);
-    const marEl = document.getElementById('mar_' + h.k);
-    if (petEl.value !== '' && petOk) overwriteCount++;
-    if (marEl.value !== '' && marOk) overwriteCount++;
-  });
-
-  if (filledCount === 0) { showToast('⚠️ Nothing to apply — all rows are blank', true); return; }
-  if (overwriteCount > 0 && !confirm('This will overwrite ' + overwriteCount + ' hourly value(s) already entered. Continue?')) return;
-
-  HOURS.forEach(function(h, i){
-    const row = _ocrRawRows[i] || {};
-    const petVal = row[petCol] ? toWesternDigits(row[petCol].text) : '';
-    const marVal = row[marCol] ? toWesternDigits(row[marCol].text) : '';
-    if (petVal !== '' && !isNaN(parseFloat(petVal))) document.getElementById('pet_' + h.k).value = petVal;
-    if (marVal !== '' && !isNaN(parseFloat(marVal))) document.getElementById('mar_' + h.k).value = marVal;
-  });
-
-  onInputChange(); // same render + Firestore save path as manual entry
-  closeOcrModal();
-  showToast('✅ Applied ' + filledCount + ' value(s) to the form');
-}
-
-// ══════════════════════════════════════════
 //  INPUT HANDLING + FIRESTORE SYNC
 // ══════════════════════════════════════════
 function onInputChange(){
@@ -2736,22 +2786,32 @@ function clearInputs(){
   });
 }
 
+var _prodPendingDoc = null;
+function _applyProdDoc(d){
+  if(d && d.__exists){ applyStateToInputs(d); } else { clearInputs(); }
+  setSyncPill('synced');
+}
 function startListener(dateStr){
   if(_unsub) _unsub();
+  _prodPendingDoc = null;
   setSyncPill('syncing');
   _unsub = db.collection('accountingProd').doc(dateStr).onSnapshot(function(doc){
     _dayDocExists = doc.exists;
-    if(doc.exists){
-      applyStateToInputs(doc.data());
-    } else {
-      clearInputs();
-    }
-    setSyncPill('synced');
+    var d = doc.exists ? doc.data() : {};
+    d.__exists = doc.exists;
+    // Never overwrite a field being typed in — park it until the user is idle.
+    if(tabHasFocus('tabContentProd')){ _prodPendingDoc = d; setSyncPill('synced'); return; }
+    _applyProdDoc(d);
   }, function(err){
     console.error('[Firestore] listener error', err);
     setSyncPill('offline');
   });
 }
+onTabIdle('tabContentProd', function(){
+  if(!_prodPendingDoc) return;
+  var d = _prodPendingDoc; _prodPendingDoc = null;
+  _applyProdDoc(d);
+});
 function stopListener(){
   if(_unsub){ _unsub(); _unsub = null; }
 }
