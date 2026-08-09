@@ -342,7 +342,6 @@ table.hr-tbl input,.ship-field input,.daily-field input,.z-sample input,
 
 /* ══ MANIFEST GRID — the certificate of quantity ══ */
 .qty-sheet{margin:10px 12px 12px;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--surface);}
-.qty-sheet-hd{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);padding:8px 12px;border-bottom:1px solid var(--border);background:rgba(128,128,128,.04);}
 .qty-block{padding:10px 12px;border-bottom:1px solid rgba(128,128,128,.12);}
 .qty-block:last-child{border-bottom:none;}
 .qty-lbl{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
@@ -527,9 +526,9 @@ body.light-mode .gauge-fill{background:linear-gradient(180deg,var(--accent),rgba
 
     <div class="result-cards">
       <div class="result-card net">
-        <div class="rc-lbl">📈 Inventory Change (Today − Yesterday)</div>
+        <div class="rc-lbl">🏭 Today in Fieran</div>
         <div class="rc-val" id="aInvChange">0</div>
-        <div class="rc-sub">m³</div>
+        <div class="rc-sub">m³ in terminal</div>
         <div class="rc-bbl" id="aInvChangeBbl">0 bbl</div>
       </div>
       <div class="result-card received">
@@ -653,6 +652,14 @@ body.light-mode .gauge-fill{background:linear-gradient(180deg,var(--accent),rgba
       <div class="field"><span class="f-label">Production in barrels</span><span class="f-val" id="aProdBbl">0<span class="u">bbl</span></span></div>
     </div>
 
+    <!-- Cross-check against the Daily Production tab -->
+    <div class="section">
+      <div class="sec-title">⚖️ Inventory Change vs Daily Production</div>
+      <div class="field"><span class="f-label">Inventory change (today − yesterday)</span><span class="f-val" id="aCmpChange">0<span class="u">m³</span></span></div>
+      <div class="field"><span class="f-label">Daily Production (net, from tab 1)</span><span class="f-val" id="aCmpDaily">0<span class="u">m³</span></span></div>
+      <div class="field" style="border-top:2px solid var(--accent2);"><span class="f-label"><b>Difference</b></span><span class="f-val" id="aCmpVar" style="color:var(--accent2);font-size:16px;">0<span class="u">m³</span></span></div>
+    </div>
+
   </div>
   </div><!-- end tabContentAcct -->
 
@@ -693,14 +700,14 @@ body.light-mode .gauge-fill{background:linear-gradient(180deg,var(--accent),rgba
         <button class="ship-add-btn" onclick="addShipRow('land')">+ Add Tank</button>
       </div>
       <div class="ship-lab">
-        <div class="ship-lab-title">🔬 Land Laboratory Data (blended average for the parcel)</div>
+        <div class="ship-lab-title">🔬 Land Laboratory Data</div>
         <div class="ship-grid">
           <div class="ship-field">
-            <label>Density in Air (blend)</label>
+            <label>Density in Air</label>
             <input type="text" inputmode="decimal" lang="en" id="shipLandDensity" placeholder="0.9238" oninput="sanitizeNumInput(this); computeShipping()">
           </div>
           <div class="ship-field">
-            <label>Avg W/C % (blend)</label>
+            <label>W/C %</label>
             <input type="text" inputmode="decimal" lang="en" id="shipLandWC" placeholder="0.20" oninput="sanitizeNumInput(this); computeShipping()">
           </div>
           <div class="ship-field">
@@ -711,7 +718,6 @@ body.light-mode .gauge-fill{background:linear-gradient(180deg,var(--accent),rgba
       </div>
       <div id="shipLandRows"></div>
       <div class="qty-sheet">
-        <div class="qty-sheet-hd">Land — Certificate Quantities</div>
         <div class="qty-block">
           <div class="qty-lbl">&Sigma; Quantity Loaded <i class="cnt" id="shipLandTankCount">(0 tanks)</i></div>
           <div class="qty-vals one"><div><b id="shipLandQtySum">0</b><i>m³</i></div></div>
@@ -721,8 +727,8 @@ body.light-mode .gauge-fill{background:linear-gradient(180deg,var(--accent),rgba
           <div class="qty-vals"><div><b id="shipLandGrossM3">0</b><i>m³</i></div><div><b id="shipLandGrossMT">0</b><i>MT</i></div><div><b id="shipLandGrossBbl">0</b><i>bbl</i></div></div>
         </div>
         <div class="qty-block water">
-          <div class="qty-lbl">Water Loaded <i class="cnt">blended W/C</i></div>
-          <div class="qty-vals one"><div><b id="shipLandWaterM3">0</b><i>m³</i></div></div>
+          <div class="qty-lbl">Water Drained</div>
+          <div class="qty-vals"><div><b id="shipLandWaterM3">0</b><i>m³</i></div><div><b id="shipLandWaterBbl">0</b><i>bbl</i></div></div>
         </div>
         <div class="qty-block net">
           <div class="qty-lbl">Net Oil Loaded</div>
@@ -738,14 +744,14 @@ body.light-mode .gauge-fill{background:linear-gradient(180deg,var(--accent),rgba
         <button class="ship-add-btn" onclick="addShipRow('marine')">+ Add Tank</button>
       </div>
       <div class="ship-lab">
-        <div class="ship-lab-title">🔬 Marine Laboratory Data (blended average for the parcel)</div>
+        <div class="ship-lab-title">🔬 Marine Laboratory Data</div>
         <div class="ship-grid">
           <div class="ship-field">
-            <label>Density in Air (blend)</label>
+            <label>Density in Air</label>
             <input type="text" inputmode="decimal" lang="en" id="shipMarineDensity" placeholder="0.8839" oninput="sanitizeNumInput(this); computeShipping()">
           </div>
           <div class="ship-field">
-            <label>Avg W/C % (blend)</label>
+            <label>W/C %</label>
             <input type="text" inputmode="decimal" lang="en" id="shipMarineWC" placeholder="0.05" oninput="sanitizeNumInput(this); computeShipping()">
           </div>
           <div class="ship-field">
@@ -756,7 +762,6 @@ body.light-mode .gauge-fill{background:linear-gradient(180deg,var(--accent),rgba
       </div>
       <div id="shipMarineRows"></div>
       <div class="qty-sheet">
-        <div class="qty-sheet-hd">Marine — Certificate Quantities</div>
         <div class="qty-block">
           <div class="qty-lbl">&Sigma; Quantity Loaded <i class="cnt" id="shipMarineTankCount">(0 tanks)</i></div>
           <div class="qty-vals one"><div><b id="shipMarineQtySum">0</b><i>m³</i></div></div>
@@ -766,8 +771,8 @@ body.light-mode .gauge-fill{background:linear-gradient(180deg,var(--accent),rgba
           <div class="qty-vals"><div><b id="shipMarineGrossM3">0</b><i>m³</i></div><div><b id="shipMarineGrossMT">0</b><i>MT</i></div><div><b id="shipMarineGrossBbl">0</b><i>bbl</i></div></div>
         </div>
         <div class="qty-block water">
-          <div class="qty-lbl">Water Loaded <i class="cnt">blended W/C</i></div>
-          <div class="qty-vals one"><div><b id="shipMarineWaterM3">0</b><i>m³</i></div></div>
+          <div class="qty-lbl">Water Drained</div>
+          <div class="qty-vals"><div><b id="shipMarineWaterM3">0</b><i>m³</i></div><div><b id="shipMarineWaterBbl">0</b><i>bbl</i></div></div>
         </div>
         <div class="qty-block net">
           <div class="qty-lbl">Net Oil Loaded</div>
@@ -1535,6 +1540,7 @@ function computeShipping(){
       grossBbl: grossM3 * CONV_BBL,
       grossMT: air ? grossM3 * air : 0,
       waterM3: waterM3,
+      waterBbl: waterM3 * CONV_BBL,
       netM3: netM3,
       netBbl: netM3 * CONV_BBL,
       netMT: air ? netM3 * air : 0
@@ -1554,6 +1560,7 @@ function computeShipping(){
     document.getElementById(prefix + 'GrossMT').textContent = fmtNum(t.grossMT, 3);
     document.getElementById(prefix + 'GrossBbl').textContent = fmtNum(t.grossBbl, 1);
     document.getElementById(prefix + 'WaterM3').textContent = fmtNum(t.waterM3, 3);
+    document.getElementById(prefix + 'WaterBbl').textContent = fmtNum(t.waterBbl, 1);
     document.getElementById(prefix + 'NetM3').textContent = fmtNum(t.netM3, 3);
     document.getElementById(prefix + 'NetMT').textContent = fmtNum(t.netMT, 3);
     document.getElementById(prefix + 'NetBbl').textContent = fmtNum(t.netBbl, 1);
@@ -2063,8 +2070,8 @@ function computeInventory(){
   var grandChange = grandT - grandY;
   var grandChangeBbl = grandChange * CONV;
 
-  document.getElementById('aInvChange').textContent = fmtNum(grandChange, 3);
-  document.getElementById('aInvChangeBbl').textContent = fmtNum(grandChangeBbl, 1) + ' bbl';
+  document.getElementById('aInvChange').textContent = fmtNum(grandT, 3);
+  document.getElementById('aInvChangeBbl').textContent = fmtNum(grandT * CONV, 1) + ' bbl';
 
   setInvField('aGrandYest', grandY, 3);
   setInvField('aGrandToday', grandT, 3);
@@ -2094,6 +2101,15 @@ function computeInventory(){
   setInvField('aRecDiesel', mDiesel, 3);
   setInvField('aProdM3', prodM3, 3);
   setInvField('aProdBbl', prodBblCalc, 1);
+
+  // Cross-check: tank-derived production vs the Daily Production tab's net
+  var dailyBbl = 0;
+  try { dailyBbl = compute(readState()).totalNet_bbl || 0; } catch(_){}
+  var dailyM3 = dailyBbl / CONV;
+  var variance = grandChange - dailyM3;
+  setInvField('aCmpChange', grandChange, 3);
+  setInvField('aCmpDaily', dailyM3, 3);
+  setInvField('aCmpVar', variance, 3);
 
   var vEl = document.getElementById('aVariance');
   var vNote = document.getElementById('aVarianceNote');
@@ -2319,10 +2335,10 @@ function _shipReportHtml(){
            '<tr><th>&nbsp;&nbsp;Quantity loaded</th><td colspan="2">' + escHtml(q) + ' m³</td></tr>';
     });
     h += '</table>';
-    h += '<table class="pr-table"><caption>' + st[0] + ' — Certificate Quantities</caption>' +
+    h += '<table class="pr-table"><caption>' + st[0] + ' — Quantities</caption>' +
       '<tr><th>Σ Quantity Loaded ' + escHtml(_txt(st[1] + 'TankCount')) + '</th><td colspan="2">' + escHtml(_txt(st[1] + 'QtySum')) + ' m³</td></tr>' +
       '<tr><th>Gross Oil Loaded</th><td>' + escHtml(_txt(st[1] + 'GrossM3')) + ' m³</td><td>' + escHtml(_txt(st[1] + 'GrossMT')) + ' MT &nbsp;·&nbsp; ' + escHtml(_txt(st[1] + 'GrossBbl')) + ' bbl</td></tr>' +
-      '<tr><th>Water Loaded (blended W/C ' + escHtml(_val(st[1] + 'WC')) + '%)</th><td colspan="2">' + escHtml(_txt(st[1] + 'WaterM3')) + ' m³</td></tr>' +
+      '<tr><th>Water Drained (W/C ' + escHtml(_val(st[1] + 'WC')) + '%)</th><td>' + escHtml(_txt(st[1] + 'WaterM3')) + ' m³</td><td>' + escHtml(_txt(st[1] + 'WaterBbl')) + ' bbl</td></tr>' +
       '<tr class="pr-total"><th>Net Oil Loaded</th><td>' + escHtml(_txt(st[1] + 'NetM3')) + ' m³</td><td>' + escHtml(_txt(st[1] + 'NetMT')) + ' MT &nbsp;·&nbsp; ' + escHtml(_txt(st[1] + 'NetBbl')) + ' bbl</td></tr>' +
       '<tr><th>Density in Air (blend)</th><td colspan="2">' + escHtml(_val(st[1] + 'Density')) + ' &nbsp;·&nbsp; API ' + escHtml(_txt(st[1] + 'API')) + '</td></tr>' +
       '</table>';
