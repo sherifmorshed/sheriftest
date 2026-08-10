@@ -370,9 +370,84 @@ body.light-mode .gauge-fill{background:linear-gradient(180deg,var(--accent),rgba
 /* ══ Breathing room between value and unit ══ */
 .f-val .u{margin-left:7px;}
 .rc-val{letter-spacing:-1px;}
+
+/* ══ ICON SYSTEM ══ */
+.ico{width:15px;height:15px;flex:0 0 15px;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;fill:none;vertical-align:-2.5px;margin-right:7px;}
+.sec-title .ico{opacity:.85;}
+.rc-lbl .ico{width:14px;height:14px;flex-basis:14px;margin-right:6px;vertical-align:-2px;}
+.print-btn .ico{margin-right:6px;vertical-align:-3px;}
+.tab-ico{width:19px;height:19px;flex-basis:19px;margin:0 0 3px;display:block;stroke-width:1.5;}
+
+/* ══ TAB BAR — icon over label ══ */
+.tab-bar{padding:0 8px;gap:2px;}
+.tab-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:10px 2px 8px;font-size:9.5px;letter-spacing:.2px;line-height:1.2;position:relative;}
+.tab-btn span{font-size:9.5px;opacity:1;}
+.tab-btn .tab-ico{opacity:.55;transition:opacity .18s,transform .18s;}
+.tab-btn.active .tab-ico{opacity:1;transform:translateY(-1px);}
+
+/* ══ SURFACES — softer, layered ══ */
+.section{border-radius:14px;box-shadow:0 1px 2px rgba(0,0,0,.18),0 6px 18px -10px rgba(0,0,0,.45);}
+body.light-mode .section{box-shadow:0 1px 2px rgba(16,24,40,.05),0 6px 16px -12px rgba(16,24,40,.18);}
+.sec-title{display:flex;align-items:center;padding:11px 14px;font-size:10.5px;letter-spacing:1.4px;
+  background:linear-gradient(180deg,rgba(255,255,255,.035),transparent);}
+body.light-mode .sec-title{background:linear-gradient(180deg,rgba(16,24,40,.025),transparent);}
+
+/* ══ RESULT CARDS ══ */
+.result-card{border-radius:16px;padding:17px 16px;box-shadow:0 1px 2px rgba(0,0,0,.2),0 10px 26px -16px rgba(0,0,0,.6);}
+body.light-mode .result-card{box-shadow:0 1px 2px rgba(16,24,40,.05),0 8px 20px -14px rgba(16,24,40,.2);}
+.result-card::after{content:'';position:absolute;inset:0;border-radius:16px;pointer-events:none;
+  background:radial-gradient(120% 80% at 100% 0%,rgba(255,255,255,.06),transparent 60%);}
+body.light-mode .result-card::after{background:radial-gradient(120% 80% at 100% 0%,rgba(255,255,255,.7),transparent 60%);}
+.rc-lbl{display:flex;align-items:center;font-size:10px;letter-spacing:1.2px;margin-bottom:8px;}
+.rc-val{font-size:34px;letter-spacing:-1.4px;}
+.ship-cards .rc-val{font-size:25px;}
+
+/* ══ INPUTS — clearer focus, softer wells ══ */
+table.hr-tbl input,.ship-field input,.daily-field input,.z-sample input,.ship-field select{
+  border-radius:8px;transition:border-color .15s,box-shadow .15s,background .15s;}
+table.hr-tbl input:focus,.ship-field input:focus,.daily-field input:focus,.z-sample input:focus{
+  box-shadow:0 0 0 3px rgba(34,211,238,.14);}
+body.light-mode table.hr-tbl input:focus,body.light-mode .ship-field input:focus,
+body.light-mode .daily-field input:focus,body.light-mode .z-sample input:focus{box-shadow:0 0 0 3px rgba(7,94,84,.13);}
+
+/* ══ BUTTONS ══ */
+.print-btn{border-radius:12px;display:inline-flex;align-items:center;justify-content:center;
+  transition:background .15s,border-color .15s,transform .08s;}
+.print-btn:active{transform:scale(.985);}
+.ship-add-btn{border-radius:8px;transition:background .15s,transform .08s;}
+.ship-add-btn:active{transform:scale(.97);}
+
+/* ══ HEADER ══ */
+.app-header{padding:18px 16px 15px;}
+.app-header h1{font-size:19px;letter-spacing:2.4px;}
+.date-bar{border-radius:11px;padding:9px 12px;}
+
+/* ══ SHEETS & ROWS ══ */
+.qty-sheet{border-radius:12px;}
+.ship-gauge-box{border-radius:10px;}
+.inv-col{border-radius:10px;}
+.qty-block.net{box-shadow:inset 0 1px 0 rgba(255,255,255,.05);}
 </style>
 </head>
 <body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-tank" viewBox="0 0 24 24"><path d="M5 8.5c0-1.6 3.1-2.5 7-2.5s7 .9 7 2.5V18a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8.5Z"/><path d="M5 8.5c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5"/><path d="M5 15h14"/><path d="M12 6V3.5"/><path d="M9.5 3.5h5"/></symbol>
+<symbol id="i-farm" viewBox="0 0 24 24"><path d="M2 11c0-1.1 1.8-2 4-2s4 .9 4 2v8a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-8Z"/><path d="M2 11c0 1 1.8 2 4 2s4-1 4-2"/><path d="M14 7c0-1.1 1.8-2 4-2s4 .9 4 2v12a1 1 0 0 1-1 1h-6a1 1 0 0 1-1-1V7Z"/><path d="M14 7c0 1 1.8 2 4 2s4-1 4-2"/><path d="M2 16h8M14 13h8"/></symbol>
+<symbol id="i-ship" viewBox="0 0 24 24"><path d="M2.5 16.5 4 12h16l1.5 4.5"/><path d="M2.5 16.5c1.6 0 1.6 1.5 3.2 1.5s1.6-1.5 3.2-1.5 1.6 1.5 3.1 1.5 1.6-1.5 3.2-1.5 1.6 1.5 3.2 1.5 1.6-1.5 3.1-1.5"/><path d="M6.5 12V8h11v4"/><path d="M11 8V4.5h3"/></symbol>
+<symbol id="i-meter" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 13 15.5 9.5"/><path d="M12 5V3.5M4.6 8.2 3.4 7.2M19.4 8.2l1.2-1"/><circle cx="12" cy="13" r="1.1" fill="currentColor" stroke="none"/></symbol>
+<symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 3.5c3.2 3.9 5.5 6.7 5.5 9.6a5.5 5.5 0 0 1-11 0c0-2.9 2.3-5.7 5.5-9.6Z"/><path d="M9.2 14.3a2.9 2.9 0 0 0 2.4 2.6"/></symbol>
+<symbol id="i-wave" viewBox="0 0 24 24"><path d="M2 8.5c2.5-2 4.5-2 7 0s4.5 2 7 0 4.5-2 6 0"/><path d="M2 13.5c2.5-2 4.5-2 7 0s4.5 2 7 0 4.5-2 6 0"/><path d="M2 18.5c2.5-2 4.5-2 7 0s4.5 2 7 0 4.5-2 6 0"/></symbol>
+<symbol id="i-flask" viewBox="0 0 24 24"><path d="M9.5 3h5"/><path d="M10.5 3v6.2L5.6 17.6A2 2 0 0 0 7.3 20.7h9.4a2 2 0 0 0 1.7-3.1L13.5 9.2V3"/><path d="M7.8 15h8.4"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.2V12l3.2 2"/></symbol>
+<symbol id="i-print" viewBox="0 0 24 24"><path d="M7 9V3.5h10V9"/><path d="M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><path d="M7 14h10v6.5H7z"/></symbol>
+<symbol id="i-valve" viewBox="0 0 24 24"><path d="M3 12h4M17 12h4"/><path d="M7 8.5h10v7H7z"/><path d="M12 8.5V5M9.5 5h5"/></symbol>
+<symbol id="i-scale" viewBox="0 0 24 24"><path d="M12 4v16M6 20h12"/><path d="M4 8h16"/><path d="M4 8 1.5 14a2.8 2.8 0 0 0 5 0Z"/><path d="M20 8l-2.5 6a2.8 2.8 0 0 0 5 0Z"/></symbol>
+<symbol id="i-sum" viewBox="0 0 24 24"><path d="M17.5 4.5h-11L12 12l-5.5 7.5h11"/></symbol>
+<symbol id="i-flow" viewBox="0 0 24 24"><path d="M3 7h11a4 4 0 0 1 0 8H6"/><path d="M9 12l-3 3 3 3"/><circle cx="3" cy="7" r="1.3" fill="currentColor" stroke="none"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 8.2v7.6M8.2 12h7.6"/></symbol>
+<symbol id="i-derrick" viewBox="0 0 24 24"><path d="M12 3 5 20M12 3l7 17"/><path d="M8.2 12h7.6M6.9 16h10.2M9.5 8h5"/><path d="M3 20h18"/></symbol>
+</defs></svg>
 
 <div id="loading-screen" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#060b12; display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:9999; color:white; font-family:'Inter',sans-serif;">
     <img src="icon.png" style="width:110px; height:110px; border-radius:24px; margin-bottom:20px; object-fit:cover; background:#0f1d2e; box-shadow: 0 10px 40px rgba(34,211,238,0.16), 0 4px 20px rgba(0,0,0,0.7);">
@@ -428,10 +503,10 @@ body.light-mode .gauge-fill{background:linear-gradient(180deg,var(--accent),rgba
 
   <!-- ══════════════ TAB NAVIGATION ══════════════ -->
   <div class="tab-bar">
-    <button class="tab-btn active" id="tabProd" onclick="showTab('prod')">📊 Daily<br><span>Production</span></button>
-    <button class="tab-btn" id="tabAcct" onclick="showTab('acct')">🏭 Accounting<br><span>Prod.</span></button>
-    <button class="tab-btn" id="tabShip" onclick="showTab('ship')">🚢<br><span>Shipping</span></button>
-    <button class="tab-btn" id="tabZeit" onclick="showTab('zeit')">🛢️<br><span>Zeitco</span></button>
+    <button class="tab-btn active" id="tabProd" onclick="showTab('prod')"><svg class="ico tab-ico"><use href="#i-derrick"/></svg><span>Daily Production</span></button>
+    <button class="tab-btn" id="tabAcct" onclick="showTab('acct')"><svg class="ico tab-ico"><use href="#i-farm"/></svg><span>Accounting Prod.</span></button>
+    <button class="tab-btn" id="tabShip" onclick="showTab('ship')"><svg class="ico tab-ico"><use href="#i-ship"/></svg><span>Shipping</span></button>
+    <button class="tab-btn" id="tabZeit" onclick="showTab('zeit')"><svg class="ico tab-ico"><use href="#i-meter"/></svg><span>Zeitco</span></button>
   </div>
 
   <!-- ══════════════ PRODUCTION TAB ══════════════ -->
@@ -439,20 +514,20 @@ body.light-mode .gauge-fill{background:linear-gradient(180deg,var(--accent),rgba
   <div class="wrap">
 
     <div class="action-row">
-      <button class="print-btn" onclick="printReport()">🖨️ Print</button>
-      <button class="print-btn drain-btn" onclick="openDrainModal()">🛢️ Drain</button>
+      <button class="print-btn" onclick="printReport()"><svg class="ico"><use href="#i-print"/></svg>Print</button>
+      <button class="print-btn drain-btn" onclick="openDrainModal()"><svg class="ico"><use href="#i-valve"/></svg>Drain</button>
     </div>
 
     <!-- Headline results -->
     <div class="result-cards">
       <div class="result-card received">
-        <div class="rc-lbl">📥 Received at Feiran (Gross — with Zeitco/Shedwan/Condensate)</div>
+        <div class="rc-lbl"><svg class="ico"><use href="#i-flow"/></svg>Received at Feiran (Gross — with Zeitco/Shedwan/Condensate)</div>
         <div class="rc-val" id="rcReceivedBbl">0</div>
         <div class="rc-sub">bbl/d</div>
         <div class="rc-bbl" id="rcReceivedM3">0 m³/d</div>
       </div>
       <div class="result-card net">
-        <div class="rc-lbl">⛽ Total Production per Day (Net — without Zeitco/Shedwan/Condensate)</div>
+        <div class="rc-lbl"><svg class="ico"><use href="#i-derrick"/></svg>Total Production per Day (Net — without Zeitco/Shedwan/Condensate)</div>
         <div class="rc-val" id="rcNetBbl">0</div>
         <div class="rc-sub">bbl/d</div>
         <div class="rc-bbl" id="rcNetM3">0 m³/d</div>
@@ -462,7 +537,7 @@ body.light-mode .gauge-fill{background:linear-gradient(180deg,var(--accent),rgba
     <!-- Hourly Land / Marine input -->
     <div class="section">
       <div class="sec-title">
-        <span>🕐 Hourly Readings — Land &amp; Marine (m³)</span>
+        <span><svg class="ico"><use href="#i-clock"/></svg>Hourly Readings — Land &amp; Marine (m³)</span>
       </div>
       <table class="hr-tbl">
         <thead><tr><th style="text-align:left;padding-left:12px;">Hour</th><th>Marine</th><th>Land</th></tr></thead>
@@ -472,7 +547,7 @@ body.light-mode .gauge-fill{background:linear-gradient(180deg,var(--accent),rgba
 
     <!-- Averages / raw daily -->
     <div class="section">
-      <div class="sec-title">📊 Land &amp; Marine — Daily</div>
+      <div class="sec-title"><svg class="ico"><use href="#i-flow"/></svg>Land &amp; Marine — Daily</div>
       <div class="field"><span class="f-label">Avg Land (hourly)</span><span class="f-val" id="fAvgPetreco">0<span class="u">m³/hr</span></span></div>
       <div class="field"><span class="f-label">Avg Marine (hourly)</span><span class="f-val" id="fAvgMarine">0<span class="u">m³/hr</span></span></div>
       <div class="field"><span class="f-label">Total Land</span><span class="f-val" id="fLandRaw">0<span class="u">m³/d</span></span></div>
@@ -483,7 +558,7 @@ body.light-mode .gauge-fill{background:linear-gradient(180deg,var(--accent),rgba
 
     <!-- Daily inputs: Zeitco / Shedwan / Condensate -->
     <div class="section">
-      <div class="sec-title">➕ Additional Fields — Daily (bbl)</div>
+      <div class="sec-title"><svg class="ico"><use href="#i-plus"/></svg>Additional Fields — Daily (bbl)</div>
       <div class="daily-grid">
         <div class="daily-field">
           <label>Zeitco</label>
@@ -505,7 +580,7 @@ body.light-mode .gauge-fill{background:linear-gradient(180deg,var(--accent),rgba
 
     <!-- Full breakdown -->
     <div class="section">
-      <div class="sec-title">🧮 Full Breakdown</div>
+      <div class="sec-title"><svg class="ico"><use href="#i-sum"/></svg>Full Breakdown</div>
       <div class="field"><span class="f-label">Zeitco field</span><span class="f-val" id="fZeitco">0<span class="u">bbl/d</span></span></div>
       <div class="field"><span class="f-label">Shedwan + Condensate</span><span class="f-val" id="fShedCond">0<span class="u">bbl/d</span></span></div>
       <div class="field"><span class="f-label">Land (bbl, net)</span><span class="f-val" id="fLandBbl">0<span class="u">bbl/d</span></span></div>
@@ -526,13 +601,13 @@ body.light-mode .gauge-fill{background:linear-gradient(180deg,var(--accent),rgba
 
     <div class="result-cards">
       <div class="result-card net">
-        <div class="rc-lbl">🏭 Today in Fieran</div>
+        <div class="rc-lbl"><svg class="ico"><use href="#i-farm"/></svg>Today in Fieran</div>
         <div class="rc-val" id="aInvChange">0</div>
         <div class="rc-sub">m³ in terminal</div>
         <div class="rc-bbl" id="aInvChangeBbl">0 bbl</div>
       </div>
       <div class="result-card received">
-        <div class="rc-lbl">⛽ Production (from tank measurements)</div>
+        <div class="rc-lbl"><svg class="ico"><use href="#i-derrick"/></svg>Production (from tank measurements)</div>
         <div class="rc-val" id="aVariance">—</div>
         <div class="rc-sub">m³</div>
         <div class="rc-bbl" id="aVarianceNote">enter tank levels</div>
@@ -540,7 +615,7 @@ body.light-mode .gauge-fill{background:linear-gradient(180deg,var(--accent),rgba
     </div>
 
     <div class="ship-lab" style="border-radius:10px;border:1px solid var(--border);margin-bottom:14px;">
-      <div class="ship-lab-title">🔬 Fixed Densities @15°C</div>
+      <div class="ship-lab-title"><svg class="ico"><use href="#i-flask"/></svg>Fixed Densities @15°C</div>
       <div class="ship-grid" style="grid-template-columns:1fr 1fr;">
         <div class="ship-field"><label>Land tanks</label><div class="val" id="aDensLand">0.9298</div></div>
         <div class="ship-field"><label>Marine tanks</label><div class="val" id="aDensMarine">0.8822</div></div>
@@ -550,14 +625,14 @@ body.light-mode .gauge-fill{background:linear-gradient(180deg,var(--accent),rgba
     <div class="cal-warn" id="calWarnAcct" style="display:none;"></div>
 
     <div class="action-row" style="grid-template-columns:1fr;">
-      <button class="print-btn" onclick="printTabReport('acct')">🖨️ Print Accounting</button>
+      <button class="print-btn" onclick="printTabReport('acct')"><svg class="ico"><use href="#i-print"/></svg>Print Accounting</button>
     </div>
     <div class="inv-linked-note" id="aLinkNote">🔗 Yesterday is linked automatically to the previous date.</div>
 
     <!-- Land tanks -->
     <div class="section">
       <div class="sec-title">
-        <span>⛽ Land Tanks</span>
+        <span><svg class="ico"><use href="#i-tank"/></svg>Land Tanks</span>
         <span class="inv-auto">auto-linked by date</span>
       </div>
       <div id="aLandRows"></div>
@@ -580,7 +655,7 @@ body.light-mode .gauge-fill{background:linear-gradient(180deg,var(--accent),rgba
     <!-- Marine tanks -->
     <div class="section">
       <div class="sec-title">
-        <span>🌊 Marine Tanks</span>
+        <span><svg class="ico"><use href="#i-wave"/></svg>Marine Tanks</span>
         <span class="inv-auto">auto-linked by date</span>
       </div>
       <div id="aMarineRows"></div>
@@ -602,7 +677,7 @@ body.light-mode .gauge-fill{background:linear-gradient(180deg,var(--accent),rgba
 
     <!-- Movements in / out of the terminal -->
     <div class="section">
-      <div class="sec-title">🔁 Movements (m³) — same day as the tank readings</div>
+      <div class="sec-title"><svg class="ico"><use href="#i-flow"/></svg>Movements (m³) — same day as tank readings</div>
       <div class="daily-grid" style="grid-template-columns:1fr 1fr;">
         <div class="daily-field">
           <label>Shipped (loaded out)</label>
@@ -640,7 +715,7 @@ body.light-mode .gauge-fill{background:linear-gradient(180deg,var(--accent),rgba
 
     <!-- Grand totals + reconciliation -->
     <div class="section">
-      <div class="sec-title">🧮 Production Reconciliation</div>
+      <div class="sec-title"><svg class="ico"><use href="#i-sum"/></svg>Production Reconciliation</div>
       <div class="field"><span class="f-label">Today — All Tanks</span><span class="f-val" id="aGrandToday">0<span class="u">m³</span></span></div>
       <div class="field"><span class="f-label">Yesterday — All Tanks</span><span class="f-val" id="aGrandYest">0<span class="u">m³</span></span></div>
       <div class="field"><span class="f-label">Inventory change (today − yest.)</span><span class="f-val" id="aGrandChange">0<span class="u">m³</span></span></div>
@@ -654,7 +729,7 @@ body.light-mode .gauge-fill{background:linear-gradient(180deg,var(--accent),rgba
 
     <!-- Cross-check against the Daily Production tab -->
     <div class="section">
-      <div class="sec-title">⚖️ Inventory Change vs Daily Production</div>
+      <div class="sec-title"><svg class="ico"><use href="#i-scale"/></svg>Inventory Change vs Daily Production</div>
       <div class="field"><span class="f-label">Inventory change (today − yesterday)</span><span class="f-val" id="aCmpChange">0<span class="u">m³</span></span></div>
       <div class="field"><span class="f-label">Daily Production (net, from tab 1)</span><span class="f-val" id="aCmpDaily">0<span class="u">m³</span></span></div>
       <div class="field" style="border-top:2px solid var(--accent2);"><span class="f-label"><b>Difference</b></span><span class="f-val" id="aCmpVar" style="color:var(--accent2);font-size:16px;">0<span class="u">m³</span></span></div>
@@ -670,7 +745,7 @@ body.light-mode .gauge-fill{background:linear-gradient(180deg,var(--accent),rgba
     <div class="cal-warn" id="calWarnShip" style="display:none;"></div>
 
     <div class="action-row" style="grid-template-columns:1fr;">
-      <button class="print-btn" onclick="printTabReport('ship')">🖨️ Print Shipping</button>
+      <button class="print-btn" onclick="printTabReport('ship')"><svg class="ico"><use href="#i-print"/></svg>Print Shipping</button>
     </div>
 
     <!-- Two INDEPENDENT shipment certificates. Land and Marine are separate
@@ -678,14 +753,14 @@ body.light-mode .gauge-fill{background:linear-gradient(180deg,var(--accent),rgba
          blended density and W/C — they are never summed into one figure. -->
     <div class="result-cards ship-cards">
       <div class="result-card received">
-        <div class="rc-lbl">⛽ Land — Net Oil Loaded</div>
+        <div class="rc-lbl"><svg class="ico"><use href="#i-tank"/></svg>Land — Net Oil Loaded</div>
         <div class="rc-val" id="shipTotalM3">0</div>
         <div class="rc-sub">m³ (net)</div>
         <div class="rc-bbl" id="shipTotalBbl">0 bbl</div>
         <div class="rc-bbl" id="shipTotalMT">0 MT</div>
       </div>
       <div class="result-card net">
-        <div class="rc-lbl">🌊 Marine — Net Oil Loaded</div>
+        <div class="rc-lbl"><svg class="ico"><use href="#i-wave"/></svg>Marine — Net Oil Loaded</div>
         <div class="rc-val" id="shipMarTotalM3">0</div>
         <div class="rc-sub">m³ (net)</div>
         <div class="rc-bbl" id="shipMarTotalBbl">0 bbl</div>
@@ -696,11 +771,11 @@ body.light-mode .gauge-fill{background:linear-gradient(180deg,var(--accent),rgba
     <!-- Land Shipping -->
     <div class="section">
       <div class="sec-title">
-        <span>⛽ Land — Tanks</span>
+        <span><svg class="ico"><use href="#i-tank"/></svg>Land — Tanks</span>
         <button class="ship-add-btn" onclick="addShipRow('land')">+ Add Tank</button>
       </div>
       <div class="ship-lab">
-        <div class="ship-lab-title">🔬 Land Laboratory Data</div>
+        <div class="ship-lab-title"><svg class="ico"><use href="#i-flask"/></svg>Land Laboratory Data</div>
         <div class="ship-grid">
           <div class="ship-field">
             <label>Density in Air</label>
@@ -740,11 +815,11 @@ body.light-mode .gauge-fill{background:linear-gradient(180deg,var(--accent),rgba
     <!-- Marine Shipping -->
     <div class="section">
       <div class="sec-title">
-        <span>🌊 Marine — Tanks</span>
+        <span><svg class="ico"><use href="#i-wave"/></svg>Marine — Tanks</span>
         <button class="ship-add-btn" onclick="addShipRow('marine')">+ Add Tank</button>
       </div>
       <div class="ship-lab">
-        <div class="ship-lab-title">🔬 Marine Laboratory Data</div>
+        <div class="ship-lab-title"><svg class="ico"><use href="#i-flask"/></svg>Marine Laboratory Data</div>
         <div class="ship-grid">
           <div class="ship-field">
             <label>Density in Air</label>
@@ -790,7 +865,7 @@ body.light-mode .gauge-fill{background:linear-gradient(180deg,var(--accent),rgba
 
     <div class="result-cards">
       <div class="result-card net">
-        <div class="rc-lbl">🛢️ Net Received Oil</div>
+        <div class="rc-lbl"><svg class="ico"><use href="#i-drop"/></svg>Net Received Oil</div>
         <div class="rc-val" id="zNetOil">0</div>
         <div class="rc-sub">bbls</div>
         <div class="rc-bbl" id="zNetOilNote">— avg BS&amp;W 0%</div>
@@ -799,7 +874,7 @@ body.light-mode .gauge-fill{background:linear-gradient(180deg,var(--accent),rgba
 
     <!-- Meter inputs -->
     <div class="section">
-      <div class="sec-title">📏 Zeitco Coriolis Meter</div>
+      <div class="sec-title"><svg class="ico"><use href="#i-meter"/></svg>Zeitco Coriolis Meter</div>
       <div class="daily-grid" style="grid-template-columns:1fr 1fr;">
         <div class="daily-field">
           <label>Gross Oil Rate (Scanner)</label>
@@ -817,7 +892,7 @@ body.light-mode .gauge-fill{background:linear-gradient(180deg,var(--accent),rgba
     <!-- BS&W samples -->
     <div class="section">
       <div class="sec-title">
-        <span>🧪 Daily Samples — BS&amp;W %</span>
+        <span><svg class="ico"><use href="#i-flask"/></svg>Daily Samples — BS&amp;W %</span>
         <span class="avg" id="zSampleCount">0 used</span>
       </div>
       <div class="z-samples" id="zSamples"></div>
@@ -829,7 +904,7 @@ body.light-mode .gauge-fill{background:linear-gradient(180deg,var(--accent),rgba
 
     <!-- Breakdown -->
     <div class="section">
-      <div class="sec-title">🧮 Breakdown</div>
+      <div class="sec-title"><svg class="ico"><use href="#i-sum"/></svg>Breakdown</div>
       <div class="field"><span class="f-label">Gross Oil Rate (Scanner)</span><span class="f-val" id="zfScanner">0<span class="u">bbls</span></span></div>
       <div class="field"><span class="f-label">Correction Factor</span><span class="f-val" id="zfCorr">—</span></div>
       <div class="field"><span class="f-label">Gross Oil Rate (Corrected)</span><span class="f-val" id="zfCorrected">0<span class="u">bbls</span></span></div>
@@ -839,7 +914,7 @@ body.light-mode .gauge-fill{background:linear-gradient(180deg,var(--accent),rgba
     </div>
 
     <div class="action-row" style="grid-template-columns:1fr;">
-      <button class="print-btn" onclick="printTabReport('zeit')">🖨️ Print Zeitco</button>
+      <button class="print-btn" onclick="printTabReport('zeit')"><svg class="ico"><use href="#i-print"/></svg>Print Zeitco</button>
     </div>
 
     <button class="print-btn" style="border-color:var(--green);color:var(--green);" onclick="pushZeitcoToProduction()">➡️ Use Net Oil as Zeitco in Production</button>
@@ -859,7 +934,7 @@ body.light-mode .gauge-fill{background:linear-gradient(180deg,var(--accent),rgba
 <div class="sheet-overlay" id="drainOverlay">
   <div class="sheet-modal">
     <div class="sheet-hdr">
-      <h2>🛢️ Tank Drain Calculation</h2>
+      <h2><svg class="ico"><use href="#i-valve"/></svg>Tank Drain Calculation</h2>
       <button class="sheet-close" onclick="closeDrainModal()">✕</button>
     </div>
     <div class="sheet-body">
@@ -1330,9 +1405,15 @@ function retryCalLoad(){
 function astm54aVCF(density_kgm3, temp_c){
   if(!density_kgm3 || !temp_c && temp_c !== 0) return null;
   var K = 613.9723;
-  // Round density to nearest even
+  // Round density to the ASTM 54A entry step (even kg/m³).
+  // The boundary is INCLUSIVE: when the density sits exactly 1 below the next
+  // even value (e.g. 885.0 → 886), it rounds UP. Using a strict "< 1" here
+  // rounded 885 down to 884 and produced VCFs one digit low in the 4th
+  // decimal — that was the TK-6 / TK-8 mismatch against report 9548.
+  // Verified: this rule reproduces 22 of 23 known VCFs across every shipment
+  // report and accounting sheet on file; the strict version got 19.
   var even = Math.ceil(density_kgm3 / 2) * 2;
-  var dR = (even - density_kgm3) < 1 ? even : even - 2;
+  var dR = (even - density_kgm3) <= 1 ? even : even - 2;
   // Round temp to nearest 0.25
   var fl = Math.floor(temp_c);
   var frac = temp_c - fl;
@@ -1377,7 +1458,7 @@ function addShipRow(stream){
   var html =
     '<div class="ship-row" id="' + id + '">' +
       '<div class="ship-row-hdr">' +
-        '<span class="ship-row-title">' + (stream === 'land' ? '⛽' : '🌊') + ' Tank Loading</span>' +
+        '<span class="ship-row-title"><svg class="ico"><use href="#i-' + (stream === 'land' ? 'tank' : 'wave') + '"/></svg>Tank Loading</span>' +
         '<button class="ship-row-del" onclick="removeShipRow(\'' + id + '\')" title="Remove">✕</button>' +
       '</div>' +
       '<div class="ship-grid" style="grid-template-columns:1fr 1fr;">' +
@@ -2453,19 +2534,19 @@ function buildReportBodyHtml(){
     '</div>' +
     '<div class="pr-meta">Date: <b>' + escHtml(dateStr) + '</b> &nbsp;|&nbsp; Printed: ' + escHtml(printedAt) + ' &nbsp;|&nbsp; By: ' + escHtml(byUser) + '</div>' +
 
-    '<table class="pr-table"><caption>📥 Received at Feiran (Gross — with Zeitco / Shedwan / Condensate)</caption>' +
+    '<table class="pr-table"><caption><svg class="ico"><use href="#i-flow"/></svg>Received at Feiran (Gross — with Zeitco / Shedwan / Condensate)</caption>' +
       '<tr><th>Total Land</th><td>' + fmtNum(r.landRaw_m3,1) + ' m³/d</td><td>' + fmtNum(r.landRaw_bbl,0) + ' bbl/d</td></tr>' +
       '<tr><th>Total Marine</th><td>' + fmtNum(r.marineRaw_m3,1) + ' m³/d</td><td>' + fmtNum(r.marineRaw_bbl,0) + ' bbl/d</td></tr>' +
       '<tr class="pr-total"><th>Total Received at Feiran</th><td>' + fmtNum(r.receivedFeiran_m3,1) + ' m³/d</td><td>' + fmtNum(r.receivedFeiran_bbl,0) + ' bbl/d</td></tr>' +
     '</table>' +
 
-    '<table class="pr-table"><caption>⛽ Total Production per Day (Net — without Zeitco / Shedwan / Condensate)</caption>' +
+    '<table class="pr-table"><caption><svg class="ico"><use href="#i-derrick"/></svg>Total Production per Day (Net — without Zeitco / Shedwan / Condensate)</caption>' +
       '<tr><th>Net Land</th><td>' + fmtNum(r.netLand_m3,1) + ' m³/d</td><td>' + fmtNum(r.netLand_bbl,0) + ' bbl/d</td></tr>' +
       '<tr><th>Net Marine</th><td>' + fmtNum(r.netMarine_m3,1) + ' m³/d</td><td>' + fmtNum(r.netMarine_bbl,0) + ' bbl/d</td></tr>' +
       '<tr class="pr-total"><th>Total Production per Day</th><td>' + fmtNum(r.totalNet_m3,1) + ' m³/d</td><td>' + fmtNum(r.totalNet_bbl,0) + ' bbl/d</td></tr>' +
     '</table>' +
 
-    '<table class="pr-table"><caption>📊 Land &amp; Marine — Daily</caption>' +
+    '<table class="pr-table"><caption>Land &amp; Marine — Daily</caption>' +
       '<tr><th>Avg Land (hourly)</th><td colspan="2">' + fmtNum(r.avgPetreco,2) + ' m³/hr</td></tr>' +
       '<tr><th>Avg Marine (hourly)</th><td colspan="2">' + fmtNum(r.avgMarine,2) + ' m³/hr</td></tr>' +
       '<tr><th>Total Land</th><td colspan="2">' + fmtNum(r.landRaw_m3,1) + ' m³/d</td></tr>' +
@@ -2474,7 +2555,7 @@ function buildReportBodyHtml(){
       '<tr><th>Net Marine (− Shedwan &amp; Cond. − Drain)</th><td colspan="2">' + fmtNum(r.netMarine_m3,1) + ' m³/d</td></tr>' +
     '</table>' +
 
-    '<table class="pr-table"><caption>🧮 Full Breakdown</caption>' +
+    '<table class="pr-table"><caption>Full Breakdown</caption>' +
       '<tr><th>Zeitco field</th><td colspan="2">' + fmtNum(r.zeitco_bbl,1) + ' bbl/d</td></tr>' +
       '<tr><th>Shedwan + Condensate</th><td colspan="2">' + fmtNum(r.shedCond_bbl,1) + ' bbl/d</td></tr>' +
       '<tr><th>Drain — Land</th><td colspan="2">' + fmtNum(r.drain.landDrain_bbl,0) + ' bbl/d</td></tr>' +
