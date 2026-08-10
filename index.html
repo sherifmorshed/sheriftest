@@ -944,28 +944,16 @@ function tankByKey(k){ for(var i=0;i<TANKS.length;i++){ if(TANKS[i].key===k) ret
 const INV_DENS_LAND = 0.9298;
 const INV_DENS_MARINE = 0.8822;
 
-// Per-tank FIXED volume deduction applied to absolute tank stock only.
+// Per-tank FIXED volume deduction for absolute tank stock.
 //
-// Derived from your accounting sheets: the difference between the raw
-// calibration table and the sheet's own CAL. SCALE is an exact constant per
-// tank — zero variation across completely different levels (verified at
-// 3.000/12.160 m for TK-1, 6.740/8.680 for TK-6, 3.000/8.000 for TK-8,
-// 7.700/14.950 for TK-9). A constant, level-independent offset is a fixed
-// volume deduction (dead stock / floating-roof displacement), not a
-// different calibration table.
-//
-// Note TK-8 and TK-9 share both the same deduction (596.200) and the same
-// tank size (44.35 m³/cm) — consistent with identical roof/bottom geometry.
-//
-// Applied to INVENTORY only, never to SHIPPING: shipping measures a
-// difference (start − end) where any constant cancels out, and your own
-// TK-8 @6.390 = 28,896 check confirmed shipping uses the raw table.
-const TANK_INV_DEDUCTION = {
-  'TK-1':  251.062,
-  'TK-6':  143.816,
-  'TK-8':  596.200,
-  'TK-9':  596.200
-};
+// Currently all zero: confirmed that the working Excel uses the RAW
+// calibration table value for a given level, with no fixed deduction.
+// (An earlier version subtracted constants derived from one accounting
+// sheet; that sheet evidently applies a correction this app should not.)
+// If a real dead-stock / roof-displacement figure is ever confirmed per
+// tank, put it here — it applies to INVENTORY only, never to SHIPPING,
+// where a constant cancels out in the start-minus-end difference.
+const TANK_INV_DEDUCTION = {};
 function invDeduction(tankKey){ return TANK_INV_DEDUCTION[tankKey] || 0; }
 function tankIdSafe(key){ return key.replace(/[^A-Za-z0-9_-]/g, '_'); }
 
