@@ -502,7 +502,7 @@ body.light-mode .daily-field input:focus,body.light-mode .z-sample input:focus{b
   </div>
 
   <!-- ══════════════ TAB NAVIGATION ══════════════ -->
-  <div class="tab-bar">
+  <div class="tab-bar" id="mainTabBar" data-tabs="3">
     <button class="tab-btn active" id="tabProd" onclick="showTab('prod')"><svg class="ico tab-ico"><use href="#i-derrick"/></svg><span>Daily Production</span></button>
     <button class="tab-btn" id="tabAcct" onclick="showTab('acct')"><svg class="ico tab-ico"><use href="#i-farm"/></svg><span>Accounting Prod.</span></button>
     <button class="tab-btn" id="tabShip" onclick="showTab('ship')"><svg class="ico tab-ico"><use href="#i-ship"/></svg><span>Shipping</span></button>
@@ -1308,6 +1308,7 @@ function closeDrainModal(){ document.getElementById('drainOverlay').classList.re
 //  TAB SWITCHING (Production | Shipping)
 // ══════════════════════════════════════════
 function showTab(tab){
+  if(tab === 'acct' && !USER_PERMS.accounting) tab = 'prod';
   var tabs = ['prod','acct','ship','zeit'];
   tabs.forEach(function(t){
     var btn = document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1));
@@ -2993,6 +2994,51 @@ function hideLoadingScreen() {
   loader.style.opacity = '0';
   setTimeout(function() { loader.style.display = 'none'; }, 550);
 }
+// ══════════════════════════════════════════
+//  PER-USER TAB PERMISSIONS
+//  Driven by the signed-in user's own users/{uid} document, so access can be
+//  changed in Firestore without redeploying the app.
+//  FAIL CLOSED: the tab stays hidden until permission is positively confirmed.
+//
+//  NOTE: hiding a tab is presentation only — anyone can inspect the page.
+//  The real protection is the Firestore rule on accountingInventory, which
+//  must also restrict that collection. See ACCOUNTING_PROD_REFERENCE.md.
+// ══════════════════════════════════════════
+var USER_PERMS = { accounting: false, loaded: false };
+
+function applyTabPermissions(){
+  var btn = document.getElementById('tabAcct');
+  var pane = document.getElementById('tabContentAcct');
+  if(!btn || !pane) return;
+  var allowed = !!USER_PERMS.accounting;
+  btn.style.display = allowed ? '' : 'none';
+  if(!allowed){
+    pane.style.display = 'none';
+    // If the hidden tab was somehow active, fall back to Daily Production.
+    if(btn.classList.contains('active')) showTab('prod');
+  }
+  // Re-balance the tab bar for the number of visible tabs
+  var bar = document.getElementById('mainTabBar');
+  if(bar) bar.setAttribute('data-tabs', allowed ? '4' : '3');
+}
+
+function loadUserPermissions(uid){
+  USER_PERMS = { accounting: false, loaded: false };
+  applyTabPermissions();
+  if(!uid) return Promise.resolve();
+  return db.collection('users').doc(uid).get().then(function(doc){
+    var d = doc.exists ? (doc.data() || {}) : {};
+    // Explicit opt-in flag. Absent or false ⇒ no access.
+    USER_PERMS.accounting = d.accountingAccess === true;
+    USER_PERMS.loaded = true;
+    applyTabPermissions();
+  }).catch(function(err){
+    console.warn('[Perms] could not read user document', err);
+    USER_PERMS.loaded = true;
+    applyTabPermissions();   // stays closed on error
+  });
+}
+
 function showApp(user){
   currentUser = { email: user.email, uid: user.uid };
   document.getElementById('login-page').classList.add('hidden');
@@ -3003,6 +3049,8 @@ function showApp(user){
   currentDate = today();
   document.getElementById('prodDate').value = currentDate;
   updateDateDisplay();
+  loadUserPermissions(user.uid);
+
   startExtrasListener();
   startListener(currentDate);
   startShipListener(currentDate);
@@ -3020,6 +3068,8 @@ function showLogin(){
   stopShipListener();
   stopZeitListener();
   stopInvListener();
+  USER_PERMS = { accounting: false, loaded: false };
+  applyTabPermissions();
   document.getElementById('login-page').classList.remove('hidden');
   document.getElementById('userBar').classList.add('hidden');
   document.getElementById('appPage').style.display = 'none';
