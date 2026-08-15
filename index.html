@@ -267,6 +267,8 @@ table.sheet-table input:focus{border-color:var(--accent);}
 .ship-hint{color:var(--accent);}
 .inv-auto{font-size:9.5px;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:.3px;}
 .inv-col.yest.linked{border-left-color:var(--accent);}
+.inv-col.yest.manual{border-left-color:var(--accent2);}
+.inv-col.yest.manual .inv-col-lbl::after{content:' · manual';color:var(--accent2);}
 .inv-col.yest.linked .inv-col-lbl::after{content:' · from ' attr(data-prev);color:var(--accent);}
 .cal-warn{font-size:11.5px;color:var(--red);background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.35);border-radius:8px;padding:9px 12px;margin-bottom:12px;line-height:1.5;}
 .inv-linked-note{font-size:10.5px;color:var(--accent);background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.25);border-radius:8px;padding:7px 10px;margin:0 14px 10px;font-family:'JetBrains Mono',monospace;}
@@ -345,6 +347,7 @@ table.hr-tbl input,.ship-field input,.daily-field input,.z-sample input,
 .qty-block{padding:10px 12px;border-bottom:1px solid rgba(128,128,128,.12);}
 .qty-block:last-child{border-bottom:none;}
 .qty-lbl{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
+.qty-lbl .ico{width:13px;height:13px;flex-basis:13px;margin-right:5px;vertical-align:-2px;opacity:.8;}
 .qty-lbl .cnt{font-style:normal;letter-spacing:0;text-transform:none;opacity:.75;margin-left:5px;}
 .qty-vals{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
 .qty-vals.one{grid-template-columns:1fr;}
@@ -374,6 +377,7 @@ body.light-mode .gauge-fill{background:linear-gradient(180deg,var(--accent),rgba
 /* ══ ICON SYSTEM ══ */
 .ico{width:15px;height:15px;flex:0 0 15px;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;fill:none;vertical-align:-2.5px;margin-right:7px;}
 .sec-title .ico{opacity:.85;}
+.rc-sub-note{font-style:normal;opacity:.65;letter-spacing:.4px;margin-left:6px;text-transform:none;}
 .rc-lbl .ico{width:14px;height:14px;flex-basis:14px;margin-right:6px;vertical-align:-2px;}
 .print-btn .ico{margin-right:6px;vertical-align:-3px;}
 .tab-ico{width:19px;height:19px;flex-basis:19px;margin:0 0 3px;display:block;stroke-width:1.5;}
@@ -424,6 +428,35 @@ body.light-mode .daily-field input:focus,body.light-mode .z-sample input:focus{b
 
 /* ══ SHEETS & ROWS ══ */
 .qty-sheet{border-radius:12px;}
+.xfer-mode{display:flex;align-items:center;gap:6px;padding:10px 14px 0;flex-wrap:wrap;}
+.xfer-mode-lbl{font-size:9px;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-right:2px;}
+.xfer-mode-btn{background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--muted);font-size:10.5px;font-family:'JetBrains Mono',monospace;padding:5px 10px;cursor:pointer;transition:all .15s;}
+.xfer-mode-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(34,211,238,.08);}
+body.light-mode .xfer-mode-btn.active{background:rgba(7,94,84,.08);}
+.xfer-note{font-size:11px;line-height:1.65;color:var(--muted);padding:10px 14px 12px;border-bottom:1px solid var(--border);}
+.xfer-note b{color:var(--text);}
+.xfer-row{border-bottom:1px solid var(--border);padding:12px 14px;}
+.xfer-row:last-child{border-bottom:none;}
+.xfer-pair{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
+.xfer-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 10px;}
+.xfer-box.from{border-left:3px solid var(--accent2);}
+.xfer-box.to{border-left:3px solid var(--green);}
+.xfer-lbl{font-size:8.5px;font-weight:700;letter-spacing:1px;font-family:'JetBrains Mono',monospace;margin-bottom:6px;}
+.xfer-box.from .xfer-lbl{color:var(--accent2);}
+.xfer-box.to .xfer-lbl{color:var(--green);}
+.xfer-out{margin-top:7px;padding-top:6px;border-top:1px solid rgba(128,128,128,.15);font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);text-align:center;}
+.xfer-out b{display:block;font-size:13px;color:var(--text);font-variant-numeric:tabular-nums;}
+.xfer-verdict{margin-top:8px;font-size:10.5px;font-family:'JetBrains Mono',monospace;line-height:1.5;padding:0 2px;}
+.xfer-verdict.ok{color:var(--green);}
+.xfer-verdict.warn{color:var(--yellow);}
+.cmp-split{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 12px 12px;}
+.cmp-split .qty-sheet{margin:0;}
+.cmp-hd{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.9px;text-transform:uppercase;
+  color:var(--muted);padding:0 2px 6px;line-height:1.35;min-height:26px;}
+.cmp-split .qty-vals{grid-template-columns:1fr;gap:3px;}
+.cmp-split .qty-vals b{font-size:13.5px;}
+.cmp-split .qty-block{padding:9px 10px;}
+.cmp-split .qty-block.net .qty-vals b{font-size:14.5px;}
 .ship-gauge-box{border-radius:10px;}
 .inv-col{border-radius:10px;}
 .qty-block.net{box-shadow:inset 0 1px 0 rgba(255,255,255,.05);}
@@ -601,16 +634,99 @@ body.light-mode .daily-field input:focus,body.light-mode .z-sample input:focus{b
 
     <div class="result-cards">
       <div class="result-card net">
-        <div class="rc-lbl"><svg class="ico"><use href="#i-farm"/></svg>Today in Fieran</div>
-        <div class="rc-val" id="aInvChange">0</div>
-        <div class="rc-sub">m³ in terminal</div>
-        <div class="rc-bbl" id="aInvChangeBbl">0 bbl</div>
-      </div>
-      <div class="result-card received">
-        <div class="rc-lbl"><svg class="ico"><use href="#i-derrick"/></svg>Production (from tank measurements)</div>
+        <div class="rc-lbl"><svg class="ico"><use href="#i-derrick"/></svg>Production from Tanks <i class="rc-sub-note">today − yesterday</i></div>
         <div class="rc-val" id="aVariance">—</div>
         <div class="rc-sub">m³</div>
         <div class="rc-bbl" id="aVarianceNote">enter tank levels</div>
+      </div>
+    </div>
+
+    <!-- Comparison, straight under the headline -->
+    <div class="section">
+      <div class="sec-title"><svg class="ico"><use href="#i-scale"/></svg>vs Daily Production</div>
+      <div class="qty-sheet">
+        <div class="qty-block">
+          <div class="qty-lbl">Production from Tanks <i class="cnt">today − yesterday</i></div>
+          <div class="qty-vals"><div><b id="aCmpChangeV">0</b><i>m³</i></div><div><b id="aCmpChangeB">0</b><i>bbl</i></div></div>
+        </div>
+      </div>
+
+      <div class="cmp-split">
+        <div class="cmp-col">
+          <div class="cmp-hd">A · WITH Zeitco / Shedwan / Condensate</div>
+          <div class="qty-sheet">
+            <div class="qty-block">
+              <div class="qty-lbl">Daily Production <i class="cnt">gross received</i></div>
+              <div class="qty-vals"><div><b id="aCmpGrossV">0</b><i>m³</i></div><div><b id="aCmpGrossB">0</b><i>bbl</i></div></div>
+            </div>
+            <div class="qty-block net">
+              <div class="qty-lbl">Difference vs tanks</div>
+              <div class="qty-vals"><div><b id="aCmpGrossVarV">0</b><i>m³</i></div><div><b id="aCmpGrossVarB">0</b><i>bbl</i></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="cmp-col">
+          <div class="cmp-hd">B · WITHOUT Zeitco / Shedwan / Condensate</div>
+          <div class="qty-sheet">
+            <div class="qty-block">
+              <div class="qty-lbl">Daily Production <i class="cnt">net own production</i></div>
+              <div class="qty-vals"><div><b id="aCmpDailyV">0</b><i>m³</i></div><div><b id="aCmpDailyB">0</b><i>bbl</i></div></div>
+            </div>
+            <div class="qty-block net">
+              <div class="qty-lbl">Difference vs tanks</div>
+              <div class="qty-vals"><div><b id="aCmpVarV">0</b><i>m³</i></div><div><b id="aCmpVarB">0</b><i>bbl</i></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tank-to-tank transfer reconciliation (API MPMS 12.1 volume balance) -->
+    <div class="section">
+      <div class="sec-title">
+        <svg class="ico"><use href="#i-valve"/></svg>Tank&nbsp;→&nbsp;Tank Transfer
+        <button class="ship-add-btn" onclick="addTransferRow()">+ Add Transfer</button>
+      </div>
+      <div class="xfer-mode">
+        <span class="xfer-mode-lbl">Basis</span>
+        <button class="xfer-mode-btn active" data-mode="obs" onclick="setXferMode('obs')">Observed</button>
+        <button class="xfer-mode-btn" data-mode="gsv" onclick="setXferMode('gsv')">GSV @15°C</button>
+        <button class="xfer-mode-btn" data-mode="mass" onclick="setXferMode('mass')">Mass</button>
+      </div>
+      <div class="xfer-note" id="xferModeNote"></div>
+      <div id="xferRows"></div>
+      <div class="qty-sheet" id="xferTotals" style="display:none;">
+        <div class="qty-block">
+          <div class="qty-lbl">Total Delivered</div>
+          <div class="qty-vals"><div><b id="xTotOutV">0</b><i id="xTotOutU">m³</i></div><div><b id="xTotOutT">0</b><i>MT</i></div></div>
+        </div>
+        <div class="qty-block">
+          <div class="qty-lbl">Total Received</div>
+          <div class="qty-vals"><div><b id="xTotInV">0</b><i id="xTotInU">m³</i></div><div><b id="xTotInT">0</b><i>MT</i></div></div>
+        </div>
+        <div class="qty-block net">
+          <div class="qty-lbl">Net Transfer Difference</div>
+          <div class="qty-vals"><div><b id="xTotDiffV">0</b><i id="xTotDiffU">m³</i></div><div><b id="xTotDiffP">0</b><i>%</i></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Today's production split by stream -->
+    <div class="section">
+      <div class="sec-title"><svg class="ico"><use href="#i-flow"/></svg>Today&rsquo;s Production by Stream</div>
+      <div class="qty-sheet">
+        <div class="qty-block">
+          <div class="qty-lbl"><svg class="ico"><use href="#i-tank"/></svg>Land <i class="cnt">today &minus; yesterday</i></div>
+          <div class="qty-vals"><div><b id="aStreamLandV">0</b><i>m³</i></div><div><b id="aStreamLandB">0</b><i>bbl</i></div></div>
+        </div>
+        <div class="qty-block">
+          <div class="qty-lbl"><svg class="ico"><use href="#i-wave"/></svg>Marine <i class="cnt">today &minus; yesterday</i></div>
+          <div class="qty-vals"><div><b id="aStreamMarineV">0</b><i>m³</i></div><div><b id="aStreamMarineB">0</b><i>bbl</i></div></div>
+        </div>
+        <div class="qty-block net">
+          <div class="qty-lbl">Total</div>
+          <div class="qty-vals"><div><b id="aStreamTotalV">0</b><i>m³</i></div><div><b id="aStreamTotalB">0</b><i>bbl</i></div></div>
+        </div>
       </div>
     </div>
 
@@ -727,12 +843,20 @@ body.light-mode .daily-field input:focus,body.light-mode .z-sample input:focus{b
       <div class="field"><span class="f-label">Production in barrels</span><span class="f-val" id="aProdBbl">0<span class="u">bbl</span></span></div>
     </div>
 
-    <!-- Cross-check against the Daily Production tab -->
+
+    <!-- Terminal stock — reference, not the headline -->
     <div class="section">
-      <div class="sec-title"><svg class="ico"><use href="#i-scale"/></svg>Inventory Change vs Daily Production</div>
-      <div class="field"><span class="f-label">Inventory change (today − yesterday)</span><span class="f-val" id="aCmpChange">0<span class="u">m³</span></span></div>
-      <div class="field"><span class="f-label">Daily Production (net, from tab 1)</span><span class="f-val" id="aCmpDaily">0<span class="u">m³</span></span></div>
-      <div class="field" style="border-top:2px solid var(--accent2);"><span class="f-label"><b>Difference</b></span><span class="f-val" id="aCmpVar" style="color:var(--accent2);font-size:16px;">0<span class="u">m³</span></span></div>
+      <div class="sec-title"><svg class="ico"><use href="#i-farm"/></svg>Terminal Inventory</div>
+      <div class="qty-sheet">
+        <div class="qty-block">
+          <div class="qty-lbl">Yesterday — all tanks</div>
+          <div class="qty-vals"><div><b id="aGrandYestV">0</b><i>m³</i></div><div><b id="aGrandYestB">0</b><i>bbl</i></div></div>
+        </div>
+        <div class="qty-block net">
+          <div class="qty-lbl">Today in Fieran — all tanks</div>
+          <div class="qty-vals"><div><b id="aGrandTodayV">0</b><i>m³</i></div><div><b id="aGrandTodayB">0</b><i>bbl</i></div></div>
+        </div>
+      </div>
     </div>
 
   </div>
@@ -2032,8 +2156,8 @@ function buildInventoryRows(){
           '<div class="inv-col yest">' +
             '<div class="inv-col-lbl">YESTERDAY</div>' +
             '<div class="ship-grid-2">' +
-              '<div class="ship-field"><label>Level m</label><input type="text" inputmode="decimal" lang="en" id="invY_g_' + id + '" placeholder="0.000" oninput="sanitizeNumInput(this); computeInventory()"></div>' +
-              '<div class="ship-field"><label>Temp °C</label><input type="text" inputmode="decimal" lang="en" id="invY_t_' + id + '" placeholder="0" oninput="sanitizeNumInput(this); computeInventory()"></div>' +
+              '<div class="ship-field"><label>Level m</label><input type="text" inputmode="decimal" lang="en" id="invY_g_' + id + '" placeholder="0.000" oninput="sanitizeNumInput(this); onYesterdayEdit(this)"></div>' +
+              '<div class="ship-field"><label>Temp °C</label><input type="text" inputmode="decimal" lang="en" id="invY_t_' + id + '" placeholder="0" oninput="sanitizeNumInput(this); onYesterdayEdit(this)"></div>' +
             '</div>' +
             '<div class="inv-out"><span id="invY_v_' + id + '">—</span> m³ <span class="vcf" id="invY_f_' + id + '"></span></div>' +
           '</div>' +
@@ -2072,6 +2196,272 @@ function invTankVolume(tankKey, levelM, tempC, densGcm3){
   if(isNaN(tempC) || tempC === null) return { raw: raw, vol: vol, vcf: null, corrected: null };
   var vcf = astm54aVCF(densGcm3 * 1000, tempC);
   return { raw: raw, vol: vol, vcf: vcf, corrected: vol * vcf };
+}
+
+// A hand-typed yesterday reading is authoritative for this date. Flag the
+// column as manual so the previous-day seed leaves it alone, and save
+// promptly so an in-flight snapshot can't echo back a doc that predates it.
+function onYesterdayEdit(el){
+  var col = el.closest ? el.closest('.inv-col') : null;
+  if(col){ col.classList.add('manual'); col.classList.remove('linked'); }
+  computeInventory();
+  if(_invSaveTimer) clearTimeout(_invSaveTimer);
+  _invSaveTimer = setTimeout(saveInventoryToFirestore, 150);
+}
+
+// ══════════════════════════════════════════
+//  TANK → TANK TRANSFER RECONCILIATION
+//
+//  Method: Gross Standard Volume (GSV) balance, per API MPMS Ch.12.1.
+//
+//    GSV = Observed volume (from strapping table) × VCF(density, temp)
+//
+//    Delivered = GSV_before(source) − GSV_after(source)
+//    Received  = GSV_after(dest)   − GSV_before(dest)
+//    Difference = Received − Delivered      (negative ⇒ apparent loss)
+//    Loss %     = |Difference| / Delivered × 100
+//
+//  Why GSV and not the raw gauged volume: the source tank is normally
+//  hotter than the destination, so the same oil occupies a different volume
+//  at each end. Correcting both to 15 °C is what makes them comparable —
+//  comparing raw observed volumes would show a "loss" that is purely
+//  thermal contraction.
+//
+//  Mass cross-check: mass is conserved, volume is not. Mass = GSV × density
+//  in air. If the volume balance looks wrong but the mass balance is clean,
+//  the discrepancy is a temperature/density artefact rather than a real loss.
+//
+//  Floating-roof adjustment (FRA, optional): a floating roof displaces a
+//  volume equal to its own weight ÷ liquid density. Enter the roof weight
+//  in tonnes and it is deducted from that tank's gauged volume. Leave blank
+//  for fixed-roof tanks, or when the roof is grounded on its legs.
+//
+//  Line fill: this balance assumes the transfer line was full before AND
+//  after (the same condition your shipment reports certify). If it wasn't,
+//  the line contents show up here as an apparent loss or gain.
+// ══════════════════════════════════════════
+var _xferRowId = 0;
+var XFER_TOLERANCE_PCT = 0.25;   // typical acceptable tank-to-tank variance
+
+// Basis for comparing the two ends of a transfer:
+//   obs  — raw gauged volumes, no temperature correction at all (no 15 °C
+//          reference). Simplest, and what a dip-tape reading gives directly.
+//          Note a hot source into a cool destination will show a shortfall
+//          that is thermal contraction, not lost oil.
+//   gsv  — both ends corrected to 15 °C via ASTM 54A. Removes the thermal
+//          effect so only real discrepancy remains.
+//   mass — tonnes at each end (volume × density at that tank's own
+//          temperature). Mass is conserved regardless of temperature and
+//          needs no standard-temperature reference at all.
+var XFER_MODE = 'obs';
+var XFER_MODE_NOTE = {
+  obs:  'Raw gauged volumes, <b>no temperature correction</b>. A hot source into a cooler ' +
+        'destination will show a shortfall — that part is thermal contraction, not lost oil.',
+  gsv:  'Both ends corrected to <b>15&nbsp;°C</b> (ASTM 54A). Removes the thermal effect so any ' +
+        'remaining gap is a genuine discrepancy.',
+  mass: 'Compared in <b>tonnes</b> at each tank\u2019s own temperature. Mass is conserved whatever ' +
+        'the temperature, so no 15&nbsp;°C reference is needed. Any gap here is real.'
+};
+function setXferMode(m){
+  XFER_MODE = m;
+  document.querySelectorAll('.xfer-mode-btn').forEach(function(b){
+    b.classList.toggle('active', b.getAttribute('data-mode') === m);
+  });
+  var n = document.getElementById('xferModeNote');
+  if(n) n.innerHTML = XFER_MODE_NOTE[m] +
+    ' &nbsp;A transfer inside the terminal <b>nets to zero</b> in total stock, so it never changes ' +
+    'your production figure — this is a leak and measurement check.';
+  computeTransfers();
+}
+
+function addTransferRow(saved){
+  _xferRowId++;
+  var id = 'xfer' + _xferRowId;
+  var opts = TANKS.filter(function(t){ return !t.noCal; }).map(function(t){
+    return '<option value="' + escHtml(t.key) + '">' + escHtml(t.key) + '</option>';
+  }).join('');
+
+  var html =
+    '<div class="xfer-row" id="' + id + '">' +
+      '<div class="ship-row-hdr">' +
+        '<span class="ship-row-title"><svg class="ico"><use href="#i-flow"/></svg>Transfer</span>' +
+        '<button class="ship-row-del" onclick="removeTransferRow(\'' + id + '\')" title="Remove">✕</button>' +
+      '</div>' +
+      '<div class="ship-grid-2">' +
+        '<div class="ship-field"><label>Density @15°C <span class="req">*</span></label>' +
+          '<input type="text" inputmode="decimal" lang="en" data-role="dens" placeholder="0.9298" oninput="sanitizeNumInput(this); computeTransfers()"></div>' +
+        '<div class="ship-field"><label>Roof wt (t, optional)</label>' +
+          '<input type="text" inputmode="decimal" lang="en" data-role="roof" placeholder="fixed roof" oninput="sanitizeNumInput(this); computeTransfers()"></div>' +
+      '</div>' +
+      '<div class="xfer-pair">' +
+        '<div class="xfer-box from">' +
+          '<div class="xfer-lbl">▶ FROM (source)</div>' +
+          '<div class="ship-field"><label>Tank</label><select data-role="fromTank" onchange="computeTransfers()">' + opts + '</select></div>' +
+          '<div class="ship-grid-2" style="margin-top:6px;">' +
+            '<div class="ship-field"><label>Before m</label><input type="text" inputmode="decimal" lang="en" data-role="fromB" placeholder="0.000" oninput="sanitizeNumInput(this); computeTransfers()"></div>' +
+            '<div class="ship-field"><label>Temp °C</label><input type="text" inputmode="decimal" lang="en" data-role="fromBT" placeholder="0" oninput="sanitizeNumInput(this); computeTransfers()"></div>' +
+          '</div>' +
+          '<div class="ship-grid-2" style="margin-top:5px;">' +
+            '<div class="ship-field"><label>After m</label><input type="text" inputmode="decimal" lang="en" data-role="fromA" placeholder="0.000" oninput="sanitizeNumInput(this); computeTransfers()"></div>' +
+            '<div class="ship-field"><label>Temp °C</label><input type="text" inputmode="decimal" lang="en" data-role="fromAT" placeholder="0" oninput="sanitizeNumInput(this); computeTransfers()"></div>' +
+          '</div>' +
+          '<div class="xfer-out">Delivered <b data-role="outV">—</b> m³</div>' +
+        '</div>' +
+        '<div class="xfer-box to">' +
+          '<div class="xfer-lbl">◀ TO (destination)</div>' +
+          '<div class="ship-field"><label>Tank</label><select data-role="toTank" onchange="computeTransfers()">' + opts + '</select></div>' +
+          '<div class="ship-grid-2" style="margin-top:6px;">' +
+            '<div class="ship-field"><label>Before m</label><input type="text" inputmode="decimal" lang="en" data-role="toB" placeholder="0.000" oninput="sanitizeNumInput(this); computeTransfers()"></div>' +
+            '<div class="ship-field"><label>Temp °C</label><input type="text" inputmode="decimal" lang="en" data-role="toBT" placeholder="0" oninput="sanitizeNumInput(this); computeTransfers()"></div>' +
+          '</div>' +
+          '<div class="ship-grid-2" style="margin-top:5px;">' +
+            '<div class="ship-field"><label>After m</label><input type="text" inputmode="decimal" lang="en" data-role="toA" placeholder="0.000" oninput="sanitizeNumInput(this); computeTransfers()"></div>' +
+            '<div class="ship-field"><label>Temp °C</label><input type="text" inputmode="decimal" lang="en" data-role="toAT" placeholder="0" oninput="sanitizeNumInput(this); computeTransfers()"></div>' +
+          '</div>' +
+          '<div class="xfer-out">Received <b data-role="inV">—</b> m³</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="ship-results">' +
+        '<div class="ship-field"><label>Difference</label><div class="val" data-role="diffV">—</div></div>' +
+        '<div class="ship-field"><label>Variance %</label><div class="val" data-role="diffP">—</div></div>' +
+        '<div class="ship-field"><label>Mass MT</label><div class="val" data-role="massD">—</div></div>' +
+      '</div>' +
+      '<div class="xfer-verdict" data-role="verdict"></div>' +
+    '</div>';
+
+  document.getElementById('xferRows').insertAdjacentHTML('beforeend', html);
+
+  if(saved){
+    var row = document.getElementById(id);
+    ['dens','roof','fromTank','fromB','fromBT','fromA','fromAT','toTank','toB','toBT','toA','toAT'].forEach(function(k){
+      var el = row.querySelector('[data-role=' + k + ']');
+      if(el && saved[k]) el.value = saved[k];
+    });
+  }
+  computeTransfers();
+}
+
+function removeTransferRow(id){
+  var el = document.getElementById(id);
+  if(el) el.remove();
+  computeTransfers();
+}
+
+// Quantity at one gauging, on whichever basis is selected.
+//   obs  → raw strapping volume (no VCF at all)
+//   gsv  → volume × VCF, i.e. corrected to 15 °C
+//   mass → volume × density at that tank's own temperature
+//          (density_at_T = density15 × VCF, so no 15 °C figure is reported —
+//           the reference cancels and the result is in tonnes)
+function _xferGSV(tankKey, levelM, tempC, densGcm3, roofTonnes){
+  if(isNaN(levelM) || isNaN(densGcm3) || !TANK_CAL) return null;
+  if(XFER_MODE !== 'obs' && isNaN(tempC)) return null;
+  var tankNum = parseInt(String(tankKey).replace(/[^0-9]/g, ''), 10);
+  var vol = calLookup(tankNum, Math.round(levelM * 1000));
+  if(vol === null) return null;
+  // Floating-roof displacement: volume = roof mass ÷ liquid density
+  if(!isNaN(roofTonnes) && roofTonnes > 0) vol -= (roofTonnes / densGcm3);
+  if(XFER_MODE === 'obs') return vol;
+  var vcf = astm54aVCF(densGcm3 * 1000, tempC);
+  if(XFER_MODE === 'gsv') return vol * vcf;
+  // mass: density at observed temperature = density@15 × VCF
+  var densAtT = (densGcm3 - 0.0011) * vcf;     // in-air density at that temp
+  return vol * densAtT;
+}
+
+function computeTransfers(){
+  var rows = document.querySelectorAll('#xferRows .xfer-row');
+  var totOut = 0, totIn = 0, totOutMT = 0, totInMT = 0, any = false;
+
+  rows.forEach(function(row){
+    var q = function(r){ return row.querySelector('[data-role=' + r + ']'); };
+    var dens = parseFloat(toWesternDigits(q('dens').value));
+    var roof = parseFloat(toWesternDigits(q('roof').value));
+
+    var outGsv = null, inGsv = null;
+    var fb = _xferGSV(q('fromTank').value, parseFloat(toWesternDigits(q('fromB').value)), parseFloat(toWesternDigits(q('fromBT').value)), dens, roof);
+    var fa = _xferGSV(q('fromTank').value, parseFloat(toWesternDigits(q('fromA').value)), parseFloat(toWesternDigits(q('fromAT').value)), dens, roof);
+    var tb = _xferGSV(q('toTank').value,  parseFloat(toWesternDigits(q('toB').value)),  parseFloat(toWesternDigits(q('toBT').value)),  dens, roof);
+    var ta = _xferGSV(q('toTank').value,  parseFloat(toWesternDigits(q('toA').value)),  parseFloat(toWesternDigits(q('toAT').value)),  dens, roof);
+
+    if(fb !== null && fa !== null) outGsv = fb - fa;
+    if(tb !== null && ta !== null) inGsv = ta - tb;
+
+    q('outV').textContent = outGsv !== null ? fmtNum(outGsv, 3) : '—';
+    q('inV').textContent  = inGsv  !== null ? fmtNum(inGsv, 3)  : '—';
+
+    var vEl = q('verdict');
+    if(outGsv !== null && inGsv !== null && outGsv !== 0){
+      var diff = inGsv - outGsv;
+      var pct = Math.abs(diff / outGsv * 100);
+      // Mass is conserved even when volume isn't — same density both ends
+      // here, so the mass gap is the volume gap scaled by density in air.
+      var air = dens - 0.0011;
+      var massDiff = (XFER_MODE === 'mass') ? diff : diff * air;
+
+      q('diffV').textContent = fmtNum(diff, 3);
+      q('diffP').textContent = pct.toFixed(3) + ' %';
+      q('massD').textContent = fmtNum(massDiff, 3);
+
+      var within = pct <= XFER_TOLERANCE_PCT;
+      vEl.className = 'xfer-verdict ' + (within ? 'ok' : 'warn');
+      vEl.textContent = within
+        ? '✓ Within ' + XFER_TOLERANCE_PCT + '% tolerance — balance acceptable'
+        : '⚠ ' + pct.toFixed(3) + '% variance exceeds ' + XFER_TOLERANCE_PCT + '% — check line fill, gauging, or roof position';
+
+      totOut += outGsv; totIn += inGsv;
+      totOutMT += outGsv * air; totInMT += inGsv * air;
+      any = true;
+    } else {
+      q('diffV').textContent = '—'; q('diffP').textContent = '—'; q('massD').textContent = '—';
+      vEl.className = 'xfer-verdict'; vEl.textContent = '';
+    }
+  });
+
+  // Unit captions follow the selected basis
+  var unit = (XFER_MODE === 'mass') ? 'MT' : 'm³';
+  document.querySelectorAll('#xferRows .xfer-out').forEach(function(el){
+    el.innerHTML = el.innerHTML.replace(/<\/b>\s*(m³|MT)/, '</b> ' + unit);
+  });
+  var uo = document.getElementById('xTotOutU'), ui = document.getElementById('xTotInU'), ud = document.getElementById('xTotDiffU');
+  if(uo) uo.textContent = unit;
+  if(ui) ui.textContent = unit;
+  if(ud) ud.textContent = unit;
+
+  var box = document.getElementById('xferTotals');
+  if(box){
+    box.style.display = any ? '' : 'none';
+    if(any){
+      var d = totIn - totOut;
+      document.getElementById('xTotOutV').textContent = fmtNum(totOut, 3);
+      document.getElementById('xTotOutT').textContent = fmtNum(totOutMT, 3);
+      document.getElementById('xTotInV').textContent  = fmtNum(totIn, 3);
+      document.getElementById('xTotInT').textContent  = fmtNum(totInMT, 3);
+      document.getElementById('xTotDiffV').textContent = fmtNum(d, 3);
+      document.getElementById('xTotDiffP').textContent = totOut ? (Math.abs(d / totOut * 100)).toFixed(3) : '0';
+    }
+  }
+  scheduleInvSave();
+}
+
+function _readTransfers(){
+  var out = [];
+  document.querySelectorAll('#xferRows .xfer-row').forEach(function(row){
+    var o = {};
+    ['dens','roof','fromTank','fromB','fromBT','fromA','fromAT','toTank','toB','toBT','toA','toAT'].forEach(function(k){
+      var el = row.querySelector('[data-role=' + k + ']');
+      o[k] = el ? (el.value || null) : null;
+    });
+    out.push(o);
+  });
+  return out;
+}
+function _applyTransfers(list){
+  var box = document.getElementById('xferRows');
+  if(!box) return;
+  box.innerHTML = '';
+  (list || []).forEach(function(t){ addTransferRow(t); });
+  computeTransfers();
 }
 
 function computeInventory(){
@@ -2140,8 +2530,10 @@ function computeInventory(){
   var grandChange = grandT - grandY;
   var grandChangeBbl = grandChange * CONV;
 
-  document.getElementById('aInvChange').textContent = fmtNum(grandT, 3);
-  document.getElementById('aInvChangeBbl').textContent = fmtNum(grandT * CONV, 1) + ' bbl';
+  // Terminal stock (reference section at the foot of the tab)
+  var setTxt = function(id, v, d){ var e = document.getElementById(id); if(e) e.textContent = fmtNum(v, d); };
+  setTxt('aGrandYestV', grandY, 3);   setTxt('aGrandYestB', grandY * CONV, 1);
+  setTxt('aGrandTodayV', grandT, 3);  setTxt('aGrandTodayB', grandT * CONV, 1);
 
   setInvField('aGrandYest', grandY, 3);
   setInvField('aGrandToday', grandT, 3);
@@ -2172,15 +2564,34 @@ function computeInventory(){
   setInvField('aProdM3', prodM3, 3);
   setInvField('aProdBbl', prodBblCalc, 1);
 
-  // Cross-check: tank-derived production vs the Daily Production tab's net
-  var dailyBbl = 0;
-  try { dailyBbl = compute(readState()).totalNet_bbl || 0; } catch(_){}
+  // Two comparisons against the Daily Production tab:
+  //   A = gross received at Feiran  (WITH Zeitco / Shedwan / Condensate)
+  //   B = net own production        (WITHOUT them)
+  // Tank movement tracks A on a day with imported receipts and B without —
+  // showing both makes it obvious which case the day actually is.
+  var dailyBbl = 0, dailyGrossBbl = 0;
+  try {
+    var _p = compute(readState());
+    dailyBbl = _p.totalNet_bbl || 0;
+    dailyGrossBbl = _p.receivedFeiran_bbl || 0;
+  } catch(_){}
   var dailyM3 = dailyBbl / CONV;
+  var dailyGrossM3 = dailyGrossBbl / CONV;
   var variance = grandChange - dailyM3;
-  setInvField('aCmpChange', grandChange, 3);
-  setInvField('aCmpDaily', dailyM3, 3);
-  setInvField('aCmpVar', variance, 3);
+  var varianceGross = grandChange - dailyGrossM3;
+  // Today's production split by stream (each stream's own today − yesterday)
+  setTxt('aStreamLandV', landChange, 3);        setTxt('aStreamLandB', landChange * CONV, 1);
+  setTxt('aStreamMarineV', marineChange, 3);    setTxt('aStreamMarineB', marineChange * CONV, 1);
+  setTxt('aStreamTotalV', landChange + marineChange, 3);
+  setTxt('aStreamTotalB', (landChange + marineChange) * CONV, 1);
 
+  setTxt('aCmpChangeV', grandChange, 3);  setTxt('aCmpChangeB', grandChange * CONV, 1);
+  setTxt('aCmpDailyV', dailyM3, 3);       setTxt('aCmpDailyB', dailyBbl, 1);
+  setTxt('aCmpVarV', variance, 3);        setTxt('aCmpVarB', variance * CONV, 1);
+  setTxt('aCmpGrossV', dailyGrossM3, 3);  setTxt('aCmpGrossB', dailyGrossBbl, 1);
+  setTxt('aCmpGrossVarV', varianceGross, 3); setTxt('aCmpGrossVarB', varianceGross * CONV, 1);
+
+  // Headline: production straight from the tank levels (today − yesterday).
   var vEl = document.getElementById('aVariance');
   var vNote = document.getElementById('aVarianceNote');
   var anyTankData = (grandT !== 0 || grandY !== 0);
@@ -2188,8 +2599,8 @@ function computeInventory(){
     vEl.textContent = '—';
     vNote.textContent = 'enter tank levels';
   } else {
-    vEl.textContent = fmtNum(prodM3, 1);
-    vNote.textContent = fmtNum(prodBblCalc, 0) + ' bbl';
+    vEl.textContent = fmtNum(grandChange, 1);
+    vNote.textContent = fmtNum(grandChange * CONV, 0) + ' bbl';
   }
 
   // Show what the Shipping tab currently totals, as a convenience hint
@@ -2253,25 +2664,45 @@ function loadPreviousDayInventory(dateStr){
   var prev = _prevDateStr(dateStr);
   var noteEl = document.getElementById('aLinkNote');
   if(!prev) return;
+  // Never touch the fields while the user is typing in them.
+  if(_invHasFocus()) return;
+
   db.collection('accountingInventory').doc(prev).get().then(function(doc){
-    if(!doc.exists){
-      if(noteEl) noteEl.textContent = '\ud83d\udd17 No saved record for ' + prev + ' \u2014 enter yesterday manually this once.';
-      _setYesterdayLinked(false);
-      return;
-    }
-    var tanks = (doc.data() && doc.data().tanks) || {};
+    var tanks = (doc.exists && doc.data() && doc.data().tanks) || {};
+    var filled = 0, keptManual = 0;
+
     TANKS.forEach(function(t){
       if(t.noCal) return;
       var id = tankIdSafe(t.key);
       var v = tanks[t.key] || {};
       var gEl = document.getElementById('invY_g_' + id);
       var tEl = document.getElementById('invY_t_' + id);
-      if(gEl) gEl.value = v.tG || '';
-      if(tEl) tEl.value = v.tT || '';
+      if(!gEl || !tEl) return;
+
+      // SEED, don't overwrite. A yesterday value already on screen — typed by
+      // hand or saved earlier — always wins. The previous day only fills gaps,
+      // and an empty previous-day reading never blanks anything out.
+      var hasManual = (gEl.value !== '' || tEl.value !== '');
+      if(hasManual){ keptManual++; return; }
+      if(v.tG){ gEl.value = v.tG; filled++; }
+      if(v.tT){ tEl.value = v.tT; }
     });
-    if(noteEl) noteEl.textContent = '\ud83d\udd17 Yesterday auto-filled from ' + prev + ' (that day\u2019s Today readings).';
-    _setYesterdayLinked(true);
-    computeInventory();
+
+    if(noteEl){
+      if(filled > 0 && keptManual === 0){
+        noteEl.textContent = '🔗 Yesterday auto-filled from ' + prev + ' (that day’s Today readings).';
+      } else if(filled > 0){
+        noteEl.textContent = '🔗 ' + filled + ' tank(s) auto-filled from ' + prev +
+                             '; your manually entered values were kept.';
+      } else if(keptManual > 0){
+        noteEl.textContent = '✏️ Yesterday entered manually. It will link automatically ' +
+                             'once ' + prev + ' has saved readings.';
+      } else {
+        noteEl.textContent = '🔗 No readings for ' + prev + ' — enter yesterday manually this once.';
+      }
+    }
+    _setYesterdayLinked(filled > 0);
+    if(filled > 0) computeInventory();
   }).catch(function(err){ console.error('[Firestore] prev-day load failed', err); });
 }
 
@@ -2310,6 +2741,8 @@ function saveInventoryToFirestore(){
   db.collection('accountingInventory').doc(currentDate).set({
     tanks: _invReadAll(),
     movements: _invReadMovements(),
+    transfers: _readTransfers(),
+    xferMode: XFER_MODE,
     updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
     updatedBy: currentUser ? currentUser.email : null
   }).catch(function(err){ console.error('[Firestore] inventory save failed', err); });
@@ -2325,19 +2758,40 @@ function _invApply(d){
     if(t.noCal) return;
     var id = tankIdSafe(t.key);
     var v = tanks[t.key] || {};
-    document.getElementById('invY_g_' + id).value = v.yG || '';
-    document.getElementById('invY_t_' + id).value = v.yT || '';
+    var yg = document.getElementById('invY_g_' + id);
+    var yt = document.getElementById('invY_t_' + id);
+    // Today's readings always mirror the stored record.
     document.getElementById('invT_g_' + id).value = v.tG || '';
     document.getElementById('invT_t_' + id).value = v.tT || '';
+    // Yesterday is different: a value on screen may be a manual entry that
+    // hasn't been saved yet (the save is debounced ~800 ms). Applying an
+    // older snapshot here would blank it, and the previous-day seed would
+    // then treat the field as empty and overwrite it. So only clear a
+    // yesterday field when the record actually carries a value for it.
+    if(v.yG) yg.value = v.yG;
+    else if(!yg.value) yg.value = '';
+    if(v.yT) yt.value = v.yT;
+    else if(!yt.value) yt.value = '';
   });
   var mv = (d && d.movements) || {};
   INV_MOV_IDS.forEach(function(id){
     var el = document.getElementById(id);
     if(el) el.value = mv[id] || '';
   });
+  if(d && d.xferMode) setXferMode(d.xferMode);
+  if(!tabHasFocus('tabContentAcct')) _applyTransfers(d && d.transfers);
   computeInventory();
-  // The previous day's TODAY always wins for the yesterday column.
-  loadPreviousDayInventory(currentDate);
+  // Seed the yesterday column from the previous day only if this day's own
+  // record has no yesterday readings yet. A saved (or manually typed)
+  // yesterday is never replaced.
+  var hasOwnYesterday = TANKS.some(function(t){
+    if(t.noCal) return false;
+    var id = tankIdSafe(t.key);
+    var g = document.getElementById('invY_g_' + id);
+    var tt = document.getElementById('invY_t_' + id);
+    return (g && g.value !== '') || (tt && tt.value !== '');
+  });
+  if(!hasOwnYesterday) loadPreviousDayInventory(currentDate);
 }
 var _invUnsub = null;
 function startInvListener(dateStr){
@@ -2347,7 +2801,8 @@ function startInvListener(dateStr){
   _invUnsub = db.collection('accountingInventory').doc(dateStr).onSnapshot(function(doc){
     var d = doc.exists ? doc.data() : {};
     if(JSON.stringify(d.tanks || {}) === JSON.stringify(_invReadAll())
-       && JSON.stringify(d.movements || {}) === JSON.stringify(_invReadMovements())) return;
+       && JSON.stringify(d.movements || {}) === JSON.stringify(_invReadMovements())
+       && JSON.stringify(d.transfers || []) === JSON.stringify(_readTransfers())) return;
     if(_invHasFocus()){ _invPendingDoc = d; return; }
     _invApply(d);
   }, function(err){ console.error('[Firestore] inventory listener error', err); });
@@ -3027,13 +3482,31 @@ function loadUserPermissions(uid){
   applyTabPermissions();
   if(!uid) return Promise.resolve();
   return db.collection('users').doc(uid).get().then(function(doc){
-    var d = doc.exists ? (doc.data() || {}) : {};
-    // Explicit opt-in flag. Absent or false ⇒ no access.
-    USER_PERMS.accounting = d.accountingAccess === true;
+    if(!doc.exists){
+      console.warn('[Perms] No users/' + uid + ' document. The document ID must be ' +
+                   'exactly the Auth UID. Accounting tab stays hidden.');
+      USER_PERMS.loaded = true;
+      applyTabPermissions();
+      return;
+    }
+    var d = doc.data() || {};
+    var raw = d.accountingAccess;
+    // Accept boolean true, or the string "true" — picking "string" instead of
+    // "boolean" in the Firestore console is an easy mistake to make, and a
+    // silently-hidden tab is a confusing way to find out.
+    USER_PERMS.accounting = (raw === true || raw === 'true');
     USER_PERMS.loaded = true;
+    if(!USER_PERMS.accounting){
+      console.warn('[Perms] users/' + uid + ' has accountingAccess = ' +
+                   JSON.stringify(raw) + ' (type ' + (typeof raw) + '). ' +
+                   'Set it to boolean true to show the Accounting Prod. tab.');
+    } else {
+      console.info('[Perms] Accounting Prod. access granted for ' + (d.email || uid));
+    }
     applyTabPermissions();
   }).catch(function(err){
-    console.warn('[Perms] could not read user document', err);
+    console.warn('[Perms] could not read users/' + uid + ' — check Firestore rules allow ' +
+                 'a user to read their own document.', err);
     USER_PERMS.loaded = true;
     applyTabPermissions();   // stays closed on error
   });
@@ -3092,6 +3565,7 @@ document.addEventListener('DOMContentLoaded', function() {
   buildDrainTable();
   buildZeitcoSamples();
   buildInventoryRows();
+  setXferMode('obs');
   render();
   const passInput = document.getElementById('loginPassword');
   const emailInput = document.getElementById('loginEmail');
