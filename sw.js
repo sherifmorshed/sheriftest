@@ -4,7 +4,7 @@
 //  requests are NEVER cached to prevent stale data.
 // ══════════════════════════════════════════
 
-const CACHE_NAME = 'accounting-prod-v55';
+const CACHE_NAME = 'accounting-prod-v60';
 
 // Only cache static files that don't change between sessions
 const STATIC_ASSETS = [
@@ -70,10 +70,39 @@ self.addEventListener('fetch', function(event) {
   // NEVER cache POST/PUT/DELETE requests
   if (event.request.method !== 'GET') return;
 
-  // For static assets: network-first, fall back to cache for offline support
+  // Immutable data files: CACHE-FIRST.
+  // tank_calibration.json is ~588 KB gzipped and only ever changes when a new
+  // version is deployed — and a deploy bumps CACHE_NAME, which discards the
+  // old cache anyway. Re-fetching it on every launch (which the previous
+  // network-first + no-store rule did) meant a 588 KB download each time the
+  // app opened, and a flaky field connection turned that into a visible
+  // "calibration failed to load" banner. Serving it from cache makes startup
+  // instant and immune to a poor signal.
+  var isImmutableData = /tank_calibration\.json$/.test(url.pathname);
+
+  if (isImmutableData) {
+    event.respondWith(
+      caches.match(event.request).then(function(hit) {
+        if (hit) return hit;                       // cached copy wins
+        return fetch(event.request).then(function(response) {
+          if (response && response.status === 200) {
+            var clone = response.clone();
+            caches.open(CACHE_NAME).then(function(cache) {
+              cache.put(event.request, clone);
+            });
+          }
+          return response;
+        });
+      })
+    );
+    return;
+  }
+
+  // Everything else (HTML, icons, manifest): network-first with no-store, so
+  // a code change is never masked by a stale cached copy. Falls back to cache
+  // when offline.
   event.respondWith(
     fetch(event.request, { cache: 'no-store' }).then(function(response) {
-      // Cache successful responses for offline use
       if (response && response.status === 200) {
         var responseClone = response.clone();
         caches.open(CACHE_NAME).then(function(cache) {
@@ -82,7 +111,6 @@ self.addEventListener('fetch', function(event) {
       }
       return response;
     }).catch(function() {
-      // Network failed — serve from cache if available (offline mode)
       return caches.match(event.request);
     })
   );

@@ -462,7 +462,6 @@ body.light-mode .xfer-mode-btn.active{background:rgba(7,94,84,.08);}
 .mov-grp-hd{display:flex;align-items:center;font-size:9.5px;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted);font-family:'JetBrains Mono',monospace;padding:10px 14px 0;}
 .mov-grp.auto{background:rgba(34,211,238,.04);}
 body.light-mode .mov-grp.auto{background:rgba(7,94,84,.04);}
-.mov-auto-note{font-size:10.5px;line-height:1.55;color:var(--muted);padding:6px 14px 0;}
 .mov-auto-val{width:100%;background:rgba(128,128,128,.08);border:1px dashed var(--border);border-radius:8px;color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;padding:9px 4px;text-align:center;font-variant-numeric:tabular-nums;}
 .mov-tag{font-style:normal;font-size:7.5px;letter-spacing:.6px;padding:1px 4px;border-radius:3px;margin-left:4px;vertical-align:1px;}
 .mov-tag.land{background:rgba(34,211,238,.18);color:var(--accent);}
@@ -475,6 +474,83 @@ body.light-mode .mov-grp.auto{background:rgba(7,94,84,.04);}
 .rec-col .f-val{font-size:12.5px;}
 .rec-col .field.rec-tot{border-top:2px solid var(--accent);}
 .rec-col .field.rec-tot .f-val{color:var(--accent);font-weight:800;}
+/* ══ QUICK ENTRY ══ */
+.qe-btn{border-color:var(--green);color:var(--green);}
+.qe-btn:active{background:rgba(16,185,129,.12);}
+.qe-daybar{display:flex;gap:6px;padding:12px 14px 0;}
+.qe-day{flex:1;padding:9px;background:var(--surface);border:1px solid var(--border);border-radius:9px;
+  color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:1px;cursor:pointer;}
+.qe-day.active{border-color:var(--accent);color:var(--accent);background:rgba(34,211,238,.08);}
+body.light-mode .qe-day.active{background:rgba(7,94,84,.08);}
+.qe-tools{display:flex;align-items:flex-end;gap:8px;padding:10px 14px 12px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.qe-tool{display:flex;align-items:center;gap:6px;flex:1;min-width:190px;}
+.qe-tool label{font-size:9px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);font-family:'JetBrains Mono',monospace;white-space:nowrap;}
+.qe-tool input{width:64px;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text);
+  font-family:'JetBrains Mono',monospace;font-size:14px;padding:7px 4px;text-align:center;outline:none;}
+.qe-tool button,.qe-copy{background:var(--surface);border:1px solid var(--accent);border-radius:7px;color:var(--accent);
+  font-family:'JetBrains Mono',monospace;font-size:10px;padding:7px 10px;cursor:pointer;white-space:nowrap;}
+.qe-row{display:grid;grid-template-columns:1fr 84px 62px 92px;gap:6px;align-items:center;
+  padding:8px 12px;border-bottom:1px solid var(--border);}
+.qe-row.land{border-left:3px solid var(--accent);}
+.qe-row.marine{border-left:3px solid var(--accent2);}
+.qe-tank{display:flex;align-items:center;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--text);min-width:0;}
+.qe-tank .ico{width:13px;height:13px;flex-basis:13px;margin-right:5px;opacity:.7;}
+.qe-row input{background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);
+  font-family:'JetBrains Mono',monospace;font-size:15px;padding:9px 4px;text-align:center;outline:none;
+  font-variant-numeric:tabular-nums;transition:border-color .15s,box-shadow .15s;}
+.qe-row input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(34,211,238,.16);}
+body.light-mode .qe-row input:focus{box-shadow:0 0 0 3px rgba(7,94,84,.14);}
+.qe-prev{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);text-align:right;
+  font-variant-numeric:tabular-nums;line-height:1.25;}
+.qe-prev span{display:block;}
+.qe-prev s{display:block;text-decoration:none;font-size:8.5px;color:var(--muted);}
+.qe-foot{position:sticky;bottom:0;background:var(--surface);border-top:1px solid var(--border);padding:12px 14px;}
+.qe-total{display:flex;align-items:baseline;gap:6px;font-family:'JetBrains Mono',monospace;
+  font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.qe-total b{margin-left:auto;font-size:19px;color:var(--accent);font-variant-numeric:tabular-nums;}
+.qe-total i{font-style:normal;font-size:9px;color:var(--muted);}
+.qe-total s{text-decoration:none;font-size:9.5px;color:var(--muted);}
+.qe-actions .sheet-done-btn{width:100%;}
+.qv-sec b{font-size:10.5px !important;color:var(--muted) !important;}
+.qv-sec i{font-size:7.5px !important;}
+.qv-sub{display:block;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--muted);margin-top:2px;font-variant-numeric:tabular-nums;}
+.qv-sub::after{content:' m³';}
+.kt-sub{display:block;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--muted);font-weight:400;margin-top:1px;font-variant-numeric:tabular-nums;}
+.inv-out .m3{display:block;font-size:9px;color:var(--muted);}
+.f-bbl{display:block;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--muted);text-align:right;margin-top:1px;font-variant-numeric:tabular-nums;}
+.rec-col .f-bbl{font-size:9px;}
+
+.cmp-band{border-bottom:1px solid var(--border);padding-bottom:4px;}
+.cmp-band:last-child{border-bottom:none;}
+.cmp-band-hd{display:flex;align-items:center;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:1.1px;
+  text-transform:uppercase;color:var(--muted);padding:11px 14px 2px;}
+
+/* ══ KEY CHECK — the primary daily monitoring comparison ══ */
+.cmp-band.key{background:linear-gradient(180deg,rgba(34,211,238,.10),rgba(34,211,238,.03));
+  border-top:2px solid var(--accent);border-bottom:none;margin-top:2px;padding-bottom:12px;}
+body.light-mode .cmp-band.key{background:linear-gradient(180deg,rgba(7,94,84,.09),rgba(7,94,84,.02));}
+.cmp-band-hd.key{color:var(--accent);font-weight:700;padding-top:12px;}
+.key-tag{font-style:normal;font-size:7.5px;letter-spacing:1px;background:var(--accent);color:#04121a;
+  padding:2px 6px;border-radius:4px;margin-left:auto;}
+body.light-mode .key-tag{color:#fff;}
+table.key-tbl{width:calc(100% - 24px);margin:8px 12px 0;border-collapse:collapse;font-family:'JetBrains Mono',monospace;}
+table.key-tbl th{font-size:8.5px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);
+  font-weight:400;padding:0 6px 6px;text-align:right;}
+table.key-tbl th:first-child{text-align:left;}
+table.key-tbl td{padding:7px 6px;border-top:1px solid rgba(128,128,128,.18);text-align:right;}
+table.key-tbl td b{font-size:14px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;}
+table.key-tbl td span{font-size:8px;color:var(--muted);margin-left:3px;}
+table.key-tbl td.kt-lbl{text-align:left;font-size:11px;color:var(--muted);white-space:nowrap;}
+table.key-tbl td.kt-lbl .ico{width:12px;height:12px;flex-basis:12px;margin-right:4px;vertical-align:-2px;}
+table.key-tbl tr.kt-total td{border-top:2px solid var(--accent);}
+table.key-tbl tr.kt-total td b{font-size:16px;}
+table.key-tbl td.kt-diff b.kv-ok{color:var(--green);}
+table.key-tbl td.kt-diff b.kv-warn{color:var(--accent2);}
+table.key-tbl td.kt-diff b.kv-bad{color:var(--red);}
+.key-bbl{margin:9px 12px 0;padding-top:8px;border-top:1px dashed rgba(128,128,128,.25);
+  font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);text-align:center;}
+.key-bbl b{color:var(--text);font-variant-numeric:tabular-nums;margin:0 2px;}
+
 .cmp-split{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 12px 12px;}
 .cmp-split .qty-sheet{margin:0;}
 .cmp-hd{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.9px;text-transform:uppercase;
@@ -663,50 +739,11 @@ body.light-mode .mov-grp.auto{background:rgba(7,94,84,.04);}
       <div class="result-card net">
         <div class="rc-lbl"><svg class="ico"><use href="#i-derrick"/></svg>Production from Tanks <i class="rc-sub-note">today − yesterday</i></div>
         <div class="rc-val" id="aVariance">—</div>
-        <div class="rc-sub">m³</div>
+        <div class="rc-sub">bbl</div>
         <div class="rc-bbl" id="aVarianceNote">enter tank levels</div>
       </div>
     </div>
 
-    <!-- Comparison, straight under the headline -->
-    <div class="section">
-      <div class="sec-title"><svg class="ico"><use href="#i-scale"/></svg>vs Daily Production</div>
-      <div class="qty-sheet">
-        <div class="qty-block">
-          <div class="qty-lbl">Production from Tanks <i class="cnt">today − yesterday</i></div>
-          <div class="qty-vals"><div><b id="aCmpChangeV">0</b><i>m³</i></div><div><b id="aCmpChangeB">0</b><i>bbl</i></div></div>
-        </div>
-      </div>
-
-      <div class="cmp-split">
-        <div class="cmp-col">
-          <div class="cmp-hd">A · WITH Zeitco / Shedwan / Condensate</div>
-          <div class="qty-sheet">
-            <div class="qty-block">
-              <div class="qty-lbl">Daily Production <i class="cnt">gross received</i></div>
-              <div class="qty-vals"><div><b id="aCmpGrossV">0</b><i>m³</i></div><div><b id="aCmpGrossB">0</b><i>bbl</i></div></div>
-            </div>
-            <div class="qty-block net">
-              <div class="qty-lbl">Difference vs tanks</div>
-              <div class="qty-vals"><div><b id="aCmpGrossVarV">0</b><i>m³</i></div><div><b id="aCmpGrossVarB">0</b><i>bbl</i></div></div>
-            </div>
-          </div>
-        </div>
-        <div class="cmp-col">
-          <div class="cmp-hd">B · WITHOUT Zeitco / Shedwan / Condensate</div>
-          <div class="qty-sheet">
-            <div class="qty-block">
-              <div class="qty-lbl">Daily Production <i class="cnt">net own production</i></div>
-              <div class="qty-vals"><div><b id="aCmpDailyV">0</b><i>m³</i></div><div><b id="aCmpDailyB">0</b><i>bbl</i></div></div>
-            </div>
-            <div class="qty-block net">
-              <div class="qty-lbl">Difference vs tanks</div>
-              <div class="qty-vals"><div><b id="aCmpVarV">0</b><i>m³</i></div><div><b id="aCmpVarB">0</b><i>bbl</i></div></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
 
 
     <!-- Today's production split by stream -->
@@ -715,15 +752,15 @@ body.light-mode .mov-grp.auto{background:rgba(7,94,84,.04);}
       <div class="qty-sheet">
         <div class="qty-block">
           <div class="qty-lbl"><svg class="ico"><use href="#i-tank"/></svg>Land <i class="cnt">today &minus; yesterday</i></div>
-          <div class="qty-vals"><div><b id="aStreamLandV">0</b><i>m³</i></div><div><b id="aStreamLandB">0</b><i>bbl</i></div></div>
+          <div class="qty-vals"><div><b id="aStreamLandB">0</b><i>bbl</i></div><div class="qv-sec"><b id="aStreamLandV">0</b><i>m³</i></div></div>
         </div>
         <div class="qty-block">
           <div class="qty-lbl"><svg class="ico"><use href="#i-wave"/></svg>Marine <i class="cnt">today &minus; yesterday</i></div>
-          <div class="qty-vals"><div><b id="aStreamMarineV">0</b><i>m³</i></div><div><b id="aStreamMarineB">0</b><i>bbl</i></div></div>
+          <div class="qty-vals"><div><b id="aStreamMarineB">0</b><i>bbl</i></div><div class="qv-sec"><b id="aStreamMarineV">0</b><i>m³</i></div></div>
         </div>
         <div class="qty-block net">
           <div class="qty-lbl">Total</div>
-          <div class="qty-vals"><div><b id="aStreamTotalV">0</b><i>m³</i></div><div><b id="aStreamTotalB">0</b><i>bbl</i></div></div>
+          <div class="qty-vals"><div><b id="aStreamTotalB">0</b><i>bbl</i></div><div class="qv-sec"><b id="aStreamTotalV">0</b><i>m³</i></div></div>
         </div>
       </div>
     </div>
@@ -743,6 +780,10 @@ body.light-mode .mov-grp.auto{background:rgba(7,94,84,.04);}
     </div>
     <div class="inv-linked-note" id="aLinkNote">🔗 Yesterday is linked automatically to the previous date.</div>
 
+    <div class="action-row" style="grid-template-columns:1fr;">
+      <button class="print-btn qe-btn" onclick="openQuickEntry('today')"><svg class="ico"><use href="#i-tank"/></svg>Quick Entry — Tank Levels</button>
+    </div>
+
     <!-- Land tanks -->
     <div class="section">
       <div class="sec-title">
@@ -753,15 +794,15 @@ body.light-mode .mov-grp.auto{background:rgba(7,94,84,.04);}
       <div class="qty-sheet">
         <div class="qty-block">
           <div class="qty-lbl">Yesterday</div>
-          <div class="qty-vals one"><div><b id="aLandYestTotal">0</b><i>m³</i></div></div>
+          <div class="qty-vals one"><div><b id="aLandYestTotalB">0</b><i>bbl</i><s class="qv-sub" id="aLandYestTotal">0</s></div></div>
         </div>
         <div class="qty-block">
           <div class="qty-lbl">Today</div>
-          <div class="qty-vals one"><div><b id="aLandTodayTotal">0</b><i>m³</i></div></div>
+          <div class="qty-vals one"><div><b id="aLandTodayTotalB">0</b><i>bbl</i><s class="qv-sub" id="aLandTodayTotal">0</s></div></div>
         </div>
         <div class="qty-block net">
           <div class="qty-lbl">Land Change</div>
-          <div class="qty-vals"><div><b id="aLandChange">0</b><i>m³</i></div><div><b id="aLandChangeBbl">0</b><i>bbl</i></div></div>
+          <div class="qty-vals"><div><b id="aLandChangeBbl">0</b><i>bbl</i></div><div class="qv-sec"><b id="aLandChange">0</b><i>m³</i></div></div>
         </div>
       </div>
     </div>
@@ -776,22 +817,22 @@ body.light-mode .mov-grp.auto{background:rgba(7,94,84,.04);}
       <div class="qty-sheet">
         <div class="qty-block">
           <div class="qty-lbl">Yesterday</div>
-          <div class="qty-vals one"><div><b id="aMarineYestTotal">0</b><i>m³</i></div></div>
+          <div class="qty-vals one"><div><b id="aMarineYestTotalB">0</b><i>bbl</i><s class="qv-sub" id="aMarineYestTotal">0</s></div></div>
         </div>
         <div class="qty-block">
           <div class="qty-lbl">Today</div>
-          <div class="qty-vals one"><div><b id="aMarineTodayTotal">0</b><i>m³</i></div></div>
+          <div class="qty-vals one"><div><b id="aMarineTodayTotalB">0</b><i>bbl</i><s class="qv-sub" id="aMarineTodayTotal">0</s></div></div>
         </div>
         <div class="qty-block net">
           <div class="qty-lbl">Marine Change</div>
-          <div class="qty-vals"><div><b id="aMarineChange">0</b><i>m³</i></div><div><b id="aMarineChangeBbl">0</b><i>bbl</i></div></div>
+          <div class="qty-vals"><div><b id="aMarineChangeBbl">0</b><i>bbl</i></div><div class="qv-sec"><b id="aMarineChange">0</b><i>m³</i></div></div>
         </div>
       </div>
     </div>
 
     <!-- Movements in / out of the terminal -->
     <div class="section">
-      <div class="sec-title"><svg class="ico"><use href="#i-flow"/></svg>Movements (m³) — same day as tank readings</div>
+      <div class="sec-title"><svg class="ico"><use href="#i-flow"/></svg>Movements — same day as tank readings</div>
 
       <div class="mov-grp">
         <div class="mov-grp-hd"><svg class="ico"><use href="#i-ship"/></svg>Shipped out — per stream</div>
@@ -812,22 +853,21 @@ body.light-mode .mov-grp.auto{background:rgba(7,94,84,.04);}
 
       <div class="mov-grp auto">
         <div class="mov-grp-hd"><svg class="ico"><use href="#i-flow"/></svg>Imported streams — read from Daily Production</div>
-        <div class="mov-auto-note">Entered in barrels on the Daily Production tab and converted here. Zeitco belongs to Land; Shedwan and Condensate to Marine — the same split that tab uses.</div>
         <div class="daily-grid" style="grid-template-columns:1fr 1fr 1fr;">
           <div class="daily-field">
             <label>Zeitco / Nefertiti <i class="mov-tag land">LAND</i></label>
-            <div class="mov-auto-val" id="aAutoZeitco">0.000</div>
-            <div class="unit">m³ · <span id="aAutoZeitcoB" class="ship-hint">0 bbl</span></div>
+            <div class="mov-auto-val" id="aAutoZeitcoB">0.0</div>
+            <div class="unit">bbl · <span id="aAutoZeitco" class="ship-hint">0 m³</span></div>
           </div>
           <div class="daily-field">
             <label>Shedwan <i class="mov-tag marine">MARINE</i></label>
-            <div class="mov-auto-val" id="aAutoShedwan">0.000</div>
-            <div class="unit">m³ · <span id="aAutoShedwanB" class="ship-hint">0 bbl</span></div>
+            <div class="mov-auto-val" id="aAutoShedwanB">0.0</div>
+            <div class="unit">bbl · <span id="aAutoShedwan" class="ship-hint">0 m³</span></div>
           </div>
           <div class="daily-field">
             <label>Condensate <i class="mov-tag marine">MARINE</i></label>
-            <div class="mov-auto-val" id="aAutoCond">0.000</div>
-            <div class="unit">m³ · <span id="aAutoCondB" class="ship-hint">0 bbl</span></div>
+            <div class="mov-auto-val" id="aAutoCondB">0.0</div>
+            <div class="unit">bbl · <span id="aAutoCond" class="ship-hint">0 m³</span></div>
           </div>
         </div>
       </div>
@@ -855,26 +895,83 @@ body.light-mode .mov-grp.auto{background:rgba(7,94,84,.04);}
       <div class="rec-split">
         <div class="rec-col">
           <div class="rec-hd"><svg class="ico"><use href="#i-tank"/></svg>LAND</div>
-          <div class="field"><span class="f-label">Δ Land tanks</span><span class="f-val" id="aRecLandChg">0<span class="u">m³</span></span></div>
-          <div class="field"><span class="f-label">+ Land shipped</span><span class="f-val" id="aRecLandShip">0<span class="u">m³</span></span></div>
-          <div class="field"><span class="f-label">− Zeitco</span><span class="f-val" id="aRecLandZeit">0<span class="u">m³</span></span></div>
-          <div class="field rec-tot"><span class="f-label"><b>= Land production</b></span><span class="f-val" id="aRecLandProd">0<span class="u">m³</span></span></div>
+          <div class="field"><span class="f-label">Δ Land tanks</span><span class="f-val" id="aRecLandChg">0<span class="u">bbl</span></span><span class="f-bbl" id="aRecLandChgB">0 bbl</span></div>
+          <div class="field"><span class="f-label">+ Land shipped</span><span class="f-val" id="aRecLandShip">0<span class="u">bbl</span></span><span class="f-bbl" id="aRecLandShipB">0 bbl</span></div>
+          <div class="field"><span class="f-label">− Zeitco</span><span class="f-val" id="aRecLandZeit">0<span class="u">bbl</span></span><span class="f-bbl" id="aRecLandZeitB">0 bbl</span></div>
+          <div class="field rec-tot"><span class="f-label"><b>= Land production</b></span><span class="f-val" id="aRecLandProd">0<span class="u">bbl</span></span><span class="f-bbl" id="aRecLandProdB">0 bbl</span></div>
         </div>
         <div class="rec-col">
           <div class="rec-hd"><svg class="ico"><use href="#i-wave"/></svg>MARINE</div>
-          <div class="field"><span class="f-label">Δ Marine tanks</span><span class="f-val" id="aRecMarChg">0<span class="u">m³</span></span></div>
-          <div class="field"><span class="f-label">+ Marine shipped</span><span class="f-val" id="aRecMarShip">0<span class="u">m³</span></span></div>
-          <div class="field"><span class="f-label">− Shedwan + Cond.</span><span class="f-val" id="aRecMarShed">0<span class="u">m³</span></span></div>
-          <div class="field rec-tot"><span class="f-label"><b>= Marine production</b></span><span class="f-val" id="aRecMarProd">0<span class="u">m³</span></span></div>
+          <div class="field"><span class="f-label">Δ Marine tanks</span><span class="f-val" id="aRecMarChg">0<span class="u">bbl</span></span><span class="f-bbl" id="aRecMarChgB">0 bbl</span></div>
+          <div class="field"><span class="f-label">+ Marine shipped</span><span class="f-val" id="aRecMarShip">0<span class="u">bbl</span></span><span class="f-bbl" id="aRecMarShipB">0 bbl</span></div>
+          <div class="field"><span class="f-label">− Shedwan + Cond.</span><span class="f-val" id="aRecMarShed">0<span class="u">bbl</span></span><span class="f-bbl" id="aRecMarShedB">0 bbl</span></div>
+          <div class="field rec-tot"><span class="f-label"><b>= Marine production</b></span><span class="f-val" id="aRecMarProd">0<span class="u">bbl</span></span><span class="f-bbl" id="aRecMarProdB">0 bbl</span></div>
         </div>
       </div>
-      <div class="field"><span class="f-label">Land + Marine</span><span class="f-val" id="aRecStreamSum">0<span class="u">m³</span></span></div>
-      <div class="field"><span class="f-label">− Other received</span><span class="f-val" id="aRecRecv">0<span class="u">m³</span></span></div>
-      <div class="field"><span class="f-label">− Diesel injected</span><span class="f-val" id="aRecDiesel">0<span class="u">m³</span></span></div>
-      <div class="field" style="border-top:2px solid var(--accent);"><span class="f-label"><b>= PRODUCTION</b></span><span class="f-val" id="aProdM3" style="color:var(--accent);font-size:17px;">0<span class="u">m³</span></span></div>
-      <div class="field"><span class="f-label">Production in barrels</span><span class="f-val" id="aProdBbl">0<span class="u">bbl</span></span></div>
+      <div class="field"><span class="f-label">Land + Marine</span><span class="f-val" id="aRecStreamSum">0<span class="u">bbl</span></span><span class="f-bbl" id="aRecStreamSumB">0 bbl</span></div>
+      <div class="field"><span class="f-label">− Other received</span><span class="f-val" id="aRecRecv">0<span class="u">bbl</span></span><span class="f-bbl" id="aRecRecvB">0 bbl</span></div>
+      <div class="field"><span class="f-label">− Diesel injected</span><span class="f-val" id="aRecDiesel">0<span class="u">bbl</span></span><span class="f-bbl" id="aRecDieselB">0 bbl</span></div>
+      <div class="field" style="border-top:2px solid var(--accent);"><span class="f-label"><b>= PRODUCTION</b></span><span class="f-val" id="aProdBblMain" style="color:var(--accent);font-size:17px;">0<span class="u">bbl</span></span><span class="f-bbl" id="aProdM3">0 m³</span></div>
+      
     </div>
 
+
+
+    <!-- vs Daily Production — placed after the reconciliation it draws on -->
+    <div class="section">
+      <div class="sec-title"><svg class="ico"><use href="#i-scale"/></svg>Tanks vs Daily Production</div>
+
+      <div class="cmp-band">
+        <div class="cmp-band-hd">A &middot; WITH Zeitco / Shedwan / Condensate</div>
+        <div class="qty-sheet">
+          <div class="qty-block">
+            <div class="qty-lbl">From tanks <i class="cnt">incl. imported streams</i></div>
+            <div class="qty-vals"><div><b id="aCmpAtankB">0</b><i>bbl</i></div><div class="qv-sec"><b id="aCmpAtank">0</b><i>m³</i></div></div>
+          </div>
+          <div class="qty-block">
+            <div class="qty-lbl">Daily Production <i class="cnt">gross received</i></div>
+            <div class="qty-vals"><div><b id="aCmpAdailyB">0</b><i>bbl</i></div><div class="qv-sec"><b id="aCmpAdaily">0</b><i>m³</i></div></div>
+          </div>
+          <div class="qty-block net">
+            <div class="qty-lbl">Difference</div>
+            <div class="qty-vals"><div><b id="aCmpAvarB">0</b><i>bbl</i></div><div class="qv-sec"><b id="aCmpAvar">0</b><i>m³</i></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cmp-band key">
+        <div class="cmp-band-hd key">
+          <svg class="ico"><use href="#i-scale"/></svg>B &middot; WITHOUT Zeitco / Shedwan / Condensate
+          <i class="key-tag">KEY CHECK</i>
+        </div>
+        <table class="key-tbl">
+          <thead><tr><th>&nbsp;</th><th>From tanks</th><th>Daily Prod.</th><th>Difference</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="kt-lbl"><svg class="ico"><use href="#i-tank"/></svg>Land</td>
+              <td><b id="aKeyLandTB">0</b><span>bbl</span><s class="kt-sub" id="aKeyLandT">0 m³</s></td>
+              <td><b id="aKeyLandDB">0</b><span>bbl</span><s class="kt-sub" id="aKeyLandD">0 m³</s></td>
+              <td class="kt-diff"><b id="aKeyLandVB">0</b><span>bbl</span><s class="kt-sub" id="aKeyLandV">0 m³</s></td>
+            </tr>
+            <tr>
+              <td class="kt-lbl"><svg class="ico"><use href="#i-wave"/></svg>Marine</td>
+              <td><b id="aKeyMarTB">0</b><span>bbl</span><s class="kt-sub" id="aKeyMarT">0 m³</s></td>
+              <td><b id="aKeyMarDB">0</b><span>bbl</span><s class="kt-sub" id="aKeyMarD">0 m³</s></td>
+              <td class="kt-diff"><b id="aKeyMarVB">0</b><span>bbl</span><s class="kt-sub" id="aKeyMarV">0 m³</s></td>
+            </tr>
+            <tr class="kt-total">
+              <td class="kt-lbl">Total</td>
+              <td><b id="aKeyTotTB">0</b><span>bbl</span><s class="kt-sub" id="aKeyTotT">0 m³</s></td>
+              <td><b id="aKeyTotDB">0</b><span>bbl</span><s class="kt-sub" id="aKeyTotD">0 m³</s></td>
+              <td class="kt-diff"><b id="aKeyTotVB">0</b><span>bbl</span><s class="kt-sub" id="aKeyTotV">0 m³</s></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="key-bbl">
+          <span>In cubic metres &nbsp;·&nbsp; tanks <b id="aKeyTotTM">0</b> &nbsp;|&nbsp; daily <b id="aKeyTotDM">0</b> &nbsp;|&nbsp; diff <b id="aKeyTotVM">0</b></span>
+        </div>
+      </div>
+    </div>
 
     <!-- Terminal stock — reference, not the headline -->
     <div class="section">
@@ -882,11 +979,11 @@ body.light-mode .mov-grp.auto{background:rgba(7,94,84,.04);}
       <div class="qty-sheet">
         <div class="qty-block">
           <div class="qty-lbl">Yesterday — all tanks</div>
-          <div class="qty-vals"><div><b id="aGrandYestV">0</b><i>m³</i></div><div><b id="aGrandYestB">0</b><i>bbl</i></div></div>
+          <div class="qty-vals"><div><b id="aGrandYestB">0</b><i>bbl</i></div><div class="qv-sec"><b id="aGrandYestV">0</b><i>m³</i></div></div>
         </div>
         <div class="qty-block net">
           <div class="qty-lbl">Today in Fieran — all tanks</div>
-          <div class="qty-vals"><div><b id="aGrandTodayV">0</b><i>m³</i></div><div><b id="aGrandTodayB">0</b><i>bbl</i></div></div>
+          <div class="qty-vals"><div><b id="aGrandTodayB">0</b><i>bbl</i></div><div class="qv-sec"><b id="aGrandTodayV">0</b><i>m³</i></div></div>
         </div>
       </div>
     </div>
@@ -1140,6 +1237,46 @@ body.light-mode .mov-grp.auto{background:rgba(7,94,84,.04);}
     </div>
     <div class="sheet-footer" style="grid-template-columns:1fr;">
       <button class="sheet-done-btn" onclick="closeDrainModal()">✅ Done</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════ QUICK ENTRY SHEET ══════════════ -->
+<div class="sheet-overlay" id="qeOverlay">
+  <div class="sheet-modal">
+    <div class="sheet-hdr">
+      <h2><svg class="ico"><use href="#i-tank"/></svg>Quick Entry</h2>
+      <button class="sheet-close" onclick="closeQuickEntry()">✕</button>
+    </div>
+
+    <div class="qe-daybar">
+      <button class="qe-day active" id="qeDayToday" onclick="qeSetDay('today')">TODAY</button>
+      <button class="qe-day" id="qeDayYest" onclick="qeSetDay('yest')">YESTERDAY</button>
+    </div>
+
+    <div class="qe-tools">
+      <div class="qe-tool">
+        <label>Set all temps</label>
+        <input type="text" inputmode="decimal" lang="en" id="qeAllTemp" placeholder="°C" oninput="sanitizeNumInput(this)">
+        <button onclick="qeApplyAllTemp()">Apply</button>
+      </div>
+      <button class="qe-copy" id="qeCopyBtn" onclick="qeCopyOtherDay()">⇄ Copy from yesterday</button>
+    </div>
+
+    <div class="sheet-body" style="padding:0;">
+      <div id="qeRows"></div>
+    </div>
+
+    <div class="qe-foot">
+      <div class="qe-total">
+        <span>Total entered</span>
+        <b id="qeTotalB">0</b><i>bbl</i>
+        <s id="qeTotalM">0 m³</s>
+      </div>
+      <div class="qe-actions">
+        <button class="sheet-done-btn" onclick="applyQuickEntry()">✓ Apply to sheet</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1551,23 +1688,58 @@ function onTabIdle(tabId, apply){
 }
 
 var CAL_LOAD_FAILED = false;
+var _calLoading = null;
+
+// Loads the strapping tables, retrying a few times before giving up.
+// A single dropped request on a field connection should not surface a
+// scary banner — only a genuine, repeated failure should. The service
+// worker serves this file cache-first, so after the first successful load
+// it comes from cache and this rarely touches the network at all.
 function loadTankCalibration(){
   if (TANK_CAL) return Promise.resolve();
-  return fetch('./tank_calibration.json').then(function(r){
-    if(!r.ok) throw new Error('HTTP ' + r.status);
-    return r.json();
-  }).then(function(data){
+  if (_calLoading) return _calLoading;        // never fire two in parallel
+
+  var attempt = function(n){
+    return fetch('./tank_calibration.json', { cache: 'force-cache' })
+      .then(function(r){
+        if(!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .catch(function(err){
+        // force-cache can fail if nothing is cached yet — retry on the network
+        if(n === 0) return fetch('./tank_calibration.json').then(function(r){
+          if(!r.ok) throw new Error('HTTP ' + r.status);
+          return r.json();
+        });
+        throw err;
+      })
+      .catch(function(err){
+        if(n >= 3) throw err;
+        var wait = 400 * Math.pow(2, n);        // 400ms, 800ms, 1.6s
+        console.warn('[Cal] load attempt ' + (n + 1) + ' failed, retrying in ' + wait + 'ms');
+        return new Promise(function(res){ setTimeout(res, wait); }).then(function(){
+          return attempt(n + 1);
+        });
+      });
+  };
+
+  _calLoading = attempt(0).then(function(data){
     TANK_CAL = data;
     CAL_LOAD_FAILED = false;
+    _calLoading = null;
     _renderCalWarning();
     // Recompute anything that was waiting on the table
-    try{ if(document.getElementById('aGrandToday')) computeInventory(); }catch(_){}
+    try{ if(document.getElementById('aProdM3')) computeInventory(); }catch(_){}
     try{ if(document.getElementById('shipLandRows')) computeShipping(); }catch(_){}
+    try{ if(document.getElementById('xferRows')) computeTransfers(); }catch(_){}
   }).catch(function(err){
+    _calLoading = null;
     CAL_LOAD_FAILED = true;
     _renderCalWarning();
+    console.error('[Cal] calibration failed to load after retries', err);
     throw err;
   });
+  return _calLoading;
 }
 // Without the calibration table every tank volume silently reads "—", which
 // looks like missing input rather than a broken deploy. Surface it loudly.
@@ -1584,6 +1756,14 @@ function _renderCalWarning(){
     }
   });
 }
+// If the device regains connectivity, try again automatically rather than
+// leaving the banner up until the person notices it.
+window.addEventListener('online', function(){
+  if(CAL_LOAD_FAILED && !TANK_CAL){
+    loadTankCalibration().then(function(){ showToast('✅ Calibration loaded'); }).catch(function(){});
+  }
+});
+
 function retryCalLoad(){
   showToast('⏳ Reloading calibration…');
   loadTankCalibration().then(function(){
@@ -2229,7 +2409,7 @@ function buildInventoryRows(){
               '<div class="ship-field"><label>Level m</label><input type="text" inputmode="decimal" lang="en" id="invY_g_' + id + '" placeholder="0.000" oninput="sanitizeNumInput(this); onYesterdayEdit(this)"></div>' +
               '<div class="ship-field"><label>Temp °C</label><input type="text" inputmode="decimal" lang="en" id="invY_t_' + id + '" placeholder="0" oninput="sanitizeNumInput(this); onYesterdayEdit(this)"></div>' +
             '</div>' +
-            '<div class="inv-out"><span class="cs" id="invY_c_' + id + '"></span><span id="invY_v_' + id + '">—</span> m³ <span class="vcf" id="invY_f_' + id + '"></span></div>' +
+            '<div class="inv-out"><span id="invY_v_' + id + '">—</span> bbl <span class="m3" id="invY_m_' + id + '"></span><span class="cs" id="invY_c_' + id + '"></span><span class="vcf" id="invY_f_' + id + '"></span></div>' +
           '</div>' +
           '<div class="inv-col today">' +
             '<div class="inv-col-lbl">TODAY</div>' +
@@ -2237,10 +2417,10 @@ function buildInventoryRows(){
               '<div class="ship-field"><label>Level m</label><input type="text" inputmode="decimal" lang="en" id="invT_g_' + id + '" placeholder="0.000" oninput="sanitizeNumInput(this); computeInventory()"></div>' +
               '<div class="ship-field"><label>Temp °C</label><input type="text" inputmode="decimal" lang="en" id="invT_t_' + id + '" placeholder="0" oninput="sanitizeNumInput(this); computeInventory()"></div>' +
             '</div>' +
-            '<div class="inv-out"><span class="cs" id="invT_c_' + id + '"></span><span id="invT_v_' + id + '">—</span> m³ <span class="vcf" id="invT_f_' + id + '"></span></div>' +
+            '<div class="inv-out"><span id="invT_v_' + id + '">—</span> bbl <span class="m3" id="invT_m_' + id + '"></span><span class="cs" id="invT_c_' + id + '"></span><span class="vcf" id="invT_f_' + id + '"></span></div>' +
           '</div>' +
         '</div>' +
-        '<div class="inv-diff">Δ <b id="invD_' + id + '">—</b> m³</div>' +
+        '<div class="inv-diff">Δ <b id="invD_' + id + '">—</b> bbl</div>' +
       '</div>';
     }).join('');
   });
@@ -2534,6 +2714,157 @@ function _applyTransfers(list){
   computeTransfers();
 }
 
+// ══════════════════════════════════════════
+//  QUICK ENTRY — fast tank level / temperature capture
+//
+//  Entering readings on the main sheet means scrolling past nine tanks with
+//  the keyboard opening and closing each time. This sheet puts every tank on
+//  one screen and lets the keyboard's "next" key walk straight through
+//  level → temp → next tank, so a full round of readings is one continuous
+//  run without ever dismissing the keypad.
+//
+//  Nothing is written to the sheet until Apply is pressed, so a mistyped
+//  entry can be abandoned by closing.
+// ══════════════════════════════════════════
+var QE_DAY = 'today';
+
+function openQuickEntry(day){
+  QE_DAY = day || 'today';
+  buildQuickEntry();
+  document.getElementById('qeOverlay').classList.add('show');
+  // Focus the first level field so typing can start immediately
+  setTimeout(function(){
+    var first = document.querySelector('#qeRows input[data-k="g"]');
+    if(first) first.focus();
+  }, 120);
+}
+function closeQuickEntry(){ document.getElementById('qeOverlay').classList.remove('show'); }
+
+function qeSetDay(day){
+  QE_DAY = day;
+  document.getElementById('qeDayToday').classList.toggle('active', day === 'today');
+  document.getElementById('qeDayYest').classList.toggle('active', day === 'yest');
+  document.getElementById('qeCopyBtn').textContent =
+    day === 'today' ? '⇄ Copy from yesterday' : '⇄ Copy from today';
+  buildQuickEntry();
+}
+
+function _qeTanks(){ return TANKS.filter(function(t){ return !t.noCal; }); }
+function _qeSrcId(tankKey, which, day){
+  return 'inv' + (day === 'today' ? 'T' : 'Y') + '_' + which + '_' + tankIdSafe(tankKey);
+}
+
+function buildQuickEntry(){
+  var box = document.getElementById('qeRows');
+  if(!box) return;
+  box.innerHTML = _qeTanks().map(function(t, i){
+    var id = tankIdSafe(t.key);
+    var g = document.getElementById(_qeSrcId(t.key, 'g', QE_DAY));
+    var tp = document.getElementById(_qeSrcId(t.key, 't', QE_DAY));
+    var stream = t.defaultStream === 'land' ? 'land' : 'marine';
+    return '<div class="qe-row ' + stream + '" id="qer_' + id + '">' +
+        '<div class="qe-tank">' +
+          '<svg class="ico"><use href="#i-' + (stream === 'land' ? 'tank' : 'wave') + '"/></svg>' +
+          '<span>' + escHtml(t.key) + '</span>' +
+        '</div>' +
+        '<input type="text" inputmode="decimal" lang="en" enterkeyhint="next" ' +
+          'data-k="g" data-tank="' + escHtml(t.key) + '" data-i="' + i + '" ' +
+          'placeholder="level m" value="' + escHtml(g ? g.value : '') + '" ' +
+          'oninput="sanitizeNumInput(this); qeRecalc()" onkeydown="qeKey(event,this)">' +
+        '<input type="text" inputmode="decimal" lang="en" enterkeyhint="next" ' +
+          'data-k="t" data-tank="' + escHtml(t.key) + '" data-i="' + i + '" ' +
+          'placeholder="°C" value="' + escHtml(tp ? tp.value : '') + '" ' +
+          'oninput="sanitizeNumInput(this); qeRecalc()" onkeydown="qeKey(event,this)">' +
+        '<div class="qe-prev" id="qep_' + id + '">—</div>' +
+      '</div>';
+  }).join('');
+  qeRecalc();
+}
+
+// Enter / Next walks to the following field, wrapping level → temp → next tank
+function qeKey(ev, el){
+  if(ev.key !== 'Enter') return;
+  ev.preventDefault();
+  var all = Array.prototype.slice.call(document.querySelectorAll('#qeRows input'));
+  var idx = all.indexOf(el);
+  if(idx > -1 && idx + 1 < all.length){ all[idx + 1].focus(); all[idx + 1].select(); }
+  else el.blur();
+}
+
+// Fills every temperature at once — tank temperatures across a farm are
+// often within a degree of each other, so this saves nine entries.
+function qeApplyAllTemp(){
+  var v = document.getElementById('qeAllTemp').value;
+  if(!v){ showToast('⚠️ Enter a temperature first', true); return; }
+  document.querySelectorAll('#qeRows input[data-k="t"]').forEach(function(el){ el.value = v; });
+  qeRecalc();
+  showToast('✅ All temperatures set to ' + v + '°C');
+}
+
+// Pulls the other day's readings across — useful when a tank hasn't moved.
+function qeCopyOtherDay(){
+  var other = QE_DAY === 'today' ? 'yest' : 'today';
+  if(!confirm('Copy ' + (other === 'yest' ? 'yesterday' : 'today') + "'s readings into this column?")) return;
+  _qeTanks().forEach(function(t){
+    var id = tankIdSafe(t.key);
+    var sg = document.getElementById(_qeSrcId(t.key, 'g', other));
+    var st = document.getElementById(_qeSrcId(t.key, 't', other));
+    var row = document.getElementById('qer_' + id);
+    if(!row) return;
+    if(sg) row.querySelector('[data-k="g"]').value = sg.value;
+    if(st) row.querySelector('[data-k="t"]').value = st.value;
+  });
+  qeRecalc();
+}
+
+// Live preview so a mistyped level is obvious before it reaches the sheet
+function qeRecalc(){
+  var CONV = 6.292316, total = 0;
+  _qeTanks().forEach(function(t){
+    var id = tankIdSafe(t.key);
+    var row = document.getElementById('qer_' + id);
+    if(!row) return;
+    var lvl = numOrNull(row.querySelector('[data-k="g"]').value);
+    var tmp = numOrNull(row.querySelector('[data-k="t"]').value);
+    var dens = t.defaultStream === 'land' ? INV_DENS_LAND : INV_DENS_MARINE;
+    var out = document.getElementById('qep_' + id);
+    if(lvl === null || tmp === null || !TANK_CAL){ if(out) out.textContent = '—'; return; }
+    var res = invTankVolume(t.key, lvl, tmp, dens);
+    if(!res || res.corrected === null){ if(out) out.textContent = '—'; return; }
+    total += res.corrected;
+    if(out) out.innerHTML = '<span>' + fmtNum(res.corrected * CONV, 0) + '</span>' +
+                            '<s>' + fmtNum(res.corrected, 1) + ' m³</s>';
+  });
+  var tb = document.getElementById('qeTotalB'), tm = document.getElementById('qeTotalM');
+  if(tb) tb.textContent = fmtNum(total * CONV, 1);
+  if(tm) tm.textContent = fmtNum(total, 3) + ' m³';
+}
+
+// Writes everything through to the real fields in one go
+function applyQuickEntry(){
+  var n = 0;
+  _qeTanks().forEach(function(t){
+    var row = document.getElementById('qer_' + tankIdSafe(t.key));
+    if(!row) return;
+    var gv = row.querySelector('[data-k="g"]').value;
+    var tv = row.querySelector('[data-k="t"]').value;
+    var dg = document.getElementById(_qeSrcId(t.key, 'g', QE_DAY));
+    var dt = document.getElementById(_qeSrcId(t.key, 't', QE_DAY));
+    if(dg){ dg.value = gv; if(gv) n++; }
+    if(dt){ dt.value = tv; }
+    // A hand-entered yesterday must stay authoritative against the auto-link
+    if(QE_DAY === 'yest' && (gv || tv)){
+      var col = dg && dg.closest ? dg.closest('.inv-col') : null;
+      if(col){ col.classList.add('manual'); col.classList.remove('linked'); }
+    }
+  });
+  computeInventory();
+  if(_invSaveTimer) clearTimeout(_invSaveTimer);
+  _invSaveTimer = setTimeout(saveInventoryToFirestore, 150);
+  closeQuickEntry();
+  showToast('✅ ' + n + ' tank' + (n === 1 ? '' : 's') + ' applied to ' + (QE_DAY === 'today' ? 'Today' : 'Yesterday'));
+}
+
 function computeInventory(){
   var CONV = 6.292316;
   var totals = { land: {y:0, t:0}, marine: {y:0, t:0} };
@@ -2554,8 +2885,11 @@ function computeInventory(){
       var yCorr = (yRes && yRes.corrected !== null) ? yRes.corrected : null;
       var tCorr = (tRes && tRes.corrected !== null) ? tRes.corrected : null;
 
-      document.getElementById('invY_v_' + id).textContent = yCorr !== null ? fmtNum(yCorr, 3) : '—';
-      document.getElementById('invT_v_' + id).textContent = tCorr !== null ? fmtNum(tCorr, 3) : '—';
+      document.getElementById('invY_v_' + id).textContent = yCorr !== null ? fmtNum(yCorr * CONV, 1) : '—';
+      document.getElementById('invT_v_' + id).textContent = tCorr !== null ? fmtNum(tCorr * CONV, 1) : '—';
+      var yM = document.getElementById('invY_m_' + id), tM = document.getElementById('invT_m_' + id);
+      if(yM) yM.textContent = yCorr !== null ? (fmtNum(yCorr, 3) + ' m³') : '';
+      if(tM) tM.textContent = tCorr !== null ? (fmtNum(tCorr, 3) + ' m³') : '';
       document.getElementById('invY_f_' + id).textContent = (yRes && yRes.vcf) ? ('VCF ' + yRes.vcf.toFixed(4)) : '';
       document.getElementById('invT_f_' + id).textContent = (tRes && tRes.vcf) ? ('VCF ' + tRes.vcf.toFixed(4)) : '';
       // Cal. Scale — the raw strapping-table volume at that level, before the
@@ -2583,7 +2917,7 @@ function computeInventory(){
 
       var diff = (yCorr !== null && tCorr !== null) ? tCorr - yCorr : null;
       var dEl = document.getElementById('invD_' + id);
-      dEl.textContent = diff !== null ? fmtNum(diff, 3) : '—';
+      dEl.textContent = diff !== null ? fmtNum(diff * CONV, 1) : '—';
       dEl.className = diff === null ? '' : (diff >= 0 ? 'pos' : 'neg');
 
       if(yCorr !== null) totals[stream].y += yCorr;
@@ -2591,12 +2925,16 @@ function computeInventory(){
     });
   });
 
+  // Barrels lead, cubic metres shown small underneath.
   function fill(prefix, s){
     var change = s.t - s.y;
-    document.getElementById(prefix + 'YestTotal').textContent = fmtNum(s.y, 3);
-    document.getElementById(prefix + 'TodayTotal').textContent = fmtNum(s.t, 3);
-    document.getElementById(prefix + 'Change').textContent = fmtNum(change, 3);
-    document.getElementById(prefix + 'ChangeBbl').textContent = fmtNum(change * CONV, 1);
+    var put2 = function(id, m3, dec){
+      var e = document.getElementById(id);
+      if(e) e.textContent = fmtNum(m3, dec === undefined ? 3 : dec);
+    };
+    put2(prefix + 'YestTotalB', s.y * CONV, 1);   put2(prefix + 'YestTotal', s.y);
+    put2(prefix + 'TodayTotalB', s.t * CONV, 1);  put2(prefix + 'TodayTotal', s.t);
+    put2(prefix + 'ChangeBbl', change * CONV, 1); put2(prefix + 'Change', change);
     return change;
   }
   var landChange = fill('aLand', totals.land);
@@ -2609,8 +2947,8 @@ function computeInventory(){
 
   // Terminal stock (reference section at the foot of the tab)
   var setTxt = function(id, v, d){ var e = document.getElementById(id); if(e) e.textContent = fmtNum(v, d); };
-  setTxt('aGrandYestV', grandY, 3);   setTxt('aGrandYestB', grandY * CONV, 1);
-  setTxt('aGrandTodayV', grandT, 3);  setTxt('aGrandTodayB', grandT * CONV, 1);
+  setTxt('aGrandYestB', grandY * CONV, 1);   setTxt('aGrandYestV', grandY, 3);
+  setTxt('aGrandTodayB', grandT * CONV, 1);  setTxt('aGrandTodayV', grandT, 3);
 
   setInvField('aGrandYest', grandY, 3);
   setInvField('aGrandToday', grandT, 3);
@@ -2644,11 +2982,11 @@ function computeInventory(){
   var shedCondM3 = (shedBbl + condBbl) / CONV;
 
   var setTxt0 = function(id, v, d){ var e = document.getElementById(id); if(e) e.textContent = fmtNum(v, d); };
-  setTxt0('aAutoZeitco', zeitM3, 3);              setTxt0('aAutoZeitcoB', zeitBbl, 1);
-  setTxt0('aAutoShedwan', shedBbl / CONV, 3);     setTxt0('aAutoShedwanB', shedBbl, 1);
-  setTxt0('aAutoCond', condBbl / CONV, 3);        setTxt0('aAutoCondB', condBbl, 1);
-  ['aAutoZeitcoB','aAutoShedwanB','aAutoCondB'].forEach(function(id){
-    var e = document.getElementById(id); if(e) e.textContent = e.textContent + ' bbl';
+  setTxt0('aAutoZeitcoB', zeitBbl, 1);   setTxt0('aAutoZeitco', zeitM3, 3);
+  setTxt0('aAutoShedwanB', shedBbl, 1);  setTxt0('aAutoShedwan', shedBbl / CONV, 3);
+  setTxt0('aAutoCondB', condBbl, 1);     setTxt0('aAutoCond', condBbl / CONV, 3);
+  ['aAutoZeitco','aAutoShedwan','aAutoCond'].forEach(function(id){
+    var e = document.getElementById(id); if(e) e.textContent = e.textContent + ' m³';
   });
 
   // Per-stream production from the tanks
@@ -2660,19 +2998,72 @@ function computeInventory(){
   var prodM3 = streamSum - recvTotal - mDiesel;
   var prodBblCalc = prodM3 * CONV;
 
-  setInvField('aRecLandChg', landChange, 3);
-  setInvField('aRecLandShip', mShipLand, 3);
-  setInvField('aRecLandZeit', zeitM3, 3);
-  setInvField('aRecLandProd', landProd, 3);
-  setInvField('aRecMarChg', marineChange, 3);
-  setInvField('aRecMarShip', mShipMar, 3);
-  setInvField('aRecMarShed', shedCondM3, 3);
-  setInvField('aRecMarProd', marProd, 3);
-  setInvField('aRecStreamSum', streamSum, 3);
-  setInvField('aRecRecv', recvTotal, 3);
-  setInvField('aRecDiesel', mDiesel, 3);
-  setInvField('aProdM3', prodM3, 3);
-  setInvField('aProdBbl', prodBblCalc, 1);
+  // Reconciliation, m³ with the barrel equivalent alongside each line
+  var recLine = function(id, v){
+    setInvField(id, v * CONV, 1);                       // barrels lead
+    var b = document.getElementById(id + 'B');
+    if(b) b.textContent = fmtNum(v, 3) + ' m³';         // m³ underneath
+  };
+  recLine('aRecLandChg', landChange);
+  recLine('aRecLandShip', mShipLand);
+  recLine('aRecLandZeit', zeitM3);
+  recLine('aRecLandProd', landProd);
+  recLine('aRecMarChg', marineChange);
+  recLine('aRecMarShip', mShipMar);
+  recLine('aRecMarShed', shedCondM3);
+  recLine('aRecMarProd', marProd);
+  recLine('aRecStreamSum', streamSum);
+  recLine('aRecRecv', recvTotal);
+  recLine('aRecDiesel', mDiesel);
+  setInvField('aProdBblMain', prodBblCalc, 1);
+  var pm = document.getElementById('aProdM3');
+  if(pm) pm.textContent = fmtNum(prodM3, 3) + ' m³';
+
+  // ── Tanks vs Daily Production ──
+  // A: with the imported streams still in — tank movement plus what shipped
+  //    out, compared against the gross received at Feiran.
+  // B: with them removed — each stream's own production from the tanks
+  //    against the same stream's net figure on the Daily Production tab.
+  //    This is the primary daily monitoring check.
+  var dailyNetLandM3 = 0, dailyNetMarM3 = 0, dailyGrossM3b = 0;
+  try {
+    var _pp = compute(readState());
+    dailyNetLandM3 = _pp.netLand_m3 || 0;
+    dailyNetMarM3  = _pp.netMarine_m3 || 0;
+    dailyGrossM3b  = (_pp.receivedFeiran_bbl || 0) / CONV;
+  } catch(_){}
+
+  var aTank = (landChange + mShipLand) + (marineChange + mShipMar);
+  var aVar  = aTank - dailyGrossM3b;
+  var put = function(id, v, dec){ var e = document.getElementById(id); if(e) e.textContent = fmtNum(v, dec === undefined ? 3 : dec); };
+  put('aCmpAtankB', aTank * CONV, 1);           put('aCmpAtank', aTank);
+  put('aCmpAdailyB', dailyGrossM3b * CONV, 1);  put('aCmpAdaily', dailyGrossM3b);
+  put('aCmpAvarB', aVar * CONV, 1);             put('aCmpAvar', aVar);
+
+  var keyTotT = landProd + marProd;
+  var keyTotD = dailyNetLandM3 + dailyNetMarM3;
+  var keyRow = function(base, m3){
+    var bEl = document.getElementById(base + 'B');
+    if(bEl) bEl.textContent = fmtNum(m3 * CONV, 1);
+    var mEl = document.getElementById(base);
+    if(mEl) mEl.textContent = fmtNum(m3, 3) + ' m³';
+  };
+  keyRow('aKeyLandT', landProd);  keyRow('aKeyLandD', dailyNetLandM3);  keyRow('aKeyLandV', landProd - dailyNetLandM3);
+  keyRow('aKeyMarT', marProd);    keyRow('aKeyMarD', dailyNetMarM3);    keyRow('aKeyMarV', marProd - dailyNetMarM3);
+  keyRow('aKeyTotT', keyTotT);    keyRow('aKeyTotD', keyTotD);          keyRow('aKeyTotV', keyTotT - keyTotD);
+  put('aKeyTotTM', keyTotT);
+  put('aKeyTotDM', keyTotD);
+  put('aKeyTotVM', keyTotT - keyTotD);
+
+  // Colour the key differences by direction so an outlier stands out
+  [['aKeyLandV', landProd - dailyNetLandM3, dailyNetLandM3],
+   ['aKeyMarV',  marProd - dailyNetMarM3,   dailyNetMarM3],
+   ['aKeyTotV',  keyTotT - keyTotD,         keyTotD]].forEach(function(k){
+    var el = document.getElementById(k[0] + 'B');
+    if(!el) return;
+    var pct = k[2] ? Math.abs(k[1] / k[2] * 100) : 0;
+    el.className = k[2] ? (pct <= 1 ? 'kv-ok' : (pct <= 3 ? 'kv-warn' : 'kv-bad')) : '';
+  });
 
   // Two comparisons against the Daily Production tab:
   //   A = gross received at Feiran  (WITH Zeitco / Shedwan / Condensate)
@@ -2709,8 +3100,8 @@ function computeInventory(){
     vEl.textContent = '—';
     vNote.textContent = 'enter tank levels';
   } else {
-    vEl.textContent = fmtNum(grandChange, 1);
-    vNote.textContent = fmtNum(grandChange * CONV, 0) + ' bbl';
+    vEl.textContent = fmtNum(grandChange * CONV, 0);
+    vNote.textContent = fmtNum(grandChange, 3) + ' m³';
   }
 
   // Hints showing what the Shipping tab currently totals for each stream
