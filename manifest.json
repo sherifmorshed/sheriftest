@@ -1,8 +1,8 @@
 {
-  "id": "com.petrobel.accountingprod.app",
-  "name": "Accounting Prod. - PETROBEL",
-  "short_name": "Acct Prod",
-  "description": "PETROBEL Accounting Production - Fieran Terminal Daily Calculator",
+  "id": "com.petrobel.wells.app",
+  "name": "Land Wells - PETROBEL",
+  "short_name": "Wells",
+  "description": "PETROBEL Land Wells Situation - Well Data Lookup System",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
