@@ -1196,6 +1196,7 @@ body.light-mode .install-banner{
 </svg></span>T.B.</button>
   <button class="nav-btn" onclick="showPage('disposal')" id="nav-disposal"><span class="icon">💧</span>Disposal</button>
   <button class="nav-btn" onclick="showPage('analysis')" id="nav-analysis"><span class="icon">📉</span>Analysis</button>
+  <button class="nav-btn" onclick="showPage('rasgara')" id="nav-rasgara"><span class="icon">🛢️</span>Ras Gara</button>
   <button class="nav-btn" onclick="showPage('data')" id="nav-data"><span class="icon">🗄️</span>Update DB</button>
 </nav>
 
@@ -1550,6 +1551,8 @@ body.light-mode .install-banner{
       <p>WELL_TEST_HISTORY.xlsx</p>
     </div>
     <input type="file" id="histFileInput" class="file-input" accept=".xlsx,.xls">
+    <button class="btn-secondary" id="histDateReviewBtn" onclick="downloadDateReport()"
+            style="display:none;margin-top:8px;width:100%;">📅 Review dates the app had to interpret</button>
     <div id="histAdminStatus" style="display:none;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-top:8px;line-height:1.7;"></div>
 
     <!-- ── Lab W.C. History upload (admin) ── -->
@@ -1567,6 +1570,8 @@ body.light-mode .install-banner{
       <p>W.C.HISTORY.xlsx</p>
     </div>
     <input type="file" id="wcFileInput" class="file-input" accept=".xlsx,.xls">
+    <button class="btn-secondary" id="wcDateReviewBtn" onclick="downloadDateReport()"
+            style="display:none;margin-top:8px;width:100%;">📅 Review dates the app had to interpret</button>
     <div id="wcAdminStatus" style="display:none;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-top:8px;line-height:1.7;"></div>
 
     <!-- ── Water Disposal Wells History upload (admin) ── -->
@@ -1940,6 +1945,91 @@ body.light-mode .install-banner{
 .anl-bal-net.gain .anl-bal-net-m3,.anl-bal-net.gain .anl-bal-net-bbl{color:var(--green);}
 .anl-bal-net.zero .anl-bal-net-m3,.anl-bal-net.zero .anl-bal-net-bbl{color:var(--muted);}
 </style>
+<style>
+/* ── Ras Gara tab ─────────────────────────────────────────────────────── */
+.rg-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;}
+.rg-lbl{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+.rg-date{background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);
+  padding:7px 9px;font-size:13px;font-family:'JetBrains Mono',monospace;}
+.rg-btn{background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);
+  padding:7px 12px;font-size:12px;cursor:pointer;font-family:inherit;}
+.rg-btn:active{transform:translateY(1px);}
+.rg-btn-primary{background:var(--accent);color:#04121a;border-color:var(--accent);font-weight:700;}
+body.light-mode .rg-btn-primary{color:#fff !important;}
+.rg-saved{font-size:11px;color:var(--muted);margin-left:auto;font-family:'JetBrains Mono',monospace;}
+.rg-hint{font-size:11px;color:var(--muted);margin:2px 0 10px;}
+.rg-sec-title{font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;margin:22px 0 8px;}
+.rg-tbl-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:10px;background:var(--surface);}
+table.rg-tbl{width:100%;border-collapse:collapse;font-family:'JetBrains Mono',monospace;font-size:12px;min-width:520px;}
+table.rg-tbl th{position:sticky;top:0;background:var(--card);color:var(--muted);font-size:10px;
+  letter-spacing:.5px;text-transform:uppercase;padding:7px 6px;border-bottom:1px solid var(--border);text-align:center;font-weight:600;}
+table.rg-tbl th.rg-grp{color:var(--accent);border-bottom:1px solid var(--accent);}
+table.rg-tbl th.rg-grp2{color:var(--accent2, #fbbf24);border-bottom:1px solid var(--accent2, #fbbf24);}
+table.rg-tbl td{padding:3px 6px;border-bottom:1px solid rgba(148,163,184,.12);text-align:center;color:var(--text);}
+table.rg-tbl tbody tr:nth-child(odd){background:rgba(56,189,248,0.07);}
+.rg-time{color:var(--muted);white-space:nowrap;}
+.rg-in{width:74px;background:transparent;border:1px solid transparent;border-radius:6px;color:var(--text);
+  padding:4px 5px;font-size:12px;font-family:'JetBrains Mono',monospace;text-align:center;}
+.rg-in:hover:not(:disabled){border-color:var(--border);}
+.rg-in:focus{outline:none;border-color:var(--accent);background:var(--card);}
+.rg-in:disabled{color:var(--muted);opacity:.65;cursor:not-allowed;}
+.rg-in.rg-dirty{border-color:var(--accent2, #fbbf24);}
+.rg-calc{color:var(--muted);font-variant-numeric:tabular-nums;}
+.rg-tot{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:14px;}
+.rg-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:11px 13px;}
+.rg-card .k{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+.rg-card .v{font-size:20px;font-weight:700;margin-top:3px;font-family:'JetBrains Mono',monospace;}
+.rg-card .s{font-size:11px;color:var(--muted);margin-top:1px;font-family:'JetBrains Mono',monospace;}
+.rg-card.petreco .v{color:var(--accent);}
+.rg-card.rasgara .v{color:var(--accent2, #fbbf24);}
+.rg-card.loss .v{color:var(--red, #f87171);}
+.rg-card.gain .v{color:var(--green, #4ade80);}
+.rg-actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+.rg-actions .rg-btn{flex:1;min-width:150px;padding:11px 12px;font-size:13px;}
+.rg-empty{color:var(--muted);font-size:13px;text-align:center;padding:26px 10px;}
+.rg-legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:6px;font-size:11px;
+  color:var(--muted);font-family:'JetBrains Mono',monospace;}
+.rg-legend .sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px;}
+</style>
+
+<div class="page" id="page-rasgara" style="display:none;">
+  <div class="page-hdr">
+    <h2>🛢️ Ras Gara — Production Comparison</h2>
+    <p>Hourly PETRECO vs Ras Gara readings, losses &amp; daily trend</p>
+  </div>
+  <div style="padding:12px 14px 30px;">
+
+    <!-- day picker + actions -->
+    <div class="rg-bar">
+      <label class="rg-lbl" for="rgDate">Shift day</label>
+      <input type="date" id="rgDate" class="rg-date">
+      <button class="rg-btn" id="rgTodayBtn">Today</button>
+      <span class="rg-saved" id="rgSaved"></span>
+    </div>
+    <div class="rg-hint" id="rgShiftHint"></div>
+
+    <!-- entry / comparison table -->
+    <div id="rgTableArea"></div>
+
+    <!-- totals -->
+    <div id="rgTotals"></div>
+
+    <!-- chart -->
+    <div id="rgChart"></div>
+
+    <!-- actions -->
+    <div class="rg-actions">
+      <button class="rg-btn rg-btn-primary" id="rgPrintBtn">🖨️ Print report</button>
+      <button class="rg-btn rg-btn-primary" id="rgMailBtn">📧 Send by e-mail</button>
+    </div>
+
+    <!-- daily trend across days -->
+    <div class="rg-sec-title">📈 Daily comparison history</div>
+    <div id="rgHistory"></div>
+  </div>
+</div>
+
 <div class="page" id="page-analysis" style="display:none;">
   <div class="page-hdr">
     <h2>📉 Loss Analysis</h2>
@@ -1995,8 +2085,14 @@ const firebaseConfig = {
   appId: "1:1035624175697:web:4b6e0a0f26ca0da2290070"
 };
 const ADMIN_EMAILS = ['sherifmorshed@gmail.com'];
+// Ras Gara plant operators. They see ONLY the Ras Gara tab and may write only
+// the Ras Gara columns of a day. Enforced here for the UI and, crucially, in
+// the Firestore rules — a UI check alone is not security; without the matching
+// rule this account could write anything.
+const RASGARA_EMAILS = ['rasgara@petrobel.org'];
 let currentUser = null;
 let isAdmin = false;
+let isRasGara = false;
 
 // ── Degraded-mode stub ───────────────────────────────────────────────────
 // Used only if the Firebase SDK could not be initialised at all. Every call
@@ -2129,8 +2225,10 @@ function hideLoadingScreen() {
 
 function showApp(user) {
   currentUser = { email: user.email, uid: user.uid, name: user.email.split('@')[0] };
-  isAdmin = ADMIN_EMAILS.includes(user.email.toLowerCase());
-  console.log('[Auth] Logged in:', user.email, isAdmin ? '(ADMIN)' : '(READER)');
+  const _email = String(user.email || '').toLowerCase();
+  isAdmin   = ADMIN_EMAILS.includes(_email);
+  isRasGara = RASGARA_EMAILS.includes(_email);
+  console.log('[Auth] Logged in:', user.email, isAdmin ? '(ADMIN)' : isRasGara ? '(RAS GARA)' : '(READER)');
 
   // Hide login, show app
   document.getElementById('login-page').classList.add('hidden');
@@ -2140,7 +2238,22 @@ function showApp(user) {
 
   // Populate user bar
   document.getElementById('ubEmail').textContent = user.email;
-  document.getElementById('ubRole').textContent = isAdmin ? 'ADMIN' : 'READER';
+  document.getElementById('ubRole').textContent = isAdmin ? 'ADMIN' : isRasGara ? 'RAS GARA' : 'READER';
+
+  // Ras Gara operators get a single-purpose app: every other tab and page is
+  // removed from the nav, and showPage() refuses to open them.
+  if (isRasGara && !isAdmin) {
+    document.querySelectorAll('#mainNav .nav-btn').forEach(function(b){
+      if (b.id !== 'nav-rasgara') b.style.display = 'none';
+    });
+    document.querySelectorAll('.page').forEach(function(pg){
+      if (pg.id !== 'page-rasgara') pg.style.display = 'none';
+    });
+    var _hdrStats = document.getElementById('headerStats');
+    if (_hdrStats) _hdrStats.classList.add('hidden');
+    var _sitBar = document.querySelector('.situation-date-bar');
+    if (_sitBar) _sitBar.style.display = 'none';
+  }
 
   // Show/hide Update DB tab + page based on admin role
   var navData = document.getElementById('nav-data');
@@ -2158,6 +2271,9 @@ function showApp(user) {
   try {
     if (isAdmin && typeof initMorningReport === 'function') initMorningReport();
   } catch (e) { console.warn('[Boot] initMorningReport failed:', e); }
+
+  // Ras Gara accounts land straight on their own tab.
+  if (isRasGara && !isAdmin) { try { showPage('rasgara'); } catch(e){} }
 
   // Update online/offline status
   handleOnlineStatus();
@@ -2378,6 +2494,7 @@ function stopFirestoreListener() {
   try { stopWCHistoryListener(); } catch(e){}
   try { stopDisposalListener(); } catch(e){}
   try { if(typeof stopSnapshotsListener==='function') stopSnapshotsListener(); } catch(e){}
+  try { if(typeof stopRasGaraListener==='function') stopRasGaraListener(); } catch(e){}
 }
 
 // Start real-time listener — all 50 readers auto-update
@@ -2386,12 +2503,30 @@ function startFirestoreListener() {
   stopFirestoreListener();
   console.log('[Firestore] Starting listener');
   updateCloudStatus('syncing', 'Connecting…');
+
+  // The Ras Gara plant account has no business with PETROBEL's well data, and
+  // the security rules deny it. Asking anyway would spray permission-denied
+  // errors across the console and park the cloud badge on "Not authorized",
+  // so simply don't subscribe to anything outside its own collection.
+  var _rgOnly = (typeof isRasGara !== 'undefined' && isRasGara) &&
+                !(typeof isAdmin !== 'undefined' && isAdmin);
+  if (_rgOnly) {
+    try { if(typeof startRasGaraListener==='function') startRasGaraListener(); }
+    catch(e){ console.warn('ras gara listener', e); }
+    _firestoreReady = true;
+    updateCloudStatus('synced', 'Cloud ✓');
+    if (_loadingScreenTimeout) { clearTimeout(_loadingScreenTimeout); _loadingScreenTimeout = null; }
+    hideLoadingScreen();
+    return;
+  }
+
   // Also start the wells-history listener for all logged-in users
   try { startHistoryListener(); } catch(e){ console.warn('history listener', e); }
   try { startWCHistoryListener(); } catch(e){ console.warn('wc listener', e); }
   try { startDisposalListener(); } catch(e){ console.warn('disposal listener', e); }
   try { if(typeof startSnapshotsListener==='function') startSnapshotsListener(); } catch(e){ console.warn('snapshots listener', e); }
   try { if(typeof startChemSurveyListener==='function') startChemSurveyListener(); } catch(e){ console.warn('chem survey listener', e); }
+  try { if(typeof startRasGaraListener==='function') startRasGaraListener(); } catch(e){ console.warn('ras gara listener', e); }
   _firestoreUnsub = db.collection('wells').doc('landWells')
     .onSnapshot(function(doc) {
       // Last-resort guard: whatever happens while handling a snapshot, the user
@@ -2457,7 +2592,7 @@ function _handleWellsSnapshot(doc) {
               lsSet(STORAGE_KEYS.situationDate, remoteSitDate);
             }
             // Only refresh the active page — mark others as stale
-            _stalePages = { substation:true, manifold:true, chemical:true, tb:true, data:true, lookup:true, analysis:true };
+            _stalePages = { substation:true, manifold:true, chemical:true, tb:true, data:true, lookup:true, analysis:true, rasgara:true };
             var activePage = document.querySelector('.page.active');
             var activeId = activePage ? activePage.id.replace('page-','') : 'lookup';
             _refreshPage(activeId);
@@ -2482,6 +2617,7 @@ function _refreshPage(page) {
   else if(page==='tb') renderTBPage();
   else if(page==='data') updateDBStats();
   else if(page==='analysis') refreshAnalysisPage();
+  else if(page==='rasgara' && typeof refreshRasGaraPage==='function') refreshRasGaraPage();
 }
 
 // ── Online/Offline detection ──
@@ -3197,6 +3333,8 @@ function updateSituationDateDisplay() {
 function showPage(page, pushState=true) {
   // Block non-admin access to Update DB page
   if (page === 'data' && !isAdmin) { showToast('⚠️ Admin access required'); return; }
+  // Ras Gara accounts are confined to their own tab.
+  if (typeof isRasGara !== 'undefined' && isRasGara && !isAdmin && page !== 'rasgara') { page = 'rasgara'; }
   // Only remove VISIBLE overlays on tab switch — hidden overlays are preserved
   // for back navigation (e.g. opening a well from the stats overlay hides it temporarily)
   ['wellListOverlay','tbWellsOverlay'].forEach(id=>{
@@ -3232,6 +3370,7 @@ function showPage(page, pushState=true) {
   else if(page==='history') refreshHistoryPage();
   else if(page==='disposal') refreshDisposalPage();
   else if(page==='analysis') refreshAnalysisPage();
+  else if(page==='rasgara' && typeof refreshRasGaraPage==='function') refreshRasGaraPage();
   // When returning to lookup — always show clean home state
   if(page==='lookup'){
     const statsEl = document.getElementById('headerStats');
@@ -6593,39 +6732,216 @@ function parseHistoryFile(file){
   r.readAsArrayBuffer(file);
 }
 
-// Sequence-aware date repair for W.C. history. The Excel sheet is entered in
-// chronological row order using DD/MM/YYYY, but Excel silently flipped some
-// cells to MM/DD/YYYY (only when BOTH day and month are ≤12, e.g. "01/09/2025"
-// = 1-Sep became 9-Jan). Rather than blindly swapping every ambiguous cell
-// (which corrupts legitimately-low dates), we walk the rows in file order and,
-// for each ambiguous date, choose whichever interpretation (original vs
-// day↔month swapped) keeps the series moving forward with the smallest gap
-// relative to the previous accepted date. Returns a NEW array of Date objects.
-//   IMPORTANT: caller must pass dates in original file order (do NOT pre-sort).
-function _fixFlippedDateSequence(dates){
-  let lastValid = null;
-  return dates.map(d => {
-    if(!d || isNaN(d.getTime())) return d;
-    const month = d.getMonth() + 1, day = d.getDate(), year = d.getFullYear();
-    const isAmbiguous = month <= 12 && day <= 12 && month !== day;
-    let candidate = d;
-    if(isAmbiguous){
-      const swapped = new Date(year, day - 1, month);
-      if(lastValid){
-        const gapOrig = Math.abs(d - lastValid);
-        const gapSwap = Math.abs(swapped - lastValid);
-        const origFwd = d >= lastValid;
-        const swapFwd = swapped >= lastValid;
-        if(origFwd && swapFwd)        candidate = gapOrig <= gapSwap ? d : swapped;
-        else if(swapFwd && !origFwd)  candidate = swapped;
-        else if(origFwd && !swapFwd)  candidate = d;
-        else                          candidate = gapOrig <= gapSwap ? d : swapped;
-      }
-      // No lastValid yet → keep as-is (earliest rows are assumed correct).
-    }
-    lastValid = candidate;
-    return candidate;
+// ══════════════════════════════════════════════════════════════════════
+//  DATE RESOLUTION — anchor-based
+// ══════════════════════════════════════════════════════════════════════
+// The history sheets are written in chronological row order, but the date
+// column is a mess: some cells are real Excel dates, some are text, and the
+// same column mixes DD/MM and MM/DD. Excel itself flipped many of them on
+// import, so a cell reading 2026-08-04 can really mean 8 April 2026.
+// A date is only AMBIGUOUS when both parts are <= 12; if either part is > 12
+// (e.g. "17/7/2026") there is exactly one possible reading.
+//
+// The previous approach walked the rows and compared each ambiguous date
+// against the PREVIOUS ACCEPTED date, preferring whichever reading moved
+// forward by the smallest gap. That chains every decision off the one before
+// it, so a single wrong choice latches and corrupts everything after it.
+// That is exactly what happened to well 113-188: once one row was read as
+// 4 July, the correct reading (7 April) looked "backwards" for every
+// following row, and a whole block of April tests surfaced as July/August.
+//
+// This version never chains off its own guesses. Instead:
+//   1. Rows that can only be read one way are CERTAIN.
+//   2. Keep only the certain rows that agree with the file's overall
+//      chronological order (longest non-decreasing run). This throws out
+//      typos like "23/2/2029" or "30/3/2006", which are unambiguous but
+//      wrong and would otherwise drag every later window out of range.
+//      Those become the trusted anchor spine.
+//   3. Every ambiguous row must fall between the nearest trusted anchor
+//      before it and the nearest one after it. Pick the reading that fits.
+//   4. If NEITHER reading fits, the row itself is wrong (usually a mistyped
+//      year). Take the closest reading and flag it as SUSPECT so a human can
+//      correct the source — the app should not silently invent a date.
+//
+// Measured on the real WELL TEST HISTORY file: per-well out-of-order steps
+// fall from 471 to 233, and of what remains 220 are genuine typos in the
+// spreadsheet that no algorithm can resolve (see the SUSPECT report).
+
+// ══════════════════════════════════════════════════════════════════════
+//  DATE REVIEW EXPORT — the permanent cure
+// ══════════════════════════════════════════════════════════════════════
+// Inference has a ceiling. On the real WELL TEST HISTORY file, after the
+// anchor resolver, 220 of the 233 remaining out-of-order dates are genuine
+// typos in the spreadsheet — a year keyed as 2024 instead of 2025, or 2006,
+// or 2035. No algorithm can recover those, because they read only one way.
+//
+// So the app stops pretending it can. It writes down every date it had to
+// interpret, and every row it believes is simply wrong, and hands that list
+// back as a spreadsheet. Fix those rows once at source, save the sheet with
+// ISO (YYYY-MM-DD) dates, and there is nothing left to guess — ever.
+function downloadDateReport(){
+  if(!_lastDateReport || !_lastDateReport.rows.length){
+    showToast('No dates needed interpreting in the last import 🎉');
+    return;
+  }
+  const rep = _lastDateReport;
+  const header = ['Excel row','Well','Date as written in sheet','App read it as','Confidence','What to do'];
+  // Rows the app believes are genuinely WRONG come first — those are the ones a
+  // human must fix. The merely-ambiguous ones follow, in sheet order, so the
+  // column can be rewritten as ISO dates in one pass afterwards.
+  const ordered = rep.rows.slice().sort(function(a,b){
+    const sa = a.flag.indexOf('suspect') >= 0 ? 0 : 1;
+    const sb = b.flag.indexOf('suspect') >= 0 ? 0 : 1;
+    return sa !== sb ? sa - sb : a.excelRow - b.excelRow;
   });
+  const body = ordered.map(function(r){
+    const suspect = r.flag.indexOf('suspect') >= 0;
+    return [
+      r.excelRow, r.well, r.raw, r.resolved,
+      suspect ? 'WRONG — please fix' : 'Interpreted (day/month swapped)',
+      suspect
+        ? 'This date does not fit the surrounding rows. Usually a mistyped year. Correct it in the sheet.'
+        : 'Written ambiguously; read from the surrounding rows. Rewrite as ' + r.resolved + ' to remove all doubt.'
+    ];
+  });
+  const aoa = [
+    ['DATE REVIEW — ' + rep.file],
+    ['Generated by the PETROBEL Land Wells app'],
+    [''],
+    ['Rows the app had to interpret: ' + rep.rows.length],
+    ['  of which look WRONG in the sheet (listed first): ' + rep.rows.filter(function(r){return r.flag.indexOf('suspect')>=0;}).length],
+    [''],
+    ['HOW TO STOP THIS HAPPENING AGAIN:'],
+    ['1. Fix every row marked "WRONG — please fix" in the original sheet.'],
+    ['2. Format the whole DATE column as YYYY-MM-DD (e.g. 2026-08-05).'],
+    ['3. Re-upload. From then on no date is ambiguous and nothing is guessed.'],
+    [''],
+    header
+  ].concat(body);
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols'] = [{wch:10},{wch:12},{wch:28},{wch:14},{wch:32},{wch:80}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Date review');
+  const out = XLSX.write(wb, {bookType:'xlsx', type:'array'});
+  const name = 'DATE_REVIEW_' + rep.file.replace(/[^A-Za-z0-9]+/g,'_') + '.xlsx';
+  _downloadBlob(new Blob([out], {type:'application/octet-stream'}), name);
+  showToast('📄 Date review downloaded (' + rep.rows.length + ' rows)');
+}
+
+// Holds the date-review report from the most recent history import, so the
+// admin can download the list of rows the app had to interpret. Reset on
+// every import.
+let _lastDateReport = null;
+
+// Render a raw date cell exactly as it appears in the sheet, for the report.
+function _rawCellText(v){
+  if(v == null) return '';
+  if(v instanceof Date && !isNaN(v)){
+    return String(v.getDate()).padStart(2,'0') + '/' +
+           String(v.getMonth()+1).padStart(2,'0') + '/' + v.getFullYear() +
+           ' (Excel date cell)';
+  }
+  return String(v);
+}
+
+// Parse one raw date cell, keeping the information needed to judge ambiguity.
+function _parseDateParts(v){
+  if(v == null || String(v).trim() === '') return null;
+  if(v instanceof Date && !isNaN(v)){
+    return { d:new Date(Date.UTC(v.getFullYear(), v.getMonth(), v.getDate())),
+             day:v.getDate(), mon:v.getMonth()+1, yr:v.getFullYear(), iso:false };
+  }
+  if(typeof v === 'number'){
+    const d = new Date(Date.UTC(1899,11,30) + v*86400000);
+    if(isNaN(d)) return null;
+    return { d, day:d.getUTCDate(), mon:d.getUTCMonth()+1, yr:d.getUTCFullYear(), iso:true };
+  }
+  const s = String(v).trim();
+  // Year-first is unambiguous by definition.
+  let m = s.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/);
+  if(m) return { d:new Date(Date.UTC(+m[1], +m[2]-1, +m[3])), day:+m[3], mon:+m[2], yr:+m[1], iso:true };
+  m = s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/);
+  if(m){ let day=+m[1], mon=+m[2], yr=+m[3]; if(yr<100) yr+=2000;
+         const d = new Date(Date.UTC(yr, mon-1, day));
+         return isNaN(d) ? null : { d, day, mon, yr, iso:false }; }
+  const d = new Date(s);
+  if(isNaN(d)) return null;
+  return { d:new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())),
+           day:d.getDate(), mon:d.getMonth()+1, yr:d.getFullYear(), iso:true };
+}
+
+function _mkUTC(y, m, d){
+  const x = new Date(Date.UTC(y, m-1, d));
+  return (x.getUTCMonth()+1 === m && x.getUTCDate() === d) ? x : null;
+}
+
+// Longest non-decreasing subsequence — picks the largest set of anchors that
+// are mutually consistent with the sheet's chronological order.
+function _longestNonDecreasing(items){
+  if(!items.length) return new Set();
+  const tails = [], tailIdx = [], prev = new Array(items.length).fill(-1);
+  for(let k = 0; k < items.length; k++){
+    const t = items[k].t;
+    let lo = 0, hi = tails.length;
+    while(lo < hi){ const mid = (lo+hi) >> 1; if(tails[mid] <= t) lo = mid+1; else hi = mid; }
+    tails[lo] = t; tailIdx[lo] = k; prev[k] = lo > 0 ? tailIdx[lo-1] : -1;
+  }
+  const keep = new Set();
+  let k = tailIdx[tails.length-1];
+  while(k >= 0){ keep.add(items[k].i); k = prev[k]; }
+  return keep;
+}
+
+// rawCells: the date column in ORIGINAL FILE ORDER (do NOT pre-sort).
+// Returns { dates, flags, stats } — flags[i] is '', 'swapped' or 'suspect'.
+function resolveDateSequence(rawCells){
+  const n = rawCells.length;
+  const parsed = new Array(n).fill(null);
+  for(let i = 0; i < n; i++) parsed[i] = _parseDateParts(rawCells[i]);
+
+  const isAmbiguous = i => {
+    const p = parsed[i];
+    return !!p && !p.iso && p.mon <= 12 && p.day <= 12 && p.mon !== p.day;
+  };
+
+  const certain = [];
+  for(let i = 0; i < n; i++) if(parsed[i] && !isAmbiguous(i)) certain.push({ i, t:+parsed[i].d });
+  const trusted = _longestNonDecreasing(certain);
+  const rejectedAnchors = certain.length - trusted.size;
+
+  const before = new Array(n).fill(null), after = new Array(n).fill(null);
+  let cur = null;
+  for(let i = 0; i < n; i++){ before[i] = cur; if(trusted.has(i)) cur = parsed[i].d; }
+  cur = null;
+  for(let i = n-1; i >= 0; i--){ after[i] = cur; if(trusted.has(i)) cur = parsed[i].d; }
+
+  const dates = new Array(n).fill(null), flags = new Array(n).fill('');
+  let swapped = 0, suspect = 0;
+  for(let i = 0; i < n; i++){
+    const p = parsed[i];
+    if(!p) continue;
+    if(trusted.has(i)){ dates[i] = p.d; continue; }
+    const asWritten = _mkUTC(p.yr, p.mon, p.day);
+    const flipped   = isAmbiguous(i) ? _mkUTC(p.yr, p.day, p.mon) : null;
+    const lo = before[i], hi = after[i];
+    const fits = x => !!x && (!lo || x >= lo) && (!hi || x <= hi);
+    const fitA = fits(asWritten), fitB = fits(flipped);
+    if(fitA && !fitB){ dates[i] = asWritten; }
+    else if(fitB && !fitA){ dates[i] = flipped; flags[i] = 'swapped'; swapped++; }
+    else if(fitA && fitB){
+      const mid = (lo && hi) ? new Date((+lo + +hi)/2) : (lo || hi);
+      dates[i] = Math.abs(asWritten - mid) <= Math.abs(flipped - mid) ? asWritten : flipped;
+      if(dates[i] === flipped){ flags[i] = 'swapped'; swapped++; }
+    } else {
+      // Neither reading lands in the window — the source row is wrong.
+      const mid = (lo && hi) ? new Date((+lo + +hi)/2) : (lo || hi || asWritten);
+      const cands = [asWritten, flipped].filter(Boolean)
+                      .sort((x,y) => Math.abs(x-mid) - Math.abs(y-mid));
+      dates[i] = cands[0] || asWritten;
+      flags[i] = 'suspect'; suspect++;
+    }
+  }
+  return { dates, flags, stats:{ swapped, suspect, anchors:trusted.size, rejectedAnchors } };
 }
 
 function _parseHistoryBuffer(buf){
@@ -6648,39 +6964,51 @@ function _parseHistoryBuffer(buf){
       // forward-fill for merged/blank cells. File order MUST be preserved so the
       // sequence-aware flip-fix can use chronological continuity (same approach
       // as the W.C. importer). Header rows 0-3 skipped; data from row index 4.
-      let _ffDate = null;
-      let _ffWell = null;
-      const seqDates = [];   // one Date (or null) per data row
-      const seqRows  = [];   // matching {row, wellRaw}
+      // Collect the RAW date cells first: the resolver needs to see the whole
+      // column at once to build its anchor spine. Resolve, THEN forward-fill —
+      // doing it the other way round would feed unresolved dates into the fill.
+      const seqRaw  = [];
+      const seqRows = [];
       for(let i = 4; i < rows.length; i++){
         const row = rows[i];
         // A completely blank row is not a record. Without this check the
         // forward-fill below hands it the previous row's date and well name
         // and it becomes a phantom test result.
-        if(!row || isBlankSheetRow(row)){ seqDates.push(null); seqRows.push(null); continue; }
-        let date = _toDate(row[0]);
+        if(!row || isBlankSheetRow(row)){ seqRaw.push(null); seqRows.push(null); continue; }
+        seqRaw.push(row[0]);
+        seqRows.push({ row, wellRaw: row[1] });
+      }
+      const _res = autoFix
+        ? resolveDateSequence(seqRaw)
+        : { dates: seqRaw.map(_toDate), flags: seqRaw.map(function(){ return ''; }), stats:{swapped:0,suspect:0} };
+      _lastDateReport = { file:'WELL TEST HISTORY', rows:[], stats:_res.stats };
+      // Forward-fill the RESOLVED dates and the well names (merged cells).
+      let _ffDate = null, _ffWell = null;
+      const fixedDates = [];
+      for(let j = 0; j < seqRows.length; j++){
+        const entry = seqRows[j];
+        if(!entry){ fixedDates.push(null); continue; }
+        let d = _res.dates[j];
         // Reject obviously-bogus dates BEFORE forward-fill: serial 0 / empty
         // cells become 1899-12-30, and other garbage can predate Y2K.
-        if(date && date < MIN_DATE) date = null;
-        if(date) _ffDate = date;
-        else if(_ffDate) date = _ffDate;            // forward-fill blank dates
-        let wellRaw = row[1];
-        if(wellRaw != null && String(wellRaw).trim() !== '') _ffWell = wellRaw;
-        else if(_ffWell != null) wellRaw = _ffWell;
-        seqDates.push(date);
-        seqRows.push({ row, wellRaw });
+        if(d && d < MIN_DATE) d = null;
+        if(d) _ffDate = d; else if(_ffDate) d = _ffDate;
+        fixedDates.push(d);
+        if(entry.wellRaw != null && String(entry.wellRaw).trim() !== '') _ffWell = entry.wellRaw;
+        else if(_ffWell != null) entry.wellRaw = _ffWell;
       }
-      // ── Sequence-aware flip repair (DD/MM vs MM/DD) ──
-      const fixedDates = autoFix ? _fixFlippedDateSequence(seqDates) : seqDates;
       // ── PASS 2 ── build records from corrected dates, still in file order.
       for(let j = 0; j < seqRows.length; j++){
         const entry = seqRows[j];
         if(!entry) continue;
         let date = fixedDates[j];
-        const orig = seqDates[j];
         if(!date){ skippedBadDate++; continue; }
         if(autoFix && date > TODAY){ skippedFuture++; continue; } // still-future → drop
-        if(orig && date.getTime() !== orig.getTime()) swappedDates++;
+        if(_res.flags[j] === 'swapped') swappedDates++;
+        if(_res.flags[j]){
+          _lastDateReport.rows.push({ excelRow:j+5, well:String(entry.wellRaw||'').trim(),
+            raw:_rawCellText(seqRaw[j]), resolved:_isoDate(date), flag:_res.flags[j] });
+        }
         let wellRaw = entry.wellRaw;
         if(wellRaw == null || String(wellRaw).trim() === ''){ skippedRows++; continue; }
         const row = entry.row;
@@ -6750,6 +7078,8 @@ function _setHistAdminStatus(text){
   if(!el) return;
   el.style.display = 'block';
   el.textContent = text;
+  const btn = document.getElementById('histDateReviewBtn');
+  if(btn) btn.style.display = (_lastDateReport && _lastDateReport.rows.length) ? '' : 'none';
 }
 
 // ── Cloud sync for wells history (per-well docs + meta) ──
@@ -7404,23 +7734,28 @@ function _parseDisposalBuffer(buf){
     const canon = function(s){ return String(s).toUpperCase().replace(/[^A-Z0-9]/g,''); };
 
     // ── PASS 1 ── forward-fill date + well in original file order ──
-    let _ffDate=null, _ffWell=null;
-    const seqDates=[], seqRows=[];
+    const seqRaw=[], seqRows=[];
     for(let i=2;i<rows.length;i++){
       const row = rows[i];
       // Blank rows must not inherit the previous date/well via forward-fill —
       // that is what turned trailing empty rows into phantom readings.
-      if(!row || isBlankSheetRow(row)){ seqDates.push(null); seqRows.push(null); continue; }
-      let date = _toDate(row[1]);
-      if(date && date < MIN_DATE) date = null;
-      if(date) _ffDate = date; else if(_ffDate) date = _ffDate;
-      let wellRaw = row[2];
-      if(wellRaw!=null && String(wellRaw).trim()!=='') _ffWell = String(wellRaw).trim();
-      else if(_ffWell!=null) wellRaw = _ffWell;
-      seqDates.push(date);
-      seqRows.push({ wellRaw: wellRaw, rate: row[3], whp: row[4] });
+      if(!row || isBlankSheetRow(row)){ seqRaw.push(null); seqRows.push(null); continue; }
+      seqRaw.push(row[1]);
+      seqRows.push({ wellRaw: row[2], rate: row[3], whp: row[4] });
     }
-    const fixedDates = _fixFlippedDateSequence(seqDates);
+    const _res = resolveDateSequence(seqRaw);
+    let _ffDate=null, _ffWell=null;
+    const fixedDates=[];
+    for(let j=0;j<seqRows.length;j++){
+      const e=seqRows[j];
+      if(!e){ fixedDates.push(null); continue; }
+      let d=_res.dates[j];
+      if(d && d < MIN_DATE) d = null;
+      if(d) _ffDate=d; else if(_ffDate) d=_ffDate;
+      fixedDates.push(d);
+      if(e.wellRaw!=null && String(e.wellRaw).trim()!=='') _ffWell = String(e.wellRaw).trim();
+      else if(_ffWell!=null) e.wellRaw = _ffWell;
+    }
 
     // ── PASS 2 ── collect readings, group by canonical well key ──
     const byKey = {};
@@ -7429,10 +7764,9 @@ function _parseDisposalBuffer(buf){
       const entry = seqRows[j];
       if(!entry) continue;
       let date = fixedDates[j];
-      const orig = seqDates[j];
       if(!date){ skippedBad++; continue; }
       if(date > TODAY){ skippedFuture++; continue; }
-      if(orig && date.getTime()!==orig.getTime()) swapped++;
+      if(_res.flags[j] === 'swapped') swapped++;
       const wellRaw = entry.wellRaw;
       if(wellRaw==null || String(wellRaw).trim()===''){ skippedNoWell++; continue; }
       const name = String(wellRaw).trim();
@@ -8035,6 +8369,8 @@ function _wcBuildMatchMap(){
 }
 
 function _setWCAdminStatus(text){
+  const btn = document.getElementById('wcDateReviewBtn');
+  if(btn) btn.style.display = (_lastDateReport && _lastDateReport.rows.length) ? '' : 'none';
   const el = document.getElementById('wcAdminStatus');
   if(!el) return;
   el.style.display = 'block';
@@ -8074,37 +8410,47 @@ function _parseWCBuffer(buf){
     // forward-fill for merged/blank cells. We MUST keep file order so the
     // sequence-aware flip-fix can use chronological continuity. Header rows
     // 0-3 are skipped; data starts at row index 4.
-    let _ffDate = null;
-    let _ffWell = null;
-    const seqDates = [];   // one entry per data row (Date or null)
-    const seqRows  = [];   // the matching raw row
+    // Collect the RAW date cells first — the resolver needs the whole column
+    // at once to build its anchor spine. Resolve, THEN forward-fill.
+    const seqRaw  = [];
+    const seqRows = [];
     for(let i = 4; i < rows.length; i++){
       const row = rows[i];
       // A completely blank row is not a reading. Without this check the
       // forward-fill below hands it the previous row's date and well name
       // and it becomes a phantom W.C. sample.
-      if(!row || isBlankSheetRow(row)){ seqDates.push(null); seqRows.push(null); continue; }
-      let date = _toDate(row[0]);
-      if(date && date < MIN_DATE) date = null;        // reject pre-Y2K phantoms
-      if(date) _ffDate = date;
-      else if(_ffDate) date = _ffDate;                // forward-fill blank dates
-      let wellRaw = row[1];
-      if(wellRaw != null && String(wellRaw).trim() !== '') _ffWell = wellRaw;
-      else if(_ffWell != null) wellRaw = _ffWell;
-      seqDates.push(date);
-      seqRows.push({ row, wellRaw });
+      if(!row || isBlankSheetRow(row)){ seqRaw.push(null); seqRows.push(null); continue; }
+      seqRaw.push(row[0]);
+      seqRows.push({ row, wellRaw: row[1] });
     }
-    // ── Sequence-aware flip repair (DD/MM vs MM/DD) ──
-    const fixedDates = autoFix ? _fixFlippedDateSequence(seqDates) : seqDates;
+    const _res = autoFix
+      ? resolveDateSequence(seqRaw)
+      : { dates: seqRaw.map(_toDate), flags: seqRaw.map(function(){ return ''; }), stats:{swapped:0,suspect:0} };
+    _lastDateReport = { file:'W.C. HISTORY', rows:[], stats:_res.stats };
+    let _ffDate = null, _ffWell = null;
+    const fixedDates = [];
+    for(let j = 0; j < seqRows.length; j++){
+      const entry = seqRows[j];
+      if(!entry){ fixedDates.push(null); continue; }
+      let d = _res.dates[j];
+      if(d && d < MIN_DATE) d = null;                 // reject pre-Y2K phantoms
+      if(d) _ffDate = d; else if(_ffDate) d = _ffDate;
+      fixedDates.push(d);
+      if(entry.wellRaw != null && String(entry.wellRaw).trim() !== '') _ffWell = entry.wellRaw;
+      else if(_ffWell != null) entry.wellRaw = _ffWell;
+    }
     // ── PASS 2 ── build records from corrected dates, still in file order.
     for(let j = 0; j < seqRows.length; j++){
       const entry = seqRows[j];
       if(!entry) continue;
       let date = fixedDates[j];
-      const orig = seqDates[j];
       if(!date){ skippedBadDate++; continue; }
       if(autoFix && date > TODAY){ skippedFuture++; continue; } // still-future → drop
-      if(orig && date.getTime() !== orig.getTime()) swappedDates++;
+      if(_res.flags[j] === 'swapped') swappedDates++;
+      if(_res.flags[j]){
+        _lastDateReport.rows.push({ excelRow:j+5, well:String(entry.wellRaw||'').trim(),
+          raw:_rawCellText(seqRaw[j]), resolved:_isoDate(date), flag:_res.flags[j] });
+      }
       let wellRaw = entry.wellRaw;
       if(wellRaw == null || String(wellRaw).trim() === ''){ skippedRows++; continue; }
       const row = entry.row;
@@ -9423,6 +9769,652 @@ function initMorningReport() {
   // Wiring — Update DB "Comparison File" input stores a dated baseline snapshot
   const cmpFile=document.getElementById('cmpFileInput');
   if(cmpFile){ cmpFile.addEventListener('change',function(){ const f=this.files&&this.files[0]; this.value=''; window.uploadBaselineSnapshot(f,function(sit,c){ renderSnapStatus(); showToast('✅ '+c+' wells stored as baseline: '+formatSituationDate(sit)); }); }); }
+})();
+</script>
+
+<!-- ══════════════════════════════════════════
+     RAS GARA — daily PETRECO vs Ras Gara comparison
+     ══════════════════════════════════════════ -->
+<script>
+(function(){
+  // Ras Gara is a plant ~100 km from PETRECO. Both sides meter the same
+  // production independently every hour; the difference is the transport loss.
+  //
+  // Data entry, per the two parties who actually take the readings:
+  //   PETRECO m3/hr  → typed by PETROBEL; the cumulative column is DERIVED
+  //                    from it (running total), never typed.
+  //   Ras Gara m3/hr AND cumulative → both typed by the Ras Gara operator,
+  //                    because their meter reports both independently.
+  //
+  // A "day" is the operating shift: 24 rows from 06:00 through 05:00 the
+  // following morning, matching the most recent sheets in Ras Gara Test 2026.
+  const RG_COL   = 'rasGara';
+  const RG_META  = { col:'rasGaraMeta', doc:'info' };
+  const RG_LS    = 'rasgara_days_v1';
+  const RG_VERK  = 'rasgara_days_v1__syncver';
+  const RG_START_HOUR = 6;
+  const RG_HOURS = 24;
+  const M3_TO_BBL = 6.3;           // the factor used in the source workbook
+
+  let RG_DAYS = (function(){ try { return JSON.parse(lsGet(RG_LS) || '{}') || {}; } catch(e){ return {}; } })();
+  let _rgDate = null;              // yyyy-mm-dd of the shift currently open
+  let _rgMetaUnsub = null, _rgLastTs = 0, _rgFirstSnap = true, _rgSkipNext = false;
+  let _rgSaveTimer = null;
+
+  // ── helpers ─────────────────────────────────────────────────────────────
+  function rgHourLabel(i){
+    const h = (RG_START_HOUR + i) % 24;
+    return String(h).padStart(2,'0') + ':00';
+  }
+  // Rows from 06:00 onward belong to the shift date; rows past midnight belong
+  // to the next calendar day. Shown so nobody has to work it out.
+  function rgRowDate(dateStr, i){
+    const rolls = (RG_START_HOUR + i) >= 24;
+    if(!rolls) return dateStr;
+    const d = new Date(dateStr + 'T00:00:00');
+    d.setDate(d.getDate() + 1);
+    return _isoDate(d);
+  }
+  function rgNum(v){
+    if(v === '' || v == null) return null;
+    const n = parseFloat(v);
+    return isNaN(n) ? null : n;
+  }
+  function rgFmt(v, dp){
+    if(v == null || isNaN(v)) return '—';
+    const p = Math.pow(10, dp == null ? 1 : dp);
+    return (Math.round(v * p) / p).toLocaleString('en-US');
+  }
+  function rgToday(){
+    // Before the 06:00 shift start the "current" shift is still yesterday's.
+    const now = new Date();
+    if(now.getHours() < RG_START_HOUR) now.setDate(now.getDate() - 1);
+    return _isoDate(now);
+  }
+  function rgBlankDay(dateStr){
+    const rows = [];
+    for(let i = 0; i < RG_HOURS; i++) rows.push({ p:null, r:null, rc:null });
+    return { date:dateStr, startHour:RG_START_HOUR, rows:rows, updatedBy:'', updatedAt:0 };
+  }
+  function rgGetDay(dateStr){
+    const d = RG_DAYS[dateStr];
+    if(!d) return rgBlankDay(dateStr);
+    // tolerate short/legacy rows
+    const rows = [];
+    for(let i = 0; i < RG_HOURS; i++){
+      const s = (d.rows && d.rows[i]) || {};
+      rows.push({ p:rgNum(s.p), r:rgNum(s.r), rc:rgNum(s.rc) });
+    }
+    return { date:dateStr, startHour:d.startHour || RG_START_HOUR, rows:rows,
+             updatedBy:d.updatedBy || '', updatedAt:d.updatedAt || 0 };
+  }
+
+  // ── the calculations, exactly as the workbook does them ────────────────
+  function rgCalc(day){
+    let pTot = 0, rTot = 0, pAny = false, rAny = false;
+    const pCum = [];
+    let run = 0;
+    for(let i = 0; i < RG_HOURS; i++){
+      const row = day.rows[i];
+      if(row.p != null){ run += row.p; pTot += row.p; pAny = true; pCum.push(run); }
+      else pCum.push(null);
+      if(row.r != null){ rTot += row.r; rAny = true; }
+    }
+    const loss = (pAny || rAny) ? (pTot - rTot) : null;   // PETRECO − Ras Gara
+    return {
+      pCum: pCum,
+      pTotal: pAny ? pTot : null,
+      rTotal: rAny ? rTot : null,
+      pBbl: pAny ? pTot * M3_TO_BBL : null,
+      rBbl: rAny ? rTot * M3_TO_BBL : null,
+      loss: loss,
+      lossBbl: loss == null ? null : loss * M3_TO_BBL,
+      lossPct: (pAny && pTot > 0 && loss != null) ? (loss / pTot * 100) : null
+    };
+  }
+
+  // ── permissions ─────────────────────────────────────────────────────────
+  // Each side owns its own columns so neither plant can quietly restate the
+  // other's meter reading — the whole point of the comparison is that the two
+  // numbers are taken independently.
+  function rgCanEditPetreco(){ return typeof isAdmin !== 'undefined' && isAdmin; }
+  function rgCanEditRasGara(){ return (typeof isRasGara !== 'undefined' && isRasGara) ||
+                                      (typeof isAdmin !== 'undefined' && isAdmin && false); }
+  function rgReadOnly(){ return !rgCanEditPetreco() && !rgCanEditRasGara(); }
+
+  // ── table ───────────────────────────────────────────────────────────────
+  function rgRenderTable(){
+    const area = document.getElementById('rgTableArea');
+    if(!area) return;
+    const day = rgGetDay(_rgDate);
+    const c   = rgCalc(day);
+    const edP = rgCanEditPetreco(), edR = rgCanEditRasGara();
+    let body = '';
+    for(let i = 0; i < RG_HOURS; i++){
+      const row = day.rows[i];
+      body += '<tr>' +
+        '<td class="rg-time">' + escHtml(rgHourLabel(i)) + '</td>' +
+        '<td>' + (edP
+            ? '<input class="rg-in" inputmode="decimal" data-rg="p" data-i="' + i + '" value="' + escAttr(row.p == null ? '' : row.p) + '">'
+            : '<span class="rg-calc">' + rgFmt(row.p, 2) + '</span>') + '</td>' +
+        '<td class="rg-calc">' + rgFmt(c.pCum[i], 1) + '</td>' +
+        '<td>' + (edR
+            ? '<input class="rg-in" inputmode="decimal" data-rg="r" data-i="' + i + '" value="' + escAttr(row.r == null ? '' : row.r) + '">'
+            : '<span class="rg-calc">' + rgFmt(row.r, 2) + '</span>') + '</td>' +
+        '<td>' + (edR
+            ? '<input class="rg-in" inputmode="decimal" data-rg="rc" data-i="' + i + '" value="' + escAttr(row.rc == null ? '' : row.rc) + '">'
+            : '<span class="rg-calc">' + rgFmt(row.rc, 1) + '</span>') + '</td>' +
+        '</tr>';
+    }
+    area.innerHTML =
+      '<div class="rg-tbl-wrap"><table class="rg-tbl">' +
+        '<thead>' +
+          '<tr><th></th><th class="rg-grp" colspan="2">PETRECO</th><th class="rg-grp2" colspan="2">RAS GARA</th></tr>' +
+          '<tr><th>Time</th><th>M3/hr' + (edP ? '' : '') + '</th><th>Cumulative<br><span style="font-weight:400;text-transform:none;">calculated</span></th>' +
+              '<th>M3/hr</th><th>Cumulative</th></tr>' +
+        '</thead><tbody>' + body + '</tbody></table></div>';
+
+    const hint = document.getElementById('rgShiftHint');
+    if(hint){
+      const endDate = rgRowDate(_rgDate, RG_HOURS - 1);
+      let who = rgReadOnly() ? 'You have read-only access.'
+              : edP ? 'You can enter the PETRECO M3/hr column.'
+                    : 'You can enter the Ras Gara columns.';
+      hint.textContent = 'Shift ' + rgHourLabel(0) + ' ' + _rgDate + '  →  ' +
+                         rgHourLabel(RG_HOURS-1) + ' ' + endDate + '. ' + who;
+    }
+  }
+
+  // ── totals ──────────────────────────────────────────────────────────────
+  function rgRenderTotals(){
+    const el = document.getElementById('rgTotals');
+    if(!el) return;
+    const c = rgCalc(rgGetDay(_rgDate));
+    if(c.pTotal == null && c.rTotal == null){
+      el.innerHTML = '<div class="rg-empty">No readings entered for this shift yet.</div>';
+      return;
+    }
+    const lossCls = (c.loss == null) ? '' : (c.loss > 0 ? 'loss' : 'gain');
+    const lossSign = (c.loss == null) ? '' : (c.loss > 0 ? '−' : '+');
+    el.innerHTML =
+      '<div class="rg-tot">' +
+        '<div class="rg-card petreco"><div class="k">PETRECO total</div><div class="v">' + rgFmt(c.pTotal,1) + '</div>' +
+          '<div class="s">m³/d · ' + rgFmt(c.pBbl,0) + ' bbl/d</div></div>' +
+        '<div class="rg-card rasgara"><div class="k">Ras Gara total</div><div class="v">' + rgFmt(c.rTotal,1) + '</div>' +
+          '<div class="s">m³/d · ' + rgFmt(c.rBbl,0) + ' bbl/d</div></div>' +
+        '<div class="rg-card ' + lossCls + '"><div class="k">Difference</div><div class="v">' + lossSign + rgFmt(Math.abs(c.loss),1) + '</div>' +
+          '<div class="s">m³/d · ' + rgFmt(Math.abs(c.lossBbl),0) + ' bbl/d' +
+          (c.lossPct == null ? '' : ' · ' + rgFmt(Math.abs(c.lossPct),1) + '%') + '</div></div>' +
+      '</div>';
+  }
+
+  // ── chart: the workbook's line chart, Time vs Rate M3/hr ───────────────
+  function rgChartSVG(day, forPrint){
+    const c = rgCalc(day);
+    const W = 720, H = 260, P = 42;
+    const series = [
+      { key:'p', label:'PETRECO',  color:'#22d3ee' },
+      { key:'r', label:'Ras Gara', color:'#fbbf24' }
+    ];
+    let maxY = 0, any = false;
+    for(let i = 0; i < RG_HOURS; i++){
+      ['p','r'].forEach(function(k){
+        const v = day.rows[i][k];
+        if(v != null){ any = true; if(v > maxY) maxY = v; }
+      });
+    }
+    if(!any) return '<div class="rg-empty">Nothing to chart yet — enter some readings.</div>';
+    maxY = maxY <= 0 ? 1 : maxY * 1.15;
+    const sx = i => P + (W - 2*P) * (i / (RG_HOURS - 1));
+    const sy = v => H - P - (H - 2*P) * (v / maxY);
+    const axisCol = forPrint ? '#94a3b8' : 'rgba(148,163,184,.35)';
+    const txtCol  = forPrint ? '#334155' : '#94a3b8';
+
+    let grid = '';
+    for(let g = 0; g <= 4; g++){
+      const v = maxY * g / 4, y = sy(v);
+      grid += '<line x1="' + P + '" y1="' + y.toFixed(1) + '" x2="' + (W-P) + '" y2="' + y.toFixed(1) +
+              '" stroke="' + axisCol + '" stroke-width="1" stroke-dasharray="2,3"/>' +
+              '<text x="' + (P-6) + '" y="' + (y+3).toFixed(1) + '" text-anchor="end" fill="' + txtCol +
+              '" font-size="10" font-family="monospace">' + (Math.round(v*10)/10) + '</text>';
+    }
+    let xax = '';
+    for(let i = 0; i < RG_HOURS; i += 3){
+      xax += '<text x="' + sx(i).toFixed(1) + '" y="' + (H-P+15) + '" text-anchor="middle" fill="' + txtCol +
+             '" font-size="9" font-family="monospace">' + rgHourLabel(i) + '</text>';
+    }
+    let paths = '';
+    series.forEach(function(s){
+      let d = '', open = false, dots = '';
+      for(let i = 0; i < RG_HOURS; i++){
+        const v = day.rows[i][s.key];
+        if(v == null){ open = false; continue; }
+        const x = sx(i), y = sy(v);
+        d += (open ? ' L' : ' M') + x.toFixed(1) + ' ' + y.toFixed(1);
+        open = true;
+        dots += '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="2.6" fill="' + s.color + '"/>';
+      }
+      if(d) paths += '<path d="' + d.trim() + '" fill="none" stroke="' + s.color + '" stroke-width="2" stroke-linejoin="round"/>' + dots;
+    });
+    const legend = series.map(function(s){
+      return '<span class="rg-legend-i"><span class="sw" style="background:' + s.color + ';"></span>' + s.label + '</span>';
+    }).join('');
+    return '<div style="overflow-x:auto;"><svg viewBox="0 0 ' + W + ' ' + H + '" ' +
+      'style="width:100%;min-width:320px;height:auto;' +
+      (forPrint ? 'background:#fff;' : 'background:rgba(15,23,42,.35);border:1px solid var(--border);border-radius:10px;') +
+      'display:block;">' +
+      '<text x="' + (W/2) + '" y="16" text-anchor="middle" fill="' + txtCol + '" font-size="11" font-family="monospace">Rate M³/hr</text>' +
+      grid + xax + paths +
+      '<line x1="' + P + '" y1="' + (H-P) + '" x2="' + (W-P) + '" y2="' + (H-P) + '" stroke="' + axisCol + '" stroke-width="1"/>' +
+      '<line x1="' + P + '" y1="' + P + '" x2="' + P + '" y2="' + (H-P) + '" stroke="' + axisCol + '" stroke-width="1"/>' +
+      '</svg></div>' +
+      '<div class="rg-legend">' + legend + '</div>';
+  }
+  function rgRenderChart(){
+    const el = document.getElementById('rgChart');
+    if(el) el.innerHTML = '<div class="rg-sec-title">📉 Ras Gara Test — ' + escHtml(_rgDate) + '</div>' +
+                          rgChartSVG(rgGetDay(_rgDate), false);
+  }
+
+  // ── cross-day history (the workbook's HISTORY sheet) ───────────────────
+  function rgHistoryRows(){
+    return Object.keys(RG_DAYS).sort().map(function(d){
+      const c = rgCalc(rgGetDay(d));
+      return { date:d, p:c.pTotal, r:c.rTotal, diff:c.loss };
+    }).filter(function(x){ return x.p != null || x.r != null; });
+  }
+  function rgRenderHistory(){
+    const el = document.getElementById('rgHistory');
+    if(!el) return;
+    const rows = rgHistoryRows();
+    if(!rows.length){ el.innerHTML = '<div class="rg-empty">No days recorded yet.</div>'; return; }
+    let body = '';
+    rows.slice().reverse().forEach(function(x){
+      const cls = x.diff == null ? '' : (x.diff > 0 ? 'style="color:var(--red,#f87171)"' : 'style="color:var(--green,#4ade80)"');
+      body += '<tr data-rgday="' + escAttr(x.date) + '" style="cursor:pointer">' +
+        '<td class="rg-time">' + escHtml(x.date) + '</td>' +
+        '<td>' + rgFmt(x.p,1) + '</td><td>' + rgFmt(x.r,1) + '</td>' +
+        '<td ' + cls + '>' + rgFmt(x.diff,1) + '</td></tr>';
+    });
+    el.innerHTML = '<div class="rg-tbl-wrap"><table class="rg-tbl">' +
+      '<thead><tr><th>Date</th><th>PETRECO</th><th>R/G</th><th>Difference</th></tr></thead>' +
+      '<tbody>' + body + '</tbody></table></div>';
+  }
+
+  function rgRenderAll(){
+    if(!_rgDate) _rgDate = rgToday();
+    const inp = document.getElementById('rgDate');
+    if(inp && inp.value !== _rgDate) inp.value = _rgDate;
+    rgRenderTable(); rgRenderTotals(); rgRenderChart(); rgRenderHistory();
+    const sv = document.getElementById('rgSaved');
+    const day = rgGetDay(_rgDate);
+    if(sv) sv.textContent = day.updatedAt
+      ? 'last saved ' + new Date(day.updatedAt).toLocaleString('en-GB') + (day.updatedBy ? ' by ' + day.updatedBy : '')
+      : '';
+  }
+  window.refreshRasGaraPage = rgRenderAll;
+
+  // ── editing & persistence ───────────────────────────────────────────────
+  function rgApplyInput(kind, i, raw){
+    const day = RG_DAYS[_rgDate] || rgBlankDay(_rgDate);
+    if(!day.rows) day.rows = rgBlankDay(_rgDate).rows;
+    while(day.rows.length < RG_HOURS) day.rows.push({ p:null, r:null, rc:null });
+    // Guard here as well as in the UI: a disabled input is not security.
+    if(kind === 'p' && !rgCanEditPetreco()) return false;
+    if((kind === 'r' || kind === 'rc') && !rgCanEditRasGara()) return false;
+    day.rows[i][kind] = rgNum(raw);
+    day.date = _rgDate;
+    day.startHour = RG_START_HOUR;
+    RG_DAYS[_rgDate] = day;
+    return true;
+  }
+  function rgSaveLocal(){
+    try { lsSet(RG_LS, JSON.stringify(RG_DAYS)); checkStorageHeadroom(); } catch(e){}
+  }
+  function rgQueueSave(){
+    rgSaveLocal();
+    if(_rgSaveTimer) clearTimeout(_rgSaveTimer);
+    // Debounced: an operator typing 24 rows should produce one write, not 24.
+    _rgSaveTimer = setTimeout(function(){ _rgSaveTimer = null; rgPushToCloud(); }, 1200);
+  }
+  async function rgPushToCloud(){
+    if(rgReadOnly()) return;
+    if(typeof db === 'undefined' || typeof FIREBASE_OK === 'undefined' || !FIREBASE_OK) return;
+    const day = RG_DAYS[_rgDate];
+    if(!day) return;
+    const who = (typeof currentUser !== 'undefined' && currentUser) ? currentUser.name : 'user';
+    try {
+      _rgSkipNext = true;
+      await db.collection(RG_COL).doc(_rgDate).set({
+        date:_rgDate, startHour:RG_START_HOUR, rows:day.rows,
+        updatedBy:who, updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+      });
+      const dates = Object.keys(RG_DAYS).sort();
+      await db.collection(RG_META.col).doc(RG_META.doc).set({
+        dates:dates, count:dates.length,
+        updatedAt:firebase.firestore.FieldValue.serverTimestamp(), updatedBy:who
+      });
+      day.updatedAt = Date.now(); day.updatedBy = who;
+      rgSaveLocal();
+      const sv = document.getElementById('rgSaved');
+      if(sv) sv.textContent = 'saved ' + new Date().toLocaleTimeString('en-GB');
+      if(typeof updateCloudStatus === 'function') updateCloudStatus('synced','Cloud ✓');
+    } catch(err){
+      console.error('[RasGara] save failed', err);
+      showToast('⚠️ Could not save to cloud: ' + (err.code || err.message), true);
+    }
+  }
+
+  // ── cloud sync (same cache-version pattern as the other datasets) ──────
+  function rgStartListener(){
+    rgStopListener();
+    if(typeof db === 'undefined' || typeof FIREBASE_OK === 'undefined' || !FIREBASE_OK) return;
+    _rgMetaUnsub = db.collection(RG_META.col).doc(RG_META.doc).onSnapshot(async function(doc){
+      if(doc.metadata && doc.metadata.hasPendingWrites && !(doc.data() && doc.data().updatedAt)) return;
+      if(!doc.exists){ _rgFirstSnap = false; return; }
+      const data = doc.data() || {};
+      const ts = data.updatedAt ? data.updatedAt.toMillis() : 0;
+      const isFirst = _rgFirstSnap; _rgFirstSnap = false;
+      if(!isFirst && ts === _rgLastTs) return;
+      _rgLastTs = ts;
+      if(_rgSkipNext){ _rgSkipNext = false; setSyncedVersion(RG_VERK, ts); return; }
+      if(isCacheCurrent(RG_VERK, ts, Object.keys(RG_DAYS).length > 0)){
+        console.log('[Firestore] Ras Gara already current (v' + ts + ') — skipped collection read');
+        rgRenderAll(); return;
+      }
+      try {
+        const snap = await db.collection(RG_COL).get();
+        const obj = {};
+        snap.forEach(function(d){
+          const dd = d.data() || {};
+          obj[dd.date || d.id] = {
+            date:dd.date || d.id, startHour:dd.startHour || RG_START_HOUR, rows:dd.rows || [],
+            updatedBy:dd.updatedBy || '',
+            updatedAt:(dd.updatedAt && dd.updatedAt.toMillis) ? dd.updatedAt.toMillis() : 0
+          };
+        });
+        RG_DAYS = obj;
+        rgSaveLocal();
+        setSyncedVersion(RG_VERK, ts);
+        rgRenderAll();
+        if(!isFirst) showToast('🔄 Ras Gara data synced');
+      } catch(err){ console.error('[Firestore] Ras Gara fetch failed', err); }
+    }, function(err){ console.error('[Firestore] Ras Gara listener error', err); });
+  }
+  function rgStopListener(){
+    if(_rgMetaUnsub){ _rgMetaUnsub(); _rgMetaUnsub = null; }
+    _rgFirstSnap = true; _rgLastTs = 0;
+  }
+  window.startRasGaraListener = rgStartListener;
+  window.stopRasGaraListener  = rgStopListener;
+
+  // ── wiring ──────────────────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', function(){
+    const dateEl = document.getElementById('rgDate');
+    if(dateEl){
+      dateEl.value = rgToday();
+      dateEl.addEventListener('change', function(){
+        _rgDate = this.value || rgToday();
+        rgRenderAll();
+      });
+    }
+    const todayBtn = document.getElementById('rgTodayBtn');
+    if(todayBtn) todayBtn.addEventListener('click', function(){ _rgDate = rgToday(); rgRenderAll(); });
+
+    const area = document.getElementById('rgTableArea');
+    if(area){
+      // Delegated so the handlers survive every re-render.
+      area.addEventListener('input', function(e){
+        const t = e.target;
+        if(!t || !t.classList.contains('rg-in')) return;
+        const kind = t.getAttribute('data-rg'), i = parseInt(t.getAttribute('data-i'), 10);
+        if(!kind || isNaN(i)) return;
+        if(!rgApplyInput(kind, i, t.value)) return;
+        t.classList.add('rg-dirty');
+        // Only the derived cells and totals need repainting — never the input
+        // the operator is typing into, or the caret would jump.
+        rgRefreshDerived();
+        rgQueueSave();
+      });
+      area.addEventListener('blur', function(e){
+        if(e.target && e.target.classList.contains('rg-in')) e.target.classList.remove('rg-dirty');
+      }, true);
+    }
+    const hist = document.getElementById('rgHistory');
+    if(hist) hist.addEventListener('click', function(e){
+      const tr = e.target.closest('tr[data-rgday]');
+      if(!tr) return;
+      _rgDate = tr.getAttribute('data-rgday');
+      rgRenderAll();
+      document.getElementById('page-rasgara').scrollIntoView({behavior:'smooth', block:'start'});
+    });
+    const pb = document.getElementById('rgPrintBtn');
+    if(pb) pb.addEventListener('click', function(){ rgPrintReport(); });
+    const mb = document.getElementById('rgMailBtn');
+    if(mb) mb.addEventListener('click', function(){ rgEmailReport(); });
+  });
+
+  // Repaint the calculated cells + totals + chart without touching inputs.
+  function rgRefreshDerived(){
+    const day = rgGetDay(_rgDate), c = rgCalc(day);
+    const rows = document.querySelectorAll('#rgTableArea tbody tr');
+    for(let i = 0; i < rows.length; i++){
+      const cell = rows[i].children[2];
+      if(cell) cell.textContent = rgFmt(c.pCum[i], 1);
+    }
+    rgRenderTotals(); rgRenderChart();
+  }
+
+  // ── written summary ─────────────────────────────────────────────────────
+  // The number alone does not tell an operator whether the shift was normal.
+  // Compare against the recent average so the report says something useful.
+  function rgSummaryText(day){
+    const c = rgCalc(day);
+    if(c.pTotal == null && c.rTotal == null) return 'No readings were recorded for this shift.';
+    const parts = [];
+    parts.push('Over the 24-hour shift beginning ' + rgHourLabel(0) + ' on ' + day.date +
+               ', PETRECO metered ' + rgFmt(c.pTotal,1) + ' m³ (' + rgFmt(c.pBbl,0) + ' bbl) and Ras Gara metered ' +
+               rgFmt(c.rTotal,1) + ' m³ (' + rgFmt(c.rBbl,0) + ' bbl).');
+    if(c.loss != null){
+      const dir = c.loss > 0 ? 'less than PETRECO' : 'more than PETRECO';
+      parts.push('Ras Gara produced ' + rgFmt(Math.abs(c.loss),1) + ' m³ (' + rgFmt(Math.abs(c.lossBbl),0) + ' bbl) ' + dir +
+                 (c.lossPct == null ? '' : ', a difference of ' + rgFmt(Math.abs(c.lossPct),1) + '% of the PETRECO figure') + '.');
+    }
+    // Context from the previous recorded days.
+    const hist = rgHistoryRows().filter(function(x){ return x.date < day.date && x.diff != null; });
+    const recent = hist.slice(-7);
+    if(recent.length >= 2){
+      const avg = recent.reduce(function(a,x){ return a + x.diff; }, 0) / recent.length;
+      const delta = (c.loss == null) ? null : c.loss - avg;
+      parts.push('The average difference over the previous ' + recent.length + ' recorded day(s) is ' +
+                 rgFmt(avg,1) + ' m³/d.' +
+                 (delta == null ? '' :
+                   Math.abs(delta) < 1
+                     ? ' This shift is in line with that average.'
+                     : ' This shift is ' + rgFmt(Math.abs(delta),1) + ' m³/d ' +
+                       (delta > 0 ? 'worse' : 'better') + ' than that average.'));
+    }
+    const missP = day.rows.filter(function(r){ return r.p == null; }).length;
+    const missR = day.rows.filter(function(r){ return r.r == null; }).length;
+    if(missP || missR){
+      parts.push('Note: ' + (missP ? missP + ' PETRECO ' : '') + (missP && missR ? 'and ' : '') +
+                 (missR ? missR + ' Ras Gara ' : '') + 'hourly reading(s) were not entered, so the totals cover only the hours recorded.');
+    }
+    return parts.join(' ');
+  }
+
+  // ── printable report (also the thing that gets e-mailed) ───────────────
+  function rgReportHTML(day){
+    const c = rgCalc(day);
+    let rows = '';
+    for(let i = 0; i < RG_HOURS; i++){
+      const r = day.rows[i];
+      rows += '<tr>' +
+        '<td>' + rgHourLabel(i) + '</td>' +
+        '<td>' + rgFmt(r.p,2) + '</td><td>' + rgFmt(c.pCum[i],1) + '</td>' +
+        '<td>' + rgFmt(r.r,2) + '</td><td>' + rgFmt(r.rc,1) + '</td>' +
+      '</tr>';
+    }
+    return '' +
+'<!DOCTYPE html><html><head><meta charset="utf-8"><title>Ras Gara Comparison ' + escHtml(day.date) + '</title>' +
+'<style>' +
+'*{box-sizing:border-box}' +
+'body{font-family:Arial,Helvetica,sans-serif;color:#111;margin:0;padding:22px;background:#fff;}' +
+'h1{font-size:19px;margin:0 0 2px;} h2{font-size:13px;margin:20px 0 7px;color:#334155;}' +
+'.sub{font-size:12px;color:#555;margin-bottom:16px;}' +
+'table{border-collapse:collapse;width:100%;font-size:11px;}' +
+'th,td{border:1px solid #cbd5e1;padding:4px 6px;text-align:center;}' +
+'th{background:#f1f5f9;font-size:10px;text-transform:uppercase;letter-spacing:.4px;}' +
+'th.p{background:#e0f2fe;} th.r{background:#fef3c7;}' +
+'.cards{display:flex;gap:10px;margin:14px 0;flex-wrap:wrap;}' +
+'.card{flex:1;min-width:150px;border:1px solid #cbd5e1;border-radius:8px;padding:9px 11px;}' +
+'.card .k{font-size:10px;text-transform:uppercase;color:#64748b;letter-spacing:.5px;}' +
+'.card .v{font-size:19px;font-weight:700;margin-top:2px;}' +
+'.card .s{font-size:10px;color:#64748b;}' +
+'.card.p .v{color:#0369a1;} .card.r .v{color:#b45309;} .card.d.neg .v{color:#b91c1c;} .card.d.pos .v{color:#15803d;}' +
+'.summary{font-size:12px;line-height:1.65;background:#f8fafc;border-left:3px solid #0369a1;padding:10px 13px;margin:6px 0 4px;}' +
+'.foot{margin-top:18px;font-size:10px;color:#64748b;border-top:1px solid #e2e8f0;padding-top:7px;}' +
+'.rg-legend{display:flex;gap:14px;justify-content:center;font-size:10px;color:#475569;margin-top:4px;}' +
+'.rg-legend .sw{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;}' +
+'@media print{body{padding:0;} .cards{break-inside:avoid;} table{break-inside:auto;}}' +
+'</style></head><body>' +
+'<h1>Ras Gara — Production Comparison</h1>' +
+'<div class="sub">Shift ' + rgHourLabel(0) + ' ' + escHtml(day.date) + ' → ' +
+   rgHourLabel(RG_HOURS-1) + ' ' + escHtml(rgRowDate(day.date, RG_HOURS-1)) +
+   ' &nbsp;·&nbsp; PETRECO test separator T.B. 6-2 vs Ras Gara plant</div>' +
+'<div class="cards">' +
+  '<div class="card p"><div class="k">PETRECO total</div><div class="v">' + rgFmt(c.pTotal,1) + ' m³</div><div class="s">' + rgFmt(c.pBbl,0) + ' bbl/d</div></div>' +
+  '<div class="card r"><div class="k">Ras Gara total</div><div class="v">' + rgFmt(c.rTotal,1) + ' m³</div><div class="s">' + rgFmt(c.rBbl,0) + ' bbl/d</div></div>' +
+  '<div class="card d ' + (c.loss == null ? '' : (c.loss > 0 ? 'neg' : 'pos')) + '">' +
+     '<div class="k">Difference</div><div class="v">' +
+     (c.loss == null ? '—' : (c.loss > 0 ? '−' : '+') + rgFmt(Math.abs(c.loss),1) + ' m³') + '</div>' +
+     '<div class="s">' + rgFmt(Math.abs(c.lossBbl),0) + ' bbl/d' +
+     (c.lossPct == null ? '' : ' · ' + rgFmt(Math.abs(c.lossPct),1) + '%') +
+     (c.loss == null ? '' : (c.loss > 0 ? ' less at Ras Gara' : ' more at Ras Gara')) + '</div></div>' +
+'</div>' +
+'<h2>Summary</h2><div class="summary">' + escHtml(rgSummaryText(day)) + '</div>' +
+'<h2>Hourly comparison</h2>' +
+'<table><thead>' +
+ '<tr><th></th><th class="p" colspan="2">PETRECO</th><th class="r" colspan="2">Ras Gara</th></tr>' +
+ '<tr><th>Time</th><th class="p">M³/hr</th><th class="p">Cumulative</th><th class="r">M³/hr</th><th class="r">Cumulative</th></tr>' +
+ '</thead><tbody>' + rows + '</tbody>' +
+ '<tfoot><tr><th>Total</th><th>' + rgFmt(c.pTotal,1) + '</th><th>—</th><th>' + rgFmt(c.rTotal,1) + '</th><th>—</th></tr></tfoot>' +
+'</table>' +
+'<h2>Rate comparison</h2>' + rgChartSVG(day, true) +
+'<div class="foot">Generated by the PETROBEL Land Wells app on ' + new Date().toLocaleString('en-GB') +
+  (day.updatedBy ? ' · last data entry by ' + escHtml(day.updatedBy) : '') + '</div>' +
+'</body></html>';
+  }
+
+  function rgOpenReportWindow(){
+    const day = rgGetDay(_rgDate);
+    const w = window.open('', '_blank');
+    if(!w){ showToast('⚠️ Pop-up blocked — allow pop-ups to print', true); return null; }
+    w.document.open(); w.document.write(rgReportHTML(day)); w.document.close();
+    return w;
+  }
+  function rgPrintReport(){
+    const w = rgOpenReportWindow();
+    if(!w) return;
+    // Give the browser a beat to lay the report out before invoking print.
+    setTimeout(function(){ try { w.focus(); w.print(); } catch(e){} }, 400);
+  }
+
+  // ── PDF: a single-page document wrapping a rendered image of the report ─
+  // Hand-built rather than pulling in a 365 KB PDF library for one button.
+  function rgBuildPdf(jpegDataUrl, pxW, pxH){
+    const b64 = jpegDataUrl.split(',')[1];
+    const bin = atob(b64);
+    // A4 portrait at 72 dpi, with a small margin; scale the image to fit.
+    const PW = 595.28, PH = 841.89, M = 24;
+    const availW = PW - 2*M, availH = PH - 2*M;
+    const scale = Math.min(availW / pxW, availH / pxH);
+    const w = pxW * scale, h = pxH * scale;
+    const x = (PW - w) / 2, y = PH - M - h;
+    const objs = [];
+    objs[1] = '<</Type/Catalog/Pages 2 0 R>>';
+    objs[2] = '<</Type/Pages/Kids[3 0 R]/Count 1>>';
+    objs[3] = '<</Type/Page/Parent 2 0 R/MediaBox[0 0 ' + PW.toFixed(2) + ' ' + PH.toFixed(2) +
+              ']/Resources<</XObject<</I0 4 0 R>>/ProcSet[/PDF/ImageC]>>/Contents 5 0 R>>';
+    const stream = 'q ' + w.toFixed(2) + ' 0 0 ' + h.toFixed(2) + ' ' + x.toFixed(2) + ' ' + y.toFixed(2) + ' cm /I0 Do Q';
+    // Build as latin1 so every byte offset below is exact.
+    let pdf = '%PDF-1.4\n';
+    const offsets = [];
+    function add(num, dict, streamData){
+      offsets[num] = pdf.length;
+      pdf += num + ' 0 obj\n' + dict + '\n';
+      if(streamData != null) pdf += 'stream\n' + streamData + '\nendstream\n';
+      pdf += 'endobj\n';
+    }
+    add(1, objs[1]); add(2, objs[2]); add(3, objs[3]);
+    add(4, '<</Type/XObject/Subtype/Image/Width ' + pxW + '/Height ' + pxH +
+           '/ColorSpace/DeviceRGB/BitsPerComponent 8/Filter/DCTDecode/Length ' + bin.length + '>>', bin);
+    add(5, '<</Length ' + stream.length + '>>', stream);
+    const xref = pdf.length;
+    pdf += 'xref\n0 6\n0000000000 65535 f \n';
+    for(let i = 1; i <= 5; i++) pdf += String(offsets[i]).padStart(10,'0') + ' 00000 n \n';
+    pdf += 'trailer\n<</Size 6/Root 1 0 R>>\nstartxref\n' + xref + '\n%%EOF';
+    const bytes = new Uint8Array(pdf.length);
+    for(let i = 0; i < pdf.length; i++) bytes[i] = pdf.charCodeAt(i) & 0xff;
+    return new Blob([bytes], { type:'application/pdf' });
+  }
+
+  async function rgMakePdfBlob(){
+    const day = rgGetDay(_rgDate);
+    // Render the report off-screen at 2x for a crisp page.
+    const host = document.createElement('iframe');
+    host.style.cssText = 'position:fixed;left:-10000px;top:0;width:820px;height:1200px;border:0;';
+    document.body.appendChild(host);
+    try {
+      const doc = host.contentDocument;
+      doc.open(); doc.write(rgReportHTML(day)); doc.close();
+      await new Promise(function(res){ setTimeout(res, 350); });
+      const target = doc.body;
+      const canvas = await html2canvas(target, { scale:2, backgroundColor:'#ffffff',
+        width:820, windowWidth:820, height:target.scrollHeight, windowHeight:target.scrollHeight });
+      const jpeg = canvas.toDataURL('image/jpeg', 0.92);
+      return rgBuildPdf(jpeg, canvas.width, canvas.height);
+    } finally { host.remove(); }
+  }
+
+  async function rgEmailReport(){
+    const day = rgGetDay(_rgDate);
+    const fname = 'Ras_Gara_Comparison_' + day.date + '.pdf';
+    const subject = 'Ras Gara production comparison — ' + day.date;
+    const body = rgSummaryText(day) + '\n\n(The full table and chart are in the attached PDF.)';
+    showToast('📄 Building PDF…');
+    let blob;
+    try { blob = await rgMakePdfBlob(); }
+    catch(err){ console.error('[RasGara] PDF failed', err); showToast('⚠️ Could not build the PDF', true); return; }
+
+    // Preferred path: hand the PDF to the phone's share sheet, where Gmail and
+    // Outlook appear with the file already attached.
+    const file = new File([blob], fname, { type:'application/pdf' });
+    if(navigator.canShare && navigator.canShare({ files:[file] }) && navigator.share){
+      try {
+        await navigator.share({ files:[file], title:subject, text:body });
+        return;
+      } catch(err){
+        if(err && err.name === 'AbortError') return;   // user backed out
+        console.warn('[RasGara] share failed, falling back', err);
+      }
+    }
+    // Fallback (desktop): download the PDF, then open a Gmail compose window
+    // with the subject and summary already filled in, ready to attach it.
+    _downloadBlob(blob, fname);
+    const gmail = 'https://mail.google.com/mail/?view=cm&fs=1&su=' +
+                  encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+    setTimeout(function(){ window.open(gmail, '_blank', 'noopener'); }, 600);
+    showToast('📄 PDF downloaded — attach it to the Gmail draft that just opened');
+  }
+
+
+
+  window.__RG = { get days(){ return RG_DAYS; }, getDay:rgGetDay, calc:rgCalc,
+                  hourLabel:rgHourLabel, get date(){ return _rgDate; },
+                  COL:RG_COL, META:RG_META, LS:RG_LS, VERK:RG_VERK,
+                  START:RG_START_HOUR, HOURS:RG_HOURS, BBL:M3_TO_BBL,
+                  fmt:rgFmt, num:rgNum, rowDate:rgRowDate, today:rgToday };
 })();
 </script>
 

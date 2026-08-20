@@ -1,0 +1,111 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ══════════════════════════════════════════════════════════════
+    //  WHO IS WHO
+    // ══════════════════════════════════════════════════════════════
+    // Full control: uploads every dataset, writes everywhere.
+    function isAdmin() {
+      return request.auth != null
+          && request.auth.token.email == 'sherifmorshed@gmail.com';
+    }
+
+    // Outside parties. They are signed in, but they are NOT PETROBEL staff and
+    // must never see PETROBEL well data. Add future partner accounts here.
+    function isExternal() {
+      return request.auth != null
+          && request.auth.token.email in ['rasgara@petrobel.org'];
+    }
+
+    // PETROBEL staff = any signed-in user who is not an outside party.
+    // This is what "any signed-in user can read" used to mean, before there was
+    // an account belonging to another plant.
+    function isStaff() {
+      return request.auth != null && !isExternal();
+    }
+
+    // The Ras Gara plant operators.
+    function isRasGara() {
+      return request.auth != null
+          && request.auth.token.email == 'rasgara@petrobel.org';
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    //  PETROBEL DATA — staff only, admin writes
+    // ══════════════════════════════════════════════════════════════
+    // Note the read rule is now isStaff(), not "request.auth != null".
+    // That single change is what stops the Ras Gara account from pulling the
+    // entire well database out of the browser console.
+
+    // ── Main wells situation data ─────────────────
+    match /wells/landWells {
+      allow read:  if isStaff();
+      allow write: if isAdmin();
+    }
+    // ── Wells Test History (per-well docs + meta) ──
+    match /wellsHistory/{wellId} {
+      allow read:  if isStaff();
+      allow write: if isAdmin();
+    }
+    match /wellsHistoryMeta/{docId} {
+      allow read:  if isStaff();
+      allow write: if isAdmin();
+    }
+    // ── Lab W.C. History (per-well docs + meta) ────
+    match /wellsWCHistory/{wellId} {
+      allow read:  if isStaff();
+      allow write: if isAdmin();
+    }
+    match /wellsWCHistoryMeta/{docId} {
+      allow read:  if isStaff();
+      allow write: if isAdmin();
+    }
+    // ── Water Disposal (per-well docs + meta) ──────
+    match /disposalHistory/{wellId} {
+      allow read:  if isStaff();
+      allow write: if isAdmin();
+    }
+    match /disposalHistoryMeta/{docId} {
+      allow read:  if isStaff();
+      allow write: if isAdmin();
+    }
+    // ── Loss Analysis — monthly baseline snapshots ──
+    match /wellsSnapshots/{date} {
+      allow read:  if isStaff();
+      allow write: if isAdmin();
+    }
+    match /wellsSnapshotsMeta/{docId} {
+      allow read:  if isStaff();
+      allow write: if isAdmin();
+    }
+    // ── Chemical Injection Survey (daily report) ────
+    match /chemSurvey/{docId} {
+      allow read:  if isStaff();
+      allow write: if isAdmin();
+    }
+    match /chemSurveyMeta/{docId} {
+      allow read:  if isStaff();
+      allow write: if isAdmin();
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    //  RAS GARA — shared between PETROBEL and the Ras Gara plant
+    // ══════════════════════════════════════════════════════════════
+    // One document per shift day holding both sides' hourly readings.
+    // PETROBEL staff read it; the admin and the Ras Gara account write it.
+    match /rasGara/{date} {
+      allow read:  if isStaff() || isRasGara();
+      allow write: if isAdmin() || isRasGara();
+    }
+    match /rasGaraMeta/{docId} {
+      allow read:  if isStaff() || isRasGara();
+      allow write: if isAdmin() || isRasGara();
+    }
+
+    // ── Deny everything else by default ────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
