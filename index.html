@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#22d3ee">
+<meta name="theme-color" content="#0b3d68">
   <link rel="manifest" href="manifest.json">
   <!-- Service Worker registered at bottom of file -->
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -20,10 +20,21 @@
 @font-face { font-family: 'Inter'; src: local('Inter'), local('Inter Regular'), local('Inter-Regular'); font-weight: 300 700; font-display: swap; }
 @font-face { font-family: 'JetBrains Mono'; src: local('JetBrains Mono'), local('JetBrainsMono'), local('JetBrains Mono Regular'); font-weight: 400 700; font-display: swap; }
 :root{
-  --bg:#060b12;--surface:#0b1622;--card:#0f1d2e;--border:#162740;
-  --accent:#22d3ee;--accent2:#f59e0b;--green:#10b981;--yellow:#fbbf24;
-  --red:#f87171;--text:#e2eaf4;--muted:#3d6080;
-  --gold:#d4a937;--deep:#040810;
+  /* ── PETROBEL palette · dark ────────────────────────────────────────
+     Navy and gold taken from the company logo. Same variable names as
+     before, so every existing rule picks the new colours up untouched.
+     Series colours are separate (--s1/--s2): brand hexes fail the
+     colourblind checks, so charts use validated steps instead. */
+  --bg:#0a1420;--surface:#0f1e2e;--card:#14273a;--border:#22405c;
+  --accent:#59a5e8;--accent2:#e0b95f;--green:#34c98a;--yellow:#f0c05a;
+  --red:#ef7a86;--text:#e6eef7;--muted:#8aa4bd;
+  --gold:#e0b95f;--deep:#071019;
+  --on-accent:#06131f;                 /* text that sits ON the accent */
+  --s1:#3987e5;--s2:#d95926;--s3:#199e70;   /* chart series, dark-validated */
+  --ring:rgba(89,165,232,.30);
+  --shadow:0 4px 16px rgba(0,0,0,.42);
+  --font-ui:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  --font-num:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html{height:100%;}
@@ -439,18 +450,18 @@ body::before{
   opacity:0.82;vertical-align:middle;border-radius:6px;
   transition:opacity .15s, background .15s;
 }
-.well-map-pin:hover{opacity:1;background:rgba(34,211,238,.15);}
+.well-map-pin:hover{opacity:1;background:var(--ring);}
 .well-map-pin:active{opacity:.6;}
 .well-map-link{
   display:inline-flex;align-items:center;gap:5px;flex-shrink:0;
   text-decoration:none;color:var(--accent);
   font-family:'Inter',sans-serif;font-size:13px;font-weight:600;
   letter-spacing:.3px;white-space:nowrap;
-  border:1px solid rgba(34,211,238,.35);border-radius:8px;
+  border:1px solid var(--ring);border-radius:8px;
   padding:5px 10px;opacity:0.88;margin-left:auto;
   transition:opacity .15s, background .15s;
 }
-.well-map-link:hover{opacity:1;background:rgba(34,211,238,.12);}
+.well-map-link:hover{opacity:1;background:var(--ring);}
 .well-map-link:active{opacity:.6;}
 
 .nav-back-btn{
@@ -748,7 +759,7 @@ pre{
 #login-page.hidden{display:none;}
 .login-card{width:100%;max-width:360px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px 24px;box-shadow:0 8px 32px rgba(0,0,0,.4);}
 .login-logo{text-align:center;margin-bottom:24px;}
-.login-logo img{width:72px;height:72px;border-radius:16px;margin-bottom:12px;object-fit:cover;background:var(--surface);box-shadow:0 4px 16px rgba(34,211,238,.12);}
+.login-logo img{width:72px;height:72px;border-radius:16px;margin-bottom:12px;object-fit:cover;background:var(--surface);box-shadow:0 4px 16px var(--ring);}
 .login-logo h1{font-size:18px;font-weight:700;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:2px;}
 .login-logo p{font-size:11px;color:var(--muted);letter-spacing:1px;font-family:'JetBrains Mono',monospace;}
 .login-field{margin-bottom:16px;}
@@ -879,8 +890,8 @@ pre{
   font-family:'JetBrains Mono',monospace;
   font-size:12px;font-weight:700;letter-spacing:2px;
   color:var(--accent);
-  background:rgba(34,211,238,.08);
-  border:1px solid rgba(34,211,238,.35);
+  background:var(--ring);
+  border:1px solid var(--ring);
   border-radius:20px;
   padding:6px 14px;
   white-space:nowrap;
@@ -900,15 +911,22 @@ pre{
    DAY / LIGHT MODE  ·  WhatsApp-inspired warm palette
    ──────────────────────────────────────────────────────────
    Activated by  <body class="light-mode">
+
+
    Auto-detects system prefers-color-scheme at startup.
    Toggle with the ☀️ / 🌙 button in the user bar.
    ══════════════════════════════════════════════════════════ */
 
 body.light-mode{
-  --bg:#ECE5DD;--surface:#FFFFFF;--card:#F0F2F5;--border:#D1D7DB;
-  --accent:#075E54;--accent2:#D97706;--green:#128C7E;--yellow:#92400E;
-  --red:#B91C1C;--text:#111B21;--muted:#667781;
-  --gold:#92400E;--deep:#E9EDEF;
+  /* ── PETROBEL palette · light (default) ─────────────────────────── */
+  --bg:#eef3f8;--surface:#ffffff;--card:#f7fafd;--border:#dbe4ee;
+  --accent:#0b3d68;--accent2:#a9822f;--green:#1d6b3f;--yellow:#8a6212;
+  --red:#b03a48;--text:#16232f;--muted:#5d7286;
+  --gold:#c8a34a;--deep:#0b3d68;
+  --on-accent:#ffffff;
+  --s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;    /* chart series, light-validated */
+  --ring:rgba(11,61,104,.18);
+  --shadow:0 2px 10px rgba(15,40,70,.07);
 }
 
 /* Strip dark atmospheric gradients & vignette */
@@ -917,32 +935,32 @@ body.light-mode #login-page{background-image:none !important;}
 body.light-mode::before{display:none !important;}
 
 /* ── Nav ── */
-body.light-mode .nav-btn.active{background:rgba(7,94,84,.08) !important;}
-body.light-mode .nav-icon-glow{background:radial-gradient(circle, rgba(7,94,84,.10) 0%, transparent 70%) !important;}
+body.light-mode .nav-btn.active{background:rgba(11,61,104,.08) !important;}
+body.light-mode .nav-icon-glow{background:radial-gradient(circle, rgba(11,61,104,.10) 0%, transparent 70%) !important;}
 
 /* ── Stat cards ── */
 body.light-mode .stat-card-breakdown{border-top-color:rgba(18,140,126,.2) !important;}
 body.light-mode .breakdown-divider{background:rgba(18,140,126,.25) !important;}
 
 /* ── Search ── */
-body.light-mode .search-input:focus{box-shadow:0 0 0 2px rgba(7,94,84,.15) !important;}
-body.light-mode .sug-item:active{background:rgba(7,94,84,.08) !important;}
+body.light-mode .search-input:focus{box-shadow:0 0 0 2px rgba(11,61,104,.15) !important;}
+body.light-mode .sug-item:active{background:rgba(11,61,104,.08) !important;}
 
 /* ── Well hero — Actual production section (has dark hardcoded gradient) ── */
 body.light-mode .actual-section{
-  border-color:rgba(7,94,84,.3) !important;
-  background:linear-gradient(135deg, rgba(7,94,84,.07), rgba(240,242,245,.97) 55%) !important;
-  box-shadow:0 0 16px rgba(7,94,84,.08) !important;
+  border-color:rgba(11,61,104,.3) !important;
+  background:linear-gradient(135deg, rgba(11,61,104,.07), rgba(247,250,253,.97) 55%) !important;
+  box-shadow:0 0 16px rgba(11,61,104,.08) !important;
 }
-body.light-mode .actual-section .field{border-bottom-color:rgba(7,94,84,.1) !important;}
+body.light-mode .actual-section .field{border-bottom-color:rgba(11,61,104,.1) !important;}
 body.light-mode .actual-title{
-  background:linear-gradient(90deg, rgba(7,94,84,.1), rgba(240,242,245,1)) !important;
+  background:linear-gradient(90deg, rgba(11,61,104,.1), rgba(247,250,253,1)) !important;
 }
 
 /* Live rate box */
 body.light-mode .live-box{
-  background:rgba(7,94,84,.05) !important;
-  border-color:rgba(7,94,84,.18) !important;
+  background:rgba(11,61,104,.05) !important;
+  border-color:rgba(11,61,104,.18) !important;
 }
 
 /* ── Field separators & table cell borders ── */
@@ -955,44 +973,44 @@ body.light-mode .f-val.wht{color:#1a4a6e !important;}
 body.light-mode .f-val.bbl{color:#1a6e8a !important;}
 body.light-mode .badge.rep{color:var(--green) !important;border-color:rgba(18,140,126,.4) !important;background:rgba(18,140,126,.1) !important;}
 body.light-mode .badge.tmr{color:#374e66 !important;border-color:#4a6680 !important;background:rgba(58,96,128,.1) !important;}
-body.light-mode .badge.rig{background:rgba(7,94,84,.1) !important;}
-body.light-mode .badge.live{background:rgba(7,94,84,.15) !important;}
+body.light-mode .badge.rig{background:rgba(11,61,104,.1) !important;}
+body.light-mode .badge.live{background:rgba(11,61,104,.15) !important;}
 
 /* ── Suggestion items ── */
-body.light-mode .is-item:active{background:rgba(7,94,84,.08) !important;}
+body.light-mode .is-item:active{background:rgba(11,61,104,.08) !important;}
 
 /* ── Upload zone ── */
 body.light-mode .upload-zone:active,
-body.light-mode .upload-zone.drag{background:rgba(7,94,84,.04) !important;}
+body.light-mode .upload-zone.drag{background:rgba(11,61,104,.04) !important;}
 
 /* ── Update intro panel ── */
 body.light-mode .update-intro{
-  background:rgba(7,94,84,.06) !important;
-  border-color:rgba(7,94,84,.2) !important;
+  background:rgba(11,61,104,.06) !important;
+  border-color:rgba(11,61,104,.2) !important;
 }
 
 /* ── Substation chip ── */
-body.light-mode .substation-chip:active{background:rgba(7,94,84,.08) !important;}
+body.light-mode .substation-chip:active{background:rgba(11,61,104,.08) !important;}
 
 /* ── Map links ── */
-body.light-mode .well-map-link{border-color:rgba(7,94,84,.35) !important;}
-body.light-mode .well-map-link:hover{background:rgba(7,94,84,.12) !important;}
-body.light-mode .well-map-pin:hover{background:rgba(7,94,84,.15) !important;}
+body.light-mode .well-map-link{border-color:rgba(11,61,104,.35) !important;}
+body.light-mode .well-map-link:hover{background:rgba(11,61,104,.12) !important;}
+body.light-mode .well-map-pin:hover{background:rgba(11,61,104,.15) !important;}
 
 /* ── Manifold icon wrap ── */
 body.light-mode .manifold-icon-wrap{
-  background:rgba(7,94,84,.06) !important;
-  border-color:rgba(7,94,84,.18) !important;
-  box-shadow:0 0 18px rgba(7,94,84,.08) !important;
+  background:rgba(11,61,104,.06) !important;
+  border-color:rgba(11,61,104,.18) !important;
+  box-shadow:0 0 18px rgba(11,61,104,.08) !important;
 }
 
 /* ── Chemical page ── */
 body.light-mode .chem-card{
-  background:linear-gradient(135deg, rgba(7,94,84,.06), rgba(240,242,245,.98)) !important;
+  background:linear-gradient(135deg, rgba(11,61,104,.06), rgba(247,250,253,.98)) !important;
 }
-body.light-mode .chem-pill{border-color:rgba(7,94,84,.25) !important;background:rgba(7,94,84,.07) !important;}
-body.light-mode .chem-pill.active{box-shadow:0 0 0 1px rgba(7,94,84,.12) inset !important;}
-body.light-mode .chem-well:active{background:rgba(7,94,84,.06) !important;}
+body.light-mode .chem-pill{border-color:rgba(11,61,104,.25) !important;background:rgba(11,61,104,.07) !important;}
+body.light-mode .chem-pill.active{box-shadow:0 0 0 1px rgba(11,61,104,.12) inset !important;}
+body.light-mode .chem-well:active{background:rgba(11,61,104,.06) !important;}
 /* ── Chemical Survey Cards (daily injection detail) ── */
 .chem-survey-banner{
   background:rgba(0,200,240,.07);border:1px solid rgba(0,200,240,.18);
@@ -1014,7 +1032,7 @@ body.light-mode .chem-well:active{background:rgba(7,94,84,.06) !important;}
   font-size:11px;color:var(--muted);margin-top:6px;padding:5px 8px;
   background:var(--surface);border-radius:6px;font-family:'JetBrains Mono',monospace;line-height:1.5;
 }
-body.light-mode .chem-survey-banner{background:rgba(7,94,84,.07) !important;border-color:rgba(7,94,84,.18) !important;}
+body.light-mode .chem-survey-banner{background:rgba(11,61,104,.07) !important;border-color:rgba(11,61,104,.18) !important;}
 /* ── Chemical Consumption Dashboard ── */
 .chem-cons-section{margin:0 14px 12px;border:1px solid var(--border);border-radius:10px;overflow:hidden;}
 .chem-cons-header{background:var(--surface);padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;}
@@ -1031,7 +1049,7 @@ body.light-mode .chem-survey-banner{background:rgba(7,94,84,.07) !important;bord
 .chem-cons-tbl td:first-child{text-align:left;color:var(--text);font-family:inherit;font-size:12px;}
 .chem-cons-tbl tr.chem-total-row td{border-bottom:none;font-weight:700;background:var(--surface);border-top:1px solid var(--border);}
 .chem-days-ok{color:var(--green);font-weight:700;}
-.chem-days-warn{color:#f59e0b;font-weight:700;}
+.chem-days-warn{color:var(--yellow);font-weight:700;}
 .chem-days-crit{color:var(--red);font-weight:700;}
 .chem-inj-type-bar{padding:8px 12px;display:flex;flex-wrap:wrap;gap:6px;border-bottom:1px solid var(--border);}
 /* Color-coded frames: Wells / Tank Batteries / Manifolds each get their own
@@ -1039,7 +1057,7 @@ body.light-mode .chem-survey-banner{background:rgba(7,94,84,.07) !important;bord
    the same category always reads as the same color at a glance. */
 .chem-inj-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;border:1px solid;font-size:11px;line-height:1.4;background:var(--card);}
 .chem-inj-chip strong{font-family:'JetBrains Mono',monospace;}
-.chem-inj-chip-wells{border-color:var(--accent);color:var(--accent);background:rgba(34,211,238,.10);}
+.chem-inj-chip-wells{border-color:var(--accent);color:var(--accent);background:var(--ring);}
 .chem-inj-chip-batteries{border-color:var(--accent2);color:var(--accent2);background:rgba(245,158,11,.10);}
 .chem-inj-chip-manifolds{border-color:var(--green);color:var(--green);background:rgba(16,185,129,.10);}
 .chem-cons-tbl th.chem-col-wells{color:var(--accent);}
@@ -1048,32 +1066,32 @@ body.light-mode .chem-survey-banner{background:rgba(7,94,84,.07) !important;bord
 .chem-cons-tbl td.chem-col-wells{color:var(--accent);}
 .chem-cons-tbl td.chem-col-batteries{color:var(--accent2);}
 .chem-cons-tbl td.chem-col-manifolds{color:var(--green);}
-body.light-mode .chem-cons-section{border-color:rgba(7,94,84,.2) !important;}
-body.light-mode .chem-cons-header{background:rgba(7,94,84,.05) !important;}
+body.light-mode .chem-cons-section{border-color:rgba(11,61,104,.2) !important;}
+body.light-mode .chem-cons-header{background:rgba(11,61,104,.05) !important;}
 
 /* ── T.B. Production page ── */
-body.light-mode .tb-date-pill{background:rgba(7,94,84,.10) !important;border-color:rgba(7,94,84,.25) !important;}
-body.light-mode .tb-total-cell.act-box{background:rgba(7,94,84,.04) !important;border-color:rgba(7,94,84,.18) !important;}
+body.light-mode .tb-date-pill{background:rgba(11,61,104,.10) !important;border-color:rgba(11,61,104,.25) !important;}
+body.light-mode .tb-total-cell.act-box{background:rgba(11,61,104,.04) !important;border-color:rgba(11,61,104,.18) !important;}
 body.light-mode .tb-battery-hdr:active,
-body.light-mode .tb-battery-hdr.open{background:rgba(7,94,84,.05) !important;}
+body.light-mode .tb-battery-hdr.open{background:rgba(11,61,104,.05) !important;}
 body.light-mode .tb-box-title{border-bottom-color:rgba(0,0,0,.08) !important;}
 body.light-mode .tb-metric{border-bottom-color:rgba(0,0,0,.06) !important;}
 body.light-mode .tb-thead{background:rgba(220,224,227,.95) !important;}
 
 /* ── Login card ── */
 body.light-mode .login-card{box-shadow:0 8px 32px rgba(0,0,0,.12) !important;}
-body.light-mode .login-logo img{box-shadow:0 4px 16px rgba(7,94,84,.15) !important;}
+body.light-mode .login-logo img{box-shadow:0 4px 16px rgba(11,61,104,.15) !important;}
 
 /* ── History divider ── */
 body.light-mode .hist-divider-title{
-  background:rgba(7,94,84,.08) !important;
-  border-color:rgba(7,94,84,.35) !important;
+  background:rgba(11,61,104,.08) !important;
+  border-color:rgba(11,61,104,.35) !important;
 }
 
 /* ── Analysis page chips & WO button ── */
-body.light-mode .anl-chip.wc{border-color:rgba(7,94,84,.4) !important;}
+body.light-mode .anl-chip.wc{border-color:rgba(11,61,104,.4) !important;}
 body.light-mode .anl-wo-btn.active{
-  background:rgba(7,94,84,.14) !important;
+  background:rgba(11,61,104,.14) !important;
   border-color:var(--accent) !important;
   color:var(--accent) !important;
 }
@@ -1087,17 +1105,17 @@ body.light-mode .app-header{
   border-bottom-color:var(--border) !important;
 }
 body.light-mode .app-header::after{
-  background:radial-gradient(circle, rgba(7,94,84,.06) 0%, transparent 70%) !important;
+  background:radial-gradient(circle, rgba(11,61,104,.06) 0%, transparent 70%) !important;
 }
 /* Situation date bar — hardcoded cyan rgba tints */
 body.light-mode .situation-date-bar{
-  background:rgba(7,94,84,.06) !important;
-  border-color:rgba(7,94,84,.2) !important;
+  background:rgba(11,61,104,.06) !important;
+  border-color:rgba(11,61,104,.2) !important;
 }
 /* Install-as-app banner — hardcoded cyan rgba tints */
 body.light-mode .install-banner{
-  background:rgba(7,94,84,.06) !important;
-  border-color:rgba(7,94,84,.22) !important;
+  background:rgba(11,61,104,.06) !important;
+  border-color:rgba(11,61,104,.22) !important;
 }
 
 /* ── Theme toggle button (sits inside the user bar) ── */
@@ -1111,19 +1129,62 @@ body.light-mode .install-banner{
 }
 .theme-toggle:active{background:rgba(128,128,128,.15);}
 </style>
+
+
 </head>
 <body>
+<!-- ══ Icon sprite (v103) ══════════════════════════════════════════════
+     Every in-content pictogram is drawn from here instead of an emoji.
+     Emoji were the wrong tool for this app: they render as a different
+     picture on every phone, they cannot take the theme colour, and none of
+     the ones available actually depict a well, a manifold or a tank battery.
+     These are drawn on the same 24-grid as the tabs, stroke-only, so they
+     inherit currentColor and stay legible at 14px.
+     Referenced as <svg class="ico"><use href="#i-name"/></svg>.
+     Note: <use> does NOT resolve inside a detached document, so the printed
+     report and the e-mailed PDF keep their own inline markup. ══════════ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+<g id="_ist" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></g>
+<symbol id="i-rig" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M6 20v-5"/><path d="M17.5 20v-3"/><path d="M4 15h4"/><path d="M6 15 14 8"/><circle cx="15.4" cy="7" r="1.9"/><path d="M17.2 7.6 19.5 12"/><path d="M19.5 12v5"/><path d="M15.6 17h3.9"/></g></symbol>
+<symbol id="i-power" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="9" width="16" height="11" rx="1.6"/><path d="M8 9V6"/><path d="M12 9V4.5"/><path d="M16 9V6"/><path d="M12.6 12l-2 3.2h2.8L11.4 18"/></g></symbol>
+<symbol id="i-manifold" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18"/><circle cx="7" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="17" cy="12" r="1.6"/><path d="M7 10.4V6"/><path d="M12 10.4V6"/><path d="M17 10.4V6"/><path d="M5.4 6h3.2"/><path d="M10.4 6h3.2"/><path d="M15.4 6h3.2"/><path d="M7 13.6V18"/><path d="M17 13.6V18"/></g></symbol>
+<symbol id="i-chem" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="7" width="12" height="13" rx="1.8"/><path d="M6 11h12"/><path d="M9.5 7V4.5h5V7"/><path d="M12 13.5c-1.3 1.5-2 2.5-2 3.4a2 2 0 0 0 4 0c0-.9-.7-1.9-2-3.4z"/></g></symbol>
+<symbol id="i-log" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3.5" width="16" height="17" rx="1.8"/><path d="M7.5 16l2.4-4 2.3 2.4 2-3.6 2.3 3"/><path d="M7.5 7h9"/></g></symbol>
+<symbol id="i-battery" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="8" width="7" height="12" rx="1.2"/><rect x="13.5" y="5" width="7" height="15" rx="1.2"/><path d="M3.5 11.5h7"/><path d="M13.5 8.5h7"/><path d="M7 8V5.6"/><path d="M17 5V3"/></g></symbol>
+<symbol id="i-water" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c-2.2 3-3.6 5-3.6 6.6a3.6 3.6 0 0 0 7.2 0C15.6 8 14.2 6 12 3z"/><path d="M4 16h16"/><path d="M6 19.5h12"/><path d="M12 13.6V16"/></g></symbol>
+<symbol id="i-decline" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v16h16"/><path d="M7 8c3 0 4 3.4 5 6s2.2 3.4 5 3.4"/><path d="M15.6 6.5h3.9v3.9"/><path d="M19.5 6.5 14 12"/></g></symbol>
+<symbol id="i-db" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="7.5" ry="2.8"/><path d="M4.5 6v6c0 1.55 3.36 2.8 7.5 2.8s7.5-1.25 7.5-2.8V6"/><path d="M4.5 12v6c0 1.55 3.36 2.8 7.5 2.8s7.5-1.25 7.5-2.8v-6"/></g></symbol>
+<symbol id="i-calendar" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 9.5h17"/><path d="M8 3.5V6"/><path d="M16 3.5V6"/></g></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.8" cy="10.8" r="6.3"/><path d="M15.4 15.4 20 20"/></g></symbol>
+<symbol id="i-print" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8V3.5h10V8"/><rect x="3.5" y="8" width="17" height="8" rx="1.8"/><rect x="7" y="14" width="10" height="6.5" rx="1"/><path d="M17 11h.01"/></g></symbol>
+<symbol id="i-mail" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.8 6.5 8.2 6 8.2-6"/></g></symbol>
+<symbol id="i-upload" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/><path d="m7.5 8.5 4.5-4.5 4.5 4.5"/><path d="M4 15v3.5a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V15"/></g></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5h16"/><path d="M9.5 6.5V4h5v2.5"/><path d="M6.5 6.5 7.4 20a1 1 0 0 0 1 1h7.2a1 1 0 0 0 1-1l.9-13.5"/><path d="M10.5 10v7"/><path d="M13.5 10v7"/></g></symbol>
+<symbol id="i-refresh" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v4.5h-4.5"/></g></symbol>
+<symbol id="i-cloud" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18.5a4 4 0 0 1-.4-8A5.5 5.5 0 0 1 17.2 10a3.8 3.8 0 0 1 .3 7.6z"/></g></symbol>
+<symbol id="i-moon" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.2A8.4 8.4 0 0 1 9.8 4 8.5 8.5 0 1 0 20 14.2z"/></g></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.6V5"/><path d="M12 19v2.4"/><path d="M2.6 12H5"/><path d="M19 12h2.4"/><path d="m5.6 5.6 1.7 1.7"/><path d="m16.7 16.7 1.7 1.7"/><path d="m18.4 5.6-1.7 1.7"/><path d="m7.3 16.7-1.7 1.7"/></g></symbol>
+<symbol id="i-trend" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v16h16"/><path d="m7 15 3.5-4 3 2.6L19 7.5"/><path d="M15.4 7.5H19v3.6"/></g></symbol>
+<symbol id="i-bolt" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13.4 2.5 5 13.4h6L10.6 21.5 19 10.6h-6z"/></g></symbol>
+<symbol id="i-camera" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h2.6l1.6-2.5h7.6L18 7h2a2 2 0 0 1 2 2v8.5a2 2 0 0 1-2 2z"/><circle cx="12" cy="13" r="3.6"/></g></symbol>
+<symbol id="i-clipboard" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="4.5" width="15" height="16" rx="2"/><rect x="8.8" y="2.6" width="6.4" height="3.8" rx="1.2"/><path d="M8.5 11h7"/><path d="M8.5 15h4.5"/></g></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></g></symbol>
+<symbol id="i-wrench" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M15.6 3.4a5.5 5.5 0 0 0-6.9 6.9L3.6 15.4a2 2 0 0 0 0 2.8l2.2 2.2a2 2 0 0 0 2.8 0l5.1-5.1a5.5 5.5 0 0 0 6.9-6.9l-3 3-3-3z"/></g></symbol>
+<symbol id="i-phone" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.4"/><path d="M10.6 18.8h2.8"/></g></symbol>
+<symbol id="i-warn" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 21 19.5H3z"/><path d="M12 9.5v4.2"/><path d="M12 16.8h.01"/></g></symbol>
+</defs></svg>
+
 <div id="loading-screen" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#060b12; display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:9999; color:white; font-family:'Inter',sans-serif;">
-    <img src="icon.png" style="width:120px; height:120px; border-radius:25px; margin-bottom:20px; object-fit:cover; background:#0f1d2e; box-shadow: 0 10px 40px rgba(34,211,238,0.16), 0 4px 20px rgba(0,0,0,0.7);">
+    <img src="icon.png" style="width:120px; height:120px; border-radius:25px; margin-bottom:20px; object-fit:cover; background:var(--card); box-shadow: 0 10px 40px var(--ring), 0 4px 20px rgba(0,0,0,.35);">
     <h1 style="letter-spacing:2px; margin-bottom:5px; font-size: 22px; font-weight:700; color:white;">PETROBEL WELLS</h1>
-    <p style="color:#22d3ee; margin-bottom:30px; font-size: 13px; opacity: 0.8; letter-spacing:1px;">Land Wells Situation</p>
+    <p style="color:var(--accent); margin-bottom:30px; font-size: 13px; opacity: 0.8; letter-spacing:1px;">Land Wells Situation</p>
     <div class="loader"></div>
 </div>
 
 <style>
 .loader {
   border: 4px solid rgba(255,255,255,0.08);
-  border-top: 4px solid #22d3ee;
+  border-top: 4px solid var(--accent);
   border-radius: 50%;
   width: 35px;
   height: 35px;
@@ -1158,73 +1219,48 @@ body.light-mode .install-banner{
 <div class="user-bar hidden" id="userBar">
   <span class="ub-email" id="ubEmail"></span>
   <span class="ub-role" id="ubRole"></span>
-  <button class="theme-toggle" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle day / night mode" aria-label="Toggle theme">🌙</button>
+  <button class="theme-toggle" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle day / night mode" aria-label="Toggle theme"><svg class="ico ico-lg" aria-hidden="true"><use href="#i-moon"/></svg></button>
   <button class="ub-logout" onclick="handleLogout()">LOGOUT</button>
 </div>
 
 <!-- NAV -->
 <nav class="nav" id="mainNav" style="display:none;">
-  <button class="nav-btn active" onclick="showPage('lookup')" id="nav-lookup"><span class="icon">🔍</span>Lookup</button>
-  <button class="nav-btn" onclick="showPage('substation')" id="nav-substation"><span class="icon">⚡</span>Substation</button>
-  <button class="nav-btn" onclick="showPage('manifold')" id="nav-manifold"><span class="icon"><svg viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg" class="manifold-svg" aria-hidden="true" style="width:20px;height:20px;">
-  <rect x="10" y="38" width="100" height="12" rx="6" class="rig-fill" opacity="0.9"/>
-  <rect x="24" y="50" width="10" height="28" rx="5" class="rig-fill" opacity="0.75"/>
-  <rect x="55" y="50" width="10" height="28" rx="5" class="rig-fill" opacity="0.75"/>
-  <rect x="86" y="50" width="10" height="28" rx="5" class="rig-fill" opacity="0.75"/>
-  <circle cx="29" cy="70" r="6" fill="none" class="rig-stroke" stroke-width="3"/>
-  <line x1="23" y1="70" x2="35" y2="70" class="rig-stroke" stroke-width="2.5"/>
-  <circle cx="60" cy="70" r="6" fill="none" class="rig-stroke" stroke-width="3"/>
-  <line x1="54" y1="70" x2="66" y2="70" class="rig-stroke" stroke-width="2.5"/>
-  <circle cx="91" cy="70" r="6" fill="none" class="rig-stroke" stroke-width="3"/>
-  <line x1="85" y1="70" x2="97" y2="70" class="rig-stroke" stroke-width="2.5"/>
-  <rect x="55" y="16" width="10" height="22" rx="5" class="rig-fill" opacity="0.85"/>
-  <rect x="49" y="12" width="22" height="7" rx="3" class="rig-fill"/>
-</svg></span>Manifold</button>
-  <button class="nav-btn" onclick="showPage('chemical')" id="nav-chemical"><span class="icon">🧪</span>Chemical</button>
-  <button class="nav-btn" onclick="showPage('history')" id="nav-history"><span class="icon">📜</span>History</button>
-  <button class="nav-btn" onclick="showPage('tb')" id="nav-tb"><span class="icon" style="display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;display:block;">
-  <rect x="2" y="8" width="20" height="10" rx="3" fill="none" stroke="currentColor" stroke-width="1.4"/>
-  <line x1="7" y1="8" x2="7" y2="18" stroke="currentColor" stroke-width="1.2"/>
-  <line x1="12" y1="8" x2="12" y2="18" stroke="currentColor" stroke-width="1.2"/>
-  <line x1="17" y1="8" x2="17" y2="18" stroke="currentColor" stroke-width="1.2"/>
-  <rect x="9" y="4" width="6" height="4" rx="1" fill="none" stroke="currentColor" stroke-width="1.2"/>
-  <line x1="12" y1="18" x2="12" y2="22" stroke="currentColor" stroke-width="1.4"/>
-  <circle cx="12" cy="22" r="1.2" fill="currentColor"/>
-  <line x1="5" y1="18" x2="5" y2="21" stroke="currentColor" stroke-width="1.2"/>
-  <line x1="19" y1="18" x2="19" y2="21" stroke="currentColor" stroke-width="1.2"/>
-  <line x1="3" y1="13" x2="21" y2="13" stroke="currentColor" stroke-width="0.8" stroke-dasharray="2 2" opacity="0.5"/>
-</svg></span>T.B.</button>
-  <button class="nav-btn" onclick="showPage('disposal')" id="nav-disposal"><span class="icon">💧</span>Disposal</button>
-  <button class="nav-btn" onclick="showPage('analysis')" id="nav-analysis"><span class="icon">📉</span>Analysis</button>
-  <button class="nav-btn" onclick="showPage('rasgara')" id="nav-rasgara"><span class="icon">🛢️</span>Ras Gara</button>
-  <button class="nav-btn" onclick="showPage('data')" id="nav-data"><span class="icon">🗄️</span>Update DB</button>
+  <button class="nav-btn active" onclick="showPage('lookup')" id="nav-lookup"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h18"/><path d="M6 20v-5"/><path d="M17.5 20v-3"/><path d="M4 15h4"/><path d="M6 15 14 8"/><circle cx="15.4" cy="7" r="1.9"/><path d="M17.2 7.6 19.5 12"/><path d="M19.5 12v5"/><path d="M15.6 17h3.9"/></svg></span>Lookup</button>
+  <button class="nav-btn" onclick="showPage('substation')" id="nav-substation"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="9" width="16" height="11" rx="1.6"/><path d="M8 9V6"/><path d="M12 9V4.5"/><path d="M16 9V6"/><path d="M12.6 12l-2 3.2h2.8L11.4 18"/></svg></span>Substation</button>
+  <button class="nav-btn" onclick="showPage('manifold')" id="nav-manifold"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18"/><circle cx="7" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="17" cy="12" r="1.6"/><path d="M7 10.4V6"/><path d="M12 10.4V6"/><path d="M17 10.4V6"/><path d="M5.4 6h3.2"/><path d="M10.4 6h3.2"/><path d="M15.4 6h3.2"/><path d="M7 13.6V18"/><path d="M17 13.6V18"/></svg></span>Manifold</button>
+  <button class="nav-btn" onclick="showPage('chemical')" id="nav-chemical"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="7" width="12" height="13" rx="1.8"/><path d="M6 11h12"/><path d="M9.5 7V4.5h5V7"/><path d="M12 13.5c-1.3 1.5-2 2.5-2 3.4a2 2 0 0 0 4 0c0-.9-.7-1.9-2-3.4z"/></svg></span>Chemical</button>
+  <button class="nav-btn" onclick="showPage('history')" id="nav-history"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3.5" width="16" height="17" rx="1.8"/><path d="M7.5 16l2.4-4 2.3 2.4 2-3.6 2.3 3"/><path d="M7.5 7h9"/></svg></span>History</button>
+  <button class="nav-btn" onclick="showPage('tb')" id="nav-tb"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="8" width="7" height="12" rx="1.2"/><rect x="13.5" y="5" width="7" height="15" rx="1.2"/><path d="M3.5 11.5h7"/><path d="M13.5 8.5h7"/><path d="M7 8V5.6"/><path d="M17 5V3"/></svg></span>T.B.</button>
+  <button class="nav-btn" onclick="showPage('disposal')" id="nav-disposal"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c-2.2 3-3.6 5-3.6 6.6a3.6 3.6 0 0 0 7.2 0C15.6 8 14.2 6 12 3z"/><path d="M4 16h16"/><path d="M6 19.5h12"/><path d="M12 13.6V16"/></svg></span>Disposal</button>
+  <button class="nav-btn" onclick="showPage('analysis')" id="nav-analysis"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4v16h16"/><path d="M7 8c3 0 4 3.4 5 6s2.2 3.4 5 3.4"/><path d="M15.6 6.5h3.9v3.9"/><path d="M19.5 6.5 14 12"/></svg></span>Analysis</button>
+  <button class="nav-btn" onclick="showPage('data')" id="nav-data"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="6" rx="7.5" ry="2.8"/><path d="M4.5 6v6c0 1.55 3.36 2.8 7.5 2.8s7.5-1.25 7.5-2.8V6"/><path d="M4.5 12v6c0 1.55 3.36 2.8 7.5 2.8s7.5-1.25 7.5-2.8v-6"/></svg></span>Update DB</button>
 </nav>
 
 <!-- ══════════════ PAGE 1: LOOKUP ══════════════ -->
 <div class="page active" id="page-lookup" style="display:none;">
   <div class="app-header">
     <h1><svg viewBox="0 0 120 130" xmlns="http://www.w3.org/2000/svg" style="width:28px;height:30px;vertical-align:middle;margin-right:6px;margin-bottom:2px;">
-  <rect x="20" y="115" width="80" height="6" rx="3" fill="#22d3ee"/>
-  <line x1="35" y1="115" x2="25" y2="85" stroke="#22d3ee" stroke-width="4" stroke-linecap="round"/>
-  <line x1="85" y1="115" x2="95" y2="85" stroke="#22d3ee" stroke-width="4" stroke-linecap="round"/>
-  <line x1="45" y1="115" x2="40" y2="85" stroke="#22d3ee" stroke-width="3" stroke-linecap="round"/>
-  <line x1="75" y1="115" x2="80" y2="85" stroke="#22d3ee" stroke-width="3" stroke-linecap="round"/>
-  <line x1="25" y1="103" x2="95" y2="103" stroke="#22d3ee" stroke-width="2.5" opacity="0.7"/>
-  <line x1="27" y1="93" x2="93" y2="93" stroke="#22d3ee" stroke-width="2.5" opacity="0.7"/>
-  <line x1="40" y1="85" x2="52" y2="20" stroke="#22d3ee" stroke-width="4" stroke-linecap="round"/>
-  <line x1="80" y1="85" x2="68" y2="20" stroke="#22d3ee" stroke-width="4" stroke-linecap="round"/>
-  <line x1="40" y1="85" x2="68" y2="20" stroke="#22d3ee" stroke-width="1.5" opacity="0.5"/>
-  <line x1="80" y1="85" x2="52" y2="20" stroke="#22d3ee" stroke-width="1.5" opacity="0.5"/>
-  <line x1="42" y1="72" x2="78" y2="72" stroke="#22d3ee" stroke-width="2" opacity="0.6"/>
-  <line x1="45" y1="58" x2="75" y2="58" stroke="#22d3ee" stroke-width="2" opacity="0.6"/>
-  <line x1="48" y1="44" x2="72" y2="44" stroke="#22d3ee" stroke-width="2" opacity="0.6"/>
-  <rect x="48" y="12" width="24" height="10" rx="2" fill="#22d3ee" opacity="0.9"/>
-  <line x1="60" y1="12" x2="60" y2="2" stroke="#22d3ee" stroke-width="3" stroke-linecap="round"/>
+  <rect x="20" y="115" width="80" height="6" rx="3" fill="currentColor"/>
+  <line x1="35" y1="115" x2="25" y2="85" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+  <line x1="85" y1="115" x2="95" y2="85" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+  <line x1="45" y1="115" x2="40" y2="85" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <line x1="75" y1="115" x2="80" y2="85" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <line x1="25" y1="103" x2="95" y2="103" stroke="currentColor" stroke-width="2.5" opacity="0.7"/>
+  <line x1="27" y1="93" x2="93" y2="93" stroke="currentColor" stroke-width="2.5" opacity="0.7"/>
+  <line x1="40" y1="85" x2="52" y2="20" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+  <line x1="80" y1="85" x2="68" y2="20" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+  <line x1="40" y1="85" x2="68" y2="20" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
+  <line x1="80" y1="85" x2="52" y2="20" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
+  <line x1="42" y1="72" x2="78" y2="72" stroke="currentColor" stroke-width="2" opacity="0.6"/>
+  <line x1="45" y1="58" x2="75" y2="58" stroke="currentColor" stroke-width="2" opacity="0.6"/>
+  <line x1="48" y1="44" x2="72" y2="44" stroke="currentColor" stroke-width="2" opacity="0.6"/>
+  <rect x="48" y="12" width="24" height="10" rx="2" fill="currentColor" opacity="0.9"/>
+  <line x1="60" y1="12" x2="60" y2="2" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
 </svg>Land Wells Situation</h1>
     <div class="sub">PETROBEL — WELL DATA LOOKUP SYSTEM</div>
     <!-- Situation Date Bar -->
     <div class="situation-date-bar" id="situationDateBar">
-      <span class="sdlbl">📅 Situation Date</span>
+      <span class="sdlbl"><svg class="ico" aria-hidden="true"><use href="#i-calendar"/></svg> Situation Date</span>
       <span class="sdval" id="situationDateVal">—</span>
       <span class="sdage" id="situationDateAge"></span>
     </div>
@@ -1255,16 +1291,16 @@ body.light-mode .install-banner{
 
   <!-- PWA install banner -->
   <div class="install-banner" id="installBanner" style="display:none;">
-    <p>📱 <span>Install as app</span> on your phone — works offline!</p>
+    <p><svg class="ico" aria-hidden="true"><use href="#i-phone"/></svg> <span>Install as app</span> on your phone — works offline!</p>
     <button class="install-btn" id="installBtn" onclick="installApp()">Install</button>
   </div>
 
   <div class="search-section">
     <div class="search-row">
       <div class="search-input-wrap">
-        <span class="s-icon">🔍</span>
+        <span class="s-icon"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg></span>
         <input class="search-input" id="searchInput" type="text"
-          placeholder="Search for a well (e.g. 112-07)..." autocomplete="off" spellcheck="false"
+          placeholder="Well name — e.g. 112-07" autocomplete="off" spellcheck="false"
           autocorrect="off" autocapitalize="none" inputmode="text">
         <button class="s-clear" id="clearBtn" onclick="clearSearch()">✕</button>
       </div>
@@ -1274,48 +1310,48 @@ body.light-mode .install-banner{
 
   <div class="well-card-area" id="wellResult">
     <div class="empty-state">
-      <div class="big"><svg class="rig-svg" viewBox="0 0 120 130" xmlns="http://www.w3.org/2000/svg" style="width:70px;height:76px;opacity:0.35;">
+      <div class="big"><svg class="rig-svg" viewBox="0 0 120 130" xmlns="http://www.w3.org/2000/svg" style="width:70px;height:76px;opacity:0.4;color:var(--accent);">
   <!-- Base platform -->
-  <rect x="20" y="115" width="80" height="6" rx="3" fill="#22d3ee"/>
+  <rect x="20" y="115" width="80" height="6" rx="3" fill="currentColor"/>
   <!-- Left leg -->
-  <line x1="35" y1="115" x2="25" y2="85" stroke="#22d3ee" stroke-width="4" stroke-linecap="round"/>
+  <line x1="35" y1="115" x2="25" y2="85" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
   <!-- Right leg -->
-  <line x1="85" y1="115" x2="95" y2="85" stroke="#22d3ee" stroke-width="4" stroke-linecap="round"/>
+  <line x1="85" y1="115" x2="95" y2="85" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
   <!-- Inner left leg -->
-  <line x1="45" y1="115" x2="40" y2="85" stroke="#22d3ee" stroke-width="3" stroke-linecap="round"/>
+  <line x1="45" y1="115" x2="40" y2="85" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
   <!-- Inner right leg -->
-  <line x1="75" y1="115" x2="80" y2="85" stroke="#22d3ee" stroke-width="3" stroke-linecap="round"/>
+  <line x1="75" y1="115" x2="80" y2="85" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
   <!-- Cross braces lower -->
-  <line x1="25" y1="103" x2="95" y2="103" stroke="#22d3ee" stroke-width="2.5" opacity="0.7"/>
-  <line x1="27" y1="93" x2="93" y2="93" stroke="#22d3ee" stroke-width="2.5" opacity="0.7"/>
+  <line x1="25" y1="103" x2="95" y2="103" stroke="currentColor" stroke-width="2.5" opacity="0.7"/>
+  <line x1="27" y1="93" x2="93" y2="93" stroke="currentColor" stroke-width="2.5" opacity="0.7"/>
   <!-- X brace lower left -->
-  <line x1="25" y1="103" x2="40" y2="85" stroke="#22d3ee" stroke-width="1.5" opacity="0.5"/>
-  <line x1="40" y1="103" x2="25" y2="85" stroke="#22d3ee" stroke-width="1.5" opacity="0.5"/>
+  <line x1="25" y1="103" x2="40" y2="85" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
+  <line x1="40" y1="103" x2="25" y2="85" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
   <!-- X brace lower right -->
-  <line x1="80" y1="103" x2="95" y2="85" stroke="#22d3ee" stroke-width="1.5" opacity="0.5"/>
-  <line x1="95" y1="103" x2="80" y2="85" stroke="#22d3ee" stroke-width="1.5" opacity="0.5"/>
+  <line x1="80" y1="103" x2="95" y2="85" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
+  <line x1="95" y1="103" x2="80" y2="85" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
   <!-- Tower body -->
-  <line x1="40" y1="85" x2="52" y2="20" stroke="#22d3ee" stroke-width="4" stroke-linecap="round"/>
-  <line x1="80" y1="85" x2="68" y2="20" stroke="#22d3ee" stroke-width="4" stroke-linecap="round"/>
+  <line x1="40" y1="85" x2="52" y2="20" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+  <line x1="80" y1="85" x2="68" y2="20" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
   <!-- Tower cross braces -->
-  <line x1="40" y1="85" x2="68" y2="20" stroke="#22d3ee" stroke-width="1.5" opacity="0.5"/>
-  <line x1="80" y1="85" x2="52" y2="20" stroke="#22d3ee" stroke-width="1.5" opacity="0.5"/>
-  <line x1="42" y1="72" x2="78" y2="72" stroke="#22d3ee" stroke-width="2" opacity="0.6"/>
-  <line x1="45" y1="58" x2="75" y2="58" stroke="#22d3ee" stroke-width="2" opacity="0.6"/>
-  <line x1="48" y1="44" x2="72" y2="44" stroke="#22d3ee" stroke-width="2" opacity="0.6"/>
-  <line x1="51" y1="30" x2="69" y2="30" stroke="#22d3ee" stroke-width="2" opacity="0.6"/>
+  <line x1="40" y1="85" x2="68" y2="20" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
+  <line x1="80" y1="85" x2="52" y2="20" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
+  <line x1="42" y1="72" x2="78" y2="72" stroke="currentColor" stroke-width="2" opacity="0.6"/>
+  <line x1="45" y1="58" x2="75" y2="58" stroke="currentColor" stroke-width="2" opacity="0.6"/>
+  <line x1="48" y1="44" x2="72" y2="44" stroke="currentColor" stroke-width="2" opacity="0.6"/>
+  <line x1="51" y1="30" x2="69" y2="30" stroke="currentColor" stroke-width="2" opacity="0.6"/>
   <!-- Crown block -->
-  <rect x="48" y="12" width="24" height="10" rx="2" fill="#22d3ee" opacity="0.9"/>
+  <rect x="48" y="12" width="24" height="10" rx="2" fill="currentColor" opacity="0.9"/>
   <!-- Vertical drill string -->
-  <line x1="60" y1="22" x2="60" y2="115" stroke="#fbbf24" stroke-width="2" stroke-dasharray="4 3" opacity="0.6"/>
+  <line x1="60" y1="22" x2="60" y2="115" stroke="currentColor" stroke-width="2" stroke-dasharray="4 3" opacity="0.6"/>
   <!-- Hook/traveling block -->
-  <rect x="54" y="60" width="12" height="8" rx="2" fill="#fbbf24" opacity="0.8"/>
+  <rect x="54" y="60" width="12" height="8" rx="2" fill="currentColor" opacity="0.8"/>
   <!-- Derrick top pip -->
-  <line x1="60" y1="12" x2="60" y2="2" stroke="#22d3ee" stroke-width="3" stroke-linecap="round"/>
+  <line x1="60" y1="12" x2="60" y2="2" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
   <!-- Pump jack arm (right side) -->
-  <line x1="85" y1="100" x2="105" y2="88" stroke="#22d3ee" stroke-width="3.5" stroke-linecap="round"/>
-  <circle cx="105" cy="88" r="5" fill="none" stroke="#22d3ee" stroke-width="2.5"/>
-  <line x1="105" y1="88" x2="105" y2="115" stroke="#22d3ee" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="85" y1="100" x2="105" y2="88" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>
+  <circle cx="105" cy="88" r="5" fill="none" stroke="currentColor" stroke-width="2.5"/>
+  <line x1="105" y1="88" x2="105" y2="115" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
 </svg></div>
       <p>Type a well name above to search,<br>or pick from the suggestions</p>
     </div>
@@ -1323,16 +1359,16 @@ body.light-mode .install-banner{
 </div>
 <div class="page" id="page-substation" style="display:none;">
   <div class="page-hdr">
-    <h2>⚡ Substation Lookup</h2>
+    <h2><svg class="ico ico-h" aria-hidden="true"><use href="#i-power"/></svg> Substation Lookup</h2>
     <p>Pick a substation to see all its wells in one table</p>
   </div>
 
   <div class="search-section">
     <div class="search-row">
       <div class="search-input-wrap">
-        <span class="s-icon">⚡</span>
+        <span class="s-icon"><svg class="ico" aria-hidden="true"><use href="#i-power"/></svg></span>
         <input class="search-input" id="substationInput" type="text"
-          placeholder="Search by substation number..." autocomplete="off" spellcheck="false"
+          placeholder="Substation number" autocomplete="off" spellcheck="false"
           autocorrect="off" autocapitalize="none" inputmode="text">
         <button class="s-clear" id="substationClearBtn" onclick="clearSubstationSearch()">✕</button>
       </div>
@@ -1342,7 +1378,7 @@ body.light-mode .install-banner{
 
   <div class="well-card-area" id="substationResult">
     <div class="empty-state">
-      <div class="big">⚡</div>
+      <div class="big"><svg class="ico ico-xl" aria-hidden="true"><use href="#i-power"/></svg></div>
       <p>Search for a substation above to see all its connected wells</p>
     </div>
   </div>
@@ -1379,9 +1415,9 @@ body.light-mode .install-banner{
   <div class="search-section">
     <div class="search-row">
       <div class="search-input-wrap">
-        <span class="s-icon">🔩</span>
+        <span class="s-icon"><svg class="ico" aria-hidden="true"><use href="#i-battery"/></svg></span>
         <input class="search-input" id="manifoldInput" type="text"
-          placeholder="Search Tank Battery (e.g. 6/1)..." autocomplete="off" spellcheck="false"
+          placeholder="Tank battery — e.g. 6/1" autocomplete="off" spellcheck="false"
           autocorrect="off" autocapitalize="none" inputmode="text">
         <button class="s-clear" id="manifoldClearBtn" onclick="clearManifoldSearch()">✕</button>
       </div>
@@ -1413,16 +1449,16 @@ body.light-mode .install-banner{
 <!-- ══════════════ PAGE 1D: CHEMICAL ══════════════ -->
 <div class="page" id="page-chemical" style="display:none;">
   <div class="page-hdr">
-    <h2>🧪 Chemical Injection</h2>
+    <h2><svg class="ico ico-h" aria-hidden="true"><use href="#i-chem"/></svg> Chemical Injection</h2>
     <p>Search active wells under chemical injection service and review chemical coverage by type</p>
   </div>
 
   <div class="search-section">
     <div class="search-row">
       <div class="search-input-wrap">
-        <span class="s-icon">🧪</span>
+        <span class="s-icon"><svg class="ico" aria-hidden="true"><use href="#i-chem"/></svg></span>
         <input class="search-input" id="chemicalInput" type="text"
-          placeholder="Search well name or chemical type..." autocomplete="off" spellcheck="false"
+          placeholder="Well name or chemical" autocomplete="off" spellcheck="false"
           autocorrect="off" autocapitalize="none" inputmode="text">
         <button class="s-clear" id="chemicalClearBtn" onclick="clearChemicalSearch()">✕</button>
       </div>
@@ -1432,7 +1468,7 @@ body.light-mode .install-banner{
 
   <div class="well-card-area" id="chemicalResult">
     <div class="empty-state">
-      <div class="big">🧪</div>
+      <div class="big"><svg class="ico ico-xl" aria-hidden="true"><use href="#i-chem"/></svg></div>
       <p>Search for an active injected well or browse the chemical types below</p>
     </div>
   </div>
@@ -1441,13 +1477,13 @@ body.light-mode .install-banner{
 <!-- ══════════════ PAGE 1E: WELL HISTORY ══════════════ -->
 <div class="page" id="page-history" style="display:none;">
   <div class="page-hdr">
-    <h2>📜 Wells History</h2>
+    <h2><svg class="ico ico-h" aria-hidden="true"><use href="#i-log"/></svg> Wells History</h2>
     <p>Per-well test history, trend chart and field comments</p>
   </div>
 
   <div style="padding:14px 14px 8px;">
     <div class="situation-date-bar" id="histUploadBar">
-      <span class="sdlbl">📅 History Uploaded</span>
+      <span class="sdlbl"><svg class="ico" aria-hidden="true"><use href="#i-calendar"/></svg> History Uploaded</span>
       <span class="sdval" id="histUploadVal">—</span>
       <span class="sdage" id="histUploadBy"></span>
     </div>
@@ -1457,7 +1493,7 @@ body.light-mode .install-banner{
 
     <div id="hist-empty">
       <div class="empty-state" style="margin-top:14px;">
-        <div class="big">📜</div>
+        <div class="big"><svg class="ico ico-xl" aria-hidden="true"><use href="#i-log"/></svg></div>
         <p>No wells history loaded yet.<br>
         <span style="font-size:12px;color:var(--muted);">Admin can upload <strong>WELL_TEST_HISTORY.xlsx</strong> from the <strong>Update DB</strong> tab — it will sync to all devices automatically.</span></p>
       </div>
@@ -1467,9 +1503,9 @@ body.light-mode .install-banner{
       <div class="search-section">
         <div class="search-row">
           <div class="search-input-wrap">
-            <span class="s-icon">🔎</span>
+            <span class="s-icon"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg></span>
             <input class="search-input" id="histSearchInput" type="text"
-              placeholder="Search well name..." autocomplete="off" spellcheck="false"
+              placeholder="Well name" autocomplete="off" spellcheck="false"
               autocorrect="off" autocapitalize="none" inputmode="text">
             <button class="s-clear" onclick="clearHistSearch()">✕</button>
           </div>
@@ -1478,7 +1514,7 @@ body.light-mode .install-banner{
       </div>
 
       <div id="histDetail" class="well-card-area">
-        <div class="empty-state"><div class="big">📜</div><p>Pick a well above to see its history</p></div>
+        <div class="empty-state"><div class="big"><svg class="ico ico-xl" aria-hidden="true"><use href="#i-log"/></svg></div><p>Pick a well above to see its history</p></div>
       </div>
     </div>
   </div>
@@ -1487,14 +1523,14 @@ body.light-mode .install-banner{
 <!-- ══════════════ PAGE 4: UPDATE DATA (Admin only) ══════════════ -->
 <div class="page" id="page-data" style="display:none;">
   <div class="page-hdr">
-    <h2>🗄️ Admin Panel</h2>
+    <h2><svg class="ico ico-h" aria-hidden="true"><use href="#i-db"/></svg> Admin Panel</h2>
     <p>Database management &amp; daily reporting tools</p>
   </div>
 
   <!-- ── Tab navigation: Update DB | Morning Report ── -->
   <div class="admin-tabs">
-    <button class="admin-tab-btn active" id="admin-tab-db"     onclick="switchAdminTab('db')">📊 Update DB</button>
-    <button class="admin-tab-btn"        id="admin-tab-report" onclick="switchAdminTab('report')">📋 Morning Report</button>
+    <button class="admin-tab-btn active" id="admin-tab-db"     onclick="switchAdminTab('db')"><svg class="ico" aria-hidden="true"><use href="#i-db"/></svg> Update DB</button>
+    <button class="admin-tab-btn"        id="admin-tab-report" onclick="switchAdminTab('report')"><svg class="ico" aria-hidden="true"><use href="#i-clipboard"/></svg> Morning Report</button>
   </div>
 
   <!-- ══ Tab 1: Update Well Database (existing content, unchanged) ══ -->
@@ -1519,18 +1555,18 @@ body.light-mode .install-banner{
         <div class="ds-lbl">Storage Status</div>
       </div>
       <div class="db-stat">
-        <div class="ds-val" id="cloud-sync-status" style="font-size:13px;color:#94a3b8;">☁️ Connecting…</div>
+        <div class="ds-val" id="cloud-sync-status" style="font-size:13px;color:var(--muted);">Connecting…</div>
         <div class="ds-lbl">Cloud Sync</div>
       </div>
     </div>
 
     <div class="update-intro">
-      <h3>📋 How to Update</h3>
+      <h3><svg class="ico" aria-hidden="true"><use href="#i-clipboard"/></svg> How to Update</h3>
       <p>Upload the latest <strong>LAND_WELLS_SITUATION.xlsx</strong> file and the app will refresh all well data immediately — no internet connection needed.</p>
     </div>
 
     <div class="upload-zone" id="dataUploadZone" onclick="document.getElementById('dataFileInput').click()">
-      <div class="uz-icon">📊</div>
+      <div class="uz-icon"><svg class="ico ico-xl" aria-hidden="true"><use href="#i-db"/></svg></div>
       <p><strong>Tap to choose Excel file</strong></p>
       <p>LAND_WELLS_SITUATION.xlsx</p>
     </div>
@@ -1538,7 +1574,7 @@ body.light-mode .install-banner{
 
     <!-- ── Wells History upload (admin) ── -->
     <div class="update-intro" style="margin-top:18px;">
-      <h3>📜 Wells Test History</h3>
+      <h3><svg class="ico" aria-hidden="true"><use href="#i-log"/></svg> Wells Test History</h3>
       <p>Upload <strong>WELL_TEST_HISTORY.xlsx</strong>.</p>
       <ul>
         <li>Last sync: <strong style="color:var(--text)" id="hist-cloud-when">—</strong></li>
@@ -1546,18 +1582,16 @@ body.light-mode .install-banner{
     </div>
     <span style="display:none" id="hist-cloud-count"></span>
     <div class="upload-zone" id="histAdminUploadZone" onclick="document.getElementById('histFileInput').click()">
-      <div class="uz-icon">📜</div>
+      <div class="uz-icon"><svg class="ico ico-xl" aria-hidden="true"><use href="#i-log"/></svg></div>
       <p><strong>Tap to choose history Excel file</strong></p>
       <p>WELL_TEST_HISTORY.xlsx</p>
     </div>
     <input type="file" id="histFileInput" class="file-input" accept=".xlsx,.xls">
-    <button class="btn-secondary" id="histDateReviewBtn" onclick="downloadDateReport()"
-            style="display:none;margin-top:8px;width:100%;">📅 Review dates the app had to interpret</button>
     <div id="histAdminStatus" style="display:none;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-top:8px;line-height:1.7;"></div>
 
     <!-- ── Lab W.C. History upload (admin) ── -->
     <div class="update-intro" style="margin-top:18px;">
-      <h3>💧 Wells Lab W.C. History</h3>
+      <h3><svg class="ico" aria-hidden="true"><use href="#i-water"/></svg> Wells Lab W.C. History</h3>
       <p>Upload <strong>W.C.HISTORY.xlsx</strong>.</p>
       <ul>
         <li>Last sync: <strong style="color:var(--text)" id="wc-cloud-when">—</strong></li>
@@ -1565,18 +1599,16 @@ body.light-mode .install-banner{
     </div>
     <span style="display:none" id="wc-cloud-count"></span>
     <div class="upload-zone" id="wcAdminUploadZone" onclick="document.getElementById('wcFileInput').click()">
-      <div class="uz-icon">💧</div>
+      <div class="uz-icon"><svg class="ico ico-xl" aria-hidden="true"><use href="#i-water"/></svg></div>
       <p><strong>Tap to choose W.C. history Excel file</strong></p>
       <p>W.C.HISTORY.xlsx</p>
     </div>
     <input type="file" id="wcFileInput" class="file-input" accept=".xlsx,.xls">
-    <button class="btn-secondary" id="wcDateReviewBtn" onclick="downloadDateReport()"
-            style="display:none;margin-top:8px;width:100%;">📅 Review dates the app had to interpret</button>
     <div id="wcAdminStatus" style="display:none;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-top:8px;line-height:1.7;"></div>
 
     <!-- ── Water Disposal Wells History upload (admin) ── -->
     <div class="update-intro" style="margin-top:18px;">
-      <h3>💧 Water Disposal Wells History</h3>
+      <h3><svg class="ico" aria-hidden="true"><use href="#i-water"/></svg> Water Disposal Wells History</h3>
       <p>Upload <strong>WATER_DISPOSAL_WELLS_HISTORY.xlsx</strong>.</p>
       <ul>
         <li>Last sync: <strong style="color:var(--text)" id="disp-cloud-when">—</strong></li>
@@ -1584,7 +1616,7 @@ body.light-mode .install-banner{
     </div>
     <span style="display:none" id="disp-cloud-count"></span>
     <div class="upload-zone" id="dispAdminUploadZone" onclick="document.getElementById('dispFileInput').click()">
-      <div class="uz-icon">💧</div>
+      <div class="uz-icon"><svg class="ico ico-xl" aria-hidden="true"><use href="#i-water"/></svg></div>
       <p><strong>Tap to choose disposal history Excel file</strong></p>
       <p>WATER_DISPOSAL_WELLS_HISTORY.xlsx</p>
     </div>
@@ -1594,7 +1626,7 @@ body.light-mode .install-banner{
 
     <!-- ── Chemical Injection Survey upload (admin) ── -->
     <div class="update-intro" style="margin-top:18px;">
-      <h3>🧪 Chemical Injection Survey</h3>
+      <h3><svg class="ico" aria-hidden="true"><use href="#i-chem"/></svg> Chemical Injection Survey</h3>
       <p>Upload the daily <strong>H2S_Scavenger_Demulsifier_Daily_Survey.xlsx</strong>. All 10 chemical sheets are parsed automatically — doses, skid levels, and pump status per well are synced to every device. Diesel stays sourced from the main well database.</p>
       <ul>
         <li>Last sync: <strong style="color:var(--text)" id="chem-survey-cloud-when">—</strong></li>
@@ -1602,7 +1634,7 @@ body.light-mode .install-banner{
       </ul>
     </div>
     <div class="upload-zone" id="chemSurveyUploadZone" onclick="document.getElementById('chemSurveyFileInput').click()">
-      <div class="uz-icon">🧪</div>
+      <div class="uz-icon"><svg class="ico ico-xl" aria-hidden="true"><use href="#i-chem"/></svg></div>
       <p><strong>Tap to choose chemical survey Excel file</strong></p>
       <p>H2S_Scavenger_Demulsifier_Daily_Survey.xlsx</p>
     </div>
@@ -1611,14 +1643,14 @@ body.light-mode .install-banner{
 
     <!-- ── Comparison / Baseline Snapshot upload (admin) ── -->
     <div class="update-intro" style="margin-top:18px;">
-      <h3>📉 Comparison File (Loss Analysis)</h3>
+      <h3><svg class="ico" aria-hidden="true"><use href="#i-decline"/></svg> Comparison File (Loss Analysis)</h3>
       <p>Upload an older monthly file to store it as a <strong>baseline snapshot</strong> for the Analysis tab. Saved to Firebase only — this does <strong>not</strong> change the live well data.</p>
       <ul>
         <li>Stored snapshots: <strong style="color:var(--text)" id="snapCloudCount">—</strong></li>
       </ul>
     </div>
     <div class="upload-zone" id="cmpAdminUploadZone" onclick="document.getElementById('cmpFileInput').click()">
-      <div class="uz-icon">📉</div>
+      <div class="uz-icon"><svg class="ico ico-xl" aria-hidden="true"><use href="#i-decline"/></svg></div>
       <p><strong>Tap to choose comparison Excel file</strong></p>
       <p>Stored as a dated baseline snapshot</p>
     </div>
@@ -1643,7 +1675,7 @@ body.light-mode .install-banner{
         • After uploading a new file, the new data stays saved in the app<br>
         • To reset to built-in data, tap the button below
       </p>
-      <button class="btn-secondary" onclick="resetToBuiltIn()" style="margin-top:10px;font-size:13px;padding:10px;">🔄 Reset to Built-in Data</button>
+      <button class="btn-secondary" onclick="resetToBuiltIn()" style="margin-top:10px;font-size:13px;padding:10px;"><svg class="ico" aria-hidden="true"><use href="#i-refresh"/></svg> Reset to Built-in Data</button>
     </div>
   </div>
   </div><!-- /admin-panel-db -->
@@ -1656,7 +1688,7 @@ body.light-mode .install-banner{
     <div id="mr-wrap">
 
       <!-- ── SECTION 1: Well Search ─────────────────── -->
-      <div class="mr-section-title">🔍 Find Well</div>
+      <div class="mr-section-title"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg> Find Well</div>
       <div id="mr-search-area" class="mr-search-wrap">
         <input class="mr-search-input" id="mr-well-search" type="text"
                placeholder="Type well name (e.g. 112-07)..."
@@ -1694,11 +1726,11 @@ body.light-mode .install-banner{
       <textarea class="mr-textarea" id="mr-note2" style="margin-top:8px;"
         placeholder="Additional note (optional) — e.g. Under investigation"></textarea>
 
-      <button class="mr-btn-add" id="mr-add-btn" onclick="mrAddWell()">➕ Add to Report</button>
+      <button class="mr-btn-add" id="mr-add-btn" onclick="mrAddWell()"><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg> Add to Report</button>
       <button class="mr-btn-secondary" onclick="mrClearWellForm()">✕ Clear Form</button>
 
       <!-- ── SECTION 3: Daily Samples ──────────────── -->
-      <div class="mr-section-title">🧪 Daily Samples</div>
+      <div class="mr-section-title"><svg class="ico" aria-hidden="true"><use href="#i-chem"/></svg> Daily Samples</div>
       <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;">
         <div class="mr-sample-row">
           <span class="mr-sample-name">Zeitco</span>
@@ -1721,7 +1753,7 @@ body.light-mode .install-banner{
       </div>
 
       <!-- ── SECTION 4: Report List ─────────────────── -->
-      <div class="mr-section-title">📋 Report Entries</div>
+      <div class="mr-section-title"><svg class="ico" aria-hidden="true"><use href="#i-clipboard"/></svg> Report Entries</div>
       <div class="mr-report-list" id="mr-list">
         <div class="mr-empty-state">No wells added yet</div>
       </div>
@@ -1729,12 +1761,12 @@ body.light-mode .install-banner{
       <!-- ── SECTION 5: Generate & Copy Report ─────── -->
       <button class="mr-btn-generate" onclick="mrGenerateReport()">📄 Generate Report</button>
       <pre class="mr-report-output" id="mr-output"></pre>
-      <button class="mr-btn-copy" id="mr-copy-btn" onclick="mrCopyReport()">📋 Copy for WhatsApp</button>
+      <button class="mr-btn-copy" id="mr-copy-btn" onclick="mrCopyReport()"><svg class="ico" aria-hidden="true"><use href="#i-clipboard"/></svg> Copy for WhatsApp</button>
 
       <!-- Clear entire report -->
       <button class="mr-btn-secondary" onclick="mrClearAll()"
               style="margin-top:18px;color:var(--red);border-color:rgba(248,113,113,.3);">
-        🗑️ Clear Entire Report
+        <svg class="ico" aria-hidden="true"><use href="#i-trash"/></svg> Clear Entire Report
       </button>
 
     </div><!-- /mr-wrap -->
@@ -1760,7 +1792,7 @@ body.light-mode .install-banner{
     <p>Tank Battery manifold production — reported vs actual</p>
   </div>
   <div class="tb-header-bar">
-    <div id="tb-date-display" class="tb-date-pill">📅 —</div>
+    <div id="tb-date-display" class="tb-date-pill"><svg class="ico" aria-hidden="true"><use href="#i-calendar"/></svg> —</div>
     <div style="font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Updates with Excel upload</div>
   </div>
   <div class="tb-total-strip">
@@ -1805,19 +1837,19 @@ body.light-mode .install-banner{
 <!-- ══════════════ PAGE: WATER DISPOSAL WELLS ══════════════ -->
 <div class="page" id="page-disposal" style="display:none;">
   <div class="page-hdr">
-    <h2>💧 Water Disposal Wells</h2>
+    <h2><svg class="ico ico-h" aria-hidden="true"><use href="#i-water"/></svg> Water Disposal Wells</h2>
     <p>Injection wells — latest rate &amp; full injection history</p>
   </div>
 
   <div style="padding:14px 14px 8px;">
     <div class="situation-date-bar" id="dispUploadBar">
-      <span class="sdlbl">📅 History Uploaded</span>
+      <span class="sdlbl"><svg class="ico" aria-hidden="true"><use href="#i-calendar"/></svg> History Uploaded</span>
       <span class="sdval" id="dispUploadVal">—</span>
       <span class="sdage" id="dispUploadBy"></span>
     </div>
     <div id="disp-empty">
       <div class="empty-state" style="margin-top:14px;">
-        <div class="big">💧</div>
+        <div class="big"><svg class="ico ico-xl" aria-hidden="true"><use href="#i-water"/></svg></div>
         <p>No water disposal history loaded yet.<br>
         <span style="font-size:12px;color:var(--muted);">Admin can upload <strong>WATER_DISPOSAL_WELLS_HISTORY.xlsx</strong> from the <strong>Update DB</strong> tab — it will sync to all devices automatically.</span></p>
       </div>
@@ -1828,14 +1860,14 @@ body.light-mode .install-banner{
 
       <div class="hist-divider">
         <div class="hist-divider-line"></div>
-        <div class="hist-divider-title">💧 PER-WELL INJECTION HISTORY</div>
+        <div class="hist-divider-title"><svg class="ico" aria-hidden="true"><use href="#i-water"/></svg> PER-WELL INJECTION HISTORY</div>
         <div class="hist-divider-line"></div>
       </div>
 
       <div class="search-section">
         <div class="search-row">
           <div class="search-input-wrap">
-            <span class="s-icon">🔎</span>
+            <span class="s-icon"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg></span>
             <input class="search-input" id="dispSearchInput" type="text"
               placeholder="Search disposal well..." autocomplete="off" spellcheck="false"
               autocorrect="off" autocapitalize="none" inputmode="text">
@@ -1846,7 +1878,7 @@ body.light-mode .install-banner{
       </div>
 
       <div id="dispDetail" class="well-card-area">
-        <div class="empty-state"><div class="big">💧</div><p>Tap a well in the table above to see its injection history</p></div>
+        <div class="empty-state"><div class="big"><svg class="ico ico-xl" aria-hidden="true"><use href="#i-water"/></svg></div><p>Tap a well in the table above to see its injection history</p></div>
       </div>
     </div>
   </div>
@@ -1885,14 +1917,14 @@ body.light-mode .install-banner{
 .anl-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px;}
 .anl-chip{font-size:10px;padding:3px 7px;border-radius:20px;border:1px solid var(--border);color:var(--muted);}
 .anl-chip.rate{color:var(--yellow);border-color:rgba(251,191,36,.4);}
-.anl-chip.wc{color:var(--accent);border-color:rgba(34,211,238,.4);}
+.anl-chip.wc{color:var(--accent);border-color:var(--ring);}
 .anl-chip.pump-down{color:var(--red);border-color:rgba(248,113,113,.4);}
 .anl-chip.pump-up{color:var(--green);border-color:rgba(16,185,129,.4);}
 .anl-chip.pump-type{color:#c084fc;border-color:rgba(192,132,252,.4);}
 .anl-chip.wo-restart{color:var(--green);border-color:rgba(16,185,129,.5);background:rgba(16,185,129,.12);font-weight:700;}
 .anl-chip.wo-stop{color:var(--red);border-color:rgba(248,113,113,.5);background:rgba(248,113,113,.12);font-weight:700;}
 .anl-wo-btn{width:100%;padding:9px 12px;margin-bottom:10px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer;font-family:'JetBrains Mono',monospace;}
-.anl-wo-btn.active{background:rgba(34,211,238,.14);border-color:var(--accent);color:var(--accent);}
+.anl-wo-btn.active{background:var(--ring);border-color:var(--accent);color:var(--accent);}
 .anl-chip.primary{background:rgba(248,113,113,.14);font-weight:700;}
 .anl-detail{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:none;}
 .anl-detail.open{display:block;}
@@ -1946,93 +1978,13 @@ body.light-mode .install-banner{
 .anl-bal-net.zero .anl-bal-net-m3,.anl-bal-net.zero .anl-bal-net-bbl{color:var(--muted);}
 </style>
 <style>
-/* ── Ras Gara tab ─────────────────────────────────────────────────────── */
-.rg-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;}
-.rg-lbl{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-family:'JetBrains Mono',monospace;}
-.rg-date{background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);
-  padding:7px 9px;font-size:13px;font-family:'JetBrains Mono',monospace;}
-.rg-btn{background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);
-  padding:7px 12px;font-size:12px;cursor:pointer;font-family:inherit;}
-.rg-btn:active{transform:translateY(1px);}
-.rg-btn-primary{background:var(--accent);color:#04121a;border-color:var(--accent);font-weight:700;}
-body.light-mode .rg-btn-primary{color:#fff !important;}
-.rg-saved{font-size:11px;color:var(--muted);margin-left:auto;font-family:'JetBrains Mono',monospace;}
-.rg-hint{font-size:11px;color:var(--muted);margin:2px 0 10px;}
-.rg-sec-title{font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);
-  font-family:'JetBrains Mono',monospace;margin:22px 0 8px;}
-.rg-tbl-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:10px;background:var(--surface);}
-table.rg-tbl{width:100%;border-collapse:collapse;font-family:'JetBrains Mono',monospace;font-size:12px;min-width:520px;}
-table.rg-tbl th{position:sticky;top:0;background:var(--card);color:var(--muted);font-size:10px;
-  letter-spacing:.5px;text-transform:uppercase;padding:7px 6px;border-bottom:1px solid var(--border);text-align:center;font-weight:600;}
-table.rg-tbl th.rg-grp{color:var(--accent);border-bottom:1px solid var(--accent);}
-table.rg-tbl th.rg-grp2{color:var(--accent2, #fbbf24);border-bottom:1px solid var(--accent2, #fbbf24);}
-table.rg-tbl td{padding:3px 6px;border-bottom:1px solid rgba(148,163,184,.12);text-align:center;color:var(--text);}
-table.rg-tbl tbody tr:nth-child(odd){background:rgba(56,189,248,0.07);}
-.rg-time{color:var(--muted);white-space:nowrap;}
-.rg-in{width:74px;background:transparent;border:1px solid transparent;border-radius:6px;color:var(--text);
-  padding:4px 5px;font-size:12px;font-family:'JetBrains Mono',monospace;text-align:center;}
-.rg-in:hover:not(:disabled){border-color:var(--border);}
-.rg-in:focus{outline:none;border-color:var(--accent);background:var(--card);}
-.rg-in:disabled{color:var(--muted);opacity:.65;cursor:not-allowed;}
-.rg-in.rg-dirty{border-color:var(--accent2, #fbbf24);}
-.rg-calc{color:var(--muted);font-variant-numeric:tabular-nums;}
-.rg-tot{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:14px;}
-.rg-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:11px 13px;}
-.rg-card .k{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-family:'JetBrains Mono',monospace;}
-.rg-card .v{font-size:20px;font-weight:700;margin-top:3px;font-family:'JetBrains Mono',monospace;}
-.rg-card .s{font-size:11px;color:var(--muted);margin-top:1px;font-family:'JetBrains Mono',monospace;}
-.rg-card.petreco .v{color:var(--accent);}
-.rg-card.rasgara .v{color:var(--accent2, #fbbf24);}
-.rg-card.loss .v{color:var(--red, #f87171);}
-.rg-card.gain .v{color:var(--green, #4ade80);}
-.rg-actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
-.rg-actions .rg-btn{flex:1;min-width:150px;padding:11px 12px;font-size:13px;}
-.rg-empty{color:var(--muted);font-size:13px;text-align:center;padding:26px 10px;}
-.rg-legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:6px;font-size:11px;
-  color:var(--muted);font-family:'JetBrains Mono',monospace;}
-.rg-legend .sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px;}
 </style>
 
-<div class="page" id="page-rasgara" style="display:none;">
-  <div class="page-hdr">
-    <h2>🛢️ Ras Gara — Production Comparison</h2>
-    <p>Hourly PETRECO vs Ras Gara readings, losses &amp; daily trend</p>
-  </div>
-  <div style="padding:12px 14px 30px;">
 
-    <!-- day picker + actions -->
-    <div class="rg-bar">
-      <label class="rg-lbl" for="rgDate">Shift day</label>
-      <input type="date" id="rgDate" class="rg-date">
-      <button class="rg-btn" id="rgTodayBtn">Today</button>
-      <span class="rg-saved" id="rgSaved"></span>
-    </div>
-    <div class="rg-hint" id="rgShiftHint"></div>
-
-    <!-- entry / comparison table -->
-    <div id="rgTableArea"></div>
-
-    <!-- totals -->
-    <div id="rgTotals"></div>
-
-    <!-- chart -->
-    <div id="rgChart"></div>
-
-    <!-- actions -->
-    <div class="rg-actions">
-      <button class="rg-btn rg-btn-primary" id="rgPrintBtn">🖨️ Print report</button>
-      <button class="rg-btn rg-btn-primary" id="rgMailBtn">📧 Send by e-mail</button>
-    </div>
-
-    <!-- daily trend across days -->
-    <div class="rg-sec-title">📈 Daily comparison history</div>
-    <div id="rgHistory"></div>
-  </div>
-</div>
 
 <div class="page" id="page-analysis" style="display:none;">
   <div class="page-hdr">
-    <h2>📉 Loss Analysis</h2>
+    <h2><svg class="ico ico-h" aria-hidden="true"><use href="#i-decline"/></svg> Loss Analysis</h2>
     <p>Compare well ACT production between two dates &amp; rank losses</p>
   </div>
   <div style="padding:12px 14px 30px;">
@@ -2050,14 +2002,14 @@ table.rg-tbl tbody tr:nth-child(odd){background:rgba(56,189,248,0.07);}
     </div>
     <div id="anlSummary" class="anl-summary" style="display:none;"></div>
     <div id="anlBody">
-      <div class="empty-state"><div class="big">📉</div><p>Select two dates and tap Compare</p></div>
+      <div class="empty-state"><div class="big"><svg class="ico ico-xl" aria-hidden="true"><use href="#i-decline"/></svg></div><p>Select two dates and tap Compare</p></div>
     </div>
   </div>
 </div>
 
 <div class="footer">Powered by <span>Sherif Morshed</span></div>
 <div class="toast" id="toast"></div>
-<div id="swUpdateBanner"><span>🔄 </span><span>App update available — </span><strong>Tap to refresh</strong></div>
+<div id="swUpdateBanner"><span><svg class="ico" aria-hidden="true"><use href="#i-refresh"/></svg> </span><span>App update available — </span><strong>Tap to refresh</strong></div>
 
 <!-- Firebase SDK (CDN — no npm needed) -->
 <!-- Firebase SDK 10.12.2 — served LOCALLY, not from gstatic.com.
@@ -2089,10 +2041,9 @@ const ADMIN_EMAILS = ['sherifmorshed@gmail.com'];
 // the Ras Gara columns of a day. Enforced here for the UI and, crucially, in
 // the Firestore rules — a UI check alone is not security; without the matching
 // rule this account could write anything.
-const RASGARA_EMAILS = ['rasgara@petrobel.org'];
+
 let currentUser = null;
 let isAdmin = false;
-let isRasGara = false;
 
 // ── Degraded-mode stub ───────────────────────────────────────────────────
 // Used only if the Firebase SDK could not be initialised at all. Every call
@@ -2227,8 +2178,7 @@ function showApp(user) {
   currentUser = { email: user.email, uid: user.uid, name: user.email.split('@')[0] };
   const _email = String(user.email || '').toLowerCase();
   isAdmin   = ADMIN_EMAILS.includes(_email);
-  isRasGara = RASGARA_EMAILS.includes(_email);
-  console.log('[Auth] Logged in:', user.email, isAdmin ? '(ADMIN)' : isRasGara ? '(RAS GARA)' : '(READER)');
+  console.log('[Auth] Logged in:', user.email, isAdmin ? '(ADMIN)' : '(READER)');
 
   // Hide login, show app
   document.getElementById('login-page').classList.add('hidden');
@@ -2238,22 +2188,7 @@ function showApp(user) {
 
   // Populate user bar
   document.getElementById('ubEmail').textContent = user.email;
-  document.getElementById('ubRole').textContent = isAdmin ? 'ADMIN' : isRasGara ? 'RAS GARA' : 'READER';
-
-  // Ras Gara operators get a single-purpose app: every other tab and page is
-  // removed from the nav, and showPage() refuses to open them.
-  if (isRasGara && !isAdmin) {
-    document.querySelectorAll('#mainNav .nav-btn').forEach(function(b){
-      if (b.id !== 'nav-rasgara') b.style.display = 'none';
-    });
-    document.querySelectorAll('.page').forEach(function(pg){
-      if (pg.id !== 'page-rasgara') pg.style.display = 'none';
-    });
-    var _hdrStats = document.getElementById('headerStats');
-    if (_hdrStats) _hdrStats.classList.add('hidden');
-    var _sitBar = document.querySelector('.situation-date-bar');
-    if (_sitBar) _sitBar.style.display = 'none';
-  }
+  document.getElementById('ubRole').textContent = isAdmin ? 'ADMIN' : 'READER';
 
   // Show/hide Update DB tab + page based on admin role
   var navData = document.getElementById('nav-data');
@@ -2271,9 +2206,6 @@ function showApp(user) {
   try {
     if (isAdmin && typeof initMorningReport === 'function') initMorningReport();
   } catch (e) { console.warn('[Boot] initMorningReport failed:', e); }
-
-  // Ras Gara accounts land straight on their own tab.
-  if (isRasGara && !isAdmin) { try { showPage('rasgara'); } catch(e){} }
 
   // Update online/offline status
   handleOnlineStatus();
@@ -2457,10 +2389,14 @@ let _loadingScreenTimeout = null;  // Timeout that hides loading screen if Fires
 function updateCloudStatus(status, text) {
   const el = document.getElementById('cloud-sync-status');
   if (!el) return;
-  const colors = { synced: '#10b981', syncing: '#fbbf24', offline: '#ef4444', error: '#ef4444' };
-  const icons  = { synced: '☁️', syncing: '🔄', offline: '📡', error: '⚠️' };
-  el.innerHTML = (icons[status]||'') + ' ' + text;
-  el.style.color = colors[status] || '#94a3b8';
+  const colors = { synced: 'var(--green)', syncing: 'var(--yellow)', offline: 'var(--red)', error: 'var(--red)' };
+  const icons  = { synced: 'cloud', syncing: 'refresh', offline: 'cloud', error: 'warn' };
+  const name = icons[status];
+  // escHtml on `text`: this is the one status line that can carry a server
+  // error message straight through from Firestore.
+  el.innerHTML = (name ? '<svg class="ico" aria-hidden="true"><use href="#i-' + name + '"/></svg> ' : '') +
+                 escHtml(text);
+  el.style.color = colors[status] || 'var(--muted)';
 }
 
 // Save wells + situationDate to Firestore
@@ -2494,7 +2430,6 @@ function stopFirestoreListener() {
   try { stopWCHistoryListener(); } catch(e){}
   try { stopDisposalListener(); } catch(e){}
   try { if(typeof stopSnapshotsListener==='function') stopSnapshotsListener(); } catch(e){}
-  try { if(typeof stopRasGaraListener==='function') stopRasGaraListener(); } catch(e){}
 }
 
 // Start real-time listener — all 50 readers auto-update
@@ -2504,29 +2439,12 @@ function startFirestoreListener() {
   console.log('[Firestore] Starting listener');
   updateCloudStatus('syncing', 'Connecting…');
 
-  // The Ras Gara plant account has no business with PETROBEL's well data, and
-  // the security rules deny it. Asking anyway would spray permission-denied
-  // errors across the console and park the cloud badge on "Not authorized",
-  // so simply don't subscribe to anything outside its own collection.
-  var _rgOnly = (typeof isRasGara !== 'undefined' && isRasGara) &&
-                !(typeof isAdmin !== 'undefined' && isAdmin);
-  if (_rgOnly) {
-    try { if(typeof startRasGaraListener==='function') startRasGaraListener(); }
-    catch(e){ console.warn('ras gara listener', e); }
-    _firestoreReady = true;
-    updateCloudStatus('synced', 'Cloud ✓');
-    if (_loadingScreenTimeout) { clearTimeout(_loadingScreenTimeout); _loadingScreenTimeout = null; }
-    hideLoadingScreen();
-    return;
-  }
-
   // Also start the wells-history listener for all logged-in users
   try { startHistoryListener(); } catch(e){ console.warn('history listener', e); }
   try { startWCHistoryListener(); } catch(e){ console.warn('wc listener', e); }
   try { startDisposalListener(); } catch(e){ console.warn('disposal listener', e); }
   try { if(typeof startSnapshotsListener==='function') startSnapshotsListener(); } catch(e){ console.warn('snapshots listener', e); }
   try { if(typeof startChemSurveyListener==='function') startChemSurveyListener(); } catch(e){ console.warn('chem survey listener', e); }
-  try { if(typeof startRasGaraListener==='function') startRasGaraListener(); } catch(e){ console.warn('ras gara listener', e); }
   _firestoreUnsub = db.collection('wells').doc('landWells')
     .onSnapshot(function(doc) {
       // Last-resort guard: whatever happens while handling a snapshot, the user
@@ -2592,7 +2510,7 @@ function _handleWellsSnapshot(doc) {
               lsSet(STORAGE_KEYS.situationDate, remoteSitDate);
             }
             // Only refresh the active page — mark others as stale
-            _stalePages = { substation:true, manifold:true, chemical:true, tb:true, data:true, lookup:true, analysis:true, rasgara:true };
+            _stalePages = { substation:true, manifold:true, chemical:true, tb:true, data:true, lookup:true, analysis:true };
             var activePage = document.querySelector('.page.active');
             var activeId = activePage ? activePage.id.replace('page-','') : 'lookup';
             _refreshPage(activeId);
@@ -2617,7 +2535,6 @@ function _refreshPage(page) {
   else if(page==='tb') renderTBPage();
   else if(page==='data') updateDBStats();
   else if(page==='analysis') refreshAnalysisPage();
-  else if(page==='rasgara' && typeof refreshRasGaraPage==='function') refreshRasGaraPage();
 }
 
 // ── Online/Offline detection ──
@@ -2648,6 +2565,44 @@ window.addEventListener('offline', handleOnlineStatus);
 //  UTILITY — HTML ESCAPE / STORAGE / NUMBERS
 // ══════════════════════════════════════════
 function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;');}
+
+// ── Chart series colours ──────────────────────────────────────────────
+// The three chart renderers used to hardcode their own hexes, so they drifted
+// from the theme and were never checked for colourblind separation. They now
+// pull the validated --s1/--s2/--s3 tokens, which differ per light/dark mode.
+//
+// Resolved to a literal hex at render time rather than emitting var(--s1) in
+// the SVG attribute: the printed report and the e-mailed PDF are rendered in a
+// detached window / html2canvas pass where the token may not be in scope, and
+// an unresolved var() paints black. PRINT_SERIES is the light-mode set, which
+// is what belongs on white paper regardless of the screen's mode.
+const PRINT_SERIES = { s1:'#2a78d6', s2:'#eb6834', s3:'#1baf7a' };
+const _SERIES_FALLBACK = { s1:'#3987e5', s2:'#d95926', s3:'#199e70' };
+function seriesColor(slot, forPrint){
+  if(forPrint) return PRINT_SERIES[slot] || PRINT_SERIES.s1;
+  try{
+    const v = getComputedStyle(document.body).getPropertyValue('--' + slot).trim();
+    if(v) return v;
+  }catch(e){}
+  return _SERIES_FALLBACK[slot] || _SERIES_FALLBACK.s1;
+}
+// The halo behind an on-chart value label. It has to be the SURFACE colour, not
+// a fixed dark navy — the old '#0b1220' painted a black outline around every
+// number once light mode existed, which is what made the charts look unfinished.
+function seriesHalo(){
+  try{
+    const v = getComputedStyle(document.body).getPropertyValue('--card').trim();
+    if(v) return v;
+  }catch(e){}
+  return '#14273a';
+}
+function axisInk(){
+  try{
+    const v = getComputedStyle(document.body).getPropertyValue('--muted').trim();
+    if(v) return v;
+  }catch(e){}
+  return '#8aa4bd';
+}
 function escAttr(s){ return escHtml(s).replace(/'/g,'&#39;'); }
 // Attach delegated click listeners on a container element
 // Each clickable child must have data-action and data-key attributes
@@ -2686,6 +2641,23 @@ function attachDelegatedClicks(container){
 function lsGet(key){ try{ return localStorage.getItem(key); }catch(e){ return null; } }
 function lsSet(key,val){ try{ localStorage.setItem(key,val); return true; }catch(e){ showToast('⚠️ Storage unavailable — data may not be saved',true); return false; } }
 function lsRemove(key){ try{ localStorage.removeItem(key); return true; }catch(e){ return false; } }
+
+// ── One-time cleanup: Ras Gara moved out in v104 ──────────────────────
+// The tab became its own application. Every device that ran v97-v103 still
+// holds its cached days in localStorage, and that cache is now unreachable
+// dead weight — a few hundred KB on a budget that is already ~2.7 MB of ~5 MB.
+// Clearing it is safe: the readings live in the new app's own Firebase project,
+// and the migration exports from Firestore, never from this cache.
+// The marker key means this costs one string read on later boots, not a scan.
+(function(){
+  try {
+    if(localStorage.getItem('rasgara_migrated_v104')) return;
+    ['rasgara_days_v1', 'rasgara_days_v1__syncver'].forEach(function(k){
+      try{ localStorage.removeItem(k); }catch(e){}
+    });
+    localStorage.setItem('rasgara_migrated_v104', '1');
+  } catch(e){ /* storage blocked entirely — nothing to clean */ }
+})();
 
 // ══════════════════════════════════════════
 //  CACHE-AWARE CLOUD SYNC
@@ -2921,7 +2893,7 @@ let pendingDataRows = [];
 
 let deferredInstall = null; // PWA install prompt
 
-const DOT = {producer:'#10b981',waiting:'#fbbf24',rig:'#22d3ee',other:'#3d6080'};
+const DOT = {producer:'#1d6b3f',waiting:'#a9822f',rig:'#0b3d68',other:'#7f93a6'};
 
 // ══════════════════════════════════════════
 //  LOCATION DATA — runtime JSON files (do not embed in HTML)
@@ -2963,7 +2935,7 @@ function getWellLocation(name)       { return getAnyLocation(WELL_LOCATIONS,    
 function getManifoldLocation(name)   { return getAnyLocation(MANIFOLD_LOCATIONS,   name); }
 function getSubstationLocation(name) { return getAnyLocation(SUBSTATION_LOCATIONS, name); }
 
-const MAPS_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="#22d3ee" style="display:block;flex-shrink:0;" aria-hidden="true"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>';
+const MAPS_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="display:block;flex-shrink:0;" aria-hidden="true"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>';
 
 // Opens a Google Maps URL safely from within a PWA.
 // Using window.open() instead of target="_blank" on <a> tags prevents the
@@ -3062,7 +3034,7 @@ function downloadWellsBackup(){
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `wells_backup_${new Date().toISOString().slice(0,10)}.json`;
+    a.download = `wells_backup_${_isoDate(new Date())}.json`;
     a.click();
     URL.revokeObjectURL(url);
     showToast('✅ Backup downloaded');
@@ -3098,7 +3070,9 @@ function resetToBuiltIn() {
 // ══════════════════════════════════════════
 //  UTILS
 // ══════════════════════════════════════════
-function today() { return new Date().toISOString().slice(0,10); }
+// Local calendar date, not the UTC one. toISOString() would report yesterday
+// between midnight and 03:00 in Baghdad (UTC+3).
+function today() { return _isoDate(new Date()); }
 function sc(s) {
   if (!s) return 'other';
   const l = s.toLowerCase();
@@ -3334,7 +3308,6 @@ function showPage(page, pushState=true) {
   // Block non-admin access to Update DB page
   if (page === 'data' && !isAdmin) { showToast('⚠️ Admin access required'); return; }
   // Ras Gara accounts are confined to their own tab.
-  if (typeof isRasGara !== 'undefined' && isRasGara && !isAdmin && page !== 'rasgara') { page = 'rasgara'; }
   // Only remove VISIBLE overlays on tab switch — hidden overlays are preserved
   // for back navigation (e.g. opening a well from the stats overlay hides it temporarily)
   ['wellListOverlay','tbWellsOverlay'].forEach(id=>{
@@ -3370,7 +3343,6 @@ function showPage(page, pushState=true) {
   else if(page==='history') refreshHistoryPage();
   else if(page==='disposal') refreshDisposalPage();
   else if(page==='analysis') refreshAnalysisPage();
-  else if(page==='rasgara' && typeof refreshRasGaraPage==='function') refreshRasGaraPage();
   // When returning to lookup — always show clean home state
   if(page==='lookup'){
     const statsEl = document.getElementById('headerStats');
@@ -3455,7 +3427,7 @@ function goSearch(){
   if(m.length>1){renderSugg(m,q,suggEl,'selectWell');return;}
   suggEl.classList.remove('show');
   document.getElementById('wellResult').innerHTML=`
-    <div class="empty-state"><div class="big">🔎</div>
+    <div class="empty-state"><div class="big"><svg class="ico ico-xl" aria-hidden="true"><use href="#i-search"/></svg></div>
     <p>No well found for <strong style="color:var(--accent)">"${escHtml(q)}"</strong></p></div>`;
 }
 
@@ -3481,7 +3453,7 @@ function clearSearch(){
   document.getElementById('headerStats').classList.remove('hidden');
   searchInput.blur();
   document.getElementById('wellResult').innerHTML=`
-    <div class="empty-state"><div class="big"><svg viewBox="0 0 120 130" xmlns="http://www.w3.org/2000/svg" style="width:70px;height:76px;opacity:0.35;"><rect x="20" y="115" width="80" height="6" rx="3" fill="#22d3ee"/><line x1="35" y1="115" x2="25" y2="85" stroke="#22d3ee" stroke-width="4" stroke-linecap="round"/><line x1="85" y1="115" x2="95" y2="85" stroke="#22d3ee" stroke-width="4" stroke-linecap="round"/><line x1="45" y1="115" x2="40" y2="85" stroke="#22d3ee" stroke-width="3" stroke-linecap="round"/><line x1="75" y1="115" x2="80" y2="85" stroke="#22d3ee" stroke-width="3" stroke-linecap="round"/><line x1="25" y1="103" x2="95" y2="103" stroke="#22d3ee" stroke-width="2.5" opacity="0.7"/><line x1="27" y1="93" x2="93" y2="93" stroke="#22d3ee" stroke-width="2.5" opacity="0.7"/><line x1="40" y1="85" x2="52" y2="20" stroke="#22d3ee" stroke-width="4" stroke-linecap="round"/><line x1="80" y1="85" x2="68" y2="20" stroke="#22d3ee" stroke-width="4" stroke-linecap="round"/><line x1="40" y1="85" x2="68" y2="20" stroke="#22d3ee" stroke-width="1.5" opacity="0.5"/><line x1="80" y1="85" x2="52" y2="20" stroke="#22d3ee" stroke-width="1.5" opacity="0.5"/><line x1="42" y1="72" x2="78" y2="72" stroke="#22d3ee" stroke-width="2" opacity="0.6"/><line x1="45" y1="58" x2="75" y2="58" stroke="#22d3ee" stroke-width="2" opacity="0.6"/><line x1="48" y1="44" x2="72" y2="44" stroke="#22d3ee" stroke-width="2" opacity="0.6"/><rect x="48" y="12" width="24" height="10" rx="2" fill="#22d3ee" opacity="0.9"/><line x1="60" y1="22" x2="60" y2="115" stroke="#fbbf24" stroke-width="2" stroke-dasharray="4 3" opacity="0.6"/><rect x="54" y="60" width="12" height="8" rx="2" fill="#fbbf24" opacity="0.8"/><line x1="60" y1="12" x2="60" y2="2" stroke="#22d3ee" stroke-width="3" stroke-linecap="round"/><line x1="85" y1="100" x2="105" y2="88" stroke="#22d3ee" stroke-width="3.5" stroke-linecap="round"/><circle cx="105" cy="88" r="5" fill="none" stroke="#22d3ee" stroke-width="2.5"/><line x1="105" y1="88" x2="105" y2="115" stroke="#22d3ee" stroke-width="2.5" stroke-linecap="round"/></svg></div>
+    <div class="empty-state"><div class="big"><svg viewBox="0 0 120 130" xmlns="http://www.w3.org/2000/svg" style="width:70px;height:76px;opacity:0.4;color:var(--accent);"><rect x="20" y="115" width="80" height="6" rx="3" fill="currentColor"/><line x1="35" y1="115" x2="25" y2="85" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><line x1="85" y1="115" x2="95" y2="85" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><line x1="45" y1="115" x2="40" y2="85" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><line x1="75" y1="115" x2="80" y2="85" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><line x1="25" y1="103" x2="95" y2="103" stroke="currentColor" stroke-width="2.5" opacity="0.7"/><line x1="27" y1="93" x2="93" y2="93" stroke="currentColor" stroke-width="2.5" opacity="0.7"/><line x1="40" y1="85" x2="52" y2="20" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><line x1="80" y1="85" x2="68" y2="20" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><line x1="40" y1="85" x2="68" y2="20" stroke="currentColor" stroke-width="1.5" opacity="0.5"/><line x1="80" y1="85" x2="52" y2="20" stroke="currentColor" stroke-width="1.5" opacity="0.5"/><line x1="42" y1="72" x2="78" y2="72" stroke="currentColor" stroke-width="2" opacity="0.6"/><line x1="45" y1="58" x2="75" y2="58" stroke="currentColor" stroke-width="2" opacity="0.6"/><line x1="48" y1="44" x2="72" y2="44" stroke="currentColor" stroke-width="2" opacity="0.6"/><rect x="48" y="12" width="24" height="10" rx="2" fill="currentColor" opacity="0.9"/><line x1="60" y1="22" x2="60" y2="115" stroke="currentColor" stroke-width="2" stroke-dasharray="4 3" opacity="0.6"/><rect x="54" y="60" width="12" height="8" rx="2" fill="currentColor" opacity="0.8"/><line x1="60" y1="12" x2="60" y2="2" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><line x1="85" y1="100" x2="105" y2="88" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><circle cx="105" cy="88" r="5" fill="none" stroke="currentColor" stroke-width="2.5"/><line x1="105" y1="88" x2="105" y2="115" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg></div>
     <p>Type a well name above to search</p></div>`;
 }
 
@@ -3501,7 +3473,7 @@ let currentRenderedWellName = '';
 
 function showLookupEmptyState(){
   document.getElementById('wellResult').innerHTML = `
-    <div class="empty-state"><div class="big"><svg viewBox="0 0 120 130" xmlns="http://www.w3.org/2000/svg" style="width:70px;height:76px;opacity:0.35;"><rect x="20" y="115" width="80" height="6" rx="3" fill="#22d3ee"/><line x1="35" y1="115" x2="25" y2="85" stroke="#22d3ee" stroke-width="4" stroke-linecap="round"/><line x1="85" y1="115" x2="95" y2="85" stroke="#22d3ee" stroke-width="4" stroke-linecap="round"/><line x1="45" y1="115" x2="40" y2="85" stroke="#22d3ee" stroke-width="3" stroke-linecap="round"/><line x1="75" y1="115" x2="80" y2="85" stroke="#22d3ee" stroke-width="3" stroke-linecap="round"/><line x1="25" y1="103" x2="95" y2="103" stroke="#22d3ee" stroke-width="2.5" opacity="0.7"/><line x1="27" y1="93" x2="93" y2="93" stroke="#22d3ee" stroke-width="2.5" opacity="0.7"/><line x1="40" y1="85" x2="52" y2="20" stroke="#22d3ee" stroke-width="4" stroke-linecap="round"/><line x1="80" y1="85" x2="68" y2="20" stroke="#22d3ee" stroke-width="4" stroke-linecap="round"/><line x1="40" y1="85" x2="68" y2="20" stroke="#22d3ee" stroke-width="1.5" opacity="0.5"/><line x1="80" y1="85" x2="52" y2="20" stroke="#22d3ee" stroke-width="1.5" opacity="0.5"/><line x1="42" y1="72" x2="78" y2="72" stroke="#22d3ee" stroke-width="2" opacity="0.6"/><line x1="45" y1="58" x2="75" y2="58" stroke="#22d3ee" stroke-width="2" opacity="0.6"/><line x1="48" y1="44" x2="72" y2="44" stroke="#22d3ee" stroke-width="2" opacity="0.6"/><rect x="48" y="12" width="24" height="10" rx="2" fill="#22d3ee" opacity="0.9"/><line x1="60" y1="22" x2="60" y2="115" stroke="#fbbf24" stroke-width="2" stroke-dasharray="4 3" opacity="0.6"/><rect x="54" y="60" width="12" height="8" rx="2" fill="#fbbf24" opacity="0.8"/><line x1="60" y1="12" x2="60" y2="2" stroke="#22d3ee" stroke-width="3" stroke-linecap="round"/><line x1="85" y1="100" x2="105" y2="88" stroke="#22d3ee" stroke-width="3.5" stroke-linecap="round"/><circle cx="105" cy="88" r="5" fill="none" stroke="#22d3ee" stroke-width="2.5"/><line x1="105" y1="88" x2="105" y2="115" stroke="#22d3ee" stroke-width="2.5" stroke-linecap="round"/></svg></div>
+    <div class="empty-state"><div class="big"><svg viewBox="0 0 120 130" xmlns="http://www.w3.org/2000/svg" style="width:70px;height:76px;opacity:0.4;color:var(--accent);"><rect x="20" y="115" width="80" height="6" rx="3" fill="currentColor"/><line x1="35" y1="115" x2="25" y2="85" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><line x1="85" y1="115" x2="95" y2="85" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><line x1="45" y1="115" x2="40" y2="85" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><line x1="75" y1="115" x2="80" y2="85" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><line x1="25" y1="103" x2="95" y2="103" stroke="currentColor" stroke-width="2.5" opacity="0.7"/><line x1="27" y1="93" x2="93" y2="93" stroke="currentColor" stroke-width="2.5" opacity="0.7"/><line x1="40" y1="85" x2="52" y2="20" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><line x1="80" y1="85" x2="68" y2="20" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><line x1="40" y1="85" x2="68" y2="20" stroke="currentColor" stroke-width="1.5" opacity="0.5"/><line x1="80" y1="85" x2="52" y2="20" stroke="currentColor" stroke-width="1.5" opacity="0.5"/><line x1="42" y1="72" x2="78" y2="72" stroke="currentColor" stroke-width="2" opacity="0.6"/><line x1="45" y1="58" x2="75" y2="58" stroke="currentColor" stroke-width="2" opacity="0.6"/><line x1="48" y1="44" x2="72" y2="44" stroke="currentColor" stroke-width="2" opacity="0.6"/><rect x="48" y="12" width="24" height="10" rx="2" fill="currentColor" opacity="0.9"/><line x1="60" y1="22" x2="60" y2="115" stroke="currentColor" stroke-width="2" stroke-dasharray="4 3" opacity="0.6"/><rect x="54" y="60" width="12" height="8" rx="2" fill="currentColor" opacity="0.8"/><line x1="60" y1="12" x2="60" y2="2" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><line x1="85" y1="100" x2="105" y2="88" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><circle cx="105" cy="88" r="5" fill="none" stroke="currentColor" stroke-width="2.5"/><line x1="105" y1="88" x2="105" y2="115" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg></div>
     <p>Type a well name above to search,<br>or pick from the suggestions</p></div>`;
   document.getElementById('headerStats').classList.remove('hidden');
 }
@@ -3545,9 +3517,9 @@ function takeWellScreenshot(btn){
   stage.style.cssText = 'position:fixed;left:-10000px;top:0;width:920px;padding:32px;background:#0a0e1a;color:#e2e8f0;font-family:Inter,system-ui,sans-serif;font-size:22px;line-height:1.5;z-index:-1;';
 
   const header = document.createElement('div');
-  header.style.cssText = 'text-align:center;padding:16px 0 22px;border-bottom:1px solid rgba(34,211,238,.25);margin-bottom:22px;';
+  header.style.cssText = 'text-align:center;padding:16px 0 22px;border-bottom:1px solid var(--border);margin-bottom:22px;';
   header.innerHTML = '<div style="font-size:60px;font-weight:800;letter-spacing:3px;color:#fff;">PETROBEL</div>' +
-                    '<div style="font-size:22px;letter-spacing:4px;color:#22d3ee;margin-top:8px;text-transform:uppercase;">Land Wells Situation</div>';
+                    '<div style="font-size:22px;letter-spacing:4px;color:var(--accent);margin-top:8px;text-transform:uppercase;">Land Wells Situation</div>';
 
   // Clone the well content but strip the buttons row + Production Data + Pump Data sections
   const body = document.createElement('div');
@@ -3591,8 +3563,8 @@ function takeWellScreenshot(btn){
   body.querySelectorAll('.field').forEach(el => { el.style.padding = '6px 0'; });
 
   const footer = document.createElement('div');
-  footer.style.cssText = 'text-align:center;margin-top:24px;padding-top:18px;border-top:1px solid rgba(34,211,238,.25);font-size:13px;color:#94a3b8;font-family:"JetBrains Mono",monospace;letter-spacing:.5px;';
-  footer.innerHTML = 'Powered by <span style="color:#22d3ee;">Sherif Morshed</span>';
+  footer.style.cssText = 'text-align:center;margin-top:24px;padding-top:18px;border-top:1px solid var(--border);font-size:13px;color:var(--muted);font-family:var(--font-num);letter-spacing:.5px;';
+  footer.innerHTML = 'Powered by <span style="color:var(--accent);">Sherif Morshed</span>';
 
   stage.appendChild(header);
   stage.appendChild(body);
@@ -3607,7 +3579,7 @@ function takeWellScreenshot(btn){
   }).then(function(canvas){
     canvas.toBlob(function(blob){
       if(!blob){ throw new Error('Blob creation failed'); }
-      const stamp = new Date().toISOString().slice(0,10);
+      const stamp = _isoDate(new Date());
       const safeName = wellName.replace(/[^A-Za-z0-9_-]+/g,'_');
       const filename = 'Well_' + safeName + '_' + stamp + '.png';
       const file = new File([blob], filename, { type: 'image/png' });
@@ -3702,19 +3674,19 @@ function renderWell(well, source='lookup'){
   const h2sBadge = (h2sPpmRaw !== null)
     ? (h2sPpmRaw > 100
         ? `<span class="badge" style="background:rgba(248,113,113,.18);color:var(--red);border-color:rgba(248,113,113,.55);font-weight:700;">⚠ H2S Blank ${h2sPpmRaw} PPM</span>`
-        : `<span class="badge" style="background:rgba(34,211,238,.1);color:var(--accent);border-color:rgba(34,211,238,.3);">H2S Blank ${h2sPpmRaw} PPM</span>`)
+        : `<span class="badge" style="background:var(--ring);color:var(--accent);border-color:var(--ring);">H2S Blank ${h2sPpmRaw} PPM</span>`)
     : '';
 
   const _wellKey = String(well['Well']||'').trim().toUpperCase();
   const _hasHistory = !!(typeof WELL_HISTORY !== 'undefined' && WELL_HISTORY[_wellKey]);
   const _histBtnHtml = _hasHistory
-    ? `<button class="nav-back-btn" onclick="goToWellHistory('${escAttr(_wellKey)}')" title="Open this well's history" aria-label="Well History" style="background:rgba(34,211,238,.12);border-color:rgba(34,211,238,.45);color:var(--accent);">📜 History</button>`
+    ? `<button class="nav-back-btn" onclick="goToWellHistory('${escAttr(_wellKey)}')" title="Open this well's history" aria-label="Well History" style="background:var(--ring);border-color:var(--accent);color:var(--accent);"><svg class="ico" aria-hidden="true"><use href="#i-log"/></svg> History</button>`
     : '';
 
   document.getElementById('wellResult').innerHTML = `
     <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px;flex-wrap:wrap;" data-screenshot-hide="1">
       ${_histBtnHtml}
-      <button class="nav-back-btn" onclick="takeWellScreenshot(this)" title="Save well snapshot as PNG" aria-label="Screenshot">📸</button>
+      <button class="nav-back-btn" onclick="takeWellScreenshot(this)" title="Save well snapshot as PNG" aria-label="Screenshot"><svg class="ico" aria-hidden="true"><use href="#i-camera"/></svg></button>
       <button class="nav-back-btn" onclick="backFromWellCard()">← Back</button>
     </div>
 
@@ -3794,7 +3766,7 @@ function renderWell(well, source='lookup'){
 
     ${chemSurveyEntries.length ? `
     <div class="section">
-      <div class="sec-title">💉 Chemical Injection Details <span style="font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;">${escHtml((typeof CHEM_SURVEY!=='undefined'&&CHEM_SURVEY&&CHEM_SURVEY.reportDate)||'')}</span></div>
+      <div class="sec-title"><svg class="ico" aria-hidden="true"><use href="#i-chem"/></svg> Chemical Injection Details <span style="font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;">${escHtml((typeof CHEM_SURVEY!=='undefined'&&CHEM_SURVEY&&CHEM_SURVEY.reportDate)||'')}</span></div>
       <div style="padding:12px 14px;">${chemSurveyEntries.map(chemSurveyCard).join('')}</div>
     </div>` : ''}
 
@@ -3911,7 +3883,7 @@ function renderSubstationResult(name){
   const wells = getWellsBySubstation(name);
   const resultEl = document.getElementById('substationResult');
   if(!wells.length){
-    resultEl.innerHTML = `<div class="empty-state"><div class="big">⚡</div><p>No wells found for <strong style="color:var(--accent)">"${escHtml(name)}"</strong></p></div>`;
+    resultEl.innerHTML = `<div class="empty-state"><div class="big"><svg class="ico ico-xl" aria-hidden="true"><use href="#i-power"/></svg></div><p>No wells found for <strong style="color:var(--accent)">"${escHtml(name)}"</strong></p></div>`;
     return;
   }
   currentSubstationName = name;
@@ -4228,7 +4200,7 @@ function renderBatteryManifoldResult(batteryKey){
   const manifolds = getManifoldGroupsByBatteryKey(batteryKey);
   const resultEl = document.getElementById('manifoldResult');
   if(!battery || !wells.length){
-    resultEl.innerHTML = `<div class="empty-state"><div class="big">🔩</div><p>No wells found for this Tank Battery</p></div>`;
+    resultEl.innerHTML = `<div class="empty-state"><div class="big"><svg class="ico ico-xl" aria-hidden="true"><use href="#i-battery"/></svg></div><p>No wells found for this Tank Battery</p></div>`;
     return;
   }
   currentManifoldBattery = batteryKey;
@@ -5042,7 +5014,7 @@ function startChemSurveyListener(){
       } catch(err){
         console.error(err);
         _setChemSurveyAdminStatus('❌ Error: '+err.message);
-        if(zone) zone.innerHTML='<div class="uz-icon">🧪</div><p><strong>Tap to choose chemical survey Excel file</strong></p><p>H2S_Scavenger_Demulsifier_Daily_Survey.xlsx</p>';
+        if(zone) zone.innerHTML='<div class="uz-icon"><svg class="ico ico-xl" aria-hidden="true"><use href="#i-chem"/></svg></div><p><strong>Tap to choose chemical survey Excel file</strong></p><p>H2S_Scavenger_Demulsifier_Daily_Survey.xlsx</p>';
         showToast('❌ Chemical survey error: '+err.message,true);
       }
     };
@@ -5247,7 +5219,7 @@ function renderChemicalWellFocus(wellName){
   const rec = getChemicalRecordByWell(wellName);
   const resultEl = document.getElementById('chemicalResult');
   if(!rec){
-    resultEl.innerHTML = `<div class="empty-state"><div class="big">🧪</div><p>No chemical injection wells found</p></div>`;
+    resultEl.innerHTML = `<div class="empty-state"><div class="big"><svg class="ico ico-xl" aria-hidden="true"><use href="#i-chem"/></svg></div><p>No chemical injection wells found</p></div>`;
     return;
   }
   currentChemicalName = '';
@@ -5275,7 +5247,7 @@ function renderChemicalWellFocus(wellName){
     </div>
     ${(CHEM_SURVEY && rec.surveyData && rec.surveyData.length) ? `
     <div class="section">
-      <div class="sec-title">💉 Injection Details <span style="font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;">${escHtml(CHEM_SURVEY.reportDate||'')}</span></div>
+      <div class="sec-title"><svg class="ico" aria-hidden="true"><use href="#i-chem"/></svg> Injection Details <span style="font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;">${escHtml(CHEM_SURVEY.reportDate||'')}</span></div>
       <div style="padding:12px 14px;">${rec.surveyData.map(chemSurveyCard).join('')}</div>
     </div>` : ''}
     <div class="section">
@@ -5291,7 +5263,7 @@ function renderChemicalResult(key){
   const group = getChemicalByKey(key);
   const resultEl = document.getElementById('chemicalResult');
   if(!group || !group.records.length){
-    resultEl.innerHTML = `<div class="empty-state"><div class="big">🧪</div><p>No wells found for this treatment</p></div>`;
+    resultEl.innerHTML = `<div class="empty-state"><div class="big"><svg class="ico ico-xl" aria-hidden="true"><use href="#i-chem"/></svg></div><p>No wells found for this treatment</p></div>`;
     return;
   }
   currentChemicalName = key;
@@ -5438,7 +5410,7 @@ function renderChemicalResult(key){
       <div style="padding:8px 14px 0;">
         <div class="chem-search-row">
           <div class="chem-search-wrap">
-            <span class="s-icon">🔎</span>
+            <span class="s-icon"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg></span>
             <input class="chem-search-input" id="chemicalWellSearchInput" type="text" placeholder="Search well inside ${escAttr(group.name)}..." value="${escAttr(currentChemicalWellFilter||'')}" autocomplete="off" spellcheck="false">
             <button class="chem-search-clear" id="chemicalWellSearchClear" onclick="clearChemicalWellSearch()">✕</button>
           </div>
@@ -5682,35 +5654,53 @@ function extractSituationDateFromWorkbook(wb) {
   const data = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
   if (!data || !data.length) return null;
 
+  // Build "YYYY-MM-DD" straight from the numbers the sheet gave us, validating
+  // that the date actually exists (rejects 31/02, month 13, …).
+  //
+  // ⚠️ Do NOT go via `new Date(y, m-1, d).toISOString()`. That constructor makes
+  // LOCAL midnight and toISOString() converts to UTC, so in any positive-offset
+  // timezone the date rolls back a day: in Baghdad (UTC+3) a sheet dated
+  // 25 Aug 2026 was stored as 2026-08-24. That was a real bug — it made every
+  // comparison snapshot land on the wrong day for Egypt and Iraq, while looking
+  // perfectly correct anywhere at or west of UTC.
+  function _ymd(y, m, d) {
+    const probe = new Date(Date.UTC(y, m - 1, d));
+    if (probe.getUTCFullYear() !== y || probe.getUTCMonth() + 1 !== m || probe.getUTCDate() !== d) return null;
+    return y + '-' + String(m).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+  }
+
   function parseRawDate(raw) {
+    // A real Excel date cell arrives as a Date object, not a string.
+    if (raw instanceof Date && !isNaN(raw)) {
+      const ep = _excelDateParts(raw);
+      return ep ? _ymd(ep.yr, ep.mon, ep.day) : null;
+    }
     const s = String(raw).trim();
     if (!s) return null;
-    // ISO format: "2026-03-27" or "2026-03-27 00:00:00"
+    // ISO format: "2026-03-27" or "2026-03-27 00:00:00" — already unambiguous.
     if (s.match(/^\d{4}-\d{2}-\d{2}/)) return s.slice(0, 10);
-    // Excel date serial (no slashes/dashes — pure number)
+    // Excel date serial (no slashes/dashes — pure number).
+    // Here toISOString() IS correct: the arithmetic produces a UTC midnight
+    // instant, so reading it back in UTC is exact. Using local getters would
+    // break this one in negative-offset timezones.
     if (!s.includes('/') && !s.includes('-')) {
       const num = parseFloat(s);
       if (!isNaN(num) && num > 40000) {
         const d = new Date((num - 25569) * 86400 * 1000);
-        return d.toISOString().slice(0, 10);
+        return isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10);
       }
     }
     // DD/MM/YYYY or D/M/YYYY (common in Egypt/Arabic contexts)
     const dmySlash = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-    if (dmySlash) {
-      const d = new Date(+dmySlash[3], +dmySlash[2] - 1, +dmySlash[1]);
-      if (!isNaN(d.getTime())) return d.toISOString().slice(0, 10);
-    }
+    if (dmySlash) return _ymd(+dmySlash[3], +dmySlash[2], +dmySlash[1]);
     // DD-MM-YYYY or D-M-YYYY
     const dmyDash = s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
-    if (dmyDash) {
-      const d = new Date(+dmyDash[3], +dmyDash[2] - 1, +dmyDash[1]);
-      if (!isNaN(d.getTime())) return d.toISOString().slice(0, 10);
-    }
-    // Last resort: native Date parsing (handles "8 Apr 2026", "April 8 2026", etc.)
+    if (dmyDash) return _ymd(+dmyDash[3], +dmyDash[2], +dmyDash[1]);
+    // Last resort: native parsing ("8 Apr 2026", "April 8 2026", …). That also
+    // yields LOCAL midnight, so read it back with LOCAL getters, never UTC.
     const parsed = new Date(s);
     if (!isNaN(parsed.getTime()) && parsed.getFullYear() > 2000) {
-      return parsed.toISOString().slice(0, 10);
+      return _ymd(parsed.getFullYear(), parsed.getMonth() + 1, parsed.getDate());
     }
     return null;
   }
@@ -6120,7 +6110,8 @@ function renderTBPage(){
       else displayDate = sitDate;
     } catch(e){ displayDate = sitDate; }
   }
-  if(dateEl) dateEl.textContent = '📅 ' + displayDate;
+  if(dateEl) dateEl.innerHTML = '<svg class="ico" aria-hidden="true"><use href="#i-calendar"/></svg> ' +
+                                escHtml(displayDate);
 
   const M3_TO_BBL = 6.28981;
   const batteries = calcTBData();
@@ -6646,9 +6637,38 @@ function _saveHistoryNow(){
   catch(e){ showToast('⚠️ Could not save history (storage full?)', true); }
 }
 
+// ══════════════════════════════════════════════════════════════════════
+//  EXCEL DATE CELLS — timezone-proof reading
+// ══════════════════════════════════════════════════════════════════════
+// SheetJS with cellDates:true builds a Date at LOCAL midnight of the cell's
+// date — and, because of a rounding quirk, often lands one second SHORT of it.
+// In Baghdad (UTC+3) the Excel date 1-Apr-2025 comes back as
+// 2025-03-31T20:59:59Z, which reads locally as 31 March 23:59:59. Every
+// Excel-native date cell therefore parses a day early anywhere east of UTC —
+// 6,502 of the 16,244 rows in the well test history.
+//
+// That corrupted the dates before the day/month resolver ever saw them: the
+// "certain" anchor dates were themselves wrong, the spine collapsed, and rows
+// that should have been repaired were left as written. It is invisible at UTC
+// and in the Americas, which is why it survived testing.
+//
+// Fix: shift the instant by the local offset so the intended wall-clock time
+// becomes UTC, then snap to the nearest whole day. The 1-second shortfall
+// rounds up to the correct midnight, and it is exact in every timezone.
+function _excelDateParts(v){
+  if(!(v instanceof Date) || isNaN(v)) return null;
+  const shifted = v.getTime() - v.getTimezoneOffset() * 60000;
+  const snapped = new Date(Math.round(shifted / 86400000) * 86400000);
+  return { yr:snapped.getUTCFullYear(), mon:snapped.getUTCMonth() + 1, day:snapped.getUTCDate(),
+           d:snapped };
+}
+
 function _toDate(v){
   if(v == null || v === '') return null;
-  if(v instanceof Date && !isNaN(v)) return v;
+  if(v instanceof Date && !isNaN(v)){
+    const ep = _excelDateParts(v);
+    return ep ? ep.d : v;      // snapped to the true calendar day
+  }
   if(typeof v === 'number'){
     // Excel serial date
     const d = new Date(Date.UTC(1899,11,30) + v*86400000);
@@ -6676,14 +6696,28 @@ function _toDate(v){
   return isNaN(d) ? null : d;
 }
 
+// Two ISO formatters, because the app holds two different KINDS of Date and
+// mixing them up shifts dates by a day. Read the kind, then pick the formatter.
+//
+//  _isoDate    — for a Date that represents a moment in LOCAL time, e.g.
+//                `new Date()` or `new Date('2026-08-20T00:00:00')`. Uses local
+//                getters; toISOString() here would report yesterday east of UTC.
+//
+//  _isoDateUTC — for the NORMALISED dates the Excel parsers produce. Since
+//                v101 those are always UTC midnight of the true calendar day
+//                (see _excelDateParts / _mkUTC), so they must be read with UTC
+//                getters. Reading them locally works east of UTC by luck, and
+//                silently loses a day everywhere west of it.
 function _isoDate(d){
-  // Use LOCAL date components, not UTC. toISOString() converts to UTC which
-  // shifts dates backward by one day in positive-offset timezones (e.g. Egypt
-  // UTC+2/+3): local-midnight 12-May becomes 11-May 21:00 UTC, then slicing
-  // gives "11-May" — silently corrupting every Excel-native date.
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+function _isoDateUTC(d){
+  const y = d.getUTCFullYear();
+  const m = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(d.getUTCDate()).padStart(2, '0');
   return `${y}-${m}-${day}`;
 }
 
@@ -6767,70 +6801,10 @@ function parseHistoryFile(file){
 // fall from 471 to 233, and of what remains 220 are genuine typos in the
 // spreadsheet that no algorithm can resolve (see the SUSPECT report).
 
-// ══════════════════════════════════════════════════════════════════════
-//  DATE REVIEW EXPORT — the permanent cure
-// ══════════════════════════════════════════════════════════════════════
-// Inference has a ceiling. On the real WELL TEST HISTORY file, after the
-// anchor resolver, 220 of the 233 remaining out-of-order dates are genuine
-// typos in the spreadsheet — a year keyed as 2024 instead of 2025, or 2006,
-// or 2035. No algorithm can recover those, because they read only one way.
-//
-// So the app stops pretending it can. It writes down every date it had to
-// interpret, and every row it believes is simply wrong, and hands that list
-// back as a spreadsheet. Fix those rows once at source, save the sheet with
-// ISO (YYYY-MM-DD) dates, and there is nothing left to guess — ever.
-function downloadDateReport(){
-  if(!_lastDateReport || !_lastDateReport.rows.length){
-    showToast('No dates needed interpreting in the last import 🎉');
-    return;
-  }
-  const rep = _lastDateReport;
-  const header = ['Excel row','Well','Date as written in sheet','App read it as','Confidence','What to do'];
-  // Rows the app believes are genuinely WRONG come first — those are the ones a
-  // human must fix. The merely-ambiguous ones follow, in sheet order, so the
-  // column can be rewritten as ISO dates in one pass afterwards.
-  const ordered = rep.rows.slice().sort(function(a,b){
-    const sa = a.flag.indexOf('suspect') >= 0 ? 0 : 1;
-    const sb = b.flag.indexOf('suspect') >= 0 ? 0 : 1;
-    return sa !== sb ? sa - sb : a.excelRow - b.excelRow;
-  });
-  const body = ordered.map(function(r){
-    const suspect = r.flag.indexOf('suspect') >= 0;
-    return [
-      r.excelRow, r.well, r.raw, r.resolved,
-      suspect ? 'WRONG — please fix' : 'Interpreted (day/month swapped)',
-      suspect
-        ? 'This date does not fit the surrounding rows. Usually a mistyped year. Correct it in the sheet.'
-        : 'Written ambiguously; read from the surrounding rows. Rewrite as ' + r.resolved + ' to remove all doubt.'
-    ];
-  });
-  const aoa = [
-    ['DATE REVIEW — ' + rep.file],
-    ['Generated by the PETROBEL Land Wells app'],
-    [''],
-    ['Rows the app had to interpret: ' + rep.rows.length],
-    ['  of which look WRONG in the sheet (listed first): ' + rep.rows.filter(function(r){return r.flag.indexOf('suspect')>=0;}).length],
-    [''],
-    ['HOW TO STOP THIS HAPPENING AGAIN:'],
-    ['1. Fix every row marked "WRONG — please fix" in the original sheet.'],
-    ['2. Format the whole DATE column as YYYY-MM-DD (e.g. 2026-08-05).'],
-    ['3. Re-upload. From then on no date is ambiguous and nothing is guessed.'],
-    [''],
-    header
-  ].concat(body);
-  const ws = XLSX.utils.aoa_to_sheet(aoa);
-  ws['!cols'] = [{wch:10},{wch:12},{wch:28},{wch:14},{wch:32},{wch:80}];
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Date review');
-  const out = XLSX.write(wb, {bookType:'xlsx', type:'array'});
-  const name = 'DATE_REVIEW_' + rep.file.replace(/[^A-Za-z0-9]+/g,'_') + '.xlsx';
-  _downloadBlob(new Blob([out], {type:'application/octet-stream'}), name);
-  showToast('📄 Date review downloaded (' + rep.rows.length + ' rows)');
-}
-
-// Holds the date-review report from the most recent history import, so the
-// admin can download the list of rows the app had to interpret. Reset on
-// every import.
+// Records which dates the importer had to interpret. The download button was
+// removed at the user's request; the data is still collected because the
+// import summary counts come from it and it is useful from the console
+// (`_lastDateReport.rows`) when diagnosing a date problem.
 let _lastDateReport = null;
 
 // Render a raw date cell exactly as it appears in the sheet, for the report.
@@ -6848,8 +6822,9 @@ function _rawCellText(v){
 function _parseDateParts(v){
   if(v == null || String(v).trim() === '') return null;
   if(v instanceof Date && !isNaN(v)){
-    return { d:new Date(Date.UTC(v.getFullYear(), v.getMonth(), v.getDate())),
-             day:v.getDate(), mon:v.getMonth()+1, yr:v.getFullYear(), iso:false };
+    const ep = _excelDateParts(v);
+    if(!ep) return null;
+    return { d:ep.d, day:ep.day, mon:ep.mon, yr:ep.yr, iso:false };
   }
   if(typeof v === 'number'){
     const d = new Date(Date.UTC(1899,11,30) + v*86400000);
@@ -7007,7 +6982,7 @@ function _parseHistoryBuffer(buf){
         if(_res.flags[j] === 'swapped') swappedDates++;
         if(_res.flags[j]){
           _lastDateReport.rows.push({ excelRow:j+5, well:String(entry.wellRaw||'').trim(),
-            raw:_rawCellText(seqRaw[j]), resolved:_isoDate(date), flag:_res.flags[j] });
+            raw:_rawCellText(seqRaw[j]), resolved:_isoDateUTC(date), flag:_res.flags[j] });
         }
         let wellRaw = entry.wellRaw;
         if(wellRaw == null || String(wellRaw).trim() === ''){ skippedRows++; continue; }
@@ -7022,7 +6997,7 @@ function _parseHistoryBuffer(buf){
         const commentText = String(row[2] == null ? '' : row[2]).trim();
         if(hasTest){
           data[well].tests.push({
-            d: _isoDate(date),
+            d: _isoDateUTC(date),
             actRate: row[4],
             wc: row[5],
             whp: row[6],
@@ -7032,7 +7007,7 @@ function _parseHistoryBuffer(buf){
           });
           totalRows++;
         } else if(commentText){
-          data[well].comments.push({ d: _isoDate(date), text: commentText });
+          data[well].comments.push({ d: _isoDateUTC(date), text: commentText });
           totalRows++;
         }
       }
@@ -7078,8 +7053,6 @@ function _setHistAdminStatus(text){
   if(!el) return;
   el.style.display = 'block';
   el.textContent = text;
-  const btn = document.getElementById('histDateReviewBtn');
-  if(btn) btn.style.display = (_lastDateReport && _lastDateReport.rows.length) ? '' : 'none';
 }
 
 // ── Cloud sync for wells history (per-well docs + meta) ──
@@ -7358,7 +7331,7 @@ function refreshHistoryPage(){
       _renderHistoryFor(_histCurrentWell);
     } else {
       const det = document.getElementById('histDetail');
-      if(det) det.innerHTML = '<div class="empty-state"><div class="big">📜</div><p>Pick a well above to see its history</p></div>';
+      if(det) det.innerHTML = '<div class="empty-state"><div class="big"><svg class="ico ico-xl" aria-hidden="true"><use href="#i-log"/></svg></div><p>Pick a well above to see its history</p></div>';
     }
   }
 }
@@ -7384,7 +7357,7 @@ function _histSearchHandler(){
   sEl.innerHTML = names.map(n => {
     const h = WELL_HISTORY[n];
     return `<div class="sug-item" onclick="pickHistoryWell('${escAttr(n)}')">
-      <span class="sug-dot" style="background:#22d3ee"></span>
+      <span class="sug-dot" style="background:var(--accent)"></span>
       <span class="sug-name">${escHtml(n)}</span>
       <span class="sug-info">${h.tests.length} tests<br>${h.comments.length} comments</span>
     </div>`;
@@ -7420,10 +7393,13 @@ function _setHistMetric(m){
   if(_histCurrentWell) _renderHistoryFor(_histCurrentWell);
 }
 
+// Only ONE of these is ever drawn at a time — the tabs switch between them —
+// so they do not have to separate from each other, only from the surface. Each
+// takes a validated series token so the colour follows the theme.
 const HIST_METRICS = [
-  { key:'actRate', label:'Act Rate', unit:'m³/d', color:'#34d399' },
-  { key:'whp',     label:'WHP',      unit:'psi',  color:'#f472b6' },
-  { key:'amp',     label:'AMP',      unit:'A',    color:'#a78bfa' }
+  { key:'actRate', label:'Act Rate', unit:'m³/d', slot:'s3' },
+  { key:'whp',     label:'WHP',      unit:'psi',  slot:'s2' },
+  { key:'amp',     label:'AMP',      unit:'A',    slot:'s1' }
 ];
 
 function _renderHistoryFor(name){
@@ -7511,17 +7487,17 @@ function _renderHistoryFor(name){
 
   out.innerHTML = `
     <div class="hist-well-hdr">
-      <span>📜 ${escHtml(name)}</span>
+      <span><svg class="ico" aria-hidden="true"><use href="#i-log"/></svg> ${escHtml(name)}</span>
       <span class="hist-summary">${h.tests.length} tests · ${h.comments.length} comments · ${wcRows.length} W.C.</span>
     </div>
     <div class="hist-section">
-      <h3>📈 Trend</h3>
+      <h3><svg class="ico" aria-hidden="true"><use href="#i-trend"/></svg> Trend</h3>
       <div class="hist-metric-tabs">${metricTabs}</div>
       ${chartHtml}
     </div>
     <div class="hist-divider">
       <div class="hist-divider-line"></div>
-      <div class="hist-divider-title">🧪 WELLS TEST HISTORY</div>
+      <div class="hist-divider-title"><svg class="ico" aria-hidden="true"><use href="#i-chem"/></svg> WELLS TEST HISTORY</div>
       <div class="hist-divider-line"></div>
     </div>
 
@@ -7531,7 +7507,7 @@ function _renderHistoryFor(name){
 
     <div class="hist-divider">
       <div class="hist-divider-line"></div>
-      <div class="hist-divider-title">💧 LAB W.C. HISTORY</div>
+      <div class="hist-divider-title"><svg class="ico" aria-hidden="true"><use href="#i-water"/></svg> LAB W.C. HISTORY</div>
       <div class="hist-divider-line"></div>
     </div>
 
@@ -7542,7 +7518,12 @@ function _renderHistoryFor(name){
 }
 
 function _buildHistoryChart(tests, metricKey){
-  const meta = HIST_METRICS.find(m => m.key === metricKey) || HIST_METRICS[0];
+  const _base = HIST_METRICS.find(m => m.key === metricKey) || HIST_METRICS[0];
+  // Resolved here, not in the HIST_METRICS literal: that literal is evaluated
+  // while the document is still parsing, before body.light-mode is applied, so
+  // a colour captured there would be the dark step forever.
+  const meta = Object.assign({}, _base, { color: seriesColor(_base.slot) });
+  const haloCol = seriesHalo();
   const pts = tests.map((t, i) => {
     let v = t[metricKey];
     if(typeof v === 'string'){
@@ -7582,8 +7563,8 @@ function _buildHistoryChart(tests, metricKey){
     let ly = above ? cyN - 9 : cyN + 15;
     if(ly < 12)       ly = cyN + 15;       // would clip top → flip down
     if(ly > H - P - 2) ly = cyN - 9;       // would clip bottom → flip up
-    return `<circle cx="${cx}" cy="${cyN}" r="3.4" fill="${meta.color}" stroke="#0b1220" stroke-width="1.2"/>` +
-           `<text x="${cx}" y="${ly.toFixed(1)}" text-anchor="middle" fill="${meta.color}" font-size="10" font-weight="700" font-family="JetBrains Mono" paint-order="stroke" stroke="#0b1220" stroke-width="2.5" stroke-linejoin="round">${val}</text>`;
+    return `<circle cx="${cx}" cy="${cyN}" r="3.4" fill="${meta.color}" stroke="${haloCol}" stroke-width="1.2"/>` +
+           `<text x="${cx}" y="${ly.toFixed(1)}" text-anchor="middle" fill="${meta.color}" font-size="10" font-weight="700" font-family="var(--font-num)" paint-order="stroke" stroke="${haloCol}" stroke-width="2.5" stroke-linejoin="round">${val}</text>`;
   }).join('');
 
   // Y axis ticks
@@ -7593,7 +7574,7 @@ function _buildHistoryChart(tests, metricKey){
     const v = minY + (maxY - minY) * i / yTicks;
     const yy = sy(v);
     yAxis += `<line x1="${P}" y1="${yy.toFixed(1)}" x2="${W-P}" y2="${yy.toFixed(1)}" stroke="rgba(148,163,184,.15)" stroke-width="1"/>
-              <text x="${P-6}" y="${(yy+3).toFixed(1)}" text-anchor="end" fill="#94a3b8" font-size="10" font-family="JetBrains Mono">${(Math.round(v*10)/10).toString()}</text>`;
+              <text x="${P-6}" y="${(yy+3).toFixed(1)}" text-anchor="end" fill="${axisInk()}" font-size="10" font-family="var(--font-num)">${(Math.round(v*10)/10).toString()}</text>`;
   }
 
   // X axis ticks
@@ -7604,7 +7585,7 @@ function _buildHistoryChart(tests, metricKey){
     const xx = sx(v);
     const d = new Date(v);
     const label = d.toLocaleDateString('en-GB', {day:'2-digit', month:'short'});
-    xAxis += `<text x="${xx.toFixed(1)}" y="${(H-P+16).toFixed(1)}" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="JetBrains Mono">${label}</text>`;
+    xAxis += `<text x="${xx.toFixed(1)}" y="${(H-P+16).toFixed(1)}" text-anchor="middle" fill="${axisInk()}" font-size="10" font-family="var(--font-num)">${label}</text>`;
   }
 
   // Min / max / last summary
@@ -7700,8 +7681,8 @@ function _saveDisposal(){
 }
 
 const DISP_METRICS = [
-  { key:'rate', label:'Rate', unit:'BBL/D', color:'#38bdf8' },
-  { key:'whp',  label:'WHP',  unit:'BAR',   color:'#f472b6' }
+  { key:'rate', label:'Rate', unit:'BBL/D', slot:'s1' },
+  { key:'whp',  label:'WHP',  unit:'BAR',   slot:'s2' }
 ];
 
 function _dispNum(v){
@@ -7777,7 +7758,7 @@ function _parseDisposalBuffer(buf){
       if(rate===null && whp===null) continue;
       if(!byKey[key]) byKey[key] = { names:{}, recs:[] };
       byKey[key].names[name] = (byKey[key].names[name]||0)+1;
-      byKey[key].recs.push({ d:_isoDate(date), rate:rate, whp:whp });
+      byKey[key].recs.push({ d:_isoDateUTC(date), rate:rate, whp:whp });
       totalRecs++;
     }
 
@@ -7953,7 +7934,7 @@ function refreshDisposalPage(){
     _renderDisposalFor(_dispCurrentWell);
   } else {
     const det = document.getElementById('dispDetail');
-    if(det) det.innerHTML = '<div class="empty-state"><div class="big">💧</div><p>Tap a well in the table above to see its injection history</p></div>';
+    if(det) det.innerHTML = '<div class="empty-state"><div class="big"><svg class="ico ico-xl" aria-hidden="true"><use href="#i-water"/></svg></div><p>Tap a well in the table above to see its injection history</p></div>';
   }
 }
 
@@ -7977,7 +7958,7 @@ function _dispSearchHandler(){
   sEl.innerHTML = names.map(function(n){
     const recs = DISPOSAL_HISTORY[n];
     return '<div class="sug-item" data-well="' + escAttr(n) + '">' +
-      '<span class="sug-dot" style="background:#38bdf8"></span>' +
+      '<span class="sug-dot" style="background:var(--s1)"></span>' +
       '<span class="sug-name">' + escHtml(n) + '</span>' +
       '<span class="sug-info">' + recs.length + ' readings</span>' +
     '</div>';
@@ -8035,7 +8016,9 @@ function _renderDisposalFor(name){
 }
 
 function _buildDispChart(recs, metricKey){
-  const meta = DISP_METRICS.find(function(m){ return m.key===metricKey; }) || DISP_METRICS[0];
+  const _base = DISP_METRICS.find(function(m){ return m.key===metricKey; }) || DISP_METRICS[0];
+  const meta = Object.assign({}, _base, { color: seriesColor(_base.slot) });
+  const haloCol = seriesHalo();
   const pts = recs.map(function(r,i){
     const v = r[metricKey];
     if(typeof v!=='number'||isNaN(v)) return null;
@@ -8059,21 +8042,21 @@ function _buildDispChart(recs, metricKey){
     let ly = above ? cyN-9 : cyN+15;
     if(ly<12) ly=cyN+15;
     if(ly>H-P-2) ly=cyN-9;
-    return '<circle cx="'+cx+'" cy="'+cyN+'" r="3.4" fill="'+meta.color+'" stroke="#0b1220" stroke-width="1.2"/>' +
-           '<text x="'+cx+'" y="'+ly.toFixed(1)+'" text-anchor="middle" fill="'+meta.color+'" font-size="10" font-weight="700" font-family="JetBrains Mono" paint-order="stroke" stroke="#0b1220" stroke-width="2.5" stroke-linejoin="round">'+val+'</text>';
+    return '<circle cx="'+cx+'" cy="'+cyN+'" r="3.4" fill="'+meta.color+'" stroke="'+haloCol+'" stroke-width="1.2"/>' +
+           '<text x="'+cx+'" y="'+ly.toFixed(1)+'" text-anchor="middle" fill="'+meta.color+'" font-size="10" font-weight="700" font-family="var(--font-num)" paint-order="stroke" stroke="'+haloCol+'" stroke-width="2.5" stroke-linejoin="round">'+val+'</text>';
   }).join('');
   let yAxis='';
   const yTicks=4;
   for(let i=0;i<=yTicks;i++){
     const v=minY+(maxY-minY)*i/yTicks; const yy=sy(v);
-    yAxis += '<line x1="'+P+'" y1="'+yy.toFixed(1)+'" x2="'+(W-P)+'" y2="'+yy.toFixed(1)+'" stroke="rgba(148,163,184,.15)" stroke-width="1"/><text x="'+(P-6)+'" y="'+(yy+3).toFixed(1)+'" text-anchor="end" fill="#94a3b8" font-size="10" font-family="JetBrains Mono">'+(Math.round(v*10)/10).toString()+'</text>';
+    yAxis += '<line x1="'+P+'" y1="'+yy.toFixed(1)+'" x2="'+(W-P)+'" y2="'+yy.toFixed(1)+'" stroke="rgba(148,163,184,.15)" stroke-width="1"/><text x="'+(P-6)+'" y="'+(yy+3).toFixed(1)+'" text-anchor="end" fill="${axisInk()}" font-size="10" font-family="var(--font-num)">'+(Math.round(v*10)/10).toString()+'</text>';
   }
   let xAxis='';
   const xTickCount=Math.min(5,pts.length-1);
   for(let i=0;i<=xTickCount;i++){
     const v=minX+(maxX-minX)*i/xTickCount; const xx=sx(v);
     const d=new Date(v); const label=d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'});
-    xAxis += '<text x="'+xx.toFixed(1)+'" y="'+(H-P+16).toFixed(1)+'" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="JetBrains Mono">'+label+'</text>';
+    xAxis += '<text x="'+xx.toFixed(1)+'" y="'+(H-P+16).toFixed(1)+'" text-anchor="middle" fill="${axisInk()}" font-size="10" font-family="var(--font-num)">'+label+'</text>';
   }
   const lastVal=pts[pts.length-1].y; const minVal=Math.min.apply(null,ys); const maxVal=Math.max.apply(null,ys);
   const summary = '<div class="hist-chart-row">' +
@@ -8369,8 +8352,6 @@ function _wcBuildMatchMap(){
 }
 
 function _setWCAdminStatus(text){
-  const btn = document.getElementById('wcDateReviewBtn');
-  if(btn) btn.style.display = (_lastDateReport && _lastDateReport.rows.length) ? '' : 'none';
   const el = document.getElementById('wcAdminStatus');
   if(!el) return;
   el.style.display = 'block';
@@ -8449,7 +8430,7 @@ function _parseWCBuffer(buf){
       if(_res.flags[j] === 'swapped') swappedDates++;
       if(_res.flags[j]){
         _lastDateReport.rows.push({ excelRow:j+5, well:String(entry.wellRaw||'').trim(),
-          raw:_rawCellText(seqRaw[j]), resolved:_isoDate(date), flag:_res.flags[j] });
+          raw:_rawCellText(seqRaw[j]), resolved:_isoDateUTC(date), flag:_res.flags[j] });
       }
       let wellRaw = entry.wellRaw;
       if(wellRaw == null || String(wellRaw).trim() === ''){ skippedRows++; continue; }
@@ -8463,7 +8444,7 @@ function _parseWCBuffer(buf){
       }
       if(!data[canonical]) data[canonical] = [];
       data[canonical].push({
-        d: _isoDate(date),
+        d: _isoDateUTC(date),
         wc: row[2],
         sal: row[3],
         rem: (row[4] == null ? '' : String(row[4]).trim())
@@ -8960,7 +8941,7 @@ function mrRenderList() {
       (noteParts ? '<div class="mr-report-item-note">' + escHtml(noteParts) + '</div>' : '') +
       '<div class="mr-report-item-actions">' +
         '<button class="mr-btn-edit"   onclick="mrEditItem('   + item.id + ')">✏️ Edit</button>' +
-        '<button class="mr-btn-delete" onclick="mrDeleteItem(' + item.id + ')">🗑️</button>' +
+        '<button class="mr-btn-delete" onclick="mrDeleteItem(' + item.id + ')"><svg class="ico" aria-hidden="true"><use href="#i-trash"/></svg></button>' +
         '<button class="mr-btn-move"   onclick="mrMoveItem('   + item.id + ',-1)" title="Move up">▲</button>' +
         '<button class="mr-btn-move"   onclick="mrMoveItem('   + item.id + ',1)"  title="Move down">▼</button>' +
       '</div>' +
@@ -9419,7 +9400,7 @@ function initMorningReport() {
   }
   function pumpsHTML(rows){
     const changed=rows.filter(r=>r.pump.changed);
-    if(!changed.length) return '<div class="empty-state"><div class="big">🔧</div><p>No pump changes between these two dates</p></div>';
+    if(!changed.length) return '<div class="empty-state"><div class="big"><svg class="ico ico-xl" aria-hidden="true"><use href="#i-wrench"/></svg></div><p>No pump changes between these two dates</p></div>';
     const downs=changed.filter(r=>r.pump.dir==='down');
     const ineff=changed.filter(r=>r.pump.dir==='up' && (r.cNet-r.bNet)<ANL_MIN);
     const effUp=changed.filter(r=>r.pump.dir==='up' && (r.cNet-r.bNet)>=ANL_MIN);
@@ -9465,7 +9446,7 @@ function initMorningReport() {
   function woBalanceHTML(rows){
     const stopped=rows.filter(r=>r.woStop).slice().sort((a,b)=>b.netLoss-a.netLoss);
     const restarted=rows.filter(r=>r.woRestart).slice().sort((a,b)=>a.netLoss-b.netLoss);
-    if(!stopped.length&&!restarted.length) return '<div class="empty-state"><div class="big">🔧</div><p>No wells changed to/from Waiting W.O. or Rig On between these two dates</p></div>';
+    if(!stopped.length&&!restarted.length) return '<div class="empty-state"><div class="big"><svg class="ico ico-xl" aria-hidden="true"><use href="#i-wrench"/></svg></div><p>No wells changed to/from Waiting W.O. or Rig On between these two dates</p></div>';
     const netLost=stopped.reduce((s,r)=>s+(r.bNet-r.cNet),0);
     const grossLost=stopped.reduce((s,r)=>s+(r.bRate-r.cRate),0);
     const netGained=restarted.reduce((s,r)=>s+(r.cNet-r.bNet),0);
@@ -9634,9 +9615,9 @@ function initMorningReport() {
     if(!body) return;
     if(SNAP_DATES.length<2){
       const adm=(typeof isAdmin!=='undefined'&&isAdmin);
-      body.innerHTML='<div class="empty-state"><div class="big">📉</div><p>Need at least two dated snapshots to compare.<br>'+(adm?'Upload months via <b>Update DB</b> (each upload is saved automatically).':'Ask an admin to upload monthly data.')+'</p></div>';
+      body.innerHTML='<div class="empty-state"><div class="big"><svg class="ico ico-xl" aria-hidden="true"><use href="#i-decline"/></svg></div><p>Need at least two dated snapshots to compare.<br>'+(adm?'Upload months via <b>Update DB</b> (each upload is saved automatically).':'Ask an admin to upload monthly data.')+'</p></div>';
     } else {
-      body.innerHTML='<div class="empty-state"><div class="big">📉</div><p>Select two dates and tap Compare</p></div>';
+      body.innerHTML='<div class="empty-state"><div class="big"><svg class="ico ico-xl" aria-hidden="true"><use href="#i-decline"/></svg></div><p>Select two dates and tap Compare</p></div>';
     }
   };
 
@@ -9772,651 +9753,7 @@ function initMorningReport() {
 })();
 </script>
 
-<!-- ══════════════════════════════════════════
-     RAS GARA — daily PETRECO vs Ras Gara comparison
-     ══════════════════════════════════════════ -->
-<script>
-(function(){
-  // Ras Gara is a plant ~100 km from PETRECO. Both sides meter the same
-  // production independently every hour; the difference is the transport loss.
-  //
-  // Data entry, per the two parties who actually take the readings:
-  //   PETRECO m3/hr  → typed by PETROBEL; the cumulative column is DERIVED
-  //                    from it (running total), never typed.
-  //   Ras Gara m3/hr AND cumulative → both typed by the Ras Gara operator,
-  //                    because their meter reports both independently.
-  //
-  // A "day" is the operating shift: 24 rows from 06:00 through 05:00 the
-  // following morning, matching the most recent sheets in Ras Gara Test 2026.
-  const RG_COL   = 'rasGara';
-  const RG_META  = { col:'rasGaraMeta', doc:'info' };
-  const RG_LS    = 'rasgara_days_v1';
-  const RG_VERK  = 'rasgara_days_v1__syncver';
-  const RG_START_HOUR = 6;
-  const RG_HOURS = 24;
-  const M3_TO_BBL = 6.3;           // the factor used in the source workbook
 
-  let RG_DAYS = (function(){ try { return JSON.parse(lsGet(RG_LS) || '{}') || {}; } catch(e){ return {}; } })();
-  let _rgDate = null;              // yyyy-mm-dd of the shift currently open
-  let _rgMetaUnsub = null, _rgLastTs = 0, _rgFirstSnap = true, _rgSkipNext = false;
-  let _rgSaveTimer = null;
-
-  // ── helpers ─────────────────────────────────────────────────────────────
-  function rgHourLabel(i){
-    const h = (RG_START_HOUR + i) % 24;
-    return String(h).padStart(2,'0') + ':00';
-  }
-  // Rows from 06:00 onward belong to the shift date; rows past midnight belong
-  // to the next calendar day. Shown so nobody has to work it out.
-  function rgRowDate(dateStr, i){
-    const rolls = (RG_START_HOUR + i) >= 24;
-    if(!rolls) return dateStr;
-    const d = new Date(dateStr + 'T00:00:00');
-    d.setDate(d.getDate() + 1);
-    return _isoDate(d);
-  }
-  function rgNum(v){
-    if(v === '' || v == null) return null;
-    const n = parseFloat(v);
-    return isNaN(n) ? null : n;
-  }
-  function rgFmt(v, dp){
-    if(v == null || isNaN(v)) return '—';
-    const p = Math.pow(10, dp == null ? 1 : dp);
-    return (Math.round(v * p) / p).toLocaleString('en-US');
-  }
-  function rgToday(){
-    // Before the 06:00 shift start the "current" shift is still yesterday's.
-    const now = new Date();
-    if(now.getHours() < RG_START_HOUR) now.setDate(now.getDate() - 1);
-    return _isoDate(now);
-  }
-  function rgBlankDay(dateStr){
-    const rows = [];
-    for(let i = 0; i < RG_HOURS; i++) rows.push({ p:null, r:null, rc:null });
-    return { date:dateStr, startHour:RG_START_HOUR, rows:rows, updatedBy:'', updatedAt:0 };
-  }
-  function rgGetDay(dateStr){
-    const d = RG_DAYS[dateStr];
-    if(!d) return rgBlankDay(dateStr);
-    // tolerate short/legacy rows
-    const rows = [];
-    for(let i = 0; i < RG_HOURS; i++){
-      const s = (d.rows && d.rows[i]) || {};
-      rows.push({ p:rgNum(s.p), r:rgNum(s.r), rc:rgNum(s.rc) });
-    }
-    return { date:dateStr, startHour:d.startHour || RG_START_HOUR, rows:rows,
-             updatedBy:d.updatedBy || '', updatedAt:d.updatedAt || 0 };
-  }
-
-  // ── the calculations, exactly as the workbook does them ────────────────
-  function rgCalc(day){
-    let pTot = 0, rTot = 0, pAny = false, rAny = false;
-    const pCum = [];
-    let run = 0;
-    for(let i = 0; i < RG_HOURS; i++){
-      const row = day.rows[i];
-      if(row.p != null){ run += row.p; pTot += row.p; pAny = true; pCum.push(run); }
-      else pCum.push(null);
-      if(row.r != null){ rTot += row.r; rAny = true; }
-    }
-    const loss = (pAny || rAny) ? (pTot - rTot) : null;   // PETRECO − Ras Gara
-    return {
-      pCum: pCum,
-      pTotal: pAny ? pTot : null,
-      rTotal: rAny ? rTot : null,
-      pBbl: pAny ? pTot * M3_TO_BBL : null,
-      rBbl: rAny ? rTot * M3_TO_BBL : null,
-      loss: loss,
-      lossBbl: loss == null ? null : loss * M3_TO_BBL,
-      lossPct: (pAny && pTot > 0 && loss != null) ? (loss / pTot * 100) : null
-    };
-  }
-
-  // ── permissions ─────────────────────────────────────────────────────────
-  // Each side owns its own columns so neither plant can quietly restate the
-  // other's meter reading — the whole point of the comparison is that the two
-  // numbers are taken independently.
-  function rgCanEditPetreco(){ return typeof isAdmin !== 'undefined' && isAdmin; }
-  function rgCanEditRasGara(){ return (typeof isRasGara !== 'undefined' && isRasGara) ||
-                                      (typeof isAdmin !== 'undefined' && isAdmin && false); }
-  function rgReadOnly(){ return !rgCanEditPetreco() && !rgCanEditRasGara(); }
-
-  // ── table ───────────────────────────────────────────────────────────────
-  function rgRenderTable(){
-    const area = document.getElementById('rgTableArea');
-    if(!area) return;
-    const day = rgGetDay(_rgDate);
-    const c   = rgCalc(day);
-    const edP = rgCanEditPetreco(), edR = rgCanEditRasGara();
-    let body = '';
-    for(let i = 0; i < RG_HOURS; i++){
-      const row = day.rows[i];
-      body += '<tr>' +
-        '<td class="rg-time">' + escHtml(rgHourLabel(i)) + '</td>' +
-        '<td>' + (edP
-            ? '<input class="rg-in" inputmode="decimal" data-rg="p" data-i="' + i + '" value="' + escAttr(row.p == null ? '' : row.p) + '">'
-            : '<span class="rg-calc">' + rgFmt(row.p, 2) + '</span>') + '</td>' +
-        '<td class="rg-calc">' + rgFmt(c.pCum[i], 1) + '</td>' +
-        '<td>' + (edR
-            ? '<input class="rg-in" inputmode="decimal" data-rg="r" data-i="' + i + '" value="' + escAttr(row.r == null ? '' : row.r) + '">'
-            : '<span class="rg-calc">' + rgFmt(row.r, 2) + '</span>') + '</td>' +
-        '<td>' + (edR
-            ? '<input class="rg-in" inputmode="decimal" data-rg="rc" data-i="' + i + '" value="' + escAttr(row.rc == null ? '' : row.rc) + '">'
-            : '<span class="rg-calc">' + rgFmt(row.rc, 1) + '</span>') + '</td>' +
-        '</tr>';
-    }
-    area.innerHTML =
-      '<div class="rg-tbl-wrap"><table class="rg-tbl">' +
-        '<thead>' +
-          '<tr><th></th><th class="rg-grp" colspan="2">PETRECO</th><th class="rg-grp2" colspan="2">RAS GARA</th></tr>' +
-          '<tr><th>Time</th><th>M3/hr' + (edP ? '' : '') + '</th><th>Cumulative<br><span style="font-weight:400;text-transform:none;">calculated</span></th>' +
-              '<th>M3/hr</th><th>Cumulative</th></tr>' +
-        '</thead><tbody>' + body + '</tbody></table></div>';
-
-    const hint = document.getElementById('rgShiftHint');
-    if(hint){
-      const endDate = rgRowDate(_rgDate, RG_HOURS - 1);
-      let who = rgReadOnly() ? 'You have read-only access.'
-              : edP ? 'You can enter the PETRECO M3/hr column.'
-                    : 'You can enter the Ras Gara columns.';
-      hint.textContent = 'Shift ' + rgHourLabel(0) + ' ' + _rgDate + '  →  ' +
-                         rgHourLabel(RG_HOURS-1) + ' ' + endDate + '. ' + who;
-    }
-  }
-
-  // ── totals ──────────────────────────────────────────────────────────────
-  function rgRenderTotals(){
-    const el = document.getElementById('rgTotals');
-    if(!el) return;
-    const c = rgCalc(rgGetDay(_rgDate));
-    if(c.pTotal == null && c.rTotal == null){
-      el.innerHTML = '<div class="rg-empty">No readings entered for this shift yet.</div>';
-      return;
-    }
-    const lossCls = (c.loss == null) ? '' : (c.loss > 0 ? 'loss' : 'gain');
-    const lossSign = (c.loss == null) ? '' : (c.loss > 0 ? '−' : '+');
-    el.innerHTML =
-      '<div class="rg-tot">' +
-        '<div class="rg-card petreco"><div class="k">PETRECO total</div><div class="v">' + rgFmt(c.pTotal,1) + '</div>' +
-          '<div class="s">m³/d · ' + rgFmt(c.pBbl,0) + ' bbl/d</div></div>' +
-        '<div class="rg-card rasgara"><div class="k">Ras Gara total</div><div class="v">' + rgFmt(c.rTotal,1) + '</div>' +
-          '<div class="s">m³/d · ' + rgFmt(c.rBbl,0) + ' bbl/d</div></div>' +
-        '<div class="rg-card ' + lossCls + '"><div class="k">Difference</div><div class="v">' + lossSign + rgFmt(Math.abs(c.loss),1) + '</div>' +
-          '<div class="s">m³/d · ' + rgFmt(Math.abs(c.lossBbl),0) + ' bbl/d' +
-          (c.lossPct == null ? '' : ' · ' + rgFmt(Math.abs(c.lossPct),1) + '%') + '</div></div>' +
-      '</div>';
-  }
-
-  // ── chart: the workbook's line chart, Time vs Rate M3/hr ───────────────
-  function rgChartSVG(day, forPrint){
-    const c = rgCalc(day);
-    const W = 720, H = 260, P = 42;
-    const series = [
-      { key:'p', label:'PETRECO',  color:'#22d3ee' },
-      { key:'r', label:'Ras Gara', color:'#fbbf24' }
-    ];
-    let maxY = 0, any = false;
-    for(let i = 0; i < RG_HOURS; i++){
-      ['p','r'].forEach(function(k){
-        const v = day.rows[i][k];
-        if(v != null){ any = true; if(v > maxY) maxY = v; }
-      });
-    }
-    if(!any) return '<div class="rg-empty">Nothing to chart yet — enter some readings.</div>';
-    maxY = maxY <= 0 ? 1 : maxY * 1.15;
-    const sx = i => P + (W - 2*P) * (i / (RG_HOURS - 1));
-    const sy = v => H - P - (H - 2*P) * (v / maxY);
-    const axisCol = forPrint ? '#94a3b8' : 'rgba(148,163,184,.35)';
-    const txtCol  = forPrint ? '#334155' : '#94a3b8';
-
-    let grid = '';
-    for(let g = 0; g <= 4; g++){
-      const v = maxY * g / 4, y = sy(v);
-      grid += '<line x1="' + P + '" y1="' + y.toFixed(1) + '" x2="' + (W-P) + '" y2="' + y.toFixed(1) +
-              '" stroke="' + axisCol + '" stroke-width="1" stroke-dasharray="2,3"/>' +
-              '<text x="' + (P-6) + '" y="' + (y+3).toFixed(1) + '" text-anchor="end" fill="' + txtCol +
-              '" font-size="10" font-family="monospace">' + (Math.round(v*10)/10) + '</text>';
-    }
-    let xax = '';
-    for(let i = 0; i < RG_HOURS; i += 3){
-      xax += '<text x="' + sx(i).toFixed(1) + '" y="' + (H-P+15) + '" text-anchor="middle" fill="' + txtCol +
-             '" font-size="9" font-family="monospace">' + rgHourLabel(i) + '</text>';
-    }
-    let paths = '';
-    series.forEach(function(s){
-      let d = '', open = false, dots = '';
-      for(let i = 0; i < RG_HOURS; i++){
-        const v = day.rows[i][s.key];
-        if(v == null){ open = false; continue; }
-        const x = sx(i), y = sy(v);
-        d += (open ? ' L' : ' M') + x.toFixed(1) + ' ' + y.toFixed(1);
-        open = true;
-        dots += '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="2.6" fill="' + s.color + '"/>';
-      }
-      if(d) paths += '<path d="' + d.trim() + '" fill="none" stroke="' + s.color + '" stroke-width="2" stroke-linejoin="round"/>' + dots;
-    });
-    const legend = series.map(function(s){
-      return '<span class="rg-legend-i"><span class="sw" style="background:' + s.color + ';"></span>' + s.label + '</span>';
-    }).join('');
-    return '<div style="overflow-x:auto;"><svg viewBox="0 0 ' + W + ' ' + H + '" ' +
-      'style="width:100%;min-width:320px;height:auto;' +
-      (forPrint ? 'background:#fff;' : 'background:rgba(15,23,42,.35);border:1px solid var(--border);border-radius:10px;') +
-      'display:block;">' +
-      '<text x="' + (W/2) + '" y="16" text-anchor="middle" fill="' + txtCol + '" font-size="11" font-family="monospace">Rate M³/hr</text>' +
-      grid + xax + paths +
-      '<line x1="' + P + '" y1="' + (H-P) + '" x2="' + (W-P) + '" y2="' + (H-P) + '" stroke="' + axisCol + '" stroke-width="1"/>' +
-      '<line x1="' + P + '" y1="' + P + '" x2="' + P + '" y2="' + (H-P) + '" stroke="' + axisCol + '" stroke-width="1"/>' +
-      '</svg></div>' +
-      '<div class="rg-legend">' + legend + '</div>';
-  }
-  function rgRenderChart(){
-    const el = document.getElementById('rgChart');
-    if(el) el.innerHTML = '<div class="rg-sec-title">📉 Ras Gara Test — ' + escHtml(_rgDate) + '</div>' +
-                          rgChartSVG(rgGetDay(_rgDate), false);
-  }
-
-  // ── cross-day history (the workbook's HISTORY sheet) ───────────────────
-  function rgHistoryRows(){
-    return Object.keys(RG_DAYS).sort().map(function(d){
-      const c = rgCalc(rgGetDay(d));
-      return { date:d, p:c.pTotal, r:c.rTotal, diff:c.loss };
-    }).filter(function(x){ return x.p != null || x.r != null; });
-  }
-  function rgRenderHistory(){
-    const el = document.getElementById('rgHistory');
-    if(!el) return;
-    const rows = rgHistoryRows();
-    if(!rows.length){ el.innerHTML = '<div class="rg-empty">No days recorded yet.</div>'; return; }
-    let body = '';
-    rows.slice().reverse().forEach(function(x){
-      const cls = x.diff == null ? '' : (x.diff > 0 ? 'style="color:var(--red,#f87171)"' : 'style="color:var(--green,#4ade80)"');
-      body += '<tr data-rgday="' + escAttr(x.date) + '" style="cursor:pointer">' +
-        '<td class="rg-time">' + escHtml(x.date) + '</td>' +
-        '<td>' + rgFmt(x.p,1) + '</td><td>' + rgFmt(x.r,1) + '</td>' +
-        '<td ' + cls + '>' + rgFmt(x.diff,1) + '</td></tr>';
-    });
-    el.innerHTML = '<div class="rg-tbl-wrap"><table class="rg-tbl">' +
-      '<thead><tr><th>Date</th><th>PETRECO</th><th>R/G</th><th>Difference</th></tr></thead>' +
-      '<tbody>' + body + '</tbody></table></div>';
-  }
-
-  function rgRenderAll(){
-    if(!_rgDate) _rgDate = rgToday();
-    const inp = document.getElementById('rgDate');
-    if(inp && inp.value !== _rgDate) inp.value = _rgDate;
-    rgRenderTable(); rgRenderTotals(); rgRenderChart(); rgRenderHistory();
-    const sv = document.getElementById('rgSaved');
-    const day = rgGetDay(_rgDate);
-    if(sv) sv.textContent = day.updatedAt
-      ? 'last saved ' + new Date(day.updatedAt).toLocaleString('en-GB') + (day.updatedBy ? ' by ' + day.updatedBy : '')
-      : '';
-  }
-  window.refreshRasGaraPage = rgRenderAll;
-
-  // ── editing & persistence ───────────────────────────────────────────────
-  function rgApplyInput(kind, i, raw){
-    const day = RG_DAYS[_rgDate] || rgBlankDay(_rgDate);
-    if(!day.rows) day.rows = rgBlankDay(_rgDate).rows;
-    while(day.rows.length < RG_HOURS) day.rows.push({ p:null, r:null, rc:null });
-    // Guard here as well as in the UI: a disabled input is not security.
-    if(kind === 'p' && !rgCanEditPetreco()) return false;
-    if((kind === 'r' || kind === 'rc') && !rgCanEditRasGara()) return false;
-    day.rows[i][kind] = rgNum(raw);
-    day.date = _rgDate;
-    day.startHour = RG_START_HOUR;
-    RG_DAYS[_rgDate] = day;
-    return true;
-  }
-  function rgSaveLocal(){
-    try { lsSet(RG_LS, JSON.stringify(RG_DAYS)); checkStorageHeadroom(); } catch(e){}
-  }
-  function rgQueueSave(){
-    rgSaveLocal();
-    if(_rgSaveTimer) clearTimeout(_rgSaveTimer);
-    // Debounced: an operator typing 24 rows should produce one write, not 24.
-    _rgSaveTimer = setTimeout(function(){ _rgSaveTimer = null; rgPushToCloud(); }, 1200);
-  }
-  async function rgPushToCloud(){
-    if(rgReadOnly()) return;
-    if(typeof db === 'undefined' || typeof FIREBASE_OK === 'undefined' || !FIREBASE_OK) return;
-    const day = RG_DAYS[_rgDate];
-    if(!day) return;
-    const who = (typeof currentUser !== 'undefined' && currentUser) ? currentUser.name : 'user';
-    try {
-      _rgSkipNext = true;
-      await db.collection(RG_COL).doc(_rgDate).set({
-        date:_rgDate, startHour:RG_START_HOUR, rows:day.rows,
-        updatedBy:who, updatedAt:firebase.firestore.FieldValue.serverTimestamp()
-      });
-      const dates = Object.keys(RG_DAYS).sort();
-      await db.collection(RG_META.col).doc(RG_META.doc).set({
-        dates:dates, count:dates.length,
-        updatedAt:firebase.firestore.FieldValue.serverTimestamp(), updatedBy:who
-      });
-      day.updatedAt = Date.now(); day.updatedBy = who;
-      rgSaveLocal();
-      const sv = document.getElementById('rgSaved');
-      if(sv) sv.textContent = 'saved ' + new Date().toLocaleTimeString('en-GB');
-      if(typeof updateCloudStatus === 'function') updateCloudStatus('synced','Cloud ✓');
-    } catch(err){
-      console.error('[RasGara] save failed', err);
-      showToast('⚠️ Could not save to cloud: ' + (err.code || err.message), true);
-    }
-  }
-
-  // ── cloud sync (same cache-version pattern as the other datasets) ──────
-  function rgStartListener(){
-    rgStopListener();
-    if(typeof db === 'undefined' || typeof FIREBASE_OK === 'undefined' || !FIREBASE_OK) return;
-    _rgMetaUnsub = db.collection(RG_META.col).doc(RG_META.doc).onSnapshot(async function(doc){
-      if(doc.metadata && doc.metadata.hasPendingWrites && !(doc.data() && doc.data().updatedAt)) return;
-      if(!doc.exists){ _rgFirstSnap = false; return; }
-      const data = doc.data() || {};
-      const ts = data.updatedAt ? data.updatedAt.toMillis() : 0;
-      const isFirst = _rgFirstSnap; _rgFirstSnap = false;
-      if(!isFirst && ts === _rgLastTs) return;
-      _rgLastTs = ts;
-      if(_rgSkipNext){ _rgSkipNext = false; setSyncedVersion(RG_VERK, ts); return; }
-      if(isCacheCurrent(RG_VERK, ts, Object.keys(RG_DAYS).length > 0)){
-        console.log('[Firestore] Ras Gara already current (v' + ts + ') — skipped collection read');
-        rgRenderAll(); return;
-      }
-      try {
-        const snap = await db.collection(RG_COL).get();
-        const obj = {};
-        snap.forEach(function(d){
-          const dd = d.data() || {};
-          obj[dd.date || d.id] = {
-            date:dd.date || d.id, startHour:dd.startHour || RG_START_HOUR, rows:dd.rows || [],
-            updatedBy:dd.updatedBy || '',
-            updatedAt:(dd.updatedAt && dd.updatedAt.toMillis) ? dd.updatedAt.toMillis() : 0
-          };
-        });
-        RG_DAYS = obj;
-        rgSaveLocal();
-        setSyncedVersion(RG_VERK, ts);
-        rgRenderAll();
-        if(!isFirst) showToast('🔄 Ras Gara data synced');
-      } catch(err){ console.error('[Firestore] Ras Gara fetch failed', err); }
-    }, function(err){ console.error('[Firestore] Ras Gara listener error', err); });
-  }
-  function rgStopListener(){
-    if(_rgMetaUnsub){ _rgMetaUnsub(); _rgMetaUnsub = null; }
-    _rgFirstSnap = true; _rgLastTs = 0;
-  }
-  window.startRasGaraListener = rgStartListener;
-  window.stopRasGaraListener  = rgStopListener;
-
-  // ── wiring ──────────────────────────────────────────────────────────────
-  document.addEventListener('DOMContentLoaded', function(){
-    const dateEl = document.getElementById('rgDate');
-    if(dateEl){
-      dateEl.value = rgToday();
-      dateEl.addEventListener('change', function(){
-        _rgDate = this.value || rgToday();
-        rgRenderAll();
-      });
-    }
-    const todayBtn = document.getElementById('rgTodayBtn');
-    if(todayBtn) todayBtn.addEventListener('click', function(){ _rgDate = rgToday(); rgRenderAll(); });
-
-    const area = document.getElementById('rgTableArea');
-    if(area){
-      // Delegated so the handlers survive every re-render.
-      area.addEventListener('input', function(e){
-        const t = e.target;
-        if(!t || !t.classList.contains('rg-in')) return;
-        const kind = t.getAttribute('data-rg'), i = parseInt(t.getAttribute('data-i'), 10);
-        if(!kind || isNaN(i)) return;
-        if(!rgApplyInput(kind, i, t.value)) return;
-        t.classList.add('rg-dirty');
-        // Only the derived cells and totals need repainting — never the input
-        // the operator is typing into, or the caret would jump.
-        rgRefreshDerived();
-        rgQueueSave();
-      });
-      area.addEventListener('blur', function(e){
-        if(e.target && e.target.classList.contains('rg-in')) e.target.classList.remove('rg-dirty');
-      }, true);
-    }
-    const hist = document.getElementById('rgHistory');
-    if(hist) hist.addEventListener('click', function(e){
-      const tr = e.target.closest('tr[data-rgday]');
-      if(!tr) return;
-      _rgDate = tr.getAttribute('data-rgday');
-      rgRenderAll();
-      document.getElementById('page-rasgara').scrollIntoView({behavior:'smooth', block:'start'});
-    });
-    const pb = document.getElementById('rgPrintBtn');
-    if(pb) pb.addEventListener('click', function(){ rgPrintReport(); });
-    const mb = document.getElementById('rgMailBtn');
-    if(mb) mb.addEventListener('click', function(){ rgEmailReport(); });
-  });
-
-  // Repaint the calculated cells + totals + chart without touching inputs.
-  function rgRefreshDerived(){
-    const day = rgGetDay(_rgDate), c = rgCalc(day);
-    const rows = document.querySelectorAll('#rgTableArea tbody tr');
-    for(let i = 0; i < rows.length; i++){
-      const cell = rows[i].children[2];
-      if(cell) cell.textContent = rgFmt(c.pCum[i], 1);
-    }
-    rgRenderTotals(); rgRenderChart();
-  }
-
-  // ── written summary ─────────────────────────────────────────────────────
-  // The number alone does not tell an operator whether the shift was normal.
-  // Compare against the recent average so the report says something useful.
-  function rgSummaryText(day){
-    const c = rgCalc(day);
-    if(c.pTotal == null && c.rTotal == null) return 'No readings were recorded for this shift.';
-    const parts = [];
-    parts.push('Over the 24-hour shift beginning ' + rgHourLabel(0) + ' on ' + day.date +
-               ', PETRECO metered ' + rgFmt(c.pTotal,1) + ' m³ (' + rgFmt(c.pBbl,0) + ' bbl) and Ras Gara metered ' +
-               rgFmt(c.rTotal,1) + ' m³ (' + rgFmt(c.rBbl,0) + ' bbl).');
-    if(c.loss != null){
-      const dir = c.loss > 0 ? 'less than PETRECO' : 'more than PETRECO';
-      parts.push('Ras Gara produced ' + rgFmt(Math.abs(c.loss),1) + ' m³ (' + rgFmt(Math.abs(c.lossBbl),0) + ' bbl) ' + dir +
-                 (c.lossPct == null ? '' : ', a difference of ' + rgFmt(Math.abs(c.lossPct),1) + '% of the PETRECO figure') + '.');
-    }
-    // Context from the previous recorded days.
-    const hist = rgHistoryRows().filter(function(x){ return x.date < day.date && x.diff != null; });
-    const recent = hist.slice(-7);
-    if(recent.length >= 2){
-      const avg = recent.reduce(function(a,x){ return a + x.diff; }, 0) / recent.length;
-      const delta = (c.loss == null) ? null : c.loss - avg;
-      parts.push('The average difference over the previous ' + recent.length + ' recorded day(s) is ' +
-                 rgFmt(avg,1) + ' m³/d.' +
-                 (delta == null ? '' :
-                   Math.abs(delta) < 1
-                     ? ' This shift is in line with that average.'
-                     : ' This shift is ' + rgFmt(Math.abs(delta),1) + ' m³/d ' +
-                       (delta > 0 ? 'worse' : 'better') + ' than that average.'));
-    }
-    const missP = day.rows.filter(function(r){ return r.p == null; }).length;
-    const missR = day.rows.filter(function(r){ return r.r == null; }).length;
-    if(missP || missR){
-      parts.push('Note: ' + (missP ? missP + ' PETRECO ' : '') + (missP && missR ? 'and ' : '') +
-                 (missR ? missR + ' Ras Gara ' : '') + 'hourly reading(s) were not entered, so the totals cover only the hours recorded.');
-    }
-    return parts.join(' ');
-  }
-
-  // ── printable report (also the thing that gets e-mailed) ───────────────
-  function rgReportHTML(day){
-    const c = rgCalc(day);
-    let rows = '';
-    for(let i = 0; i < RG_HOURS; i++){
-      const r = day.rows[i];
-      rows += '<tr>' +
-        '<td>' + rgHourLabel(i) + '</td>' +
-        '<td>' + rgFmt(r.p,2) + '</td><td>' + rgFmt(c.pCum[i],1) + '</td>' +
-        '<td>' + rgFmt(r.r,2) + '</td><td>' + rgFmt(r.rc,1) + '</td>' +
-      '</tr>';
-    }
-    return '' +
-'<!DOCTYPE html><html><head><meta charset="utf-8"><title>Ras Gara Comparison ' + escHtml(day.date) + '</title>' +
-'<style>' +
-'*{box-sizing:border-box}' +
-'body{font-family:Arial,Helvetica,sans-serif;color:#111;margin:0;padding:22px;background:#fff;}' +
-'h1{font-size:19px;margin:0 0 2px;} h2{font-size:13px;margin:20px 0 7px;color:#334155;}' +
-'.sub{font-size:12px;color:#555;margin-bottom:16px;}' +
-'table{border-collapse:collapse;width:100%;font-size:11px;}' +
-'th,td{border:1px solid #cbd5e1;padding:4px 6px;text-align:center;}' +
-'th{background:#f1f5f9;font-size:10px;text-transform:uppercase;letter-spacing:.4px;}' +
-'th.p{background:#e0f2fe;} th.r{background:#fef3c7;}' +
-'.cards{display:flex;gap:10px;margin:14px 0;flex-wrap:wrap;}' +
-'.card{flex:1;min-width:150px;border:1px solid #cbd5e1;border-radius:8px;padding:9px 11px;}' +
-'.card .k{font-size:10px;text-transform:uppercase;color:#64748b;letter-spacing:.5px;}' +
-'.card .v{font-size:19px;font-weight:700;margin-top:2px;}' +
-'.card .s{font-size:10px;color:#64748b;}' +
-'.card.p .v{color:#0369a1;} .card.r .v{color:#b45309;} .card.d.neg .v{color:#b91c1c;} .card.d.pos .v{color:#15803d;}' +
-'.summary{font-size:12px;line-height:1.65;background:#f8fafc;border-left:3px solid #0369a1;padding:10px 13px;margin:6px 0 4px;}' +
-'.foot{margin-top:18px;font-size:10px;color:#64748b;border-top:1px solid #e2e8f0;padding-top:7px;}' +
-'.rg-legend{display:flex;gap:14px;justify-content:center;font-size:10px;color:#475569;margin-top:4px;}' +
-'.rg-legend .sw{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;}' +
-'@media print{body{padding:0;} .cards{break-inside:avoid;} table{break-inside:auto;}}' +
-'</style></head><body>' +
-'<h1>Ras Gara — Production Comparison</h1>' +
-'<div class="sub">Shift ' + rgHourLabel(0) + ' ' + escHtml(day.date) + ' → ' +
-   rgHourLabel(RG_HOURS-1) + ' ' + escHtml(rgRowDate(day.date, RG_HOURS-1)) +
-   ' &nbsp;·&nbsp; PETRECO test separator T.B. 6-2 vs Ras Gara plant</div>' +
-'<div class="cards">' +
-  '<div class="card p"><div class="k">PETRECO total</div><div class="v">' + rgFmt(c.pTotal,1) + ' m³</div><div class="s">' + rgFmt(c.pBbl,0) + ' bbl/d</div></div>' +
-  '<div class="card r"><div class="k">Ras Gara total</div><div class="v">' + rgFmt(c.rTotal,1) + ' m³</div><div class="s">' + rgFmt(c.rBbl,0) + ' bbl/d</div></div>' +
-  '<div class="card d ' + (c.loss == null ? '' : (c.loss > 0 ? 'neg' : 'pos')) + '">' +
-     '<div class="k">Difference</div><div class="v">' +
-     (c.loss == null ? '—' : (c.loss > 0 ? '−' : '+') + rgFmt(Math.abs(c.loss),1) + ' m³') + '</div>' +
-     '<div class="s">' + rgFmt(Math.abs(c.lossBbl),0) + ' bbl/d' +
-     (c.lossPct == null ? '' : ' · ' + rgFmt(Math.abs(c.lossPct),1) + '%') +
-     (c.loss == null ? '' : (c.loss > 0 ? ' less at Ras Gara' : ' more at Ras Gara')) + '</div></div>' +
-'</div>' +
-'<h2>Summary</h2><div class="summary">' + escHtml(rgSummaryText(day)) + '</div>' +
-'<h2>Hourly comparison</h2>' +
-'<table><thead>' +
- '<tr><th></th><th class="p" colspan="2">PETRECO</th><th class="r" colspan="2">Ras Gara</th></tr>' +
- '<tr><th>Time</th><th class="p">M³/hr</th><th class="p">Cumulative</th><th class="r">M³/hr</th><th class="r">Cumulative</th></tr>' +
- '</thead><tbody>' + rows + '</tbody>' +
- '<tfoot><tr><th>Total</th><th>' + rgFmt(c.pTotal,1) + '</th><th>—</th><th>' + rgFmt(c.rTotal,1) + '</th><th>—</th></tr></tfoot>' +
-'</table>' +
-'<h2>Rate comparison</h2>' + rgChartSVG(day, true) +
-'<div class="foot">Generated by the PETROBEL Land Wells app on ' + new Date().toLocaleString('en-GB') +
-  (day.updatedBy ? ' · last data entry by ' + escHtml(day.updatedBy) : '') + '</div>' +
-'</body></html>';
-  }
-
-  function rgOpenReportWindow(){
-    const day = rgGetDay(_rgDate);
-    const w = window.open('', '_blank');
-    if(!w){ showToast('⚠️ Pop-up blocked — allow pop-ups to print', true); return null; }
-    w.document.open(); w.document.write(rgReportHTML(day)); w.document.close();
-    return w;
-  }
-  function rgPrintReport(){
-    const w = rgOpenReportWindow();
-    if(!w) return;
-    // Give the browser a beat to lay the report out before invoking print.
-    setTimeout(function(){ try { w.focus(); w.print(); } catch(e){} }, 400);
-  }
-
-  // ── PDF: a single-page document wrapping a rendered image of the report ─
-  // Hand-built rather than pulling in a 365 KB PDF library for one button.
-  function rgBuildPdf(jpegDataUrl, pxW, pxH){
-    const b64 = jpegDataUrl.split(',')[1];
-    const bin = atob(b64);
-    // A4 portrait at 72 dpi, with a small margin; scale the image to fit.
-    const PW = 595.28, PH = 841.89, M = 24;
-    const availW = PW - 2*M, availH = PH - 2*M;
-    const scale = Math.min(availW / pxW, availH / pxH);
-    const w = pxW * scale, h = pxH * scale;
-    const x = (PW - w) / 2, y = PH - M - h;
-    const objs = [];
-    objs[1] = '<</Type/Catalog/Pages 2 0 R>>';
-    objs[2] = '<</Type/Pages/Kids[3 0 R]/Count 1>>';
-    objs[3] = '<</Type/Page/Parent 2 0 R/MediaBox[0 0 ' + PW.toFixed(2) + ' ' + PH.toFixed(2) +
-              ']/Resources<</XObject<</I0 4 0 R>>/ProcSet[/PDF/ImageC]>>/Contents 5 0 R>>';
-    const stream = 'q ' + w.toFixed(2) + ' 0 0 ' + h.toFixed(2) + ' ' + x.toFixed(2) + ' ' + y.toFixed(2) + ' cm /I0 Do Q';
-    // Build as latin1 so every byte offset below is exact.
-    let pdf = '%PDF-1.4\n';
-    const offsets = [];
-    function add(num, dict, streamData){
-      offsets[num] = pdf.length;
-      pdf += num + ' 0 obj\n' + dict + '\n';
-      if(streamData != null) pdf += 'stream\n' + streamData + '\nendstream\n';
-      pdf += 'endobj\n';
-    }
-    add(1, objs[1]); add(2, objs[2]); add(3, objs[3]);
-    add(4, '<</Type/XObject/Subtype/Image/Width ' + pxW + '/Height ' + pxH +
-           '/ColorSpace/DeviceRGB/BitsPerComponent 8/Filter/DCTDecode/Length ' + bin.length + '>>', bin);
-    add(5, '<</Length ' + stream.length + '>>', stream);
-    const xref = pdf.length;
-    pdf += 'xref\n0 6\n0000000000 65535 f \n';
-    for(let i = 1; i <= 5; i++) pdf += String(offsets[i]).padStart(10,'0') + ' 00000 n \n';
-    pdf += 'trailer\n<</Size 6/Root 1 0 R>>\nstartxref\n' + xref + '\n%%EOF';
-    const bytes = new Uint8Array(pdf.length);
-    for(let i = 0; i < pdf.length; i++) bytes[i] = pdf.charCodeAt(i) & 0xff;
-    return new Blob([bytes], { type:'application/pdf' });
-  }
-
-  async function rgMakePdfBlob(){
-    const day = rgGetDay(_rgDate);
-    // Render the report off-screen at 2x for a crisp page.
-    const host = document.createElement('iframe');
-    host.style.cssText = 'position:fixed;left:-10000px;top:0;width:820px;height:1200px;border:0;';
-    document.body.appendChild(host);
-    try {
-      const doc = host.contentDocument;
-      doc.open(); doc.write(rgReportHTML(day)); doc.close();
-      await new Promise(function(res){ setTimeout(res, 350); });
-      const target = doc.body;
-      const canvas = await html2canvas(target, { scale:2, backgroundColor:'#ffffff',
-        width:820, windowWidth:820, height:target.scrollHeight, windowHeight:target.scrollHeight });
-      const jpeg = canvas.toDataURL('image/jpeg', 0.92);
-      return rgBuildPdf(jpeg, canvas.width, canvas.height);
-    } finally { host.remove(); }
-  }
-
-  async function rgEmailReport(){
-    const day = rgGetDay(_rgDate);
-    const fname = 'Ras_Gara_Comparison_' + day.date + '.pdf';
-    const subject = 'Ras Gara production comparison — ' + day.date;
-    const body = rgSummaryText(day) + '\n\n(The full table and chart are in the attached PDF.)';
-    showToast('📄 Building PDF…');
-    let blob;
-    try { blob = await rgMakePdfBlob(); }
-    catch(err){ console.error('[RasGara] PDF failed', err); showToast('⚠️ Could not build the PDF', true); return; }
-
-    // Preferred path: hand the PDF to the phone's share sheet, where Gmail and
-    // Outlook appear with the file already attached.
-    const file = new File([blob], fname, { type:'application/pdf' });
-    if(navigator.canShare && navigator.canShare({ files:[file] }) && navigator.share){
-      try {
-        await navigator.share({ files:[file], title:subject, text:body });
-        return;
-      } catch(err){
-        if(err && err.name === 'AbortError') return;   // user backed out
-        console.warn('[RasGara] share failed, falling back', err);
-      }
-    }
-    // Fallback (desktop): download the PDF, then open a Gmail compose window
-    // with the subject and summary already filled in, ready to attach it.
-    _downloadBlob(blob, fname);
-    const gmail = 'https://mail.google.com/mail/?view=cm&fs=1&su=' +
-                  encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
-    setTimeout(function(){ window.open(gmail, '_blank', 'noopener'); }, 600);
-    showToast('📄 PDF downloaded — attach it to the Gmail draft that just opened');
-  }
-
-
-
-  window.__RG = { get days(){ return RG_DAYS; }, getDay:rgGetDay, calc:rgCalc,
-                  hourLabel:rgHourLabel, get date(){ return _rgDate; },
-                  COL:RG_COL, META:RG_META, LS:RG_LS, VERK:RG_VERK,
-                  START:RG_START_HOUR, HOURS:RG_HOURS, BBL:M3_TO_BBL,
-                  fmt:rgFmt, num:rgNum, rowDate:rgRowDate, today:rgToday };
-})();
-</script>
 
 <!-- ══════════════════════════════════════════
      DAY / NIGHT THEME  — system-aware + manual toggle
@@ -10433,12 +9770,15 @@ function initMorningReport() {
     document.body.classList.toggle('light-mode', light);
     /* Sync loading screen background so there is no dark flash on light devices */
     var ls = document.getElementById('loading-screen');
-    if(ls) ls.style.background = light ? '#ECE5DD' : '#060b12';
+    if(ls) ls.style.background = light ? '#eef3f8' : '#0a1420';
     var btn = document.getElementById('themeToggleBtn');
-    if(btn) btn.textContent = light ? '☀️' : '🌙';
+    /* innerHTML, not textContent: the button now holds an SVG <use>, and
+       assigning text would wipe the sprite reference and leave it blank. */
+    if(btn) btn.innerHTML = '<svg class="ico ico-lg" aria-hidden="true"><use href="#i-' +
+                            (light ? 'sun' : 'moon') + '"/></svg>';
     /* Keep PWA title-bar colour in sync with the active palette */
     var meta = document.querySelector('meta[name="theme-color"]');
-    if(meta) meta.setAttribute('content', light ? '#075E54' : '#22d3ee');
+    if(meta) meta.setAttribute('content', light ? '#0b3d68' : '#0a1420');
     if(persist){ try{ localStorage.setItem(KEY, mode); }catch(_){} }
   }
 
@@ -10474,5 +9814,213 @@ function initMorningReport() {
 })();
 </script>
 
+
+<style id="pb-redesign">
+/* ══════════════════════════════════════════════════════════════════════
+   PETROBEL REDESIGN  (v103)
+   Layered on top of the original stylesheet rather than replacing it, so
+   nothing that already worked can regress. Everything here is driven by the
+   tokens, so both themes follow automatically.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ── Typography ────────────────────────────────────────────────────────
+   No web font is downloaded — that would cost ~300 KB and break the offline
+   guarantee. The gain comes from the scale, weight and tracking instead, plus
+   tabular figures so numeric columns line up. */
+body, input, select, textarea, button{ font-family:var(--font-ui); }
+.hist-tbl, .sub-table, .man-table,
+.f-val, .ds-val, .stat-value{ font-variant-numeric:tabular-nums; }
+
+h1, h2, h3, .page-hdr h2, .app-header .title{ letter-spacing:-.02em; font-weight:800; }
+.page-hdr h2{ font-size:19px; }
+.page-hdr p{ font-size:12.5px; color:var(--muted); }
+
+/* ── App header ───────────────────────────────────────────────────────── */
+.app-header{
+  background:linear-gradient(180deg,var(--surface),var(--card)) !important;
+  border-bottom:1px solid var(--border) !important;
+  box-shadow:var(--shadow);
+}
+body.light-mode .app-header{ border-bottom:3px solid var(--gold) !important; }
+
+/* ── Navigation: framed tabs ──────────────────────────────────────────
+   Each tab is its own bordered pill so it reads as a control, and the active
+   one is filled rather than merely tinted — the old underline was easy to miss
+   on a phone in daylight. */
+/* `display` is set without !important on purpose — the app toggles the whole
+   strip with an inline style (hidden on the login screen, shown after sign-in),
+   and !important here would beat that inline style and leave the tabs on the
+   login page. This block is the last stylesheet in the document, so plain
+   declarations already win over the base rules. */
+nav.nav, #mainNav{
+  display:flex; gap:6px !important;
+  padding:8px !important;
+  background:var(--surface) !important;
+  border-bottom:1px solid var(--border) !important;
+  overflow-x:auto; -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+#mainNav::-webkit-scrollbar{ display:none; }
+#mainNav .nav-btn{
+  flex:0 0 auto !important;
+  min-width:74px;
+  /* NO `display` declaration here, deliberately. The Ras Gara lockdown hides
+     the other tabs with an inline style.display='none'; an !important display
+     rule in the stylesheet beats that inline style and would silently unhide
+     every tab for the plant account. Layout comes from the base .nav-btn rule. */
+  flex-direction:column; align-items:center; justify-content:center;
+  gap:4px;
+  padding:9px 10px !important;
+  border:1px solid var(--border) !important;
+  border-radius:12px !important;
+  background:var(--card) !important;
+  color:var(--muted) !important;
+  font-size:9.5px !important; font-weight:700 !important;
+  letter-spacing:.6px; text-transform:uppercase;
+  line-height:1.25 !important;
+  transition:background .15s, color .15s, border-color .15s, transform .08s;
+}
+#mainNav .nav-btn .icon{
+  display:flex; align-items:center; justify-content:center;
+  width:22px; height:22px; margin:0 !important;
+}
+#mainNav .nav-btn .icon svg{ width:22px; height:22px; display:block; }
+#mainNav .nav-btn:active{ transform:translateY(1px); }
+#mainNav .nav-btn.active{
+  background:var(--accent) !important;
+  border-color:var(--accent) !important;
+  color:var(--on-accent) !important;
+  box-shadow:0 3px 10px var(--ring);
+}
+body.light-mode #mainNav .nav-btn.active{ color:#fff !important; }
+/* the old glow blob behind the emoji has no place in the new tabs */
+#mainNav .nav-icon-glow{ display:none !important; }
+
+/* ── Cards: gold top edge is the "something changed" signal ──────────── */
+.card, .well-card, .detail-section, .stat-card, .chem-card,
+.substation-summary, .anl-card, .db-stat{
+  border-radius:13px !important;
+}
+body.light-mode .detail-section,
+body.light-mode .well-card,
+body.light-mode .substation-summary{
+  border-top:3px solid var(--gold) !important;
+  box-shadow:var(--shadow);
+}
+
+/* ── Form controls: everything tappable now LOOKS tappable ────────────
+   The Ras Gara entry table was the worst case — the numbers were bare text
+   with a transparent border, so an operator could not tell a cell was an
+   input until they tapped it. Every control now carries a visible frame at
+   rest, an obvious focus ring, and a comfortable touch target. */
+input[type=text], input[type=number], input[type=date], input[type=email],
+input[type=password], input[type=search], select, textarea, .search-input{
+  background:var(--surface) !important;
+  border:1.5px solid var(--border) !important;
+  border-radius:10px !important;
+  color:var(--text) !important;
+  padding:10px 11px;
+  font-family:var(--font-num);
+  transition:border-color .15s, box-shadow .15s;
+}
+input:focus, select:focus, textarea:focus, .search-input:focus{
+  outline:none !important;
+  border-color:var(--accent) !important;
+  box-shadow:0 0 0 3px var(--ring) !important;
+}
+input:disabled{
+  background:var(--card) !important; color:var(--muted) !important;
+  border-style:dashed !important; opacity:1 !important;
+}
+input::placeholder{ color:var(--muted); opacity:.75; }
+
+/* Ras Gara entry grid — the specific complaint */
+/* calculated cells are visibly NOT inputs */
+
+/* ── Buttons ──────────────────────────────────────────────────────────── */
+.btn-primary, .anl-run, .login-btn{
+  background:var(--accent) !important; color:var(--on-accent) !important;
+  border:1px solid var(--accent) !important; border-radius:11px !important;
+  font-weight:700 !important; letter-spacing:.3px;
+  box-shadow:0 3px 10px var(--ring);
+}
+body.light-mode .btn-primary,
+body.light-mode .anl-run, body.light-mode .login-btn{ color:#fff !important; }
+.btn-secondary, .nav-back-btn{
+  background:var(--surface) !important; color:var(--text) !important;
+  border:1.5px solid var(--border) !important; border-radius:11px !important;
+  font-weight:600 !important;
+}
+button:active{ transform:translateY(1px); }
+
+/* ── Tables ───────────────────────────────────────────────────────────── */
+.sub-table th, .man-table th{
+  background:var(--card) !important;
+  border-bottom:2px solid var(--border) !important;
+  letter-spacing:.8px;
+}
+/* The plant account's table is three columns, not five. The 520px minimum was
+   sized for the full comparison view and pushed the Cumulative column off a
+   phone screen for no reason, so the own-side view drops it and fits. */
+
+/* ── Chips / badges ───────────────────────────────────────────────────── */
+.badge, .chip{ letter-spacing:.7px; }
+.badge{ border-radius:7px !important; font-weight:700 !important; }
+
+/* ── Situation date bar ───────────────────────────────────────────────── */
+.situation-date-bar{
+  background:var(--card) !important;
+  border:1px solid var(--border) !important;
+  border-left:3px solid var(--gold) !important;
+  border-radius:11px !important;
+}
+
+/* ── Ras Gara KPI cards pick up the series colours ─────────────────────── */
+
+/* ── Login ────────────────────────────────────────────────────────────── */
+body.light-mode #login-page{ background:var(--bg) !important; }
+.login-card{ border-radius:16px !important; box-shadow:var(--shadow); }
+body.light-mode .login-card{ border-top:4px solid var(--gold) !important; }
+
+/* ── Icon sprite sizing ───────────────────────────────────────────────
+   One class, four sizes. `1em` height keeps an inline icon locked to the
+   line it sits on, so it never drags a heading's baseline around. */
+.ico{ width:1.15em; height:1.15em; flex:0 0 auto;
+      vertical-align:-.19em; fill:none; stroke:currentColor; }
+.ico-h{ width:1.05em; height:1.05em; vertical-align:-.13em; color:var(--accent); }
+.ico-lg{ width:20px; height:20px; vertical-align:-.28em; }
+.ico-xl{ width:52px; height:52px; vertical-align:middle; opacity:.5; color:var(--accent); }
+.uz-icon .ico-xl{ width:40px; height:40px; opacity:.6; }
+.empty-state .big{ line-height:0; }
+.s-icon{ display:inline-flex; align-items:center; color:var(--muted); }
+.s-icon .ico{ width:17px; height:17px; vertical-align:middle; }
+.theme-toggle{ display:inline-flex; align-items:center; justify-content:center;
+  background:transparent; border:1px solid var(--border); border-radius:9px;
+  width:34px; height:32px; color:var(--accent2); }
+.sdlbl .ico, .tb-date-pill .ico, .hist-divider-title .ico,
+.mr-section-title .ico{ color:var(--gold); }
+.btn-primary .ico, .btn-secondary .ico{ margin-right:5px; }
+
+/* The search field carries its own icon element now, so the input needs the
+   room. Previously the magnifier was baked into the placeholder text, which
+   is why the placeholder ran under it once the input gained a real frame. */
+.search-input-wrap{ position:relative; }
+.search-input-wrap .s-icon{ left:13px; z-index:2; }
+.search-input, .search-input-wrap input[type=text]{ padding-left:40px !important; padding-right:36px !important; }
+
+/* The tab strip scrolls horizontally. Without an edge cue a phone user has no
+   reason to believe there is anything past the last visible tab, so the right
+   edge fades out. Done with a mask on the scroller itself rather than a
+   positioned overlay — a pseudo-element inside a scrolling box scrolls away
+   with the content, which is exactly when you still need the cue. */
+#mainNav{
+  -webkit-mask-image:linear-gradient(90deg, #000 calc(100% - 24px), transparent);
+          mask-image:linear-gradient(90deg, #000 calc(100% - 24px), transparent);
+}
+
+@media (max-width:380px){
+#mainNav .nav-btn{ min-width:66px; font-size:9px !important; }
+}
+</style>
 </body>
 </html>
