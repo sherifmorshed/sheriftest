@@ -2564,6 +2564,172 @@ window.addEventListener('offline', handleOnlineStatus);
 // ══════════════════════════════════════════
 //  UTILITY — HTML ESCAPE / STORAGE / NUMBERS
 // ══════════════════════════════════════════
+
+// ══════════════════════════════════════════════════════════════════════
+//  UPLOAD GUARD — stop a file going into the wrong slot
+// ══════════════════════════════════════════════════════════════════════
+// The admin panel is used by many engineers and every upload zone looks the
+// same. Dropping WELL_TEST_HISTORY.xlsx into the Water Disposal zone used to
+// run the disposal parser over it, which at best fails confusingly and at
+// worst overwrites a good dataset with nonsense.
+//
+// Two checks, in this order:
+//
+//   1. FILENAME — must carry the words that identify its kind. Deliberately
+//      token-based, not an exact match: real files arrive as "W.C.HISTORY (2)",
+//      "well test history_1", "WATER DISPOSAL WELLS HISTORY - Copy". Separators,
+//      case and trailing copy numbers are all ignored; the words must be there.
+//
+//   2. CONTENTS — sheet names and the top few rows are read and matched
+//      against the known layouts.
+//
+// The content check blocks ONLY when it positively recognises a DIFFERENT
+// kind. It never blocks merely because it failed to recognise the expected
+// one. That asymmetry is deliberate: an unusual-but-valid file must still get
+// through, or a rejection becomes a phone call rather than a correction.
+
+// Collapse a filename to comparable letters: lower-case, drop the extension,
+// drop copy/version suffixes, then remove every separator so "W.C. HISTORY-1"
+// and "wc_history" both become "wchistory".
+function _normUploadName(name){
+  return String(name || '')
+    .toLowerCase()
+    .replace(/\.(xlsx|xlsm|xls|csv)$/,'')
+    .replace(/[\s._\-()]*(copy|final|new|rev)?[\s._\-()]*\d*$/,'')  // trailing " - Copy 2", "_v3"
+    .replace(/[^a-z0-9]/g,'');
+}
+
+var UPLOAD_KINDS = {
+  data: {
+    label: 'Update DB',
+    example: 'LAND_WELLS_SITUATION.xlsx',
+    name: function(n){ return /situation/.test(n) || (/land/.test(n) && /wells/.test(n)); }
+  },
+  cmp: {
+    label: 'Comparison File (Loss Analysis)',
+    example: 'an older LAND_WELLS_SITUATION.xlsx',
+    // A comparison file IS a Land Wells Situation file — an older one. The two
+    // slots cannot be told apart by the file, only by intent, so they share a
+    // signature and each accepts what the other accepts.
+    name: function(n){ return /situation/.test(n) || (/land/.test(n) && /wells/.test(n)); }
+  },
+  hist: {
+    label: 'Wells Test History',
+    example: 'WELL_TEST_HISTORY.xlsx',
+    // "history" but none of the other three histories.
+    name: function(n){ return /history/.test(n) && !/wc/.test(n) && !/disposal/.test(n) && !/survey/.test(n); }
+  },
+  wc: {
+    label: 'Wells Lab W.C. History',
+    example: 'W.C.HISTORY.xlsx',
+    name: function(n){ return /wc/.test(n) && /history/.test(n); }
+  },
+  disposal: {
+    label: 'Water Disposal Wells History',
+    example: 'WATER_DISPOSAL_WELLS_HISTORY.xlsx',
+    name: function(n){ return /disposal/.test(n); }
+  },
+  chem: {
+    label: 'Chemical Injection Survey',
+    example: 'H2S_Scavenger_Demulsifier_Daily_Survey.xlsx',
+    name: function(n){ return /survey/.test(n) || /scavenger/.test(n) || /demulsifier/.test(n); }
+  }
+};
+
+// Which kind does this NAME look like? Most distinctive first, because
+// "WATER_DISPOSAL_WELLS_HISTORY" satisfies several loose tests at once.
+var _NAME_ORDER = ['disposal','chem','wc','hist','data'];
+function _identifyByName(fileName){
+  var n = _normUploadName(fileName);
+  for(var i = 0; i < _NAME_ORDER.length; i++){
+    var k = _NAME_ORDER[i];
+    if(UPLOAD_KINDS[k].name(n)) return k;
+  }
+  return null;
+}
+
+// Which kind do the CONTENTS look like? Uses only markers taken from the
+// parsers themselves or from real files, so it cannot drift from reality:
+//   disposal — a sheet named "…DISPOSAL…HISTORY…" (what parseDisposalFile looks for)
+//   chem     — the named chemical sheets / "Daily Survey Report" title
+//   data     — the "LAND WELLS SITUATION" title, or its Wells Summary/DATA BASE sheets
+// Returns null for anything it does not positively recognise.
+function _identifyByContent(wb){
+  try {
+    var sheets = (wb.SheetNames || []).map(function(x){ return _normUploadName(x); });
+    var joined = sheets.join(' ');
+    var first  = wb.Sheets[wb.SheetNames[0]];
+    var top    = '';
+    if(first){
+      var rows = XLSX.utils.sheet_to_json(first, {header:1, defval:null, raw:false});
+      top = _normUploadName(rows.slice(0, 5).map(function(r){
+        return (r || []).join(' ');
+      }).join(' '));
+    }
+    if(/disposal/.test(joined) || /waterdisposal/.test(top)) return 'disposal';
+    if(/scavenger|demulsifier|corrosioninhibitor|antifoulant|biocide/.test(joined) ||
+       /dailysurveyreport/.test(top)) return 'chem';
+    if(/landwellssituation/.test(top) || /wellssummary|database/.test(joined)) return 'data';
+    if(/wchistory|labwc/.test(top)) return 'wc';
+    if(/welltesthistory|testhistory/.test(top)) return 'hist';
+  } catch(e){ /* unreadable here is not a verdict — let the parser report it */ }
+  return null;
+}
+
+// `data` and `cmp` are the same file in two roles.
+function _kindsCompatible(a, b){
+  if(a === b) return true;
+  var pair = [a, b].sort().join('|');
+  return pair === 'cmp|data';
+}
+
+// Reads only the first few rows of each sheet — enough to identify the file
+// without parsing a 16,000-row history twice.
+function _peekWorkbook(file){
+  return new Promise(function(resolve){
+    var r = new FileReader();
+    r.onload = function(e){
+      try { resolve(XLSX.read(new Uint8Array(e.target.result), {type:'array', sheetRows:6})); }
+      catch(err){ resolve(null); }
+    };
+    r.onerror = function(){ resolve(null); };
+    r.readAsArrayBuffer(file);
+  });
+}
+
+// The gate every upload zone calls. Runs `proceed(file)` only if the file
+// belongs here; otherwise explains where it does belong and stops.
+async function guardUpload(file, slot, proceed, onReject){
+  var kind = UPLOAD_KINDS[slot];
+  if(!file || !kind){ return; }
+
+  function reject(msg){
+    showToast(msg, true);
+    if(typeof onReject === 'function') onReject(msg);
+    console.warn('[upload] rejected for ' + slot + ': ' + file.name);
+  }
+
+  var byName = _identifyByName(file.name);
+  if(!_kindsCompatible(byName, slot)){
+    return reject(byName
+      ? 'Wrong slot — "' + file.name + '" looks like a ' + UPLOAD_KINDS[byName].label +
+        ' file. Upload it under ' + UPLOAD_KINDS[byName].label + '.'
+      : 'Wrong file name — this zone expects ' + kind.example + '. Rename the file or use the right zone.');
+  }
+
+  var wb = await _peekWorkbook(file);
+  if(wb){
+    var byContent = _identifyByContent(wb);
+    // Only a POSITIVE identification of something else is grounds to refuse.
+    if(byContent && !_kindsCompatible(byContent, slot)){
+      return reject('Wrong slot — the contents of "' + file.name + '" are a ' +
+                    UPLOAD_KINDS[byContent].label + ' file. Upload it under ' +
+                    UPLOAD_KINDS[byContent].label + '.');
+    }
+  }
+  proceed(file);
+}
+
 function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;');}
 
 // ── Chart series colours ──────────────────────────────────────────────
@@ -4982,8 +5148,11 @@ function startChemSurveyListener(){
 
   // File input handler
   const fi = document.getElementById('chemSurveyFileInput');
-  if(fi) fi.addEventListener('change', async function(){
-    const file = this.files[0]; if(!file) return;
+  if(fi) fi.addEventListener('change', function(){
+    const f = this.files[0]; this.value = '';
+    if(f) guardUpload(f, 'chem', _handleChemSurveyFile, _setChemSurveyAdminStatus);
+  });
+  async function _handleChemSurveyFile(file){
     const zone = document.getElementById('chemSurveyUploadZone');
     _setChemSurveyAdminStatus('⏳ Reading file…');
     if(zone) zone.innerHTML='<div class="uz-icon">⏳</div><p><strong>Processing…</strong></p><p>'+escHtml(file.name)+'</p>';
@@ -5019,8 +5188,7 @@ function startChemSurveyListener(){
       }
     };
     reader.readAsArrayBuffer(file);
-    this.value='';
-  });
+  }
 }
 
 function _updateChemSurveyMetaUI(){
@@ -5570,7 +5738,11 @@ document.addEventListener('click',e=>{
 // ══════════════════════════════════════════
 document.getElementById('dataFileInput').addEventListener('change',function(){
   if(!this.files[0])return;
-  const file = this.files[0];
+  const _picked = this.files[0];
+  this.value = '';
+  guardUpload(_picked, 'data', _handleDataFile);
+});
+function _handleDataFile(file){
   const fname = file.name.toLowerCase();
   // Validate file type
   if(!fname.endsWith('.xlsx') && !fname.endsWith('.xls') && !fname.endsWith('.csv')){
@@ -5601,8 +5773,7 @@ document.getElementById('dataFileInput').addEventListener('change',function(){
     document.getElementById('dataUploadOk').style.display='none';
     // Keep upload zone visible so user can re-upload immediately
   },true); // isDataSheet=true
-  this.value='';
-});
+}
 
 // ══════════════════════════════════════════
 //  EXCEL IMPORT — file parsing, column mapping, data validation
@@ -7615,19 +7786,17 @@ function _buildHistoryChart(tests, metricKey){
   const fi = document.getElementById('histFileInput');
   if(fi){
     fi.addEventListener('change', function(){
-      if(this.files && this.files[0]){
-        parseHistoryFile(this.files[0]);
-        this.value = '';
-      }
+      const f = this.files && this.files[0];
+      this.value = '';
+      if(f) guardUpload(f, 'hist', parseHistoryFile, _setHistAdminStatus);
     });
   }
   const wi = document.getElementById('wcFileInput');
   if(wi){
     wi.addEventListener('change', function(){
-      if(this.files && this.files[0]){
-        parseWCHistoryFile(this.files[0]);
-        this.value = '';
-      }
+      const f = this.files && this.files[0];
+      this.value = '';
+      if(f) guardUpload(f, 'wc', parseWCHistoryFile, _setWCAdminStatus);
     });
   }
   const si = document.getElementById('histSearchInput');
@@ -8186,7 +8355,9 @@ function stopDisposalListener(){
   const fi = document.getElementById('dispFileInput');
   if(fi){
     fi.addEventListener('change', function(){
-      if(this.files && this.files[0]){ parseDisposalFile(this.files[0]); this.value=''; }
+      const f = this.files && this.files[0];
+      this.value = '';
+      if(f) guardUpload(f, 'disposal', parseDisposalFile, _setDispAdminStatus);
     });
   }
   const si = document.getElementById('dispSearchInput');
@@ -9749,7 +9920,16 @@ function initMorningReport() {
 
   // Wiring — Update DB "Comparison File" input stores a dated baseline snapshot
   const cmpFile=document.getElementById('cmpFileInput');
-  if(cmpFile){ cmpFile.addEventListener('change',function(){ const f=this.files&&this.files[0]; this.value=''; window.uploadBaselineSnapshot(f,function(sit,c){ renderSnapStatus(); showToast('✅ '+c+' wells stored as baseline: '+formatSituationDate(sit)); }); }); }
+  if(cmpFile){ cmpFile.addEventListener('change',function(){
+    const f=this.files&&this.files[0]; this.value='';
+    if(!f) return;
+    guardUpload(f, 'cmp', function(file){
+      window.uploadBaselineSnapshot(file,function(sit,c){
+        renderSnapStatus();
+        showToast('✅ '+c+' wells stored as baseline: '+formatSituationDate(sit));
+      });
+    });
+  }); }
 })();
 </script>
 
