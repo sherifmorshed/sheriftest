@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Load the 2026 history into Sinai Field</title>
+<style>
+:root{ --bg:#eef3f8; --card:#fff; --border:#dbe4ee; --accent:#0b3d68; --text:#16232f;
+       --muted:#5d7286; --gold:#c8a34a; --red:#b03a48; --green:#1d6b3f; }
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);padding:24px 16px 60px;line-height:1.55;
+  font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;}
+.wrap{max-width:660px;margin:0 auto;}
+h1{font-size:21px;font-weight:800;letter-spacing:-.02em;margin-bottom:6px;}
+.sub{color:var(--muted);font-size:13.5px;margin-bottom:20px;}
+.card{background:var(--card);border:1px solid var(--border);border-top:3px solid var(--gold);
+  border-radius:13px;padding:18px;margin-bottom:16px;box-shadow:0 2px 10px rgba(15,40,70,.07);}
+h2{font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);
+  font-family:ui-monospace,monospace;margin-bottom:12px;}
+label{display:block;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);
+  font-family:ui-monospace,monospace;margin:11px 0 5px;}
+input{width:100%;background:#fff;border:1.5px solid var(--border);border-radius:10px;color:var(--text);
+  padding:10px 11px;font-family:ui-monospace,monospace;font-size:13px;}
+input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(11,61,104,.18);}
+button{background:var(--accent);color:#fff;border:1px solid var(--accent);border-radius:11px;
+  padding:12px 18px;font-size:14px;font-weight:700;cursor:pointer;margin-top:14px;font-family:inherit;}
+button:disabled{opacity:.5;cursor:not-allowed;}
+#log{font-family:ui-monospace,monospace;font-size:12px;white-space:pre-wrap;margin-top:14px;color:var(--muted);
+  max-height:320px;overflow:auto;}
+.ok{color:var(--green);font-weight:700;} .bad{color:var(--red);font-weight:700;}
+.warn{border-left:3px solid var(--gold);background:#fbf7ec;padding:11px 13px;border-radius:8px;
+  font-size:13px;margin-top:12px;}
+code{font-family:ui-monospace,monospace;font-size:12.5px;background:#eef3f8;padding:1px 5px;border-radius:4px;}
+ul{margin:8px 0 0 20px;font-size:13.5px;} li{margin-bottom:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Load the 2026 history</h1>
+<p class="sub">Writes the <strong>116 days</strong> extracted from
+<code>Ras Gara Test 2026.xlsx</code> (8 April → 8 August 2026) into this project's
+<code>rasGara</code> collection. Run it <strong>once</strong>.</p>
+
+<div class="warn">
+  <strong>This is a development tool — do not deploy it.</strong> It is not part of
+  the app and nothing in the app links to it. Delete it, and
+  <code>history-data.js</code>, once the history is in.
+</div>
+
+<div class="card">
+  <h2>What it will do</h2>
+  <ul>
+    <li>Sign in with your <strong>admin</strong> account.</li>
+    <li>Write one document per day, each carrying the 24 hourly readings.</li>
+    <li><strong>Skip any day that already has readings</strong>, so it can never
+        overwrite something entered in the app. Run it twice and the second run
+        writes nothing.</li>
+    <li>Update the version stamp last, so other devices pick it all up at once.</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h2>Sign in</h2>
+  <label for="em">Admin email</label>
+  <input type="email" id="em" autocomplete="username" placeholder="you@example.com">
+  <label for="pw">Password</label>
+  <input type="password" id="pw" autocomplete="current-password">
+  <button id="go">Load the history</button>
+  <div id="log"></div>
+</div>
+
+</div>
+
+<script src="./firebase-app-compat.js"></script>
+<script src="./firebase-firestore-compat.js"></script>
+<script src="./firebase-auth-compat.js"></script>
+<script src="./history-data.js"></script>
+<script>
+const logEl = document.getElementById('log');
+function log(msg, cls){ const d=document.createElement('div'); if(cls) d.className=cls;
+  d.textContent = msg; logEl.appendChild(d); logEl.scrollTop = logEl.scrollHeight; }
+
+// Pull the project config straight out of the app so the two can never point at
+// different projects — the single most likely way to get this wrong.
+async function loadConfig(){
+  const txt = await (await fetch('./index.html')).text();
+  const m = txt.match(/const firebaseConfig = \{([\s\S]*?)\};/);
+  if(!m) throw new Error('Could not find firebaseConfig in index.html');
+  const cfg = {};
+  m[1].replace(/(\w+)\s*:\s*"([^"]*)"/g, function(_, k, v){ cfg[k] = v; });
+  if(!cfg.projectId) throw new Error('firebaseConfig has no projectId');
+  return cfg;
+}
+
+const RG_COL = 'rasGara', META_COL = 'rasGaraMeta', META_DOC = 'info', START_HOUR = 6;
+const hasReadings = rows => Array.isArray(rows) &&
+  rows.some(r => r && (r.p != null || r.r != null || r.rc != null));
+
+document.getElementById('go').addEventListener('click', async function(){
+  const btn = this; btn.disabled = true; logEl.innerHTML = '';
+  try {
+    const days = window.__HISTORY__;
+    if(!days || !days.length) throw new Error('history-data.js did not load');
+    const cfg = await loadConfig();
+    log('Project: ' + cfg.projectId + '  ·  ' + days.length + ' day(s) to consider');
+
+    if(!firebase.apps.length) firebase.initializeApp(cfg);
+    const auth = firebase.auth(), db = firebase.firestore();
+    await auth.signInWithEmailAndPassword(
+      document.getElementById('em').value.trim(),
+      document.getElementById('pw').value);
+    log('Signed in as ' + auth.currentUser.email, 'ok');
+
+    log('Checking what is already there…');
+    const existing = new Set();
+    const snap = await db.collection(RG_COL).get();
+    snap.forEach(function(doc){
+      const d = doc.data() || {};
+      // rows may be a map (current) or an array (older documents)
+      const arr = Array.isArray(d.rows) ? d.rows
+                : d.rows ? Object.keys(d.rows).map(k => d.rows[k]) : [];
+      if(hasReadings(arr)) existing.add(d.date || doc.id);
+    });
+    log('  ' + existing.size + ' day(s) already hold readings — those will be skipped.');
+
+    let written = 0, skipped = 0, failed = 0;
+    for(const day of days){
+      if(existing.has(day.d)){ skipped++; continue; }
+      const rows = {};
+      day.r.forEach(function(t, i){ rows[String(i)] = { p:t[0], r:t[1], rc:t[2] }; });
+      try {
+        await db.collection(RG_COL).doc(day.d).set({
+          date: day.d, startHour: START_HOUR, rows: rows,
+          updatedBy: 'history 2026',
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge:true });
+        written++;
+        if(written % 20 === 0) log('  written ' + written + '…');
+      } catch(e){ failed++; console.error(day.d, e); }
+    }
+
+    // Meta last: it is the version stamp every device watches, so touching it
+    // before the days were written would send everyone to fetch a half-set.
+    const all = await db.collection(RG_COL).get();
+    const dates = []; all.forEach(function(d){ dates.push((d.data()||{}).date || d.id); });
+    dates.sort();
+    await db.collection(META_COL).doc(META_DOC).set({
+      dates: dates, count: dates.length,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedBy: 'history 2026'
+    });
+
+    log('');
+    log('Written ' + written + ' · skipped ' + skipped + ' · failed ' + failed,
+        failed ? 'bad' : 'ok');
+    log('The collection now holds ' + dates.length + ' day(s).', 'ok');
+    log('Open the app and check a few days, then delete this page and history-data.js.');
+    await auth.signOut();
+  } catch(e){
+    log('Failed: ' + (e && (e.code || e.message) || e), 'bad');
+    if(String(e && e.code).indexOf('permission') !== -1)
+      log('That account cannot write rasGara. Use the admin login, and check the rules are published.');
+    console.error(e);
+  } finally { btn.disabled = false; }
+});
+</script>
+</body>
+</html>

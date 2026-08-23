@@ -1,0 +1,228 @@
+# Sinai Field — Production Readings
+
+A standalone PWA for the hourly production readings of the Sinai field: the
+PETRECO test separator on one side, the Ras Gara plant on the other, and the
+daily comparison between them.
+
+A standalone application: its own Firebase project, its own accounts, its own
+release cycle. It depends on nothing outside this folder.
+
+> **On the naming.** The app is *Sinai Field*. *Ras Gara* and *PETRECO* are the
+> two measuring points inside it, and those names appear wherever they refer to
+> a side — column headers, totals, an operator's own heading.
+
+---
+
+## What it does
+
+**The shift day runs 06:00 → 05:00 the next morning**, 24 hourly rows. Before
+06:00 the app still shows the previous day, so a night operator opens it and
+sees the right page without thinking about it.
+
+**Who types what**
+
+| Column | Admin | PETRECO | Ras Gara | How |
+|---|---|---|---|---|
+| PETRECO M³/hr | edit | edit | — | typed |
+| PETRECO Cumulative | — | — | — | **calculated** as the running total |
+| Ras Gara M³/hr | edit | — | edit | typed |
+| Ras Gara Cumulative | edit | — | edit | typed — their meter reports it separately |
+
+Entries save automatically: to the device first, then to the cloud about a
+second after typing stops, so filling 24 rows is one upload rather than 24.
+
+**A save only writes the columns that role owns.** This matters because the two
+operator groups work in different places and one of them may have been offline
+for hours: without it, whoever saved last would overwrite the other side's
+readings with whatever stale copy their phone happened to hold. Each save is
+merged into the day server-side rather than replacing it.
+
+**The calculations**, exactly as the original workbook did them:
+
+```
+PETRECO total  = Σ hourly M³/hr        bbl/d = total × 6.3
+Ras Gara total = Σ hourly M³/hr        bbl/d = total × 6.3
+Difference     = PETRECO total − Ras Gara total
+```
+
+**The difference is highlighted, and the colour means something.** Oil leaves
+Ras Gara and is received at PETRECO, so the two totals should agree:
+
+| | |
+|---|---|
+| **Red** | Ras Gara metered **more** than PETRECO received — oil left that PETRECO cannot account for |
+| **Green** | PETRECO received at least what Ras Gara sent |
+
+The same colouring runs down the Difference column of the daily history, so a
+run of red days is visible at a glance.
+
+**Print** opens a one-page report — the three KPI cards, the full hourly table
+and the rate chart.
+
+**Send by e-mail** builds that report as a PDF and hands it to the phone's share
+sheet, where Gmail and Outlook appear with the file already attached. On a
+desktop browser with no share sheet it downloads the PDF and opens a Gmail
+compose window with the subject and summary written, ready for you to attach it.
+
+---
+
+## The daily record
+
+Below the day view is the **Daily record** — every shift day that has been
+entered, one row each, newest first. Tap a row to jump to that day.
+
+Three range chips sit above it: **30 days**, **90 days** and **All**. A window
+wider than the data is hidden, so a project with 12 days offers only "All 12".
+The chip governs everything below it — the chart, the table and the printout.
+
+**The day-by-day chart** plots each day's total, PETRECO against Ras Gara, so a
+drift that is invisible hour to hour shows up as two lines separating. Point
+markers are drawn up to 45 days and dropped beyond that, where they would merge
+into a band. An operator sees only their own line.
+
+**Print daily record** produces its own document, separate from the day report:
+the range totals, the trend chart and the full day-by-day table with the same
+red/green Difference column. Admin only.
+
+> **Days where only one side reported are excluded from the range totals**, and
+> the subtitle says how many. Counting them would compare 116 Ras Gara days
+> against 114 PETRECO ones and book the two missing sheets as loss. For the
+> same reason a day with only one side shows its Difference as "—", not as a
+> −186 m³ shortfall against an implied zero.
+
+---
+
+## The three roles
+
+Set by `ADMIN_EMAILS`, `PETRECO_EMAILS` and `PLANT_EMAILS` at the top of
+`index.html`.
+
+| | Admin | PETRECO (`petreco@petrobel.org`) | Ras Gara (`rasgara@petrobel.org`) |
+|---|---|---|---|
+| Table | 5 columns, both sides | **3 columns, PETRECO only** | **3 columns, Ras Gara only** |
+| Totals | PETRECO, Ras Gara, Difference | **PETRECO only** | **Ras Gara only** |
+| Chart | yes | no | no |
+| Print / e-mail | yes | no | no |
+| Daily history | Date, PETRECO, R/G, Difference | Date, PETRECO total | Date, Ras Gara total |
+| Heading | "Production Comparison" | "PETRECO — Daily Readings" | "Ras Gara — Daily Readings" |
+
+Neither operator group ever sees the other's figures on screen, or the
+difference between them. The comparison is PETROBEL's to make.
+
+An account in none of the three lists can sign in but is **read-only** — it can
+look, not type. That is deliberate: an account added to the console by mistake
+should not gain write access just by existing.
+
+> **The screen hides each side from the other; the accounts can still read it.**
+> Both sides live in one document per day and the rules let either operator read
+> that document, so the other side's figures are reachable from a browser
+> console. What the app *does* prevent is accidental overwriting — a save only
+> writes the fields that role owns. If the two sides ever need to be genuinely
+> confidential from each other, the day has to be split into two sub-documents;
+> the reasoning is written into `firestore.rules` at the rule it would change.
+
+---
+
+## Why the frames
+
+Every input carries a visible 2px frame at rest, not on hover.
+
+The original was `border: 1px solid transparent` revealed on `:hover`. A phone
+has no hover, so on the actual device the field only appeared **after** you had
+already tapped it, and operators could not tell which cells were typeable. If
+you restyle this table, keep the frames.
+
+The calculated cells are deliberately different — muted text on the card ground
+rather than a white field — so a derived number never looks like an empty input.
+
+---
+
+## Files
+
+**Upload these nine — this is the whole app:**
+
+| File | | |
+|---|---|---|
+| `index.html` | 84 KB | everything: markup, styles, logic |
+| `sw.js` | 4 KB | offline cache — **bump `CACHE_NAME` every release** |
+| `manifest.json` | 1 KB | makes it installable |
+| `icon.png`, `icon-192.png` | 64 KB | home-screen icon |
+| `firebase-app-compat.js` | 32 KB | ┐ |
+| `firebase-firestore-compat.js` | 336 KB | ├ Firebase SDK 10.12.2 |
+| `firebase-auth-compat.js` | 140 KB | ┘ |
+| `html2canvas.min.js` | 196 KB | renders the report for the e-mailed PDF |
+
+The Firebase SDK is vendored rather than loaded from Google's CDN because a
+service worker cannot cache a cross-origin script. Loaded remotely, a cold
+offline start leaves `firebase is not defined` and the app never boots. Do not
+replace these with the `<script type="module">` snippet the Firebase console
+offers — take only the config values from it.
+
+**Do not upload these** — they are for you, not the server:
+
+| File | |
+|---|---|
+| `README.md`, `SETUP.md`, `DEVELOPER_REFERENCE.md` | documentation |
+| `firestore.rules` | paste into the Firebase console; never served |
+| `test.html`, `test_petreco.html`, `test_plant.html`, `firebase-stub.js` | offline test harness |
+| `test_hist.html`, `test_hist_rg.html` | the same harness seeded with the 116 real days — what the daily record is tested against |
+| `test_build.py`, `test_build_hist.py` | regenerate the harnesses; run after every edit to `index.html` |
+| `history-data.js`, `load-history.html` | the 2026 history and its one-off loader — see below |
+
+---
+
+## Working on it
+
+`index.html` is the file you edit — no build step.
+There is a map of what lives where in a comment at the very top of it.
+
+```bash
+python3 -m http.server 8000
+# admin:    http://localhost:8000/test.html
+# PETRECO:  http://localhost:8000/test_petreco.html
+# Ras Gara: http://localhost:8000/test_plant.html
+# admin, with the 116 real days:  http://localhost:8000/test_hist.html
+```
+
+The harnesses are generated from `index.html`, so **regenerate them after every
+edit** or you will be testing the old build:
+
+```bash
+python3 test_build.py        # three synthetic days, all three roles
+python3 test_build_hist.py   # the 116 real days, admin + Ras Gara
+```
+
+---
+
+## Loading the 2026 history
+
+`history-data.js` holds 116 shift days, 2026-04-08 to 2026-08-08, extracted from
+`Ras Gara Test 2026.xlsx`. `load-history.html` writes them into Firestore once.
+
+1. Upload `load-history.html` and `history-data.js` alongside the app.
+2. Open it, sign in as the admin, press **Load**.
+3. **Delete both files from the server.** They are a one-off, and the loader is
+   a write tool that has no business staying online.
+
+It reads its Firebase config out of `index.html`, so there is nothing to
+configure, and it **skips any day that already holds readings** — running it
+twice cannot overwrite work the operators have since done.
+
+These run the real app against a stubbed Firebase with three days of seeded
+readings — no project, no network, no risk to live data. Everything works
+there: typing, the chart, print and the PDF.
+
+They are **snapshots taken from `index.html`**, so after editing it run:
+
+```bash
+python3 test_build.py
+```
+
+or you will be testing the previous version. Full detail in
+`DEVELOPER_REFERENCE.md`.
+
+---
+
+## Getting started
+
+`SETUP.md` — the Firebase project, the rules, the three accounts, deployment.
