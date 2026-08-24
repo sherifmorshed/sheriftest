@@ -192,6 +192,19 @@ body.light-mode .login-btn{ color:#fff; }
 #toast.show{ transform:translate(-50%,0); opacity:1; }
 #toast.warn{ border-left-color:var(--yellow); }
 
+/* "your PDF is ready" sheet — see rgOfferPdf() for why this exists */
+#pdfSheet{position:fixed;inset:0;z-index:400;display:none;align-items:flex-end;
+  background:rgba(8,20,32,.45);}
+#pdfSheet.show{display:flex;}
+#pdfSheet .box{background:var(--card);border-top:3px solid var(--gold,#c8a34a);
+  border-radius:16px 16px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));
+  width:100%;box-shadow:0 -6px 26px rgba(8,20,32,.3);}
+#pdfSheet h4{font-size:15px;font-weight:800;margin-bottom:3px;color:var(--text);}
+#pdfSheet .fn{font-size:11.5px;color:var(--muted);font-family:var(--font-num);
+  margin-bottom:13px;word-break:break-all;}
+#pdfSheet .row{display:flex;flex-direction:column;gap:8px;}
+#pdfSheet .row .rg-btn{width:100%;justify-content:center;}
+
 /* ── Footer ─────────────────────────────────────────────────────────── */
 .app-footer{
   margin-top:auto; text-align:center; padding:16px; font-size:12px;
@@ -234,6 +247,13 @@ body.light-mode .rg-btn-primary{color:#fff !important;}
 body.light-mode .rg-range button.on{color:#fff;}
 .rg-sec-title{font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);
   font-family:var(--font-num);margin:22px 0 8px;}
+/* one-off 2026 history import — admin only, and only while nothing is loaded */
+.rg-import{border:1.5px solid var(--gold,#c8a34a);border-radius:13px;background:var(--surface);
+  padding:14px 15px;margin:0 0 12px;box-shadow:var(--shadow);}
+.rg-import h4{font-size:13px;font-weight:800;margin-bottom:5px;color:var(--text);}
+.rg-import p{font-size:12.5px;color:var(--muted);line-height:1.5;margin-bottom:10px;}
+.rg-import .log{font-family:var(--font-num);font-size:11.5px;color:var(--muted);margin-top:9px;
+  white-space:pre-wrap;}
 .rg-tbl-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:13px;background:var(--surface);
   box-shadow:var(--shadow);}
 table.rg-tbl{width:100%;border-collapse:collapse;font-family:var(--font-num);font-size:12px;min-width:520px;
@@ -385,6 +405,7 @@ body:not(.light-mode) .rg-card.gain{background:rgba(52,201,138,.12);}
 
     <!-- daily trend across days -->
     <div class="rg-sec-title" id="rgHistTitle"><svg class="ico" aria-hidden="true"><use href="#i-trend"/></svg> <span>Daily record</span></div>
+    <div class="rg-import" id="rgImport" style="display:none;"></div>
     <div class="rg-range" id="rgRange"></div>
     <div id="rgHistChart"></div>
     <div id="rgHistory"></div>
@@ -403,6 +424,11 @@ body:not(.light-mode) .rg-card.gain{background:rgba(52,201,138,.12);}
 </div>
 
 <div id="toast"></div>
+<div id="pdfSheet"><div class="box">
+  <h4>Report ready</h4>
+  <div class="fn" id="pdfSheetName"></div>
+  <div class="row" id="pdfSheetRow"></div>
+</div></div>
 <div id="swUpdateBanner"><svg class="ico" aria-hidden="true"><use href="#i-refresh"/></svg> Update available — <strong>tap to refresh</strong></div>
 
 <script src="./firebase-app-compat.js"></script>
@@ -532,6 +558,20 @@ function showToast(msg, warn){
   el.className = 'show' + (warn ? ' warn' : '');
   clearTimeout(_toastTimer);
   _toastTimer = setTimeout(function(){ el.className = ''; }, 3200);
+}
+
+// Save a Blob to the user's device.
+// Revoking the object URL synchronously after click() cancels the download in
+// some browsers before they have finished reading the blob, so it is deferred.
+function _downloadBlob(blob, filename){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function(){ URL.revokeObjectURL(url); a.remove(); }, 60000);
 }
 
 function updateCloudStatus(status, text){
@@ -1068,6 +1108,9 @@ document.addEventListener('DOMContentLoaded', function(){
     const el = document.getElementById('rgRange');
     if(!el) return;
     const total = rgHistoryRows().length;
+    // Nothing recorded means nothing to range over — an "All 0" chip beside an
+    // empty table just looks broken.
+    if(!total){ el.innerHTML = ''; return; }
     const opts = [[30,'30 days'],[90,'90 days'],[0,'All ' + total]];
     el.innerHTML = opts.map(function(o){
       // Offering "90 days" when only 12 exist is noise, so a window wider than
@@ -1150,6 +1193,118 @@ document.addEventListener('DOMContentLoaded', function(){
     el.innerHTML = rgHistChartSVG(rgRangeRows(), false);
   }
 
+  // ── the one-off 2026 history import ─────────────────────────────────────
+  // This lives in the app rather than in a separate loader page because a
+  // separate page is a step that gets skipped: it has to be uploaded, opened,
+  // signed into and then deleted, and until all four happen the app simply
+  // shows no history with no explanation. Here it is where somebody goes
+  // looking for the history, and it disappears by itself once there is any.
+  //
+  // Three things keep it safe to leave in production:
+  //   · admin only, checked again server-side by the rules;
+  //   · it only appears while the app can see NO recorded days at all;
+  //   · it skips any day that already holds readings, so it can never
+  //     overwrite something an operator typed.
+  let _rgImporting = false;
+  function rgRenderImport(){
+    const el = document.getElementById('rgImport');
+    if(!el) return;
+    const show = _admin() && !_rgImporting && Object.keys(RG_DAYS).length === 0 &&
+                 typeof FIREBASE_OK !== 'undefined' && FIREBASE_OK;
+    el.style.display = show ? 'block' : 'none';
+    if(!show) return;
+    el.innerHTML =
+      '<h4>No readings in this project yet</h4>' +
+      '<p>The recorded history from <b>Ras Gara Test 2026.xlsx</b> — 116 days, ' +
+      '8 April to 8 August 2026 — can be loaded into the cloud once. Days that ' +
+      'already hold readings are never touched.</p>' +
+      '<button class="rg-btn rg-btn-primary" id="rgImportBtn">' +
+      '<svg class="ico" aria-hidden="true"><use href="#i-cloud"/></svg> Load the 2026 history</button>' +
+      '<div class="log" id="rgImportLog"></div>';
+    const b = document.getElementById('rgImportBtn');
+    if(b) b.addEventListener('click', rgImportHistory);
+  }
+
+  // history-data.js is 36 KB and is needed exactly once, so it is fetched on
+  // demand rather than carried on every boot by every operator's phone.
+  function rgLoadHistoryFile(){
+    if(window.__HISTORY__) return Promise.resolve(window.__HISTORY__);
+    return new Promise(function(resolve, reject){
+      const s = document.createElement('script');
+      s.src = './history-data.js?v=4';
+      s.onload  = function(){ window.__HISTORY__ ? resolve(window.__HISTORY__)
+                                                 : reject(new Error('history-data.js loaded but was empty')); };
+      s.onerror = function(){ reject(new Error('history-data.js is not on the server — upload it next to index.html')); };
+      document.head.appendChild(s);
+    });
+  }
+
+  async function rgImportHistory(){
+    if(_rgImporting) return;
+    if(!_admin()){ showToast('Admin only', true); return; }
+    const logEl = document.getElementById('rgImportLog');
+    const btn = document.getElementById('rgImportBtn');
+    const say = t => { if(logEl) logEl.textContent = t; };
+    _rgImporting = true;
+    if(btn) btn.disabled = true;
+    try {
+      say('Fetching the history file…');
+      const days = await rgLoadHistoryFile();
+
+      say('Checking what is already in the cloud…');
+      const existing = new Set();
+      const snap = await db.collection(RG_COL).get();
+      snap.forEach(function(doc){
+        const d = doc.data() || {};
+        const arr = rgRowsToArray(d.rows);
+        if(arr.some(function(r){ return r && (r.p != null || r.r != null || r.rc != null); }))
+          existing.add(d.date || doc.id);
+      });
+
+      let written = 0, skipped = 0, failed = 0;
+      for(const day of days){
+        if(existing.has(day.d)){ skipped++; continue; }
+        const rows = {};
+        day.r.forEach(function(t, i){ rows[String(i)] = { p:t[0], r:t[1], rc:t[2] }; });
+        try {
+          await db.collection(RG_COL).doc(day.d).set({
+            date:day.d, startHour:RG_START_HOUR, rows:rows, updatedBy:'history 2026',
+            updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge:true });
+          written++;
+        } catch(e){ failed++; console.error('[import]', day.d, e); }
+        if((written + skipped) % 10 === 0)
+          say('Loading… ' + (written + skipped) + ' of ' + days.length);
+      }
+
+      // The meta document is the version stamp every device watches, so it is
+      // written LAST. Touching it first would send all 30 phones off to fetch a
+      // half-written collection.
+      const all = await db.collection(RG_COL).get();
+      const dates = []; all.forEach(function(d){ dates.push((d.data()||{}).date || d.id); });
+      dates.sort();
+      await db.collection(RG_META.col).doc(RG_META.doc).set({
+        dates:dates, count:dates.length, updatedBy:'history 2026',
+        updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      say('Loaded ' + written + ' day(s)' + (skipped ? ', skipped ' + skipped : '') +
+          (failed ? ', FAILED ' + failed : '') + '. The record now holds ' + dates.length + ' day(s).');
+      showToast(failed ? ('Loaded with ' + failed + ' failure(s)') : ('History loaded — ' + written + ' day(s)'), !!failed);
+      _rgImporting = false;
+      rgStartListener();     // re-read from the version stamp we just wrote
+    } catch(err){
+      console.error('[import] failed', err);
+      const code = (err && (err.code || err.message)) || 'unknown';
+      say('Failed: ' + (code === 'permission-denied'
+        ? 'this account cannot write to the cloud — check firestore.rules is published'
+        : code));
+      showToast('History import failed: ' + code, true);
+      _rgImporting = false;
+      if(btn) btn.disabled = false;
+    }
+  }
+
   function rgRenderHistory(){
     const el = document.getElementById('rgHistory');
     if(!el) return;
@@ -1212,11 +1367,13 @@ document.addEventListener('DOMContentLoaded', function(){
     // The daily-record report is the PETRECO-vs-Ras-Gara comparison across
     // days, so like the day report it is not offered to an operator.
     const histActs = document.getElementById('rgHistActions');
-    if(histActs) histActs.style.display = (side === 'both') ? '' : 'none';
+    // Admin only, and only once there is something to print.
+    if(histActs) histActs.style.display =
+      (side === 'both' && rgHistoryRows().length) ? '' : 'none';
     const histTitle = document.querySelector('#rgHistTitle span');
     if(histTitle) histTitle.textContent = COPY.hist;
     rgRenderTable(); rgRenderTotals(); rgRenderChart();
-    rgRenderRange(); rgRenderHistChart(); rgRenderHistory();
+    rgRenderImport(); rgRenderRange(); rgRenderHistChart(); rgRenderHistory();
     const sv = document.getElementById('rgSaved');
     const day = rgGetDay(_rgDate);
     if(sv) sv.textContent = day.updatedAt
@@ -1305,26 +1462,60 @@ document.addEventListener('DOMContentLoaded', function(){
     } catch(err){
       console.error('[RasGara] save failed', err);
       showToast('Could not save to cloud: ' + (err.code || err.message), true);
+      rgCloudError(err);
     }
   }
 
   // ── cloud sync (same cache-version pattern as the other datasets) ──────
+  // The footer line is the ONLY thing telling anyone whether this app is
+  // talking to Firestore, so every outcome has to reach it — including the
+  // healthy ones. It used to be written in exactly one place, after a
+  // successful save, which meant a correctly-connected app sat on
+  // "Connecting…" until somebody typed a reading, and a rules failure looked
+  // identical to a slow network. If you add a path through here, give it a
+  // status.
+  function rgCloud(status, text){
+    if(typeof updateCloudStatus === 'function') updateCloudStatus(status, text);
+  }
+  function rgCloudIdle(){
+    const n = Object.keys(RG_DAYS).length;
+    if(!navigator.onLine){ rgCloud('offline', 'Offline — showing ' + n + ' saved day(s)'); return; }
+    rgCloud('synced', n ? 'Cloud connected · ' + n + ' day(s)' : 'Cloud connected · no readings yet');
+  }
+  function rgCloudError(err){
+    const code = (err && (err.code || err.message)) || 'unknown';
+    // permission-denied is the one that actually happens, and it has exactly
+    // one cause worth naming: firestore.rules was never published.
+    rgCloud('error', code === 'permission-denied'
+      ? 'Cloud refused access — publish firestore.rules'
+      : 'Cloud error: ' + code);
+    console.error('[Firestore]', err);
+  }
   function rgStartListener(){
     rgStopListener();
-    if(typeof db === 'undefined' || typeof FIREBASE_OK === 'undefined' || !FIREBASE_OK) return;
+    if(typeof db === 'undefined' || typeof FIREBASE_OK === 'undefined' || !FIREBASE_OK){
+      rgCloud('error', (typeof window.__BOOT_ERROR__ === 'string' && window.__BOOT_ERROR__)
+        ? 'No cloud: ' + window.__BOOT_ERROR__ : 'No cloud connection');
+      return;
+    }
+    rgCloud('syncing', 'Connecting…');
     _rgMetaUnsub = db.collection(RG_META.col).doc(RG_META.doc).onSnapshot(async function(doc){
       if(doc.metadata && doc.metadata.hasPendingWrites && !(doc.data() && doc.data().updatedAt)) return;
-      if(!doc.exists){ _rgFirstSnap = false; return; }
+      // No meta document is the NORMAL state of a brand-new project, not a
+      // failure — the connection is fine, there is simply nothing in it yet.
+      // Saying so is what tells you the difference between "empty" and "broken".
+      if(!doc.exists){ _rgFirstSnap = false; rgCloudIdle(); rgRenderAll(); return; }
       const data = doc.data() || {};
       const ts = data.updatedAt ? data.updatedAt.toMillis() : 0;
       const isFirst = _rgFirstSnap; _rgFirstSnap = false;
       if(!isFirst && ts === _rgLastTs) return;
       _rgLastTs = ts;
-      if(_rgSkipNext){ _rgSkipNext = false; setSyncedVersion(RG_VERK, ts); return; }
+      if(_rgSkipNext){ _rgSkipNext = false; setSyncedVersion(RG_VERK, ts); rgCloudIdle(); return; }
       if(isCacheCurrent(RG_VERK, ts, Object.keys(RG_DAYS).length > 0)){
         console.log('[Firestore] Ras Gara already current (v' + ts + ') — skipped collection read');
-        rgRenderAll(); return;
+        rgRenderAll(); rgCloudIdle(); return;
       }
+      rgCloud('syncing', 'Loading readings…');
       try {
         const snap = await db.collection(RG_COL).get();
         const obj = {};
@@ -1345,9 +1536,10 @@ document.addEventListener('DOMContentLoaded', function(){
         rgSaveLocal();
         setSyncedVersion(RG_VERK, ts);
         rgRenderAll();
+        rgCloudIdle();
         if(!isFirst) showToast('Readings synced from cloud');
-      } catch(err){ console.error('[Firestore] Ras Gara fetch failed', err); }
-    }, function(err){ console.error('[Firestore] Ras Gara listener error', err); });
+      } catch(err){ rgCloudError(err); }
+    }, function(err){ rgCloudError(err); });
   }
   function rgStopListener(){
     if(_rgMetaUnsub){ _rgMetaUnsub(); _rgMetaUnsub = null; }
@@ -1355,6 +1547,13 @@ document.addEventListener('DOMContentLoaded', function(){
   }
   window.startRasGaraListener = rgStartListener;
   window.stopRasGaraListener  = rgStopListener;
+
+  // Losing the network does not fire the listener's error callback — Firestore
+  // just goes quiet and keeps serving its local cache, which is the behaviour
+  // we want but leaves the footer claiming a live connection. These two events
+  // are what make the line honest offline.
+  window.addEventListener('offline', function(){ if(currentUser) rgCloudIdle(); });
+  window.addEventListener('online',  function(){ if(currentUser) rgCloudIdle(); });
 
   // ── wiring ──────────────────────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', function(){
@@ -1396,12 +1595,31 @@ document.addEventListener('DOMContentLoaded', function(){
       rgRenderAll();
       document.getElementById('page-rasgara').scrollIntoView({behavior:'smooth', block:'start'});
     });
-    const pb = document.getElementById('rgPrintBtn');
-    if(pb) pb.addEventListener('click', function(){ rgPrintReport(); });
-    const mb = document.getElementById('rgMailBtn');
-    if(mb) mb.addEventListener('click', function(){ rgEmailReport(); });
-    const hb = document.getElementById('rgHistPrintBtn');
-    if(hb) hb.addEventListener('click', function(){ rgPrintHistory(); });
+    // Every one of these is async or can throw, and a rejected promise from a
+    // click handler is COMPLETELY silent — no toast, no console entry the
+    // operator would ever see. That is how "Send by e-mail" spent a release
+    // doing nothing at all: it threw on a missing helper after the PDF was
+    // built and the failure went nowhere. Route them all through one wrapper
+    // so a button can never again look dead.
+    function _bind(id, fn, label){
+      const el = document.getElementById(id);
+      if(!el) return;
+      el.addEventListener('click', function(){
+        try {
+          const r = fn();
+          if(r && typeof r.catch === 'function') r.catch(function(err){
+            console.error('[RasGara] ' + label + ' failed', err);
+            showToast(label + ' failed: ' + ((err && (err.message || err.code)) || 'unknown'), true);
+          });
+        } catch(err){
+          console.error('[RasGara] ' + label + ' failed', err);
+          showToast(label + ' failed: ' + ((err && (err.message || err.code)) || 'unknown'), true);
+        }
+      });
+    }
+    _bind('rgPrintBtn',     rgPrintReport,  'Print');
+    _bind('rgMailBtn',      rgEmailReport,  'Send by e-mail');
+    _bind('rgHistPrintBtn', rgPrintHistory, 'Print daily record');
     // Delegated: the range chips are re-rendered on every pass, so binding each
     // button directly would leak listeners.
     const rangeEl = document.getElementById('rgRange');
@@ -1677,6 +1895,64 @@ document.addEventListener('DOMContentLoaded', function(){
     } finally { host.remove(); }
   }
 
+  // ── handing the finished PDF to the user ────────────────────────────────
+  // This is a sheet with buttons rather than something automatic, and that is
+  // deliberate. Building the PDF takes seconds, and BOTH ways of delivering it
+  // need a live user gesture:
+  //
+  //   · navigator.share() throws NotAllowedError without transient activation;
+  //   · window.open() is blocked as a pop-up for the same reason.
+  //
+  // The tap that started the build is long spent by the time the blob exists,
+  // so anything fired from here is refused — silently, on a phone. Putting the
+  // delivery behind a fresh tap is what makes it work at all. It also lets
+  // whoever is holding the phone choose share, save or Gmail, which the old
+  // automatic path decided for them.
+  function rgOfferPdf(blob, fname, subject, body){
+    const sheet = document.getElementById('pdfSheet');
+    const row   = document.getElementById('pdfSheetRow');
+    const nameEl= document.getElementById('pdfSheetName');
+    if(!sheet || !row){ _downloadBlob(blob, fname); return; }   // markup missing: still deliver
+    nameEl.textContent = fname;
+    const file = new File([blob], fname, { type:'application/pdf' });
+    const canShare = !!(navigator.canShare && navigator.share && navigator.canShare({ files:[file] }));
+    const close = function(){ sheet.classList.remove('show'); row.innerHTML = ''; };
+
+    const btns = [];
+    if(canShare) btns.push(['i-mail', 'Share / e-mail', 'primary', async function(){
+      try { await navigator.share({ files:[file], title:subject, text:body }); close(); }
+      catch(err){
+        if(err && err.name === 'AbortError') return;            // backed out; leave the sheet up
+        console.warn('[RasGara] share failed', err);
+        showToast('Sharing was refused — use Save PDF instead', true);
+      }
+    }]);
+    btns.push(['i-print', 'Save PDF', canShare ? '' : 'primary', function(){
+      _downloadBlob(blob, fname);
+      showToast('PDF saved to your downloads');
+      close();
+    }]);
+    btns.push(['i-mail', 'Open Gmail', '', function(){
+      // Inside the click, so it is a user-initiated navigation and not a pop-up.
+      window.open('https://mail.google.com/mail/?view=cm&fs=1&su=' +
+        encodeURIComponent(subject) + '&body=' + encodeURIComponent(body), '_blank', 'noopener');
+      showToast('Attach the saved PDF to the draft');
+    }]);
+    btns.push(['', 'Cancel', '', close]);
+
+    row.innerHTML = '';
+    btns.forEach(function(b){
+      const el = document.createElement('button');
+      el.className = 'rg-btn' + (b[2] === 'primary' ? ' rg-btn-primary' : '');
+      el.innerHTML = (b[0] ? '<svg class="ico" aria-hidden="true"><use href="#' + b[0] + '"/></svg> ' : '') +
+                     escHtml(b[1]);
+      el.addEventListener('click', b[3]);
+      row.appendChild(el);
+    });
+    sheet.classList.add('show');
+    sheet.onclick = function(e){ if(e.target === sheet) close(); };
+  }
+
   async function rgEmailReport(){
     const day = rgGetDay(_rgDate);
     const fname = 'Ras_Gara_Comparison_' + day.date + '.pdf';
@@ -1685,27 +1961,13 @@ document.addEventListener('DOMContentLoaded', function(){
     showToast('Building PDF…');
     let blob;
     try { blob = await rgMakePdfBlob(); }
-    catch(err){ console.error('[RasGara] PDF failed', err); showToast('Could not build the PDF', true); return; }
-
-    // Preferred path: hand the PDF to the phone's share sheet, where Gmail and
-    // Outlook appear with the file already attached.
-    const file = new File([blob], fname, { type:'application/pdf' });
-    if(navigator.canShare && navigator.canShare({ files:[file] }) && navigator.share){
-      try {
-        await navigator.share({ files:[file], title:subject, text:body });
-        return;
-      } catch(err){
-        if(err && err.name === 'AbortError') return;   // user backed out
-        console.warn('[RasGara] share failed, falling back', err);
-      }
+    catch(err){
+      console.error('[RasGara] PDF failed', err);
+      showToast('Could not build the PDF: ' + ((err && err.message) || 'unknown'), true);
+      return;
     }
-    // Fallback (desktop): download the PDF, then open a Gmail compose window
-    // with the subject and summary already filled in, ready to attach it.
-    _downloadBlob(blob, fname);
-    const gmail = 'https://mail.google.com/mail/?view=cm&fs=1&su=' +
-                  encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
-    setTimeout(function(){ window.open(gmail, '_blank', 'noopener'); }, 600);
-    showToast('PDF downloaded — attach it to the Gmail draft that just opened');
+    if(!blob || !blob.size){ showToast('The PDF came out empty — nothing to send', true); return; }
+    rgOfferPdf(blob, fname, subject, body);
   }
 
 
