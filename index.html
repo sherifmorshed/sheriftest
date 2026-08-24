@@ -239,12 +239,42 @@ body.light-mode #swUpdateBanner{ color:#fff; }
 body.light-mode .rg-btn-primary{color:#fff !important;}
 .rg-saved{font-size:11px;color:var(--muted);margin-left:auto;font-family:var(--font-num);}
 .rg-hint{font-size:11px;color:var(--muted);margin:2px 0 10px;}
-.rg-range{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 10px;}
-.rg-range button{background:var(--surface);border:1.5px solid var(--border);border-radius:9px;
-  color:var(--muted);padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer;
+.rg-range{display:flex;gap:7px;flex-wrap:wrap;}
+.rg-range button{background:transparent;border:1.5px solid var(--border);border-radius:9px;
+  color:var(--muted);padding:6px 13px;font-size:11.5px;font-weight:700;cursor:pointer;
   font-family:var(--font-num);letter-spacing:.4px;}
 .rg-range button.on{background:var(--accent);border-color:var(--accent);color:var(--on-accent);}
 body.light-mode .rg-range button.on{color:#fff;}
+
+/* ── Daily record header ──────────────────────────────────────────────
+   A titled panel rather than the bare uppercase label the other sections
+   use: this one opens a whole second view (a range, a chart, a table and
+   its own printout), so it needs to say what it is covering. The day count
+   lives HERE, which is what lets the range chips read "All" instead of
+   "All 3" — a number inside a button label looks like part of the choice. */
+.rg-rec-head{background:var(--card);border:1px solid var(--border);border-radius:14px;
+  box-shadow:var(--shadow);margin:26px 0 12px;overflow:hidden;}
+.rg-rec-head .bar{height:3px;background:linear-gradient(90deg,var(--accent) 0%,var(--gold) 100%);}
+.rg-rec-head .in{padding:13px 15px;}
+.rg-rec-head .row{display:flex;align-items:flex-start;gap:10px;}
+.rg-rec-head .ico{width:17px;height:17px;color:var(--gold);margin-top:2px;}
+.rg-rec-head h3{font-size:15.5px;font-weight:800;letter-spacing:-.01em;color:var(--text);line-height:1.25;}
+.rg-rec-head .sub{font-size:11.5px;color:var(--muted);font-family:var(--font-num);margin-top:3px;
+  line-height:1.45;}
+.rg-rec-head .sub b{color:var(--text);font-weight:700;}
+.rg-rec-head .chips{margin-top:11px;padding-top:11px;border-top:1px solid var(--border);}
+.rg-rec-head .chips:empty{display:none;}
+.rg-cust{margin-top:11px;padding-top:11px;border-top:1px dashed var(--border);}
+.rg-cust .fld{display:flex;flex-direction:column;gap:4px;flex:1;min-width:0;}
+.rg-cust label{font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);
+  font-family:var(--font-num);}
+.rg-cust select,.rg-cust input{width:100%;background:var(--surface);border:1.5px solid var(--border);
+  border-radius:9px;color:var(--text);padding:8px 9px;font-size:12.5px;font-family:var(--font-num);}
+.rg-cust select:focus,.rg-cust input:focus{outline:none;border-color:var(--accent);
+  box-shadow:0 0 0 3px var(--ring);}
+.rg-cust .or{font-size:10.5px;color:var(--muted);text-align:center;margin:9px 0 7px;
+  font-family:var(--font-num);letter-spacing:.5px;}
+.rg-cust .pair{display:flex;gap:9px;}
 .rg-sec-title{font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);
   font-family:var(--font-num);margin:22px 0 8px;}
 /* one-off 2026 history import — admin only, and only while nothing is loaded */
@@ -404,9 +434,21 @@ body:not(.light-mode) .rg-card.gain{background:rgba(52,201,138,.12);}
     </div>
 
     <!-- daily trend across days -->
-    <div class="rg-sec-title" id="rgHistTitle"><svg class="ico" aria-hidden="true"><use href="#i-trend"/></svg> <span>Daily record</span></div>
+    <div class="rg-rec-head" id="rgHistTitle">
+      <div class="bar"></div>
+      <div class="in">
+        <div class="row">
+          <svg class="ico" aria-hidden="true"><use href="#i-trend"/></svg>
+          <div>
+            <h3><span id="rgHistHeading">Daily record</span></h3>
+            <div class="sub" id="rgHistSub"></div>
+          </div>
+        </div>
+        <div class="chips rg-range" id="rgRange"></div>
+        <div class="rg-cust" id="rgCustom" style="display:none;"></div>
+      </div>
+    </div>
     <div class="rg-import" id="rgImport" style="display:none;"></div>
-    <div class="rg-range" id="rgRange"></div>
     <div id="rgHistChart"></div>
     <div id="rgHistory"></div>
     <div class="rg-actions" id="rgHistActions">
@@ -1096,29 +1138,179 @@ document.addEventListener('DOMContentLoaded', function(){
     }).filter(function(x){ return x.p != null || x.r != null; });
   }
   // ── the daily record ────────────────────────────────────────────────────
-  // One row per shift day. `_rgRange` is how many days back to show; 0 = all.
-  let _rgRange = 30;
+  // One row per shift day. `_rgSel` is WHICH days are on screen, and it governs
+  // the chart, the table and the printed record together:
+  //
+  //   {k:'month'}                 the current calendar month, 1st onward
+  //   {k:'month', m:'2026-06'}    a specific month, picked from the panel
+  //   {k:'days',  n:90}           the last N recorded days
+  //   {k:'all'}
+  //   {k:'custom', from, to}      an explicit span
+  //
+  // Months are CALENDAR months, not rolling windows. "The last 30 days" and
+  // "this month" answer different questions, and a monthly report wants the
+  // second: a range that starts on the 1st can be compared with the one before
+  // it, and a rolling window cannot.
+  let _rgSel = { k:'month' };
+
+  const _RG_MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const _RG_MON_FULL = ['January','February','March','April','May','June','July',
+                        'August','September','October','November','December'];
+  function _rgMonthOf(iso){ return String(iso).slice(0,7); }
+  function _rgCurMonth(){ return rgToday().slice(0,7); }
+  function _rgMonthName(m){
+    const b = String(m).split('-');
+    return (_RG_MON_FULL[parseInt(b[1],10)-1] || b[1]) + ' ' + b[0];
+  }
+  function _rgDayLabel(iso, withYear){
+    const b = String(iso).split('-');
+    if(b.length !== 3) return String(iso);
+    return String(parseInt(b[2],10)) + ' ' + (_RG_MON[parseInt(b[1],10)-1] || b[1]) +
+           (withYear ? ' ' + b[0] : '');
+  }
+  function _rgSpan(from, to){
+    if(from === to) return _rgDayLabel(from, true);
+    const sameYear = String(from).slice(0,4) === String(to).slice(0,4);
+    return _rgDayLabel(from, !sameYear) + ' – ' + _rgDayLabel(to, true);
+  }
+  // Every month that has at least one recorded day, newest first.
+  function rgMonthsPresent(){
+    const seen = {};
+    rgHistoryRows().forEach(function(x){ seen[_rgMonthOf(x.date)] = true; });
+    return Object.keys(seen).sort().reverse();
+  }
 
   function rgRangeRows(){
     const all = rgHistoryRows();
-    return (_rgRange > 0 && all.length > _rgRange) ? all.slice(-_rgRange) : all;
+    if(!all.length) return all;
+    const s = _rgSel;
+    if(s.k === 'days')  return all.length > s.n ? all.slice(-s.n) : all;
+    if(s.k === 'month'){
+      const m = s.m || _rgCurMonth();
+      return all.filter(function(x){ return _rgMonthOf(x.date) === m; });
+    }
+    if(s.k === 'custom'){
+      const f = s.from || all[0].date, t = s.to || all[all.length-1].date;
+      return all.filter(function(x){ return x.date >= f && x.date <= t; });
+    }
+    return all;   // 'all'
+  }
+
+  // Which chip is lit. Picking a specific month or a span belongs to the panel,
+  // so both light "Custom" and leave it open.
+  function _rgChipOn(c){
+    const s = _rgSel;
+    if(c === 'month')  return s.k === 'month' && !s.m;
+    if(c === '90')     return s.k === 'days'  && s.n === 90;
+    if(c === 'all')    return s.k === 'all';
+    if(c === 'custom') return s.k === 'custom' || (s.k === 'month' && !!s.m);
+    return false;
   }
 
   function rgRenderRange(){
     const el = document.getElementById('rgRange');
     if(!el) return;
     const total = rgHistoryRows().length;
-    // Nothing recorded means nothing to range over — an "All 0" chip beside an
-    // empty table just looks broken.
-    if(!total){ el.innerHTML = ''; return; }
-    const opts = [[30,'30 days'],[90,'90 days'],[0,'All ' + total]];
+    // Nothing recorded means nothing to range over — a lone chip beside an
+    // empty table just looks broken. (`.chips:empty` drops the divider too.)
+    if(!total){ el.innerHTML = ''; rgRenderCustom(); return; }
+    // The chips are a CHOICE, so they carry no counts — "All 3" reads as though
+    // the 3 were part of what you are picking. How many days there are, and how
+    // many are on screen, is the header's job.
+    const opts = [['month','This month'], ['90','90 days'], ['all','All'], ['custom','Custom']];
     el.innerHTML = opts.map(function(o){
-      // Offering "90 days" when only 12 exist is noise, so a window wider than
-      // the data is hidden — except "All", which always makes sense.
-      if(o[0] > 0 && o[0] >= total) return '';
-      return '<button data-rgrange="' + o[0] + '"' + (_rgRange === o[0] ? ' class="on"' : '') +
+      // A window wider than the whole record is noise — except "All", which
+      // always makes sense, and "Custom", which is a door rather than a window.
+      if(o[0] === '90' && total <= 90) return '';
+      return '<button data-rgsel="' + o[0] + '"' + (_rgChipOn(o[0]) ? ' class="on"' : '') +
              '>' + escHtml(o[1]) + '</button>';
     }).join('');
+    rgRenderCustom();
+  }
+
+  // ── the custom-range panel ──────────────────────────────────────────────
+  // Two ways in, because they are different questions: "show me June" is one
+  // click, and "show me the 12th to the 20th" needs two dates.
+  function rgRenderCustom(){
+    const el = document.getElementById('rgCustom');
+    if(!el) return;
+    const open = _rgChipOn('custom');
+    el.style.display = open ? 'block' : 'none';
+    if(!open){ el.innerHTML = ''; return; }
+    const all = rgHistoryRows();
+    if(!all.length){ el.innerHTML = ''; return; }
+    const lo = all[0].date, hi = all[all.length-1].date;
+    const s = _rgSel;
+    const from = s.k === 'custom' ? (s.from || lo) : '';
+    const to   = s.k === 'custom' ? (s.to   || hi) : '';
+    const months = rgMonthsPresent();
+    el.innerHTML =
+      '<div class="fld"><label for="rgCustMonth">Whole month</label>' +
+        '<select id="rgCustMonth">' +
+          '<option value="">Choose a month…</option>' +
+          months.map(function(m){
+            return '<option value="' + escAttr(m) + '"' +
+                   (s.k === 'month' && s.m === m ? ' selected' : '') + '>' +
+                   escHtml(_rgMonthName(m)) + '</option>'; }).join('') +
+        '</select></div>' +
+      '<div class="or">or a specific span</div>' +
+      '<div class="pair">' +
+        '<div class="fld"><label for="rgCustFrom">From</label>' +
+          '<input type="date" id="rgCustFrom" min="' + escAttr(lo) + '" max="' + escAttr(hi) +
+          '" value="' + escAttr(from) + '"></div>' +
+        '<div class="fld"><label for="rgCustTo">To</label>' +
+          '<input type="date" id="rgCustTo" min="' + escAttr(lo) + '" max="' + escAttr(hi) +
+          '" value="' + escAttr(to) + '"></div>' +
+      '</div>';
+
+    const mSel = document.getElementById('rgCustMonth');
+    if(mSel) mSel.addEventListener('change', function(){
+      if(!this.value) return;
+      _rgSel = { k:'month', m:this.value };
+      rgRenderRange(); rgRenderRecHead(); rgRenderHistChart(); rgRenderHistory();
+    });
+    const f = document.getElementById('rgCustFrom'), t = document.getElementById('rgCustTo');
+    function applySpan(edited){
+      let a = f.value || lo, b = t.value || hi;
+      // Entered backwards is a slip, not an empty result. Move the END the
+      // operator did NOT just touch — rewriting the date they are still looking
+      // at is the confusing way to fix this.
+      if(a > b){
+        if(edited === 'from'){ b = a; t.value = b; }
+        else                 { a = b; f.value = a; }
+      }
+      _rgSel = { k:'custom', from:a, to:b };
+      rgRenderRange(); rgRenderRecHead(); rgRenderHistChart(); rgRenderHistory();
+    }
+    if(f) f.addEventListener('change', function(){ applySpan('from'); });
+    if(t) t.addEventListener('change', function(){ applySpan('to'); });
+  }
+
+  // ── the daily-record header ─────────────────────────────────────────────
+  function rgRenderRecHead(){
+    const el = document.getElementById('rgHistSub');
+    if(!el) return;
+    const total = rgHistoryRows().length;
+    if(!total){ el.textContent = 'No shift days recorded yet'; return; }
+    const rows = rgRangeRows();
+    const s = _rgSel;
+    const span = rows.length ? escHtml(_rgSpan(rows[0].date, rows[rows.length-1].date)) : '';
+    const days = '<b>' + rows.length + '</b> day' + (rows.length === 1 ? '' : 's');
+    let txt;
+    if(s.k === 'month'){
+      const name = escHtml(_rgMonthName(s.m || _rgCurMonth()));
+      txt = rows.length ? '<b>' + name + '</b> &nbsp;·&nbsp; ' + days + ' &nbsp;·&nbsp; ' + span
+                        : '<b>' + name + '</b> &nbsp;·&nbsp; nothing recorded in this month';
+    } else if(s.k === 'custom'){
+      txt = rows.length ? days + ' &nbsp;·&nbsp; ' + span
+                        : 'No recorded days in that range';
+    } else if(s.k === 'days'){
+      txt = 'Showing <b>' + rows.length + '</b> of ' + total + ' days &nbsp;·&nbsp; ' + span;
+    } else {
+      txt = 'All <b>' + total + '</b> recorded day' + (total === 1 ? '' : 's') +
+            ' &nbsp;·&nbsp; ' + span;
+    }
+    el.innerHTML = txt;
   }
 
   // Day-by-day trend. Same shape as the hourly chart but one point per day, and
@@ -1206,20 +1398,52 @@ document.addEventListener('DOMContentLoaded', function(){
   //   · it skips any day that already holds readings, so it can never
   //     overwrite something an operator typed.
   let _rgImporting = false;
+
+  // What `history-data.js` contains, as a constant. Keeping the span and count
+  // here lets the app work out whether the record is already loaded WITHOUT
+  // fetching the 36 KB file on every boot just to find out.
+  const RG_HISTORY = { from:'2026-04-08', to:'2026-08-08', count:116,
+                       label:'8 April to 8 August 2026',
+                       source:'Ras Gara Test 2026.xlsx' };
+
+  // How many of those days are NOT in the cloud yet.
+  //
+  // This used to ask whether the project was completely empty, which was wrong
+  // and hid the loader from the person who needed it: a project holding three
+  // unrelated test days would never offer the import, with no way to reach it
+  // and nothing on screen explaining why. What matters is whether the 2026
+  // record is there — days outside its span are irrelevant to the question.
+  function rgHistoryMissing(){
+    let have = 0;
+    Object.keys(RG_DAYS).forEach(function(d){
+      if(d < RG_HISTORY.from || d > RG_HISTORY.to) return;
+      const rows = (RG_DAYS[d] && RG_DAYS[d].rows) || [];
+      if(rows.some(function(r){ return r && (r.p != null || r.r != null || r.rc != null); })) have++;
+    });
+    return Math.max(0, RG_HISTORY.count - have);
+  }
+
   function rgRenderImport(){
     const el = document.getElementById('rgImport');
     if(!el) return;
-    const show = _admin() && !_rgImporting && Object.keys(RG_DAYS).length === 0 &&
+    const missing = rgHistoryMissing();
+    const show = _admin() && !_rgImporting && missing > 0 &&
                  typeof FIREBASE_OK !== 'undefined' && FIREBASE_OK;
     el.style.display = show ? 'block' : 'none';
     if(!show) return;
+    const all = missing === RG_HISTORY.count;
     el.innerHTML =
-      '<h4>No readings in this project yet</h4>' +
-      '<p>The recorded history from <b>Ras Gara Test 2026.xlsx</b> — 116 days, ' +
-      '8 April to 8 August 2026 — can be loaded into the cloud once. Days that ' +
-      'already hold readings are never touched.</p>' +
+      '<h4>' + (all ? 'The 2026 history is not loaded' : 'Part of the 2026 history is missing') + '</h4>' +
+      '<p>' + (all
+        ? 'The recorded history from <b>' + escHtml(RG_HISTORY.source) + '</b> — ' +
+          RG_HISTORY.count + ' days, ' + escHtml(RG_HISTORY.label) + ' — has not been ' +
+          'loaded into this project yet.'
+        : '<b>' + missing + '</b> of the ' + RG_HISTORY.count + ' days from <b>' +
+          escHtml(RG_HISTORY.source) + '</b> are not in the cloud.') +
+      ' Days that already hold readings are never touched.</p>' +
       '<button class="rg-btn rg-btn-primary" id="rgImportBtn">' +
-      '<svg class="ico" aria-hidden="true"><use href="#i-cloud"/></svg> Load the 2026 history</button>' +
+      '<svg class="ico" aria-hidden="true"><use href="#i-cloud"/></svg> ' +
+      (all ? 'Load the 2026 history' : 'Load the missing ' + missing + ' day(s)') + '</button>' +
       '<div class="log" id="rgImportLog"></div>';
     const b = document.getElementById('rgImportBtn');
     if(b) b.addEventListener('click', rgImportHistory);
@@ -1370,10 +1594,11 @@ document.addEventListener('DOMContentLoaded', function(){
     // Admin only, and only once there is something to print.
     if(histActs) histActs.style.display =
       (side === 'both' && rgHistoryRows().length) ? '' : 'none';
-    const histTitle = document.querySelector('#rgHistTitle span');
+    const histTitle = document.getElementById('rgHistHeading');
     if(histTitle) histTitle.textContent = COPY.hist;
     rgRenderTable(); rgRenderTotals(); rgRenderChart();
-    rgRenderImport(); rgRenderRange(); rgRenderHistChart(); rgRenderHistory();
+    rgRenderImport(); rgRenderRange(); rgRenderRecHead();
+    rgRenderHistChart(); rgRenderHistory();
     const sv = document.getElementById('rgSaved');
     const day = rgGetDay(_rgDate);
     if(sv) sv.textContent = day.updatedAt
@@ -1624,10 +1849,16 @@ document.addEventListener('DOMContentLoaded', function(){
     // button directly would leak listeners.
     const rangeEl = document.getElementById('rgRange');
     if(rangeEl) rangeEl.addEventListener('click', function(e){
-      const b = e.target.closest('button[data-rgrange]');
+      const b = e.target.closest('button[data-rgsel]');
       if(!b) return;
-      _rgRange = parseInt(b.getAttribute('data-rgrange'), 10) || 0;
-      rgRenderRange(); rgRenderHistChart(); rgRenderHistory();
+      const k = b.getAttribute('data-rgsel');
+      // "Custom" opens the panel without changing what is shown yet — the
+      // selection only moves once a month or a date is actually picked.
+      if(k === 'custom'){ if(!_rgChipOn('custom')) _rgSel = { k:'custom' }; }
+      else if(k === 'month') _rgSel = { k:'month' };
+      else if(k === 'all')   _rgSel = { k:'all' };
+      else                   _rgSel = { k:'days', n:parseInt(k,10) };
+      rgRenderRange(); rgRenderRecHead(); rgRenderHistChart(); rgRenderHistory();
     });
   });
 
