@@ -277,13 +277,6 @@ body.light-mode .rg-range button.on{color:#fff;}
 .rg-cust .pair{display:flex;gap:9px;}
 .rg-sec-title{font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);
   font-family:var(--font-num);margin:22px 0 8px;}
-/* one-off 2026 history import — admin only, and only while nothing is loaded */
-.rg-import{border:1.5px solid var(--gold,#c8a34a);border-radius:13px;background:var(--surface);
-  padding:14px 15px;margin:0 0 12px;box-shadow:var(--shadow);}
-.rg-import h4{font-size:13px;font-weight:800;margin-bottom:5px;color:var(--text);}
-.rg-import p{font-size:12.5px;color:var(--muted);line-height:1.5;margin-bottom:10px;}
-.rg-import .log{font-family:var(--font-num);font-size:11.5px;color:var(--muted);margin-top:9px;
-  white-space:pre-wrap;}
 .rg-tbl-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:13px;background:var(--surface);
   box-shadow:var(--shadow);}
 table.rg-tbl{width:100%;border-collapse:collapse;font-family:var(--font-num);font-size:12px;min-width:520px;
@@ -448,7 +441,6 @@ body:not(.light-mode) .rg-card.gain{background:rgba(52,201,138,.12);}
         <div class="rg-cust" id="rgCustom" style="display:none;"></div>
       </div>
     </div>
-    <div class="rg-import" id="rgImport" style="display:none;"></div>
     <div id="rgHistChart"></div>
     <div id="rgHistory"></div>
     <div class="rg-actions" id="rgHistActions">
@@ -1053,6 +1045,21 @@ document.addEventListener('DOMContentLoaded', function(){
   }
 
   // ── chart: the workbook's line chart, Time vs Rate M3/hr ───────────────
+  // Which indices get an x-axis label. Stepping blindly by `step` stops short:
+  // over 24 hours a step of 3 ends at index 21 — 03:00 — so a shift that runs
+  // to 05:00 looked like it ended two hours early. The LAST point always gets a
+  // label; if that would crowd the previous one, it replaces it instead.
+  function rgAxisMarks(n, step){
+    const marks = [];
+    for(let i = 0; i < n; i += step) marks.push(i);
+    const last = n - 1;
+    if(marks[marks.length - 1] !== last){
+      if(last - marks[marks.length - 1] < Math.ceil(step * 0.6)) marks.pop();
+      marks.push(last);
+    }
+    return marks;
+  }
+
   function rgChartSVG(day, forPrint){
     const c = rgCalc(day);
     const W = 720, H = 260, P = 42;
@@ -1089,10 +1096,10 @@ document.addEventListener('DOMContentLoaded', function(){
               '" font-size="10" font-family="' + numFont + '">' + (Math.round(v*10)/10) + '</text>';
     }
     let xax = '';
-    for(let i = 0; i < RG_HOURS; i += 3){
+    rgAxisMarks(RG_HOURS, 3).forEach(function(i){
       xax += '<text x="' + sx(i).toFixed(1) + '" y="' + (H-P+15) + '" text-anchor="middle" fill="' + txtCol +
              '" font-size="9" font-family="' + numFont + '">' + rgHourLabel(i) + '</text>';
-    }
+    });
     let paths = '';
     series.forEach(function(s){
       let d = '', open = false, dots = '';
@@ -1342,13 +1349,14 @@ document.addEventListener('DOMContentLoaded', function(){
         '<text x="' + (P-6) + '" y="' + (y+3).toFixed(1) + '" text-anchor="end" fill="' + txtCol +
         '" font-size="10" font-family="' + numFont + '">' + Math.round(v) + '</text>';
     }
-    // At most ~7 date labels, or they collide once the range is long.
+    // At most ~7 date labels, or they collide once the range is long. The last
+    // day is always one of them — an axis that stops before the most recent
+    // reading is the thing people notice first.
     let xax = '';
-    const step = Math.max(1, Math.ceil(rows.length / 7));
-    for(let i = 0; i < rows.length; i += step){
+    rgAxisMarks(rows.length, Math.max(1, Math.ceil(rows.length / 7))).forEach(function(i){
       xax += '<text x="' + sx(i).toFixed(1) + '" y="' + (H-P+15) + '" text-anchor="middle" fill="' + txtCol +
         '" font-size="9" font-family="' + numFont + '">' + escHtml(rows[i].date.slice(5)) + '</text>';
-    }
+    });
     let paths = '';
     series.forEach(function(sr){
       let d = '', open = false, dots = '';
@@ -1383,150 +1391,6 @@ document.addEventListener('DOMContentLoaded', function(){
     const el = document.getElementById('rgHistChart');
     if(!el) return;
     el.innerHTML = rgHistChartSVG(rgRangeRows(), false);
-  }
-
-  // ── the one-off 2026 history import ─────────────────────────────────────
-  // This lives in the app rather than in a separate loader page because a
-  // separate page is a step that gets skipped: it has to be uploaded, opened,
-  // signed into and then deleted, and until all four happen the app simply
-  // shows no history with no explanation. Here it is where somebody goes
-  // looking for the history, and it disappears by itself once there is any.
-  //
-  // Three things keep it safe to leave in production:
-  //   · admin only, checked again server-side by the rules;
-  //   · it only appears while the app can see NO recorded days at all;
-  //   · it skips any day that already holds readings, so it can never
-  //     overwrite something an operator typed.
-  let _rgImporting = false;
-
-  // What `history-data.js` contains, as a constant. Keeping the span and count
-  // here lets the app work out whether the record is already loaded WITHOUT
-  // fetching the 36 KB file on every boot just to find out.
-  const RG_HISTORY = { from:'2026-04-08', to:'2026-08-08', count:116,
-                       label:'8 April to 8 August 2026',
-                       source:'Ras Gara Test 2026.xlsx' };
-
-  // How many of those days are NOT in the cloud yet.
-  //
-  // This used to ask whether the project was completely empty, which was wrong
-  // and hid the loader from the person who needed it: a project holding three
-  // unrelated test days would never offer the import, with no way to reach it
-  // and nothing on screen explaining why. What matters is whether the 2026
-  // record is there — days outside its span are irrelevant to the question.
-  function rgHistoryMissing(){
-    let have = 0;
-    Object.keys(RG_DAYS).forEach(function(d){
-      if(d < RG_HISTORY.from || d > RG_HISTORY.to) return;
-      const rows = (RG_DAYS[d] && RG_DAYS[d].rows) || [];
-      if(rows.some(function(r){ return r && (r.p != null || r.r != null || r.rc != null); })) have++;
-    });
-    return Math.max(0, RG_HISTORY.count - have);
-  }
-
-  function rgRenderImport(){
-    const el = document.getElementById('rgImport');
-    if(!el) return;
-    const missing = rgHistoryMissing();
-    const show = _admin() && !_rgImporting && missing > 0 &&
-                 typeof FIREBASE_OK !== 'undefined' && FIREBASE_OK;
-    el.style.display = show ? 'block' : 'none';
-    if(!show) return;
-    const all = missing === RG_HISTORY.count;
-    el.innerHTML =
-      '<h4>' + (all ? 'The 2026 history is not loaded' : 'Part of the 2026 history is missing') + '</h4>' +
-      '<p>' + (all
-        ? 'The recorded history from <b>' + escHtml(RG_HISTORY.source) + '</b> — ' +
-          RG_HISTORY.count + ' days, ' + escHtml(RG_HISTORY.label) + ' — has not been ' +
-          'loaded into this project yet.'
-        : '<b>' + missing + '</b> of the ' + RG_HISTORY.count + ' days from <b>' +
-          escHtml(RG_HISTORY.source) + '</b> are not in the cloud.') +
-      ' Days that already hold readings are never touched.</p>' +
-      '<button class="rg-btn rg-btn-primary" id="rgImportBtn">' +
-      '<svg class="ico" aria-hidden="true"><use href="#i-cloud"/></svg> ' +
-      (all ? 'Load the 2026 history' : 'Load the missing ' + missing + ' day(s)') + '</button>' +
-      '<div class="log" id="rgImportLog"></div>';
-    const b = document.getElementById('rgImportBtn');
-    if(b) b.addEventListener('click', rgImportHistory);
-  }
-
-  // history-data.js is 36 KB and is needed exactly once, so it is fetched on
-  // demand rather than carried on every boot by every operator's phone.
-  function rgLoadHistoryFile(){
-    if(window.__HISTORY__) return Promise.resolve(window.__HISTORY__);
-    return new Promise(function(resolve, reject){
-      const s = document.createElement('script');
-      s.src = './history-data.js?v=4';
-      s.onload  = function(){ window.__HISTORY__ ? resolve(window.__HISTORY__)
-                                                 : reject(new Error('history-data.js loaded but was empty')); };
-      s.onerror = function(){ reject(new Error('history-data.js is not on the server — upload it next to index.html')); };
-      document.head.appendChild(s);
-    });
-  }
-
-  async function rgImportHistory(){
-    if(_rgImporting) return;
-    if(!_admin()){ showToast('Admin only', true); return; }
-    const logEl = document.getElementById('rgImportLog');
-    const btn = document.getElementById('rgImportBtn');
-    const say = t => { if(logEl) logEl.textContent = t; };
-    _rgImporting = true;
-    if(btn) btn.disabled = true;
-    try {
-      say('Fetching the history file…');
-      const days = await rgLoadHistoryFile();
-
-      say('Checking what is already in the cloud…');
-      const existing = new Set();
-      const snap = await db.collection(RG_COL).get();
-      snap.forEach(function(doc){
-        const d = doc.data() || {};
-        const arr = rgRowsToArray(d.rows);
-        if(arr.some(function(r){ return r && (r.p != null || r.r != null || r.rc != null); }))
-          existing.add(d.date || doc.id);
-      });
-
-      let written = 0, skipped = 0, failed = 0;
-      for(const day of days){
-        if(existing.has(day.d)){ skipped++; continue; }
-        const rows = {};
-        day.r.forEach(function(t, i){ rows[String(i)] = { p:t[0], r:t[1], rc:t[2] }; });
-        try {
-          await db.collection(RG_COL).doc(day.d).set({
-            date:day.d, startHour:RG_START_HOUR, rows:rows, updatedBy:'history 2026',
-            updatedAt:firebase.firestore.FieldValue.serverTimestamp()
-          }, { merge:true });
-          written++;
-        } catch(e){ failed++; console.error('[import]', day.d, e); }
-        if((written + skipped) % 10 === 0)
-          say('Loading… ' + (written + skipped) + ' of ' + days.length);
-      }
-
-      // The meta document is the version stamp every device watches, so it is
-      // written LAST. Touching it first would send all 30 phones off to fetch a
-      // half-written collection.
-      const all = await db.collection(RG_COL).get();
-      const dates = []; all.forEach(function(d){ dates.push((d.data()||{}).date || d.id); });
-      dates.sort();
-      await db.collection(RG_META.col).doc(RG_META.doc).set({
-        dates:dates, count:dates.length, updatedBy:'history 2026',
-        updatedAt:firebase.firestore.FieldValue.serverTimestamp()
-      });
-
-      say('Loaded ' + written + ' day(s)' + (skipped ? ', skipped ' + skipped : '') +
-          (failed ? ', FAILED ' + failed : '') + '. The record now holds ' + dates.length + ' day(s).');
-      showToast(failed ? ('Loaded with ' + failed + ' failure(s)') : ('History loaded — ' + written + ' day(s)'), !!failed);
-      _rgImporting = false;
-      rgStartListener();     // re-read from the version stamp we just wrote
-    } catch(err){
-      console.error('[import] failed', err);
-      const code = (err && (err.code || err.message)) || 'unknown';
-      say('Failed: ' + (code === 'permission-denied'
-        ? 'this account cannot write to the cloud — check firestore.rules is published'
-        : code));
-      showToast('History import failed: ' + code, true);
-      _rgImporting = false;
-      if(btn) btn.disabled = false;
-    }
   }
 
   function rgRenderHistory(){
@@ -1597,7 +1461,7 @@ document.addEventListener('DOMContentLoaded', function(){
     const histTitle = document.getElementById('rgHistHeading');
     if(histTitle) histTitle.textContent = COPY.hist;
     rgRenderTable(); rgRenderTotals(); rgRenderChart();
-    rgRenderImport(); rgRenderRange(); rgRenderRecHead();
+    rgRenderRange(); rgRenderRecHead();
     rgRenderHistChart(); rgRenderHistory();
     const sv = document.getElementById('rgSaved');
     const day = rgGetDay(_rgDate);
@@ -1945,7 +1809,24 @@ document.addEventListener('DOMContentLoaded', function(){
 '.foot{margin-top:18px;font-size:10px;color:#64748b;border-top:1px solid #e2e8f0;padding-top:7px;}' +
 '.rg-legend{display:flex;gap:14px;justify-content:center;font-size:10px;color:#475569;margin-top:4px;}' +
 '.rg-legend .sw{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;}' +
-'@media print{body{padding:0;} .cards{break-inside:avoid;} table{break-inside:auto;}}' +
+// The whole report is meant to be ONE A4 page — a shift comparison that runs
+// onto a second sheet is two things to staple and one to lose. It does not fit
+// at screen sizes: 24 hourly rows plus the cards and the chart come to roughly
+// 1150px against about 1050px of printable A4, so print gets its own tighter
+// set of numbers rather than a scale hack.
+'@page{size:A4 portrait;margin:9mm;}' +
+'@media print{' +
+  'body{padding:0;}' +
+  'h1{font-size:17px;} h2{font-size:12px;margin:13px 0 6px;}' +
+  '.sub{font-size:10.5px;margin-bottom:10px;}' +
+  '.cards{margin:11px 0;gap:9px;break-inside:avoid;}' +
+  '.card{padding:8px 10px;} .card .v{font-size:17px;} .card .k,.card .s{font-size:9.5px;}' +
+  'table{font-size:11px;break-inside:auto;} th,td{padding:3px 5px;}' +
+  'th{font-size:9px;}' +
+  'svg{max-height:250px;}' +
+  '.foot{margin-top:12px;padding-top:6px;font-size:9.5px;}' +
+  'thead{display:table-header-group;} tr{break-inside:avoid;}' +
+'}' +
 '</style></head><body>' +
 '<h1>Sinai Field — Production Comparison</h1>' +
 '<div class="sub">Shift ' + rgHourLabel(0) + ' ' + escHtml(day.date) + ' → ' +
