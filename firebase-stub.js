@@ -1,13 +1,4 @@
 (function(){
-  function isPlainMap(x){ return x&&typeof x==='object'&&!Array.isArray(x); }
-  function deepMerge(base,patch){
-    if(!isPlainMap(base)||!isPlainMap(patch)) return patch;
-    var out=JSON.parse(JSON.stringify(base));
-    Object.keys(patch).forEach(function(k){
-      out[k]=(isPlainMap(patch[k])&&isPlainMap(out[k]))?deepMerge(out[k],patch[k]):patch[k];
-    });
-    return out;
-  }
   var SEED=window.__SEED__||{}; var STORE=SEED.store||{}; var listeners=[];
   function clone(o){var c=JSON.parse(JSON.stringify(o));
     if(c&&c.updatedAt&&c.updatedAt.__ts!==undefined){var _v=c.updatedAt.__v||1754000000000;c.updatedAt={toMillis:function(){return _v;}};}return c;}
@@ -22,12 +13,7 @@
     else ls.forEach(function(l){l.cb(snapOf(p,false));});}
   function docRef(path){var coll=path.split('/')[0];
     return{get:function(){bump('docReads',coll,1);return Promise.resolve(snapOf(path,false));},
-      set:function(d,opt){var v=JSON.parse(JSON.stringify(d));
-        /* merge:true must behave like Firestore's, or the merge-write test
-           passes for the wrong reason: plain maps deep-merge key by key, and
-           any other type (including an array) replaces wholesale. */
-        STORE[path]=(opt&&opt.merge)?deepMerge(STORE[path]||{},v):v;
-        bump('docWrites',coll,1);fire(path,true);return Promise.resolve();},
+      set:function(d){STORE[path]=JSON.parse(JSON.stringify(d));bump('docWrites',coll,1);fire(path,true);return Promise.resolve();},
       update:function(d){STORE[path]=Object.assign({},STORE[path]||{},d);bump('docWrites',coll,1);fire(path,true);return Promise.resolve();},
       delete:function(){delete STORE[path];bump('docWrites',coll,1);fire(path,false);return Promise.resolve();},
       onSnapshot:function(cb){var l={path:path,cb:cb};listeners.push(l);bump('docReads',coll,1);
