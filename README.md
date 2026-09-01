@@ -164,10 +164,10 @@ offers — take only the config values from it.
 |---|---|
 | `README.md`, `SETUP.md`, `DEVELOPER_REFERENCE.md` | documentation |
 | `firestore.rules` | paste into the Firebase console; never served |
-| `test.html`, `test_petreco.html`, `test_plant.html`, `firebase-stub.js` | offline test harness |
-| `test_hist.html`, `test_hist_rg.html` | the same harness seeded with the 116 real days — what the daily record is tested against |
+| `test.html`, `test_petreco.html`, `test_plant.html`, `test_tb.html`, `firebase-stub.js` | offline test harness |
+| `test_hist.html`, `test_hist_rg.html` | the same harness seeded with ~120 generated days across five months — what the daily record is tested against |
 | `test_build.py`, `test_build_hist.py` | regenerate the harnesses; run after every edit to `index.html` |
-| `history-data.js`, `load-history.html` | the 2026 history and its one-off loader — see below |
+
 
 ---
 
@@ -181,6 +181,7 @@ python3 -m http.server 8000
 # admin:    http://localhost:8000/test.html
 # PETRECO:  http://localhost:8000/test_petreco.html
 # Ras Gara: http://localhost:8000/test_plant.html
+# Tank bat: http://localhost:8000/test_tb.html
 # admin, with the 116 real days:  http://localhost:8000/test_hist.html
 ```
 
@@ -194,34 +195,6 @@ python3 test_build_hist.py   # the 116 real days, admin + Ras Gara
 
 ---
 
-## Loading the 2026 history
-
-`history-data.js` holds 116 shift days, 2026-04-08 to 2026-08-08, extracted from
-`Ras Gara Test 2026.xlsx`. `load-history.html` writes them into Firestore once.
-
-1. Upload `load-history.html` and `history-data.js` alongside the app.
-2. Open it, sign in as the admin, press **Load**.
-3. **Delete both files from the server.** They are a one-off, and the loader is
-   a write tool that has no business staying online.
-
-It reads its Firebase config out of `index.html`, so there is nothing to
-configure, and it **skips any day that already holds readings** — running it
-twice cannot overwrite work the operators have since done.
-
-These run the real app against a stubbed Firebase with three days of seeded
-readings — no project, no network, no risk to live data. Everything works
-there: typing, the chart, print and the PDF.
-
-They are **snapshots taken from `index.html`**, so after editing it run:
-
-```bash
-python3 test_build.py
-```
-
-or you will be testing the previous version. Full detail in
-`DEVELOPER_REFERENCE.md`.
-
----
 
 ## Getting started
 

@@ -3,112 +3,156 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // ══════════════════════════════════════════════════════════════
-    //  WHO IS WHO
+    //  RAS GARA — security rules for the NEW, SEPARATE project
     // ══════════════════════════════════════════════════════════════
-    // Full control: uploads every dataset, writes everywhere.
+    //
+    //  Publish this in the Ras Gara project ONLY. Do not paste it into the
+    //  Land Wells project; they are different databases with different rules.
+    //
+    //  Firebase Console → Firestore Database → Rules → paste → Publish.
+    //
+    //  This is the real access control. The email lists inside index.html only
+    //  decide what the screen offers — anyone can open a browser console. If
+    //  these rules are not published, Firestore's default (open for 30 days,
+    //  then closed) applies, which is either wide open or completely broken.
+    //
+    //  Keep the addresses below in step with ADMIN_EMAILS / PLANT_EMAILS /
+    //  PETRECO_EMAILS / TB_EMAILS in index.html. They are two halves of the
+    //  same decision, and drift shows up as "the button is there but saving
+    //  fails".
+
+    // PETROBEL. Reads and writes both sides, and is the only role offered the
+    // chart, the printed report and the e-mailed PDF.
     function isAdmin() {
       return request.auth != null
           && request.auth.token.email == 'sherifmorshed@gmail.com';
     }
 
-    // Outside parties: signed in, but NOT PETROBEL staff, and never allowed to
-    // see PETROBEL well data.
-    //
-    // As of v104 this list exists purely as a backstop. Ras Gara moved to its
-    // own application on its own Firebase project, and the instruction is to
-    // DELETE rasgara@petrobel.org from this project's Authentication → Users.
-    // The address stays listed here anyway, because "delete the account" is a
-    // manual step in a console and manual steps get skipped. If it is skipped,
-    // this line is the difference between an unused login and an outside party
-    // holding a full copy of the well database.
-    //
-    // Add any future partner account here BEFORE creating it.
-    function isExternal() {
+    // The Ras Gara plant operators.
+    function isPlant() {
       return request.auth != null
           && request.auth.token.email in ['rasgara@petrobel.org'];
     }
 
-    // PETROBEL staff = any signed-in user who is not an outside party.
-    function isStaff() {
-      return request.auth != null && !isExternal();
+    // The PETRECO operators.
+    function isPetreco() {
+      return request.auth != null
+          && request.auth.token.email in ['petreco@petrobel.org'];
     }
 
-    // ══════════════════════════════════════════════════════════════
-    //  PETROBEL DATA — staff read, admin writes
-    // ══════════════════════════════════════════════════════════════
-
-    // ── Main wells situation data ─────────────────
-    match /wells/landWells {
-      allow read:  if isStaff();
-      allow write: if isAdmin();
-    }
-    // ── Wells Test History (per-well docs + meta) ──
-    match /wellsHistory/{wellId} {
-      allow read:  if isStaff();
-      allow write: if isAdmin();
-    }
-    match /wellsHistoryMeta/{docId} {
-      allow read:  if isStaff();
-      allow write: if isAdmin();
-    }
-    // ── Lab W.C. History (per-well docs + meta) ────
-    match /wellsWCHistory/{wellId} {
-      allow read:  if isStaff();
-      allow write: if isAdmin();
-    }
-    match /wellsWCHistoryMeta/{docId} {
-      allow read:  if isStaff();
-      allow write: if isAdmin();
-    }
-    // ── Water Disposal (per-well docs + meta) ──────
-    match /disposalHistory/{wellId} {
-      allow read:  if isStaff();
-      allow write: if isAdmin();
-    }
-    match /disposalHistoryMeta/{docId} {
-      allow read:  if isStaff();
-      allow write: if isAdmin();
-    }
-    // ── Loss Analysis — monthly baseline snapshots ──
-    match /wellsSnapshots/{date} {
-      allow read:  if isStaff();
-      allow write: if isAdmin();
-    }
-    match /wellsSnapshotsMeta/{docId} {
-      allow read:  if isStaff();
-      allow write: if isAdmin();
-    }
-    // ── Chemical Injection Survey (daily report) ────
-    match /chemSurvey/{docId} {
-      allow read:  if isStaff();
-      allow write: if isAdmin();
-    }
-    match /chemSurveyMeta/{docId} {
-      allow read:  if isStaff();
-      allow write: if isAdmin();
-    }
-
-    // ══════════════════════════════════════════════════════════════
-    //  RAS GARA — admin read-only, retained for migration
-    // ══════════════════════════════════════════════════════════════
-    // These collections are no longer written by this app: Ras Gara is its own
-    // application on its own project as of v104. The documents are left in
-    // place, readable by the admin only, so migration/export-rasgara.html can
-    // still pull the history across.
+    // ── Tank batteries ────────────────────────────────────────────
     //
-    // Once the export has been imported into the new project AND verified,
-    // delete this block and delete the two collections. Until then, leaving
-    // them costs nothing and losing them costs the entire reading history.
-    match /rasGara/{date} {
-      allow read:  if isAdmin();
-      allow write: if false;
-    }
-    match /rasGaraMeta/{docId} {
-      allow read:  if isAdmin();
-      allow write: if false;
+    //  One account per BATTERY. The map must match TB_ACCOUNTS in index.html.
+    //  get() with a default is used deliberately: indexing a missing key in
+    //  this language errors, and an unknown address should be "no battery",
+    //  not a rule that blows up.
+    function tbBattery() {
+      return request.auth == null ? '' :
+        {
+          'tb10-1@petrobel.org': 'tb10_1',
+          'tb6-1@petrobel.org':  'tb6_1',
+          'tb6-2@petrobel.org':  'tb6_2',
+          'tb8-1@petrobel.org':  'tb8_1',
+          'tb8-2@petrobel.org':  'tb8_2'
+        }.get(request.auth.token.email, '');
     }
 
-    // ── Deny everything else by default ────────────
+    function isTankBattery() {
+      return tbBattery() != '';
+    }
+
+    // Does this session own the battery a document belongs to? Checked against
+    // BOTH the stored data and the incoming write, so an operator can neither
+    // read someone else's readings nor create a document claiming to be
+    // another battery's.
+    function tbOwnsExisting() {
+      return isTankBattery() && resource.data.battery == tbBattery();
+    }
+    function tbOwnsIncoming() {
+      return isTankBattery() && request.resource.data.battery == tbBattery();
+    }
+
+    // Anyone allowed to record PETRECO / Ras Gara readings.
+    //
+    // isTankBattery() is deliberately NOT in here. The tank battery operators
+    // are not to see the comparison at all, and hiding a tab is not access
+    // control — anyone can open a browser console. Keeping them out of this
+    // function is what actually stops them reading rasGara. If you ever add a
+    // role that should see both, add it to both functions explicitly rather
+    // than widening this one.
+    function isOperator() {
+      return isAdmin() || isPlant() || isPetreco();
+    }
+
+    // ── Daily readings: one document per shift day ────────────────
+    //
+    //  A NOTE ON WHAT THIS DOES AND DOES NOT DO
+    //
+    //  Both sides' hourly figures live in one document, so these rules cannot
+    //  stop one operator group from WRITING the other's field: a rule allows
+    //  or denies the whole document, and each group must be able to write its
+    //  own half of it.
+    //
+    //  What DOES protect each side is in the app, not here. A save sends only
+    //  the fields that role owns, merged into the document, so the two groups
+    //  cannot overwrite each other by accident even when one has been offline
+    //  for hours. That is the failure that actually happens in practice.
+    //
+    //  A DELIBERATE write from a browser console is still possible. Making
+    //  that impossible needs the day split into two sub-documents
+    //  (rasGara/{date}/sides/petreco and .../rasgara) so the rules can address
+    //  each side separately — a schema change plus a migration. It has not
+    //  been done because the two parties are cooperating on a shared
+    //  measurement, not adversaries. If that ever stops being true, this is
+    //  the thing to change.
+    match /rasGara/{date} {
+      allow read:  if isOperator();
+      allow write: if isOperator();
+    }
+
+    // ── Version stamp every device watches ────────────────────────
+    // Changing this doc is what tells the other phones to re-download. It is
+    // rewritten on every save and by the JSON import.
+    match /rasGaraMeta/{docId} {
+      allow read:  if isOperator();
+      allow write: if isOperator();
+    }
+
+    // ── Tank battery readings: one document PER BATTERY per day ───
+    //
+    //  Document id is `2026-08-14__tb6_2` and the battery is ALSO stored as a
+    //  field, because that is what a rule and a query can both match on.
+    //
+    //  This is why the day was split into five documents. While a whole shift
+    //  was one document a rule could only allow or deny the lot, so "each
+    //  battery sees only its own" could not be enforced here at all — it would
+    //  have been a curtain on the screen and nothing more.
+    //
+    //  Shift day is 05:00 → 05:00 and the date is the day the shift STARTS.
+    //  Rows are a map keyed "0".."8" = { s, w }; never an array, because an
+    //  array is one atomic value and writing it replaces the whole thing.
+    //
+    //  An operator's client MUST query with .where('battery','==', his own).
+    //  An unfiltered query is rejected outright rather than trimmed — that is
+    //  how Firestore evaluates queries, and it is the behaviour we want.
+    match /tbReadings/{docId} {
+      allow read:   if isAdmin() || tbOwnsExisting();
+      allow create: if isAdmin() || tbOwnsIncoming();
+      allow update: if isAdmin() || (tbOwnsExisting() && tbOwnsIncoming());
+      allow delete: if isAdmin();
+    }
+
+    // Version stamp, watched the way rasGaraMeta is. Readable by every tank
+    // battery operator: it carries the list of dates that have readings and no
+    // readings themselves, so it leaks nothing an operator should not see.
+    match /tbReadingsMeta/{docId} {
+      allow read:  if isAdmin() || isTankBattery();
+      allow write: if isAdmin() || isTankBattery();
+    }
+
+    // ── Deny everything else ──────────────────────────────────────
+    // Including any collection a future feature adds: it will fail loudly here
+    // rather than quietly inheriting someone else's permissions.
     match /{document=**} {
       allow read, write: if false;
     }

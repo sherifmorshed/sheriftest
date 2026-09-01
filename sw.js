@@ -1,33 +1,29 @@
 // ══════════════════════════════════════════
-//  SERVICE WORKER — Land Wells PWA
-//  Caches static assets ONLY. Firebase/Firestore
-//  requests are NEVER cached to prevent stale data.
+//  SERVICE WORKER — Sinai Field PWA
+//  Caches static assets ONLY. Firebase / Firestore traffic is never cached,
+//  or the app would happily show yesterday's readings as today's.
 // ══════════════════════════════════════════
 
-const CACHE_NAME = 'land-wells-v105';
+// Bump this on EVERY release or nobody sees the change. It is the single most
+// common cause of "my fix isn't showing up".
+const CACHE_NAME = 'sinai-field-v11';
 
-// Only cache static files that don't change between sessions
 const STATIC_ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './icon.png',
   './icon-192.png',
-  './xlsx.full.min.js',
   './html2canvas.min.js',
-  // Firebase SDK — served locally so it CAN be cached. It used to be loaded
-  // from www.gstatic.com, which is in NO_CACHE_DOMAINS below, so on a cold
-  // offline start the SDK never loaded and the app could not boot at all.
+  // The Firebase SDK is served from here rather than gstatic. A service worker
+  // cannot cache a cross-origin CDN script, so on a cold offline start the SDK
+  // would never load and `firebase is not defined` would kill the whole boot.
   './firebase-app-compat.js',
   './firebase-firestore-compat.js',
-  './firebase-auth-compat.js',
-  './well_locations.json',
-  './manifold_substation_locations.json'
+  './firebase-auth-compat.js'
 ];
 
-// Domains that must NEVER be cached (live Firebase data / auth traffic).
-// www.gstatic.com stays listed, but the app no longer loads the SDK from
-// there — the three firebase-*-compat.js files above are local copies.
+// Live data and auth traffic — never intercepted.
 const NO_CACHE_DOMAINS = [
   'firestore.googleapis.com',
   'www.googleapis.com',
@@ -38,76 +34,52 @@ const NO_CACHE_DOMAINS = [
   'www.gstatic.com'
 ];
 
-// Install — pre-cache static assets
-// Each asset is cached individually on purpose. cache.addAll() is atomic: one
-// 404 (a renamed icon, a missing json) rejects the whole batch and leaves the
-// cache EMPTY, so the app silently loses offline support with only a console
-// warning. Caching one-by-one means a single bad entry costs only that entry.
-self.addEventListener('install', function(event) {
-  console.log('[SW] Installing, cache:', CACHE_NAME);
+// Install — pre-cache, one asset at a time.
+// cache.addAll() is atomic: a single 404 (a renamed icon, a missing file)
+// rejects the whole batch and leaves the cache EMPTY, so the app silently
+// loses offline support with nothing but a console warning. One-by-one means
+// a bad entry costs only that entry.
+self.addEventListener('install', function(event){
+  console.log('[SW] installing', CACHE_NAME);
   event.waitUntil(
-    caches.open(CACHE_NAME).then(function(cache) {
-      return Promise.all(STATIC_ASSETS.map(function(url) {
-        return cache.add(url).catch(function(err) {
-          console.warn('[SW] Failed to cache', url, err);
-        });
+    caches.open(CACHE_NAME).then(function(cache){
+      return Promise.all(STATIC_ASSETS.map(function(url){
+        return cache.add(url).catch(function(err){ console.warn('[SW] could not cache', url, err); });
       }));
     })
   );
 });
 
-// Activate — clean up old caches
-self.addEventListener('activate', function(event) {
-  console.log('[SW] Activating');
+self.addEventListener('activate', function(event){
   event.waitUntil(
-    caches.keys().then(function(keys) {
-      return Promise.all(
-        keys.filter(function(k) { return k !== CACHE_NAME; })
-            .map(function(k) { 
-              console.log('[SW] Deleting old cache:', k);
-              return caches.delete(k); 
-            })
-      );
-    }).then(function() {
-      return self.clients.claim();
-    })
+    caches.keys().then(function(keys){
+      return Promise.all(keys.filter(function(k){ return k !== CACHE_NAME; })
+                            .map(function(k){ return caches.delete(k); }));
+    }).then(function(){ return self.clients.claim(); })
   );
 });
 
-// Fetch — network-first for everything, cache fallback for static assets only
-self.addEventListener('fetch', function(event) {
-  var url = new URL(event.request.url);
+// Network-first, cache as fallback: readings must be fresh when there is a
+// connection, and the app must still open when there is not.
+self.addEventListener('fetch', function(event){
+  const url = new URL(event.request.url);
 
-  // NEVER intercept Firebase API requests — let them go straight to network
-  var isFirebase = NO_CACHE_DOMAINS.some(function(domain) {
-    return url.hostname.includes(domain);
-  });
-  if (isFirebase) return; // Don't call respondWith — browser handles it normally
+  if(NO_CACHE_DOMAINS.some(function(d){ return url.hostname.includes(d); })) return;
+  if(event.request.method !== 'GET') return;
 
-  // NEVER cache POST/PUT/DELETE requests
-  if (event.request.method !== 'GET') return;
-
-  // For static assets: network-first, fall back to cache for offline support
   event.respondWith(
-    fetch(event.request).then(function(response) {
-      // Cache successful responses for offline use
-      if (response && response.status === 200) {
-        var responseClone = response.clone();
-        caches.open(CACHE_NAME).then(function(cache) {
-          cache.put(event.request, responseClone);
-        });
+    fetch(event.request).then(function(response){
+      if(response && response.status === 200){
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then(function(cache){ cache.put(event.request, clone); });
       }
       return response;
-    }).catch(function() {
-      // Network failed — serve from cache if available (offline mode)
+    }).catch(function(){
       return caches.match(event.request);
     })
   );
 });
 
-// Listen for SKIP_WAITING message from the app
-self.addEventListener('message', function(event) {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
-  }
+self.addEventListener('message', function(event){
+  if(event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
 });
