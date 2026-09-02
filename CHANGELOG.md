@@ -2,8 +2,37 @@
 
 ## v11 — Tank Batteries
 
-Second tab. Five tank batteries — T.B. 10/1, 6/1, 6/2, 8/1, 8/2 — each with one
-totalizing scanner read every three hours on an 05:00 → 05:00 shift.
+Second tab, renamed **R/G Production** for the first. Five tank batteries —
+T.B. 10/1, 6/1, 6/2, 8/1, 8/2 — each with one totalizing scanner read every
+three hours.
+
+**Two shift clocks.** T.B. 10/1 runs 06:00 → 06:00; the other four run
+05:00 → 05:00. A reading time is a property of the BATTERY, not of the module —
+every label, row date and shift window takes the battery and nothing assumes
+05:00. Each panel states its own window. On the printed report the Time column
+is the 05:00 schedule with 10/1's own time in brackets on every row, because a
+cell under a heading saying 05:00 must not hold a reading taken at 06:00. Each battery total covers exactly that battery's own nine readings; the field
+figure is the sum of five days that begin an hour apart.
+
+**The Scanners page** is an analysis page, not a second copy of the data. It
+carries no totalizer readings at all — a totalizer is working data for the man
+at the tank; what an engineer wants is production and whether it is normal:
+
+- **Three-hour production, today against yesterday** — grouped bars, field-wide
+  and one chart per battery, each on its own clock. Bars not lines: eight
+  discrete buckets, and a line would imply production between readings that
+  nobody measured.
+- **Where the hours went** — a grid of battery × interval, each cell shaded
+  against that battery's OWN average for the day, never against the field, so a
+  small battery does not read as permanently failing. Columns become ordinals
+  when the batteries do not share a clock.
+- Day KPIs including **vs the 7-day average**, which is the context that says
+  whether "down 8% on yesterday" is a problem or just Tuesday.
+
+**The tank battery tab has two pages for admin:** Entry and Scanners. Entry is
+done standing at a tank with a phone, the overview sitting down; burying the
+entry table above five charts served neither. Operators have Entry only and see
+no chips.
 
 - **Nine readings, eight intervals.** Production is the difference between a
   reading and the one before it, so the day carries a closing 05:00 reading as
@@ -56,7 +85,7 @@ totalizing scanner read every three hours on an 05:00 → 05:00 shift.
 - **Printed day report and e-mail PDF**, admin only, one A4 portrait page:
   totals cards with vs-yesterday, scanner readings interleaved with production
   (12 columns), WHP in its own table, and a production-per-interval chart.
-  Measured in Chrome at A4/9mm — 867px clean, 898px with both warning banners,
+  Measured in Chrome at A4/9mm — 928px clean, 957px with the warning banners,
   against 1054px printable. A backwards scanner or a part day is named in a
   banner at the top, not left as a cell colour.
 - **Printed record and e-mail PDF** over the selected range. NOT held to one

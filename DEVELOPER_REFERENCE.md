@@ -295,6 +295,16 @@ which matters more at a plant than the typeface does.
 Second tab, its own collection, its own shift. Five batteries, one totalizing
 scanner each, read every three hours on an **05:00 → 05:00** day.
 
+**Two clocks.** T.B. 10/1 starts at 06:00, the rest at 05:00 — see `start` in
+`TB_LIST`, and `tbStart(b)`. `tbLabel`, `tbHour`, `tbRowDate` and `tbShiftDates`
+all take a battery. Never reintroduce a module-wide start hour: `TB_START_HOUR`
+is the page default and the fallback, not a truth about the shift.
+`tbOneClock()` reports whether the visible batteries agree, and is what decides
+whether a shared Time column can be printed without mislabelling a reading — the
+printed report falls back to bracketed second times, the heat grid to ordinal
+columns. Those are LABELS and must stay; the commentary that used to sit beside
+them was removed at the owner's request.
+
 **Nine readings, eight intervals.** Production is `reading[i] − reading[i-1]`.
 The ninth reading (the closing 05:00, on the NEXT calendar day) is not a spare —
 without it the 02:00 → 05:00 interval has no production. Production is derived
@@ -333,8 +343,8 @@ keeps its own state, the worst wins, and when all are healthy their fragments
 are joined. On `synced` a module passes only its fragment ("116 day(s)"); on any
 other status it passes a whole sentence.
 
-**Reports.** The day report is ONE A4 page — measured in Chrome, 867px clean and
-898px with both warning banners, against 1054px printable. The record report is
+**Reports.** The day report is ONE A4 page — measured in Chrome, 928px clean and
+957px with the warning banners, against 1054px printable. The record report is
 deliberately not one page; its summary block is `break-inside:avoid` and ends at
 620px at every range, so page one always stands alone. Both use
 `window.__REPORT__` (`buildPdf`, `pdfFromHTML`, `printHTML`, `offerPdf`) rather

@@ -386,6 +386,32 @@ table.tb-tbl .tb-tag{display:block;font-size:9px;letter-spacing:.6px;color:var(-
    summed into a day total without saying so. */
 table.tb-tbl td.tb-neg{color:var(--red);font-weight:700;}
 
+/* ── Scanners: the analysis page ───────────────────────────────────────
+   Denser than the entry page on purpose. This one is read sitting down on a
+   desk screen, and the job is to see what happened across five batteries at
+   once, not to type. */
+.tb-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin-top:12px;}
+.tb-mini{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:9px 11px 6px;}
+.tb-mini .cap{display:flex;align-items:baseline;gap:8px;margin-bottom:4px;}
+.tb-mini .cap h4{font-size:13px;font-weight:800;color:var(--text);}
+.tb-mini .cap .d{margin-left:auto;font-family:var(--font-num);font-size:12px;font-weight:700;}
+.tb-mini .cap .d.up{color:var(--green);} .tb-mini .cap .d.dn{color:var(--red);}
+.tb-mini .cap .clk{font-size:9.5px;color:var(--muted);font-family:var(--font-num);}
+/* Heat grid: batteries down the side, the eight intervals across. Each cell is
+   shaded against that battery's OWN average for the day, never against the
+   field — a small battery would otherwise read as permanently failing. */
+.tb-heat{overflow-x:auto;margin-top:10px;}
+.tb-heat table{border-collapse:separate;border-spacing:3px;font-family:var(--font-num);font-size:11px;}
+.tb-heat th{font-size:9.5px;color:var(--muted);font-weight:600;padding:2px 4px;white-space:nowrap;}
+.tb-heat th.row{text-align:right;color:var(--text);font-weight:700;font-size:11px;}
+.tb-heat td{text-align:center;padding:6px 8px;border-radius:6px;min-width:52px;
+  background:var(--surface);color:var(--text);font-variant-numeric:tabular-nums;}
+.tb-heat td.na{color:var(--muted);}
+.tb-heat td.rst{outline:2px solid var(--red);color:var(--red);font-weight:700;}
+.tb-legend{display:flex;gap:12px;align-items:center;font-size:10.5px;color:var(--muted);margin-top:7px;flex-wrap:wrap;}
+.tb-legend .bar{width:76px;height:9px;border-radius:3px;
+  background:linear-gradient(90deg,rgba(220,38,38,.55),rgba(148,163,184,.18),rgba(22,163,74,.55));}
+
 </style>
 </head>
 <body>
@@ -506,6 +532,11 @@ table.tb-tbl td.tb-neg{color:var(--red);font-weight:700;}
   </div>
   <div style="padding:12px 14px 30px;">
 
+    <!-- Admin only: entry and overview are two different jobs. An operator has
+         only the first and never sees these chips. -->
+    <div class="chips rg-range" id="tbSubTabs" style="display:none;"></div>
+
+    <div id="tb-page-entry">
     <div class="rg-bar">
       <label class="rg-lbl" for="tbDate">Shift day</label>
       <input type="date" id="tbDate" class="rg-date">
@@ -526,7 +557,26 @@ table.tb-tbl td.tb-neg{color:var(--red);font-weight:700;}
       <button class="rg-btn rg-btn-primary" id="tbMailBtn"><svg class="ico" aria-hidden="true"><use href="#i-mail"/></svg> Send by e-mail</button>
     </div>
 
-    <!-- ── ADMIN ONLY: breakdown across days ─────────────────────────── -->
+    </div><!-- /tb-page-entry -->
+
+    <!-- ── ADMIN ONLY: the scanners, across days ─────────────────────── -->
+    <div id="tb-page-view" style="display:none;">
+
+      <div class="rg-bar">
+        <label class="rg-lbl" for="tbViewDate">Shift day</label>
+        <input type="date" id="tbViewDate" class="rg-date">
+        <button class="rg-btn" id="tbViewToday">Today</button>
+      </div>
+
+      <div id="tbDayKpis"></div>
+
+      <div class="rg-sec-title">Three-hour production — today vs yesterday</div>
+      <div id="tbIntervalField"></div>
+      <div class="tb-grid" id="tbIntervalGrid"></div>
+
+      <div class="rg-sec-title">Where the hours went</div>
+      <div id="tbHeat"></div>
+
     <div id="tbHistWrap" style="display:none;">
       <div class="rg-rec-head">
         <div class="bar"></div>
@@ -553,6 +603,7 @@ table.tb-tbl td.tb-neg{color:var(--red);font-weight:700;}
         <button class="rg-btn rg-btn-primary" id="tbRecMailBtn"><svg class="ico" aria-hidden="true"><use href="#i-mail"/></svg> E-mail record</button>
       </div>
     </div>
+    </div><!-- /tb-page-view -->
 
   </div>
 </div>
@@ -848,7 +899,9 @@ function _mayOpen(tab){ return _tabsFor().indexOf(tab) !== -1; }
 
 let _activeTab = 'rg';
 const _TAB_DEF = {
-  rg: { page:'page-rasgara', icon:'plant', label:'Production' },
+  // R/G = Ras Gara. The tab used to read just "Production", which said nothing
+  // about which side of the field it covered once a second one existed.
+  rg: { page:'page-rasgara', icon:'plant', label:'R/G Production' },
   tb: { page:'page-tb',      icon:'tank',  label:'Tank Batteries' }
 };
 
@@ -2423,13 +2476,25 @@ document.addEventListener('DOMContentLoaded', function(){
   //      nothing else — the table, the totals and the storage shape are all
   //      driven from it. `id` is the Firestore map key and must never change
   //      once data exists under it; `name` is only what the screen prints.
+  // `start` is the hour the battery's own shift begins. T.B. 10/1 runs 06:00 →
+  // 06:00; the other four run 05:00 → 05:00. A reading time is therefore a
+  // property of the BATTERY, not of this module — every label, row date and
+  // shift window takes the battery, and nothing may assume 05:00.
   const TB_LIST = [
-    { id:'tb10_1', name:'T.B. 10/1' },
-    { id:'tb6_1',  name:'T.B. 6/1'  },
-    { id:'tb6_2',  name:'T.B. 6/2'  },
-    { id:'tb8_1',  name:'T.B. 8/1'  },
-    { id:'tb8_2',  name:'T.B. 8/2'  }
+    { id:'tb10_1', name:'T.B. 10/1', start:6 },
+    { id:'tb6_1',  name:'T.B. 6/1',  start:5 },
+    { id:'tb6_2',  name:'T.B. 6/2',  start:5 },
+    { id:'tb8_1',  name:'T.B. 8/1',  start:5 },
+    { id:'tb8_2',  name:'T.B. 8/2',  start:5 }
   ];
+  function tbById(id){
+    for(let i = 0; i < TB_LIST.length; i++) if(TB_LIST[i].id === id) return TB_LIST[i];
+    return null;
+  }
+  function tbStart(b){
+    if(typeof b === 'string') b = tbById(b);
+    return (b && b.start != null) ? b.start : TB_START_HOUR;
+  }
 
   // ONE DOCUMENT PER BATTERY PER DAY, id `2026-08-14__tb6_2`.
   //
@@ -2447,6 +2512,8 @@ document.addEventListener('DOMContentLoaded', function(){
   function tbDocId(dateStr, id){ return dateStr + '__' + id; }
   const TB_LS         = 'tb_days_v1';
   const TB_VERK       = 'tb_days_v1__syncver';
+  // The page default, and the start for every battery that does not say
+  // otherwise. NOT a global truth about the shift — see `start` in TB_LIST.
   const TB_START_HOUR = 5;
   const TB_STEP       = 3;    // hours between readings
   const TB_READS      = 9;    // 05,08,11,14,17,20,23,02,05 — eight intervals
@@ -2489,18 +2556,25 @@ document.addEventListener('DOMContentLoaded', function(){
     if(now.getHours() < TB_START_HOUR) now.setDate(now.getDate() - 1);
     return _isoDate(now);
   }
-  function tbHour(i){ return (TB_START_HOUR + i * TB_STEP) % 24; }
-  function tbLabel(i){ return (tbHour(i) < 10 ? '0' : '') + tbHour(i) + ':00'; }
+  function tbHour(i, b){ return (tbStart(b) + i * TB_STEP) % 24; }
+  function tbLabel(i, b){ const h = tbHour(i, b); return (h < 10 ? '0' : '') + h + ':00'; }
   // Which calendar date a reading falls on. Readings 7 and 8 (02:00 and the
   // closing 05:00) are the NEXT day — the printed date has to say so or the
   // closing reading looks like a duplicate of the opening one.
-  function tbRowDate(dateStr, i){
+  function tbRowDate(dateStr, i, b){
     const d = new Date(dateStr + 'T00:00:00');
-    if(TB_START_HOUR + i * TB_STEP >= 24) d.setDate(d.getDate() + 1);
+    if(tbStart(b) + i * TB_STEP >= 24) d.setDate(d.getDate() + 1);
     return _isoDate(d);
   }
-  function tbShiftDates(dateStr){
-    return { from:dateStr, to:tbRowDate(dateStr, TB_READS - 1) };
+  function tbShiftDates(dateStr, b){
+    return { from:dateStr, to:tbRowDate(dateStr, TB_READS - 1, b) };
+  }
+  // Do the batteries all run the same clock? Used to decide whether a shared
+  // Time column can be printed without mislabelling somebody's reading.
+  function tbOneClock(list){
+    const l = list || TB_LIST;
+    for(let i = 1; i < l.length; i++) if(tbStart(l[i]) !== tbStart(l[0])) return false;
+    return true;
   }
 
   // ── state ───────────────────────────────────────────────────────────────
@@ -2512,7 +2586,9 @@ document.addEventListener('DOMContentLoaded', function(){
   function tbBlankDay(dateStr){
     const tbs = {};
     TB_LIST.forEach(function(b){ tbs[b.id] = tbBlankCell(); });
-    return { date:dateStr, startHour:TB_START_HOUR, tbs:tbs, updatedBy:'', updatedAt:0 };
+    // No `startHour` on the day: the batteries no longer share one. Each
+    // document carries its own, and TB_LIST is the authority on screen.
+    return { date:dateStr, tbs:tbs, updatedBy:'', updatedAt:0 };
   }
   // Rows arrive as a MAP keyed "0".."8", never an array. Firestore treats an
   // array as one atomic value, so a map is what lets two accounts patch the
@@ -2626,7 +2702,7 @@ document.addEventListener('DOMContentLoaded', function(){
       const pCls = 'rg-calc' + (p != null && p < 0 ? ' tb-neg' : '');
       rows +=
         '<tr' + (edge ? ' class="tb-edge"' : '') + '>' +
-          '<td class="rg-time">' + tbLabel(i) +
+          '<td class="rg-time">' + tbLabel(i, b) +
             (tag ? '<span class="tb-tag">' + tag + '</span>' : '') + '</td>' +
           '<td><input class="rg-in" type="number" inputmode="decimal" step="any" ' +
             'data-tb="' + escAttr(b.id) + '" data-k="s" data-i="' + i + '" ' +
@@ -2657,10 +2733,13 @@ document.addEventListener('DOMContentLoaded', function(){
                                 ' intervals complete — the total below covers those only.</div>';
 
     const totTxt = (c.total == null) ? '—' : tbFmt(c.total, 1);
+    const bsh = tbShiftDates(day.date, b);
     return '<div class="tb-panel">' +
       '<div class="bar"></div>' +
       '<div class="hd"><h3>' + escHtml(b.name) + '</h3>' +
         '<div class="tot">' + totTxt + ' <i>m³/d</i></div></div>' +
+      '<div class="note">Shift ' + tbLabel(0, b) + ' ' + escHtml(bsh.from) + ' → ' +
+        tbLabel(0, b) + ' ' + escHtml(bsh.to) + '</div>' +
       notes +
       '<div class="bd"><div class="rg-tbl-wrap"><table class="rg-tbl tb-tbl">' +
         '<thead><tr>' +
@@ -2854,6 +2933,268 @@ document.addEventListener('DOMContentLoaded', function(){
     });
   }
 
+  // ── the two sub-pages ───────────────────────────────────────────────────
+  // Entry is a job done standing at a tank with a phone; the overview is a job
+  // done sitting down. They want different screens, so they get different
+  // screens rather than one long scroll with the entry table buried above five
+  // charts. Admin only — an operator has entry and nothing else, so drawing him
+  // a pair of chips he cannot use would be furniture.
+  let _tbSub = 'entry';
+  const _TB_SUBS = [ { k:'entry', label:'Entry' }, { k:'view', label:'Scanners' } ];
+  function tbShowSub(k){
+    if(!_tbAdmin()) k = 'entry';
+    _tbSub = k;
+    const e = document.getElementById('tb-page-entry');
+    const v = document.getElementById('tb-page-view');
+    if(e) e.style.display = (k === 'entry') ? '' : 'none';
+    if(v) v.style.display = (k === 'view')  ? '' : 'none';
+    const bar = document.getElementById('tbSubTabs');
+    if(bar) Array.prototype.forEach.call(bar.querySelectorAll('button'), function(b){
+      b.classList.toggle('on', b.getAttribute('data-sub') === k);
+    });
+    // The charts were written into a hidden container and came out sized zero,
+    // the same trap the main tabs have. Redraw on the way in.
+    if(k === 'view') tbRenderView();
+  }
+  function tbRenderSubTabs(){
+    const bar = document.getElementById('tbSubTabs');
+    if(!bar) return;
+    if(!_tbAdmin()){ bar.style.display = 'none'; bar.innerHTML = ''; return; }
+    bar.style.display = '';
+    if(bar.getAttribute('data-built')) return;   // buttons survive re-renders
+    bar.innerHTML = _TB_SUBS.map(function(t){
+      return '<button type="button" data-sub="' + t.k + '"' +
+             (t.k === _tbSub ? ' class="on"' : '') + '>' + t.label + '</button>';
+    }).join('');
+    Array.prototype.forEach.call(bar.querySelectorAll('button'), function(b){
+      b.addEventListener('click', function(){ tbShowSub(b.getAttribute('data-sub')); });
+    });
+    bar.setAttribute('data-built', '1');
+  }
+
+  // ── the analysis page ───────────────────────────────────────────────────
+  // Scanner totalizer readings are deliberately absent here. A totalizer is
+  // working data for the man at the tank; what an engineer wants to see is
+  // PRODUCTION — how much came in each three hours, and whether that is normal.
+
+  // The eight interval productions for one battery on one day.
+  function tbIntervals(dateStr, id){
+    return tbCalcOne(tbGetDay(dateStr).tbs[id]).prod.slice(1);
+  }
+  function tbSum(a){
+    let t = null;
+    a.forEach(function(v){ if(v != null) t = (t == null ? 0 : t) + v; });
+    return t;
+  }
+  // Average of the N complete days BEFORE this one — the context that says
+  // whether "down 8% on yesterday" is a problem or just Tuesday.
+  function tbTrailing(dateStr, id, n){
+    const out = [];
+    let d = new Date(dateStr + 'T00:00:00');
+    for(let k = 0; k < 30 && out.length < n; k++){
+      d.setDate(d.getDate() - 1);
+      const iso = _isoDate(d);
+      if(!TB_DAYS[iso]) continue;
+      const c = id ? tbCalcOne(tbGetDay(iso).tbs[id]) : tbCalcDay(tbGetDay(iso));
+      const done = id ? c.done : c.allDone;
+      const tot  = id ? c.total : c.grand;
+      if(done && tot != null) out.push(tot);
+    }
+    if(!out.length) return null;
+    return out.reduce(function(a,b){ return a+b; }, 0) / out.length;
+  }
+
+  // Grouped bars: today against yesterday, one pair per interval. Bars rather
+  // than lines because these are eight discrete buckets, not a continuous
+  // signal, and a line implies production between the readings that nobody
+  // measured.
+  function tbBarChart(labels, today, yest, opt){
+    opt = opt || {};
+    const W = opt.w || 700, H = opt.h || 210, P = 34, PB = 30;
+    let max = 0, any = false;
+    today.concat(yest).forEach(function(v){
+      if(v != null){ any = true; if(Math.abs(v) > max) max = Math.abs(v); } });
+    if(!any) return '<div class="rg-empty">No production recorded for either day.</div>';
+    max = max * 1.18 || 1;
+    const n = labels.length;
+    const band = (W - P - 12) / n;
+    const bw   = Math.min(16, band * 0.30);
+    const y0   = H - PB;
+    const sy   = function(v){ return y0 - (H - PB - 18) * (v / max); };
+    const cT = seriesColor('s3'), cY = 'rgba(148,163,184,.55)';
+    let grid = '', bars = '', axis = '';
+    for(let g = 0; g <= 3; g++){
+      const v = max * g / 3, y = sy(v);
+      grid += '<line x1="' + P + '" y1="' + y.toFixed(1) + '" x2="' + (W-6) + '" y2="' + y.toFixed(1) +
+        '" stroke="var(--border)" stroke-width="1" stroke-dasharray="2,3"/>' +
+        '<text x="' + (P-5) + '" y="' + (y+3).toFixed(1) + '" text-anchor="end" fill="var(--muted)" ' +
+        'font-size="9" font-family="var(--font-num)">' + Math.round(v) + '</text>';
+    }
+    for(let i = 0; i < n; i++){
+      const cx = P + band * i + band / 2;
+      if(yest[i] != null) bars += '<rect x="' + (cx - bw - 1).toFixed(1) + '" y="' + sy(Math.max(0,yest[i])).toFixed(1) +
+        '" width="' + bw + '" height="' + Math.max(1, y0 - sy(Math.max(0,yest[i]))).toFixed(1) +
+        '" rx="2" fill="' + cY + '"/>';
+      if(today[i] != null) bars += '<rect x="' + (cx + 1).toFixed(1) + '" y="' + sy(Math.max(0,today[i])).toFixed(1) +
+        '" width="' + bw + '" height="' + Math.max(1, y0 - sy(Math.max(0,today[i]))).toFixed(1) +
+        '" rx="2" fill="' + (today[i] < 0 ? 'var(--red)' : cT) + '"/>';
+      axis += '<text x="' + cx.toFixed(1) + '" y="' + (H-10) + '" text-anchor="middle" fill="var(--muted)" ' +
+        'font-size="8.5" font-family="var(--font-num)">' + escHtml(labels[i]) + '</text>';
+    }
+    return '<div style="overflow-x:auto;"><svg viewBox="0 0 ' + W + ' ' + H + '" ' +
+      'style="width:100%;min-width:300px;height:auto;display:block;background:var(--surface);' +
+      'border:1px solid var(--border);border-radius:12px;">' + grid + bars + axis +
+      '<line x1="' + P + '" y1="' + y0 + '" x2="' + (W-6) + '" y2="' + y0 + '" stroke="var(--border)"/>' +
+      '</svg></div>' +
+      '<div class="rg-legend"><span><span class="sw" style="background:' + cY + '"></span>Yesterday</span>' +
+      '<span><span class="sw" style="background:' + cT + '"></span>Today</span></div>';
+  }
+
+  function tbDeltaChip(a, b){
+    if(a == null || b == null || b === 0) return '';
+    const pct = ((a - b) / Math.abs(b)) * 100;
+    const cls = pct >= 0 ? 'up' : 'dn';
+    return '<span class="d ' + cls + '">' + (pct >= 0 ? '+' : '−') + tbFmt(Math.abs(pct),1) + '%</span>';
+  }
+
+  function tbRenderDayKpis(){
+    const el = document.getElementById('tbDayKpis');
+    if(!el) return;
+    const c   = tbCalcDay(tbGetDay(_tbDate));
+    const yc  = tbCalcDay(tbGetDay(tbPrevDate(_tbDate)));
+    const av7 = tbTrailing(_tbDate, null, 7);
+    if(c.grand == null){ el.innerHTML = '<div class="rg-empty">No readings for this shift.</div>'; return; }
+    let best = null, worst = null;
+    TB_LIST.forEach(function(b){
+      const t = c.per[b.id].total;
+      if(t == null) return;
+      if(!best  || t > c.per[best.id].total)  best  = b;
+      if(!worst || t < c.per[worst.id].total) worst = b;
+    });
+    el.innerHTML = '<div class="rg-tot">' +
+      '<div class="rg-card"><div class="k">Field today</div>' +
+        '<div class="v">' + tbFmt(c.grand,1) + '</div>' +
+        '<div class="s">m³/d · ' + tbFmt(c.grand * TB_BBL,0) + ' bbl/d' + (c.allDone ? '' : ' · part day') + '</div></div>' +
+      '<div class="rg-card"><div class="k">vs yesterday</div><div class="v">' +
+        ((c.allDone && yc.allDone && yc.grand)
+          ? (c.grand - yc.grand > 0 ? '+' : '−') + tbFmt(Math.abs(c.grand - yc.grand),1) : '—') + '</div>' +
+        '<div class="s">' + ((c.allDone && yc.allDone && yc.grand)
+          ? tbFmt(((c.grand - yc.grand)/yc.grand)*100,1) + '% · yesterday ' + tbFmt(yc.grand,0)
+          : 'needs two complete days') + '</div></div>' +
+      '<div class="rg-card"><div class="k">vs 7-day average</div><div class="v">' +
+        ((c.allDone && av7) ? (c.grand - av7 > 0 ? '+' : '−') + tbFmt(Math.abs(c.grand - av7),1) : '—') + '</div>' +
+        '<div class="s">' + (av7 ? 'average ' + tbFmt(av7,1) + ' m³/d' : 'not enough complete days') + '</div></div>' +
+      '<div class="rg-card"><div class="k">Top battery</div><div class="v">' +
+        (best ? escHtml(best.name.replace('T.B. ','')) : '—') + '</div>' +
+        '<div class="s">' + (best ? tbFmt(c.per[best.id].total,1) + ' m³/d' : '') + '</div></div>' +
+      '<div class="rg-card"><div class="k">Lowest battery</div><div class="v">' +
+        (worst ? escHtml(worst.name.replace('T.B. ','')) : '—') + '</div>' +
+        '<div class="s">' + (worst ? tbFmt(c.per[worst.id].total,1) + ' m³/d' : '') + '</div></div>' +
+      '</div>';
+  }
+
+  function tbRenderIntervals(){
+    const y = tbPrevDate(_tbDate);
+    const fieldEl = document.getElementById('tbIntervalField');
+    if(fieldEl){
+      // The field roll-up uses interval INDEX, not clock time — the batteries
+      // do not all start at the same hour, so "the third three hours of each
+      // battery's own shift" is the only sum that means anything.
+      const tA = [], tB = [];
+      for(let i = 0; i < TB_READS-1; i++){
+        let a = null, b = null;
+        TB_LIST.forEach(function(bt){
+          const va = tbIntervals(_tbDate, bt.id)[i], vb = tbIntervals(y, bt.id)[i];
+          if(va != null) a = (a == null ? 0 : a) + va;
+          if(vb != null) b = (b == null ? 0 : b) + vb;
+        });
+        tA.push(a); tB.push(b);
+      }
+      const base = TB_LIST.filter(function(b){ return tbStart(b) === TB_START_HOUR; })[0] || TB_LIST[0];
+      const labels = [];
+      for(let i = 1; i < TB_READS; i++) labels.push(tbLabel(i-1, base).slice(0,2) + '–' + tbLabel(i, base).slice(0,2));
+      fieldEl.innerHTML = '<div class="tb-mini"><div class="cap"><h4>All batteries</h4>' +
+        tbDeltaChip(tbSum(tA), tbSum(tB)) + '</div>' +
+        tbBarChart(labels, tA, tB, { h:220 }) + '</div>';
+    }
+    const grid = document.getElementById('tbIntervalGrid');
+    if(grid){
+      grid.innerHTML = TB_LIST.map(function(b){
+        const a = tbIntervals(_tbDate, b.id), c = tbIntervals(y, b.id);
+        const labels = [];
+        for(let i = 1; i < TB_READS; i++) labels.push(tbLabel(i-1, b).slice(0,2) + '–' + tbLabel(i, b).slice(0,2));
+        return '<div class="tb-mini"><div class="cap"><h4>' + escHtml(b.name) + '</h4>' +
+          '<span class="clk">' + tbLabel(0, b) + ' shift</span>' +
+          tbDeltaChip(tbSum(a), tbSum(c)) + '</div>' +
+          tbBarChart(labels, a, c, { h:170 }) + '</div>';
+      }).join('');
+    }
+  }
+
+  // Each cell shaded against that battery's OWN day average. A battery that
+  // simply produces less than another must not read as a fault.
+  function tbRenderHeat(){
+    const el = document.getElementById('tbHeat');
+    if(!el) return;
+    const base = TB_LIST.filter(function(b){ return tbStart(b) === TB_START_HOUR; })[0] || TB_LIST[0];
+    // With two clocks in the field there is no single set of times that fits
+    // every row, so the columns become ordinals and the caption spells out what
+    // each battery's ordinal means. Printing 05–08 over a row that was read
+    // 06–09 would be a wrong label on a right number.
+    const one = tbOneClock();
+    const ORD = ['1st','2nd','3rd','4th','5th','6th','7th','8th'];
+    let head = '<tr><th></th>';
+    for(let i = 1; i < TB_READS; i++)
+      head += '<th>' + (one ? tbLabel(i-1, base).slice(0,2) + '–' + tbLabel(i, base).slice(0,2)
+                            : ORD[i-1]) + '</th>';
+    head += '<th>Day</th></tr>';
+    let body = '', anything = false;
+    TB_LIST.forEach(function(b){
+      const c  = tbCalcOne(tbGetDay(_tbDate).tbs[b.id]);
+      const iv = c.prod.slice(1);
+      const ok = iv.filter(function(v){ return v != null && v >= 0; });
+      const mean = ok.length ? ok.reduce(function(x,y2){ return x+y2; },0) / ok.length : null;
+      let cells = '';
+      iv.forEach(function(v){
+        if(v == null){ cells += '<td class="na">—</td>'; return; }
+        anything = true;
+        if(v < 0){ cells += '<td class="rst">' + tbFmt(v,1) + '</td>'; return; }
+        let bg = 'var(--surface)';
+        if(mean && mean > 0){
+          const dev = Math.max(-1, Math.min(1, ((v - mean) / mean) / 0.4));
+          const a = (Math.abs(dev) * 0.5).toFixed(2);
+          bg = dev >= 0 ? 'rgba(22,163,74,' + a + ')' : 'rgba(220,38,38,' + a + ')';
+        }
+        cells += '<td style="background:' + bg + '">' + tbFmt(v,1) + '</td>';
+      });
+      body += '<tr><th class="row">' + escHtml(b.name) +
+              (one ? '' : ' <span style="color:var(--muted);font-weight:600">' +
+                          tbLabel(0, b) + '</span>') + '</th>' + cells +
+              '<td style="font-weight:700">' + tbFmt(c.total,1) + '</td></tr>';
+    });
+    el.innerHTML = anything
+      ? '<div class="tb-heat"><table><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' +
+        '<div class="tb-legend"><span class="bar"></span>' +
+        '<span>shaded against each battery\'s own average for the day — red below, green above</span>' +
+        '<span>· red outline = scanner went backwards</span>' +
+        (one ? '' : '<span>· columns are each battery\'s own three hours: ' +
+          TB_LIST.filter(function(b,i,a){ return a.findIndex(function(x){
+            return tbStart(x) === tbStart(b); }) === i; })
+            .map(function(b){ return tbLabel(0,b) + ' shift starts ' +
+              tbLabel(0,b).slice(0,2) + '–' + tbLabel(1,b).slice(0,2); }).join(', ') + '</span>') +
+        '</div>'
+      : '<div class="rg-empty">No production recorded for this shift.</div>';
+  }
+
+  function tbRenderView(){
+    const dv = document.getElementById('tbViewDate');
+    if(dv && dv.value !== _tbDate) dv.value = _tbDate;
+    tbRenderDayKpis();
+    tbRenderIntervals();
+    tbRenderHeat();
+    tbRenderHist();
+  }
+
   function tbRenderHist(){
     const wrap = document.getElementById('tbHistWrap');
     if(!wrap) return;
@@ -2958,7 +3299,13 @@ document.addEventListener('DOMContentLoaded', function(){
     const yDay  = tbGetDay(tbPrevDate(day.date));
     const yCalc = tbCalcDay(yDay);
     const gDl   = tbDelta(calc.grand, yCalc.grand, calc.allDone, yCalc.allDone);
-    const sh    = tbShiftDates(day.date);
+    // Two clocks now. The Time column is the 05:00 schedule; where a battery
+    // runs to a different one its own time is printed in brackets on the same
+    // row, because a cell under a heading that says 05:00 must not hold a
+    // reading taken at 06:00.
+    const base    = TB_LIST.filter(function(b){ return tbStart(b) === TB_START_HOUR; })[0] || TB_LIST[0];
+    const offset  = TB_LIST.filter(function(b){ return tbStart(b) !== tbStart(base); });
+    const sh      = tbShiftDates(day.date, base);
 
     // Readings + production, one row per reading time.
     let rows = '';
@@ -2974,7 +3321,9 @@ document.addEventListener('DOMContentLoaded', function(){
                  (i === 0 ? '—' : tbFmt(p, 1)) + '</td>';
       });
       rows += '<tr' + (i === 0 || i === TB_READS-1 ? ' class="edge"' : '') + '>' +
-        '<td>' + tbLabel(i) + '</td>' + cells +
+        '<td>' + tbLabel(i, base) +
+          (offset.length ? ' <span class="alt">(' + tbLabel(i, offset[0]) + ')</span>' : '') +
+          '</td>' + cells +
         '<td class="tot">' + (i === 0 ? '—' : tbFmt(intervalTotal, 1)) + '</td></tr>';
     }
     let foot = '<tr><th>Day</th>';
@@ -2989,12 +3338,14 @@ document.addEventListener('DOMContentLoaded', function(){
     for(let i = 0; i < TB_READS; i++){
       let cells = '';
       TB_LIST.forEach(function(b){ cells += '<td>' + tbFmt(day.tbs[b.id].w[i], 0) + '</td>'; });
-      whp += '<tr><td>' + tbLabel(i) + '</td>' + cells + '</tr>';
+      whp += '<tr><td>' + tbLabel(i, base) +
+             (offset.length ? ' <span class="alt">(' + tbLabel(i, offset[0]) + ')</span>' : '') +
+             '</td>' + cells + '</tr>';
     }
 
     // Production per interval, five series, print colours.
     const labels = [];
-    for(let i = 1; i < TB_READS; i++) labels.push(tbLabel(i-1) + '–' + tbLabel(i));
+    for(let i = 1; i < TB_READS; i++) labels.push(tbLabel(i-1, base) + '–' + tbLabel(i, base));
     const chart = tbLineChart(labels, TB_LIST.map(function(b, i){
       return { label:b.name, color:tbColor(i, true),
                vals: calc.per[b.id].prod.slice(1) };
@@ -3014,7 +3365,11 @@ document.addEventListener('DOMContentLoaded', function(){
         'The totals cover what has been read so far.</div>';
 
     let head1 = '<tr><th rowspan="2">Time</th>';
-    TB_LIST.forEach(function(b){ head1 += '<th colspan="2" class="grp">' + escHtml(b.name) + '</th>'; });
+    TB_LIST.forEach(function(b){
+      head1 += '<th colspan="2" class="grp">' + escHtml(b.name) +
+        (tbStart(b) !== tbStart(base) ? '<br><span class="alt">' + tbLabel(0, b) + ' shift</span>' : '') +
+        '</th>';
+    });
     head1 += '<th rowspan="2" class="tot">Total<br>prod</th></tr><tr>';
     TB_LIST.forEach(function(){ head1 += '<th>Scanner</th><th>Prod</th>'; });
     head1 += '</tr>';
@@ -3046,6 +3401,7 @@ document.addEventListener('DOMContentLoaded', function(){
   'padding:6px 9px;border-radius:6px;margin:9px 0;}' +
 '.warn.part{border-color:#fde68a;background:#fffbeb;color:#92400e;}' +
 '.foot{margin-top:14px;font-size:9.5px;color:#64748b;border-top:1px solid #e2e8f0;padding-top:6px;}' +
+'.alt{color:#7c5a10;font-weight:400;}' +
 '.rg-legend{display:flex;gap:11px;justify-content:center;font-size:9px;color:#475569;margin-top:4px;flex-wrap:wrap;}' +
 '.rg-legend .sw{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;}' +
 // See the height budget in the comment above this function before adding
@@ -3065,9 +3421,14 @@ document.addEventListener('DOMContentLoaded', function(){
 '}' +
 '</style></head><body>' +
 '<h1>Sinai Field — Tank Batteries</h1>' +
-'<div class="sub">Shift 05:00 ' + escHtml(sh.from) + ' → 05:00 ' + escHtml(sh.to) +
-  ' &nbsp;·&nbsp; five batteries, scanner read every three hours' +
-  ' &nbsp;·&nbsp; production is the difference between consecutive readings</div>' +
+'<div class="sub">Shift ' + tbLabel(0, base) + ' ' + escHtml(sh.from) + ' → ' +
+  tbLabel(0, base) + ' ' + escHtml(sh.to) +
+  (offset.length ? ' &nbsp;·&nbsp; ' + offset.map(function(b){
+      return escHtml(b.name) + ' runs ' + tbLabel(0, b) + ' → ' + tbLabel(0, b); }).join(', ') +
+    ', shown in brackets' : '') +
+  ' &nbsp;·&nbsp; scanner read every three hours; production is the difference between' +
+  ' consecutive readings</div>' +
+
 warn + part +
 '<div class="cards">' +
   '<div class="card g"><div class="k">Field total</div><div class="v">' + tbFmt(calc.grand,1) + ' m³</div>' +
@@ -3319,15 +3680,30 @@ warn + part +
   function tbRenderAll(){
     const inp = document.getElementById('tbDate');
     if(inp && inp.value !== _tbDate) inp.value = _tbDate;
-    const sh = tbShiftDates(_tbDate);
+    const vis0 = tbVisible();
     const hint = document.getElementById('tbShiftHint');
-    if(hint) hint.textContent =
-      'Shift ' + sh.from + ' 05:00 → ' + sh.to + ' 05:00 · nine readings, three hours apart. ' +
-      'Production is the difference between one reading and the one before it.';
+    if(hint){
+      if(tbOneClock(vis0)){
+        const sh = tbShiftDates(_tbDate, vis0[0]);
+        hint.textContent = 'Shift ' + sh.from + ' ' + tbLabel(0, vis0[0]) + ' → ' +
+          sh.to + ' ' + tbLabel(0, vis0[0]) +
+          ' · nine readings, three hours apart. Production is the difference ' +
+          'between one reading and the one before it.';
+      } else {
+        // The batteries run different clocks, so no single shift line fits them
+        // all. Each panel states its own window instead.
+        hint.textContent = 'Nine readings, three hours apart, per battery. ' +
+          'Production is the difference between one reading and the one before it.';
+      }
+    }
     const sub = document.getElementById('tbSubtitle');
-    if(sub) sub.textContent = tbCanEdit()
-      ? 'Enter the scanner reading and WHP at each of the nine times'
-      : 'Scanner readings and production, read-only';
+    if(sub) sub.textContent = (_tbAdmin() && _tbSub === 'view')
+      ? 'Three-hour production against yesterday, and the record across days'
+      : tbCanEdit()
+        ? 'Enter the scanner reading and WHP at each of the nine times'
+        : 'Scanner readings and production, read-only';
+    tbRenderSubTabs();
+    tbShowSub(_tbAdmin() ? _tbSub : 'entry');
     tbRenderTotals();
     tbRenderArea();
     // Admin only, and only once the day has something on it — offering to print
@@ -3342,7 +3718,9 @@ warn + part +
       if(b) sub2.innerHTML = '<svg class="ico ico-h" aria-hidden="true"><use href="#i-tank"/></svg> ' +
                              escHtml(b.name);
     }
-    tbRenderHist();
+    // Only when it is on screen: five charts redrawn on every keystroke of the
+    // entry table would be wasted work on a phone.
+    if(_tbAdmin() && _tbSub === 'view') tbRenderView();
     const sv = document.getElementById('tbSaved');
     const day = tbGetDay(_tbDate);
     if(sv) sv.textContent = day.updatedAt
@@ -3422,7 +3800,7 @@ warn + part +
         // `battery` is a stored field, not just part of the id, because the
         // rules and the operator's query both match on it.
         await db.collection(TB_COL).doc(tbDocId(_tbDate, id)).set({
-          date:_tbDate, battery:id, startHour:TB_START_HOUR, rows:rows,
+          date:_tbDate, battery:id, startHour:tbStart(id), rows:rows,
           updatedBy:who, updatedAt:firebase.firestore.FieldValue.serverTimestamp()
         }, { merge:true });
       }
@@ -3548,6 +3926,11 @@ warn + part +
     }
     const todayBtn = document.getElementById('tbTodayBtn');
     if(todayBtn) todayBtn.addEventListener('click', function(){ _tbDate = tbToday(); tbRenderAll(); });
+
+    const vd = document.getElementById('tbViewDate');
+    if(vd) vd.addEventListener('change', function(){ _tbDate = this.value || tbToday(); tbRenderAll(); });
+    const vt = document.getElementById('tbViewToday');
+    if(vt) vt.addEventListener('click', function(){ _tbDate = tbToday(); tbRenderAll(); });
 
     const pb = document.getElementById('tbPrintBtn');
     if(pb) pb.addEventListener('click', tbPrintReport);
