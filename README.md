@@ -165,6 +165,7 @@ offers — take only the config values from it.
 | `README.md`, `SETUP.md`, `DEVELOPER_REFERENCE.md` | documentation |
 | `firestore.rules` | paste into the Firebase console; never served |
 | `test.html`, `test_petreco.html`, `test_plant.html`, `test_tb.html`, `firebase-stub.js` | offline test harness |
+| `import_history.html` | one-off daily-history import — **run locally, do not deploy** |
 | `test_hist.html`, `test_hist_rg.html` | the same harness seeded with ~120 generated days across five months — what the daily record is tested against |
 | `test_build.py`, `test_build_hist.py` | regenerate the harnesses; run after every edit to `index.html` |
 
