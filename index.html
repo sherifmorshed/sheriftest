@@ -532,6 +532,38 @@ table.tb-tbl .tb-din{max-width:88px;}
 .tb-modal-bd .zt td.gain{color:var(--green);font-weight:800;}
 .tb-modal-bd .zt td.loss{color:var(--red);font-weight:800;}
 .tb-modal-bd .zt td.na{color:var(--muted);}
+/* ── PETRECO scanners ────────────────────────────────────────────────
+   Two periods a day and five meters, so a plain table rather than the tank
+   batteries' nine-row panels. A period is a quantity for those twelve hours,
+   not a meter reading — nothing here is differenced. */
+.pf-sec{background:var(--card);border:1px solid var(--border);border-radius:14px;
+  box-shadow:var(--shadow);overflow:hidden;margin-top:16px;}
+.pf-h{font-size:12px;letter-spacing:1px;text-transform:uppercase;font-weight:800;
+  color:var(--accent2);padding:12px 15px 0;}
+.pf-wrap{overflow-x:auto;padding:8px 12px 13px;-webkit-overflow-scrolling:touch;}
+.pf-sec table{width:100%;border-collapse:collapse;font-family:var(--font-num);
+  font-size:13.5px;font-variant-numeric:tabular-nums;min-width:520px;}
+.pf-sec th{font-size:10px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);
+  padding:8px 7px;text-align:center;border-bottom:2px solid var(--border);white-space:nowrap;}
+.pf-sec th.row{text-align:left;color:var(--text);font-size:13.5px;text-transform:none;
+  letter-spacing:0;font-weight:800;white-space:nowrap;}
+.pf-sec td{padding:7px 7px;text-align:center;border-bottom:1px solid var(--border);}
+.pf-sec td.dim,.pf-sec td.na{color:var(--muted);}
+.pf-sec td.gain{color:var(--green);font-weight:800;}
+.pf-sec td.loss{color:var(--red);font-weight:800;}
+.pf-sec td.rg-calc{font-weight:800;color:var(--s3);}
+.pf-sec tr.tot td,.pf-sec tr.tot th{border-top:2px solid var(--border);font-weight:800;
+  background:rgba(148,163,184,.09);}
+.pf-sec .rg-in{width:100%;max-width:120px;}
+.pf-remarks{width:100%;background:var(--surface);border:1.5px solid var(--border);
+  border-radius:12px;color:var(--text);padding:11px 13px;font-family:inherit;
+  font-size:14px;line-height:1.5;resize:vertical;}
+.pf-remarks:focus{outline:none;border-color:var(--accent2);}
+@media (max-width:560px){
+  .pf-sec table{font-size:12px;min-width:460px;}
+  .pf-sec th.row{font-size:12px;}
+  .pf-sec td{padding:6px 4px;}
+}
 .tb-heat{overflow-x:auto;margin-top:10px;-webkit-overflow-scrolling:touch;}
 /* Sized to the page rather than to its contents: 90% of the available width,
    centred, so the figures are readable across a room. */
@@ -727,6 +759,27 @@ document.addEventListener('click', function(e){
     <div id="rgHistory"></div>
     <div class="rg-actions" id="rgHistActions">
       <button class="rg-btn rg-btn-primary" id="rgHistPrintBtn"><svg class="ico" aria-hidden="true"><use href="#i-print"/></svg> Print daily record</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PETRECO SCANNERS ══════════════════════════════════════════════ -->
+<div id="page-pf" style="display:none;">
+  <div class="page-hdr">
+    <h2><svg class="ico ico-h" aria-hidden="true"><use href="#i-plant"/></svg> PETRECO Scanners</h2>
+    <p id="pfSubtitle"></p>
+  </div>
+  <div style="padding:12px 14px 30px;">
+    <div class="rg-bar">
+      <label class="rg-lbl" for="pfDate">Shift day</label>
+      <input type="date" id="pfDate" class="rg-date">
+      <button class="rg-btn" id="pfToday">Today</button>
+      <span class="rg-saved" id="pfSaved"></span>
+    </div>
+    <div id="pfArea"></div>
+    <div id="pfRemarksWrap">
+      <div class="rg-sec-title">Remarks</div>
+      <textarea id="pfRemarks" class="pf-remarks" rows="3"></textarea>
     </div>
   </div>
 </div>
@@ -1148,8 +1201,12 @@ function _roleOf(email){
 // listener for a collection the signed-in role cannot read.
 function _tabsFor(){
   if(isTankBat && !isAdmin) return ['tb'];
-  if((isRasGara || isPetreco) && !isAdmin) return ['rg'];
-  return ['rg','tb'];   // admin, and read-only viewers
+  // PETRECO run the central processing facility, so they also record its own
+  // scanners — the tank batteries feed them, and what arrives is not what any
+  // one battery sent.
+  if(isPetreco && !isAdmin)  return ['rg','pf'];
+  if(isRasGara && !isAdmin)  return ['rg'];
+  return ['rg','tb','pf'];   // admin, and read-only viewers
 }
 function _mayOpen(tab){ return _tabsFor().indexOf(tab) !== -1; }
 
@@ -1158,7 +1215,8 @@ const _TAB_DEF = {
   // R/G = Ras Gara. The tab used to read just "Production", which said nothing
   // about which side of the field it covered once a second one existed.
   rg: { page:'page-rasgara', icon:'plant', label:'R/G Production' },
-  tb: { page:'page-tb',      icon:'tank',  label:'Tank Batteries' }
+  tb: { page:'page-tb',      icon:'tank',  label:'Tank Batteries' },
+  pf: { page:'page-pf',      icon:'plant', label:'PETRECO Scanners' }
 };
 
 function showTab(tab){
@@ -1176,6 +1234,7 @@ function showTab(tab){
   // a display:none container came out sized zero. Redraw on the way in.
   if(tab === 'rg' && typeof window.refreshRasGaraPage === 'function') window.refreshRasGaraPage();
   if(tab === 'tb' && typeof window.refreshTankBatteriesPage === 'function') window.refreshTankBatteriesPage();
+  if(tab === 'pf' && typeof window.refreshPetrecoPage === 'function') window.refreshPetrecoPage();
 }
 
 function _renderTabs(){
@@ -1229,6 +1288,10 @@ function showApp(user){
     if(typeof window.refreshTankBatteriesPage   === 'function') window.refreshTankBatteriesPage();
     if(typeof window.startTankBatteriesListener === 'function') window.startTankBatteriesListener();
   }
+  if(_mayOpen('pf')){
+    if(typeof window.refreshPetrecoPage   === 'function') window.refreshPetrecoPage();
+    if(typeof window.startPetrecoListener === 'function') window.startPetrecoListener();
+  }
 }
 
 function showLogin(){
@@ -1236,6 +1299,7 @@ function showLogin(){
   isTankBat = false; tbBattery = null;
   if(typeof window.stopRasGaraListener       === 'function') window.stopRasGaraListener();
   if(typeof window.stopTankBatteriesListener === 'function') window.stopTankBatteriesListener();
+  if(typeof window.stopPetrecoListener       === 'function') window.stopPetrecoListener();
   // Otherwise the next sign-in inherits the last account's footer line —
   // including an error it has nothing to do with.
   if(typeof resetCloudStatus === 'function') resetCloudStatus();
@@ -2746,7 +2810,10 @@ document.addEventListener('DOMContentLoaded', function(){
     { id:'tb6_2',  name:'T.B. 6/2',  start:5 },
     { id:'tb8_1',  name:'T.B. 8/1',  start:5 },
     { id:'tb8_2',  name:'T.B. 8/2',  start:5 },
-    { id:'tb10_1', name:'T.B. 10/1', start:6 }
+    // `wUnit` — 10/1's operators read wellhead pressure in bar; the Belayim
+    // four read psi. Display only: WHP is never summed or compared across
+    // batteries, so the two units never meet in one figure.
+    { id:'tb10_1', name:'T.B. 10/1', start:6, wUnit:'bar' }
   ];
   // ►►►► THE TWO GROUPS. This is a fact about the FIELD, not a display choice.
   //
@@ -2823,6 +2890,10 @@ document.addEventListener('DOMContentLoaded', function(){
   function tbById(id){
     for(let i = 0; i < TB_LIST.length; i++) if(TB_LIST[i].id === id) return TB_LIST[i];
     return null;
+  }
+  function tbWUnit(b){
+    if(typeof b === 'string') b = tbById(b);
+    return (b && b.wUnit) ? b.wUnit : 'psi';
   }
   function tbStart(b){
     if(typeof b === 'string') b = tbById(b);
@@ -3170,7 +3241,7 @@ document.addEventListener('DOMContentLoaded', function(){
           '<th>Time</th>' +
           '<th class="rg-grp">Scanner<br>m³</th>' +
           '<th class="tb-grp3">Production<br>m³/3h</th>' +
-          '<th class="rg-grp2">WHP<br>psi</th>' +
+          '<th class="rg-grp2">WHP<br>' + escHtml(tbWUnit(b)) + '</th>' +
         '</tr></thead><tbody>' + rows + '</tbody></table></div></div>' +
     '</div>';
   }
@@ -4194,13 +4265,39 @@ document.addEventListener('DOMContentLoaded', function(){
       const rt = rgFor(dateStr), ry = rgFor(y);
       if(rt && (rt.pTotal != null || rt.rTotal != null)){
         let rows = '';
-        rows += row('PETRECO', rt.pTotal, ry ? ry.pTotal : null);
-        rows += row('Ras Gara', rt.rTotal, ry ? ry.rTotal : null);
+        // Named for what the figure IS rather than for the meter it came from:
+        // one is what arrived at PETRECO, the other is what Ras Gara sent.
+        rows += row('Received at PETRECO', rt.pTotal, ry ? ry.pTotal : null);
+        rows += row('From Ras Gara', rt.rTotal, ry ? ry.rTotal : null);
         rows += row('Difference', rt.loss, ry ? ry.loss : null, 'tot');
         rgBlock = '<div class="blk"><div class="blk-h">R/G Production</div>' +
           '<table><thead><tr><th class="nm">Meter</th><th>Today</th><th>Yesterday</th>' +
           '<th>Difference</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
       }
+    }
+
+    // ── PETRECO's own scanners ──────────────────────────────────────────
+    // Read through window.__PF__, the same way the R/G figures are read through
+    // window.__RG__ — a view of the module that owns them, not a second copy of
+    // its arithmetic.
+    //
+    // PETRECO records twelve-hour periods, so 'day' adds both and h1/h2 take
+    // one. That maps onto the card's period selector exactly.
+    const PF = window.__PF__;
+    function pfVal(dt, id){
+      if(!PF) return null;
+      if(p === 'day') return PF.meterTotal(dt, id);
+      return PF.period(dt, id, p === 'h1' ? 0 : 1);
+    }
+    function pfSec(dt, grp){
+      if(!PF) return null;
+      let t = null;
+      PF.list.forEach(function(m){
+        if(m.grp !== grp) return;
+        const v = pfVal(dt, m.id);
+        if(v != null) t = (t == null ? 0 : t) + v;
+      });
+      return t;
     }
 
     let blocks = '';
@@ -4218,35 +4315,48 @@ document.addEventListener('DOMContentLoaded', function(){
         '<th>Difference</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
     });
 
+    // Paper is a fixed size and the card now has five sections in it, so the
+    // printed version gets its own measurements rather than the screen's.
+    // MEASURED against A4 — see the figure in CHANGELOG.
+    const Z = forPrint
+      ? { hdP:'10px 14px', h2:17, sub:9.5, dateP:'6px 10px', date:12, bdP:'10px 12px 12px',
+          blkGap:9, blkH:9.5, thP:'5px 7px', th:9, tdP:'5px 7px', td:13, nm:11.5,
+          totTd:13.5, pillP:'3px 8px', pill:11.5, remP:'7px 10px', rem:11 }
+      : { hdP:'16px 20px', h2:22, sub:11.5, dateP:'9px 14px', date:15, bdP:'16px 18px 18px',
+          blkGap:18, blkH:11, thP:'9px 10px', th:10.5, tdP:'11px 10px', td:17, nm:15,
+          totTd:18, pillP:'6px 12px', pill:15, remP:'11px 13px', rem:14 };
     const css =
       '.tbcard{background:' + C.card + ';border:1px solid ' + C.line + ';border-radius:16px;' +
         'overflow:hidden;max-width:820px;margin:0 auto;}' +
-      '.tbcard .hd{background:' + C.head + ';color:' + C.headInk + ';padding:16px 20px;' +
+      '.tbcard .hd{background:' + C.head + ';color:' + C.headInk + ';padding:' + Z.hdP + ';' +
         'display:flex;align-items:center;gap:14px;flex-wrap:wrap;}' +
-      '.tbcard .hd h2{font-size:22px;font-weight:800;letter-spacing:-.02em;margin:0;}' +
-      '.tbcard .hd .sub{font-size:11.5px;letter-spacing:1.4px;font-weight:700;opacity:.88;' +
+      '.tbcard .hd h2{font-size:' + Z.h2 + 'px;font-weight:800;letter-spacing:-.02em;margin:0;}' +
+      '.tbcard .hd .sub{font-size:' + Z.sub + 'px;letter-spacing:1.4px;font-weight:700;opacity:.88;' +
         'text-transform:uppercase;margin-top:3px;}' +
       '.tbcard .hd .date{margin-left:auto;background:rgba(255,255,255,.16);border-radius:10px;' +
-        'padding:9px 14px;font-size:15px;font-weight:800;font-family:ui-monospace,monospace;}' +
-      '.tbcard .bd{padding:16px 18px 18px;}' +
-      '.tbcard .blk + .blk{margin-top:18px;}' +
-      '.tbcard .blk-h{font-size:11px;letter-spacing:1.2px;text-transform:uppercase;' +
-        'color:' + C.mute + ';font-weight:800;margin-bottom:6px;}' +
+        'padding:' + Z.dateP + ';font-size:' + Z.date + 'px;font-weight:800;font-family:ui-monospace,monospace;}' +
+      '.tbcard .bd{padding:' + Z.bdP + ';}' +
+      '.tbcard .blk + .blk{margin-top:' + Z.blkGap + 'px;}' +
+      '.tbcard .blk-h{font-size:' + Z.blkH + 'px;letter-spacing:1.2px;text-transform:uppercase;' +
+        'color:' + C.mute + ';font-weight:800;margin-bottom:4px;}' +
       '.tbcard table{width:100%;border-collapse:collapse;}' +
-      '.tbcard th{background:' + C.band + ';color:' + C.mute + ';font-size:10.5px;letter-spacing:1px;' +
-        'text-transform:uppercase;padding:9px 10px;text-align:center;border-bottom:2px solid ' + C.line + ';}' +
+      '.tbcard th{background:' + C.band + ';color:' + C.mute + ';font-size:' + Z.th + 'px;letter-spacing:1px;' +
+        'text-transform:uppercase;padding:' + Z.thP + ';text-align:center;border-bottom:2px solid ' + C.line + ';}' +
       '.tbcard th.nm{text-align:left;}' +
-      '.tbcard td{padding:11px 10px;text-align:center;border-bottom:1px solid ' + C.line + ';' +
-        'font-family:ui-monospace,monospace;font-size:17px;font-weight:700;color:' + C.ink + ';}' +
-      '.tbcard td.nm{text-align:left;font-size:15px;font-weight:800;font-family:inherit;}' +
+      '.tbcard td{padding:' + Z.tdP + ';text-align:center;border-bottom:1px solid ' + C.line + ';' +
+        'font-family:ui-monospace,monospace;font-size:' + Z.td + 'px;font-weight:700;color:' + C.ink + ';}' +
+      '.tbcard td.nm{text-align:left;font-size:' + Z.nm + 'px;font-weight:800;font-family:inherit;}' +
       '.tbcard td.y{color:' + C.mute + ';font-weight:600;}' +
-      '.tbcard tr.tot td{background:' + C.totalBg + ';font-size:18px;font-weight:800;}' +
-      '.tbcard .pill{display:inline-block;border-radius:9px;padding:6px 12px;font-size:15px;' +
+      '.tbcard tr.tot td{background:' + C.totalBg + ';font-size:' + Z.totTd + 'px;font-weight:800;}' +
+      '.tbcard .pill{display:inline-block;border-radius:9px;padding:' + Z.pillP + ';font-size:' + Z.pill + 'px;' +
         'font-weight:800;color:#fff;font-family:ui-monospace,monospace;white-space:nowrap;}' +
       '.tbcard .pill.up{background:' + C.gain + ';}' +
       '.tbcard .pill.down{background:' + C.loss + ';}' +
       '.tbcard .pill.flat{background:' + C.mute + ';}' +
       '.tbcard .pill.nil{background:transparent;color:' + C.mute + ';font-weight:600;}' +
+      '.tbcard .blk.remarks{border:1px solid ' + C.line + ';border-radius:12px;padding:' + Z.remP + ';' +
+        'background:' + C.totalBg + ';}' +
+      '.tbcard .blk.remarks p{font-size:' + Z.rem + 'px;line-height:1.5;color:' + C.ink + ';margin-top:2px;}' +
       '@media (max-width:560px){' +
         '.tbcard td{font-size:14px;padding:9px 5px;}' +
         '.tbcard td.nm{font-size:12.5px;}' +
@@ -4254,6 +4364,35 @@ document.addEventListener('DOMContentLoaded', function(){
         '.tbcard th{font-size:9px;padding:7px 4px;letter-spacing:.4px;}' +
         '.tbcard .hd h2{font-size:18px;} .tbcard .hd .date{font-size:13px;padding:7px 10px;}' +
       '}';
+
+    // PETRECO scanners — drains, then crude oil, each with its own total.
+    let pfBlocks = '';
+    if(PF){
+      [{ grp:'drain', title:'PETRECO Scanners — drain of the tanks' },
+       { grp:'crude', title:'PETRECO Crude Oil' }].forEach(function(sec){
+        let rows = '', any = false;
+        PF.list.forEach(function(m){
+          if(m.grp !== sec.grp) return;
+          const a = pfVal(dateStr, m.id), b = pfVal(y, m.id);
+          if(a != null || b != null) any = true;
+          rows += row(m.name, a, b);
+        });
+        if(!any) return;
+        rows += row('TOTAL', pfSec(dateStr, sec.grp), pfSec(y, sec.grp), 'tot');
+        pfBlocks += '<div class="blk"><div class="blk-h">' + escHtml(sec.title) + '</div>' +
+          '<table><thead><tr><th class="nm">Scanner</th><th>Today</th><th>Yesterday</th>' +
+          '<th>Difference</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+      });
+    }
+
+    // Remarks, only when there is one. An empty box on a printed report is a
+    // question nobody can answer.
+    let remarksBlock = '';
+    if(PF){
+      const note = (PF.getDay(dateStr).remarks || '').trim();
+      if(note) remarksBlock = '<div class="blk remarks"><div class="blk-h">Remarks</div>' +
+        '<p>' + escHtml(note) + '</p></div>';
+    }
 
     const dt = new Date(dateStr + 'T00:00:00');
     const pretty = ('0' + dt.getDate()).slice(-2) + '/' +
@@ -4263,7 +4402,7 @@ document.addEventListener('DOMContentLoaded', function(){
         '<div><h2>Production Report</h2>' +
         '<div class="sub">PETROBEL · Scanners for ' + TB_PERIODS[p].label + '</div></div>' +
         '<div class="date">' + pretty + '</div>' +
-      '</div><div class="bd">' + blocks + rgBlock + '</div></div>';
+      '</div><div class="bd">' + blocks + pfBlocks + rgBlock + remarksBlock + '</div></div>';
   }
 
   function tbRenderOld(){
@@ -4279,10 +4418,10 @@ document.addEventListener('DOMContentLoaded', function(){
     return '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Production Report ' +
       escHtml(_tbDate) + '</title><style>' +
       '*{box-sizing:border-box;margin:0;padding:0;}' +
-      'body{font-family:Arial,Helvetica,sans-serif;background:#fff;padding:26px;}' +
-      '@page{size:A4 portrait;margin:12mm;}' +
+      'body{font-family:Arial,Helvetica,sans-serif;background:#fff;padding:0;}' +
+      '@page{size:A4 portrait;margin:10mm;}' +
       '@media print{body{padding:0;} tr{break-inside:avoid;} .blk{break-inside:avoid;}}' +
-      '.foot{margin-top:18px;text-align:center;font-size:10px;color:#5d7286;}' +
+      '.foot{margin-top:9px;text-align:center;font-size:8.5px;color:#5d7286;}' +
       '</style></head><body>' + tbOldCardHTML(_tbDate, _tbOldPeriod, true) +
       '<div class="foot">Generated by PETROBEL Sinai Field on ' +
       new Date().toLocaleString('en-GB') + '<br>Powered by Sherif Morshed</div>' +
@@ -5401,6 +5540,394 @@ if('serviceWorker' in navigator){
   });
 }
 
+</script>
+
+<!-- ══ PETRECO SCANNERS ═══════════════════════════════════════════════ -->
+<script>
+// ── PETRECO SCANNERS ────────────────────────────────────────────────────
+// PETRECO is the central processing facility. The tank batteries are early
+// production facilities feeding it; what arrives here is not what any one of
+// them sent, which is why these readings live in their own collection and are
+// never added to a battery's figures.
+//
+// Two things get recorded, both TWICE A DAY on twelve-hour periods:
+//   • Drain of the tanks — 29 BIS, GB #1, GB #3
+//   • Crude oil          — L.O.T.F, M.O.T.F
+//
+// A period is a QUANTITY FOR THOSE TWELVE HOURS, not a meter reading to be
+// differenced. The day total is the two periods added, so unlike the tank
+// batteries there is no opening reading and no boundary to share.
+(function(){
+
+  const PF_START = 6;                 // first period begins 06:00
+  const PF_PERIODS = [
+    { k:0, label:'06:00 → 18:00', short:'06–18' },
+    { k:1, label:'18:00 → 06:00', short:'18–06' }
+  ];
+  // ►►►► THE METERS. `grp` decides which table a meter appears under; the
+  //      order here is the order on screen and on the report card.
+  const PF_LIST = [
+    { id:'p29bis', name:'29 BIS',  grp:'drain' },
+    { id:'pgb1',   name:'GB #1',   grp:'drain' },
+    { id:'pgb3',   name:'GB #3',   grp:'drain' },
+    { id:'plotf',  name:'L.O.T.F', grp:'crude' },
+    { id:'pmotf',  name:'M.O.T.F', grp:'crude' }
+  ];
+  const PF_SECTIONS = [
+    { grp:'drain', title:'Drain of the tanks' },
+    { grp:'crude', title:'PETRECO Crude Oil'  }
+  ];
+
+  const PF_COL  = 'pfReadings';
+  const PF_META = { col:'pfReadingsMeta', doc:'info' };
+  const PF_LS   = 'pf_days_v1';
+  const PF_VERK = 'pf_days_v1__syncver';
+  const PF_BBL  = 6.3;
+
+  let PF_DAYS = {};
+  let _pfDate = pfToday();
+  let _pfMetaUnsub = null, _pfLastTs = 0, _pfFirstSnap = true, _pfSkipNext = false;
+
+  function _pfAdmin(){ return typeof isAdmin   !== 'undefined' && isAdmin; }
+  function _pfOper(){  return typeof isPetreco !== 'undefined' && isPetreco; }
+  function pfCanEdit(){ return _pfAdmin() || _pfOper(); }
+
+  function pfDocId(dateStr, id){ return dateStr + '__' + id; }
+  function pfNum(v){
+    if(v === '' || v == null) return null;
+    const n = parseFloat(v);
+    return isNaN(n) ? null : n;
+  }
+  function pfFmt(v, dp){
+    if(v == null || isNaN(v)) return '—';
+    const p = Math.pow(10, dp == null ? 0 : dp);
+    return (Math.round(v * p) / p).toLocaleString('en-US');
+  }
+  function pfToday(){
+    const now = new Date();
+    if(now.getHours() < PF_START) now.setDate(now.getDate() - 1);
+    return _isoDate(now);
+  }
+  function pfPrevDate(dateStr){
+    const d = new Date(dateStr + 'T00:00:00');
+    d.setDate(d.getDate() - 1);
+    return _isoDate(d);
+  }
+  function pfById(id){
+    for(let i = 0; i < PF_LIST.length; i++) if(PF_LIST[i].id === id) return PF_LIST[i];
+    return null;
+  }
+
+  function pfBlankDay(dateStr){
+    const m = {};
+    PF_LIST.forEach(function(x){ m[x.id] = [null, null]; });
+    return { date:dateStr, meters:m, remarks:'', updatedBy:'', updatedAt:0 };
+  }
+  function pfGetDay(dateStr){
+    const d = PF_DAYS[dateStr];
+    const out = pfBlankDay(dateStr);
+    if(!d) return out;
+    out.remarks  = d.remarks || '';
+    out.updatedBy = d.updatedBy || '';
+    out.updatedAt = d.updatedAt || 0;
+    PF_LIST.forEach(function(x){
+      const v = d.meters && d.meters[x.id];
+      if(!v) return;
+      out.meters[x.id] = [ v[0] == null ? null : Number(v[0]),
+                           v[1] == null ? null : Number(v[1]) ];
+    });
+    return out;
+  }
+  // The day is the two periods added. A period missing is simply not counted —
+  // never treated as zero, which would report a shut-in that did not happen.
+  function pfMeterTotal(dateStr, id){
+    const v = pfGetDay(dateStr).meters[id];
+    let t = null;
+    if(v[0] != null) t = (t == null ? 0 : t) + v[0];
+    if(v[1] != null) t = (t == null ? 0 : t) + v[1];
+    return t;
+  }
+  function pfPeriod(dateStr, id, k){ return pfGetDay(dateStr).meters[id][k]; }
+  function pfSectionTotal(dateStr, grp, k){
+    let t = null;
+    PF_LIST.forEach(function(x){
+      if(x.grp !== grp) return;
+      const v = (k == null) ? pfMeterTotal(dateStr, x.id) : pfPeriod(dateStr, x.id, k);
+      if(v != null) t = (t == null ? 0 : t) + v;
+    });
+    return t;
+  }
+  function pfSaveLocal(){ lsSet(PF_LS, JSON.stringify(PF_DAYS)); }
+  function pfLoadLocal(){
+    try { const raw = lsGet(PF_LS); if(raw) PF_DAYS = JSON.parse(raw) || {}; }
+    catch(e){ console.warn('[PETRECO] local cache unreadable', e); PF_DAYS = {}; }
+  }
+  pfLoadLocal();
+
+  // ── the entry tables ────────────────────────────────────────────────────
+  function pfRenderArea(){
+    const el = document.getElementById('pfArea');
+    if(!el) return;
+    const ed = pfCanEdit();
+    const y  = pfPrevDate(_pfDate);
+    el.innerHTML = PF_SECTIONS.map(function(sec){
+      let rows = '';
+      PF_LIST.forEach(function(x){
+        if(x.grp !== sec.grp) return;
+        let cells = '';
+        PF_PERIODS.forEach(function(p){
+          const v = pfPeriod(_pfDate, x.id, p.k);
+          cells += '<td><input class="rg-in" type="number" inputmode="decimal" step="any" ' +
+            'data-pf="' + escAttr(x.id) + '" data-k="' + p.k + '" ' +
+            'value="' + (v == null ? '' : v) + '"' + (ed ? '' : ' disabled') + '></td>';
+        });
+        const tot = pfMeterTotal(_pfDate, x.id);
+        const yt  = pfMeterTotal(y, x.id);
+        const d   = (tot == null || yt == null) ? null : tot - yt;
+        cells += '<td class="rg-calc">' + pfFmt(tot) + '</td>' +
+                 '<td class="dim">' + pfFmt(yt) + '</td>' +
+                 '<td class="' + (d == null ? 'na' : d > 0 ? 'gain' : d < 0 ? 'loss' : '') + '">' +
+                 (d == null ? '—' : (d > 0 ? '+' : d < 0 ? '−' : '±') + pfFmt(Math.abs(d))) + '</td>';
+        rows += '<tr><th class="row">' + escHtml(x.name) + '</th>' + cells + '</tr>';
+      });
+      // Section total, on the same footing as a tank battery group total.
+      let tcells = '';
+      PF_PERIODS.forEach(function(p){
+        tcells += '<td>' + pfFmt(pfSectionTotal(_pfDate, sec.grp, p.k)) + '</td>';
+      });
+      const st = pfSectionTotal(_pfDate, sec.grp, null);
+      const sy = pfSectionTotal(y, sec.grp, null);
+      const sd = (st == null || sy == null) ? null : st - sy;
+      tcells += '<td class="rg-calc">' + pfFmt(st) + '</td>' +
+                '<td class="dim">' + pfFmt(sy) + '</td>' +
+                '<td class="' + (sd == null ? 'na' : sd > 0 ? 'gain' : sd < 0 ? 'loss' : '') + '">' +
+                (sd == null ? '—' : (sd > 0 ? '+' : sd < 0 ? '−' : '±') + pfFmt(Math.abs(sd))) + '</td>';
+      rows += '<tr class="tot"><th class="row">Total</th>' + tcells + '</tr>';
+
+      let head = '<tr><th class="row">Scanner</th>';
+      PF_PERIODS.forEach(function(p){ head += '<th>' + p.label + '</th>'; });
+      head += '<th class="rg-calc">Day total</th><th>Yesterday</th><th>Difference</th></tr>';
+      return '<div class="pf-sec"><div class="pf-h">' + escHtml(sec.title) + '</div>' +
+        '<div class="pf-wrap"><table><thead>' + head + '</thead><tbody>' + rows +
+        '</tbody></table></div></div>';
+    }).join('');
+  }
+
+  function pfRenderAll(){
+    const inp = document.getElementById('pfDate');
+    if(inp && inp.value !== _pfDate) inp.value = _pfDate;
+    pfRenderArea();
+    const rm = document.getElementById('pfRemarks');
+    if(rm){
+      const day = pfGetDay(_pfDate);
+      if(document.activeElement !== rm) rm.value = day.remarks || '';
+      rm.disabled = !pfCanEdit();
+    }
+    const sv = document.getElementById('pfSaved');
+    const day = pfGetDay(_pfDate);
+    if(sv) sv.textContent = day.updatedAt
+      ? 'last saved ' + new Date(day.updatedAt).toLocaleString('en-GB') +
+        (day.updatedBy ? ' by ' + day.updatedBy : '') : '';
+  }
+  window.refreshPetrecoPage = pfRenderAll;
+
+  // ── editing ─────────────────────────────────────────────────────────────
+  let _pfDirty = {};
+  function pfMarkDirty(id){ _pfDirty[id] = true; }
+  function pfApply(id, k, raw){
+    if(!pfCanEdit()) return;
+    if(!PF_DAYS[_pfDate]) PF_DAYS[_pfDate] = pfBlankDay(_pfDate);
+    const day = PF_DAYS[_pfDate];
+    if(!day.meters) day.meters = {};
+    if(!day.meters[id]) day.meters[id] = [null, null];
+    day.meters[id][k] = pfNum(raw);
+    pfMarkDirty(id);
+    pfSaveLocal();
+  }
+  function pfApplyRemarks(text){
+    if(!pfCanEdit()) return;
+    if(!PF_DAYS[_pfDate]) PF_DAYS[_pfDate] = pfBlankDay(_pfDate);
+    PF_DAYS[_pfDate].remarks = text;
+    pfMarkDirty('__remarks');
+    pfSaveLocal();
+  }
+
+  let _pfTimer = null;
+  function pfQueueSave(){ clearTimeout(_pfTimer); _pfTimer = setTimeout(pfPush, 900); }
+
+  async function pfPush(){
+    if(!pfCanEdit()) return;
+    if(typeof db === 'undefined' || !FIREBASE_OK || !currentUser) return;
+    const who = currentUser.name || currentUser.email || 'unknown';
+    const day = PF_DAYS[_pfDate];
+    if(!day) return;
+    const dirty = _pfDirty; _pfDirty = {};
+    if(!Object.keys(dirty).length) return;
+    try {
+      _pfSkipNext = true;
+      for(const id of Object.keys(dirty)){
+        if(id === '__remarks'){
+          await db.collection(PF_COL).doc(pfDocId(_pfDate, 'remarks')).set({
+            date:_pfDate, meter:'remarks', text:day.remarks || '',
+            updatedBy:who, updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge:true });
+          continue;
+        }
+        const v = day.meters[id] || [null, null];
+        await db.collection(PF_COL).doc(pfDocId(_pfDate, id)).set({
+          date:_pfDate, meter:id,
+          v:{ '0': v[0] == null ? null : v[0], '1': v[1] == null ? null : v[1] },
+          updatedBy:who, updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge:true });
+      }
+      const dates = Object.keys(PF_DAYS).sort();
+      await db.collection(PF_META.col).doc(PF_META.doc).set({
+        dates:dates, count:dates.length,
+        updatedAt:firebase.firestore.FieldValue.serverTimestamp(), updatedBy:who
+      }, { merge:true });
+      day.updatedAt = Date.now(); day.updatedBy = who;
+      pfSaveLocal();
+      const sv = document.getElementById('pfSaved');
+      if(sv) sv.textContent = 'saved ' + new Date().toLocaleTimeString('en-GB');
+      pfCloudIdle();
+    } catch(err){
+      Object.keys(dirty).forEach(function(id){ pfMarkDirty(id); });
+      console.error('[PETRECO] save failed', err);
+      showToast('Could not save to cloud: ' + (err.code || err.message), true);
+      pfCloudError(err);
+    }
+  }
+
+  // ── cloud ───────────────────────────────────────────────────────────────
+  function pfCloud(st, txt){
+    if(typeof updateCloudStatus === 'function') updateCloudStatus(st, txt, 'pf');
+  }
+  function pfCloudIdle(){
+    const n = Object.keys(PF_DAYS).length;
+    if(!navigator.onLine){ pfCloud('offline', 'Offline — showing ' + n + ' saved PETRECO day(s)'); return; }
+    pfCloud('synced', n ? n + ' PETRECO day(s)' : 'no PETRECO readings yet');
+  }
+  function pfCloudError(err){
+    const code = (err && (err.code || err.message)) || 'unknown';
+    pfCloud('error', code === 'permission-denied'
+      ? 'Cloud refused the PETRECO scanners — publish firestore.rules'
+      : 'PETRECO cloud error: ' + code);
+    console.error('[Firestore]', err);
+  }
+  function pfStart(){
+    pfStop();
+    if(typeof db === 'undefined' || typeof FIREBASE_OK === 'undefined' || !FIREBASE_OK){
+      pfCloud('error', 'No cloud connection'); return;
+    }
+    pfCloud('syncing', 'Connecting…');
+    _pfMetaUnsub = db.collection(PF_META.col).doc(PF_META.doc).onSnapshot(async function(doc){
+      if(doc.metadata && doc.metadata.hasPendingWrites && !(doc.data() && doc.data().updatedAt)) return;
+      if(!doc.exists){ _pfFirstSnap = false; pfCloudIdle(); pfRenderAll(); return; }
+      const data = doc.data() || {};
+      const ts = data.updatedAt ? data.updatedAt.toMillis() : 0;
+      const isFirst = _pfFirstSnap; _pfFirstSnap = false;
+      if(!isFirst && ts === _pfLastTs) return;
+      _pfLastTs = ts;
+      if(_pfSkipNext){ _pfSkipNext = false; setSyncedVersion(PF_VERK, ts); pfCloudIdle(); return; }
+      if(isCacheCurrent(PF_VERK, ts, Object.keys(PF_DAYS).length > 0)){
+        pfRenderAll(); pfCloudIdle(); return;
+      }
+      pfCloud('syncing', 'Loading PETRECO scanners…');
+      try {
+        const snap = await db.collection(PF_COL).get();
+        const obj = {};
+        snap.forEach(function(dd){
+          const x = dd.data() || {};
+          const date = x.date || String(dd.id).split('__')[0];
+          if(!date) return;
+          if(!obj[date]) obj[date] = pfBlankDay(date);
+          if(x.meter === 'remarks'){ obj[date].remarks = x.text || ''; }
+          else if(x.meter && obj[date].meters[x.meter]){
+            obj[date].meters[x.meter] = [ x.v && x.v['0'] != null ? Number(x.v['0']) : null,
+                                          x.v && x.v['1'] != null ? Number(x.v['1']) : null ];
+          }
+          const t = (x.updatedAt && x.updatedAt.toMillis) ? x.updatedAt.toMillis() : 0;
+          if(t > (obj[date].updatedAt || 0)){ obj[date].updatedAt = t; obj[date].updatedBy = x.updatedBy || ''; }
+        });
+        PF_DAYS = obj;
+        pfSaveLocal();
+        setSyncedVersion(PF_VERK, ts);
+        pfRenderAll();
+        pfCloudIdle();
+      } catch(err){ pfCloudError(err); }
+    }, function(err){ pfCloudError(err); });
+  }
+  function pfStop(){
+    if(_pfMetaUnsub){ _pfMetaUnsub(); _pfMetaUnsub = null; }
+    _pfFirstSnap = true; _pfLastTs = 0;
+  }
+  window.startPetrecoListener = pfStart;
+  window.stopPetrecoListener  = pfStop;
+  window.addEventListener('offline', function(){ if(currentUser && _pfMetaUnsub) pfCloudIdle(); });
+  window.addEventListener('online',  function(){ if(currentUser && _pfMetaUnsub) pfCloudIdle(); });
+
+  // ── wiring ──────────────────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', function(){
+    const dt = document.getElementById('pfDate');
+    if(dt){ dt.value = _pfDate;
+      dt.addEventListener('change', function(){ _pfDate = this.value || pfToday(); pfRenderAll(); }); }
+    const td = document.getElementById('pfToday');
+    if(td) td.addEventListener('click', function(){ _pfDate = pfToday(); pfRenderAll(); });
+    const area = document.getElementById('pfArea');
+    if(area){
+      area.addEventListener('input', function(e){
+        const t = e.target;
+        if(!t || !t.getAttribute || !t.getAttribute('data-pf')) return;
+        pfApply(t.getAttribute('data-pf'), Number(t.getAttribute('data-k')), t.value);
+        t.classList.add('rg-dirty');
+        pfRepaint();
+        pfQueueSave();
+      });
+    }
+    const rm = document.getElementById('pfRemarks');
+    if(rm){
+      rm.addEventListener('input', function(){ pfApplyRemarks(this.value); pfQueueSave(); });
+    }
+    pfRenderAll();
+  });
+
+  // Repaint only the derived cells, so the box being typed in is left alone.
+  function pfRepaint(){
+    const y = pfPrevDate(_pfDate);
+    document.querySelectorAll('#pfArea .pf-sec').forEach(function(sec, si){
+      const grp = PF_SECTIONS[si].grp;
+      const trs = sec.querySelectorAll('tbody tr');
+      let r = 0;
+      PF_LIST.forEach(function(x){
+        if(x.grp !== grp) return;
+        const tr = trs[r++]; if(!tr) return;
+        const tot = pfMeterTotal(_pfDate, x.id), yt = pfMeterTotal(y, x.id);
+        const d = (tot == null || yt == null) ? null : tot - yt;
+        tr.children[3].textContent = pfFmt(tot);
+        tr.children[4].textContent = pfFmt(yt);
+        tr.children[5].className = (d == null ? 'na' : d > 0 ? 'gain' : d < 0 ? 'loss' : '');
+        tr.children[5].textContent = (d == null ? '—' : (d > 0 ? '+' : d < 0 ? '−' : '±') + pfFmt(Math.abs(d)));
+      });
+      const tr = trs[r]; if(!tr) return;
+      PF_PERIODS.forEach(function(p){
+        tr.children[1 + p.k].textContent = pfFmt(pfSectionTotal(_pfDate, grp, p.k));
+      });
+      const st = pfSectionTotal(_pfDate, grp, null), sy = pfSectionTotal(y, grp, null);
+      const sd = (st == null || sy == null) ? null : st - sy;
+      tr.children[3].textContent = pfFmt(st);
+      tr.children[4].textContent = pfFmt(sy);
+      tr.children[5].className = (sd == null ? 'na' : sd > 0 ? 'gain' : sd < 0 ? 'loss' : '');
+      tr.children[5].textContent = (sd == null ? '—' : (sd > 0 ? '+' : sd < 0 ? '−' : '±') + pfFmt(Math.abs(sd)));
+    });
+  }
+
+  window.__PF__ = { list:PF_LIST, sections:PF_SECTIONS, periods:PF_PERIODS,
+                    days:function(){ return PF_DAYS; }, getDay:pfGetDay,
+                    meterTotal:pfMeterTotal, period:pfPeriod, sectionTotal:pfSectionTotal,
+                    fmt:pfFmt, today:pfToday, byId:pfById,
+                    setDate:function(d){ _pfDate = d; pfRenderAll(); },
+                    get date(){ return _pfDate; } };
+})();
 </script>
 </body>
 </html>

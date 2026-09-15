@@ -1,6 +1,6 @@
 # Sinai Field — start here
 
-**Attach `sinai-field-v11.zip` to the new chat and paste the block below as your
+**Attach `sinai-field-v12.zip` to the new chat and paste the block below as your
 first message.** Everything Claude needs is in the zip; nothing from any other
 conversation is required.
 
@@ -16,7 +16,7 @@ conversation is required.
 > The attached zip is the whole project. Read `README.md`, then
 > `DEVELOPER_REFERENCE.md`, then `CHANGELOG.md` before changing anything.
 >
-> Current release: **v11**, service-worker cache `sinai-field-v11`.
+> Current release: **v12**, service-worker cache `sinai-field-v12`.
 >
 > How I work: show me the change, test it before you say it is done, and tell me
 > plainly when something I asked for is a bad idea.
@@ -46,7 +46,7 @@ columns), and `tb10-1@`…`tb8-2@petrobel.org` (each sees one tank battery only)
   ```
 - `firestore.rules` is the real access control. The e-mail lists in `index.html`
   only decide what the screen offers. Change them together.
-- Ten files get deployed; `README.md` lists exactly which. Everything else is
+- Twelve files get deployed; `README.md` lists exactly which. Everything else is
   documentation or the offline test harness — do not upload those.
 
 ## The two tabs

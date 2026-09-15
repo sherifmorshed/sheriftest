@@ -150,6 +150,25 @@ service cloud.firestore {
       allow write: if isAdmin() || isTankBattery();
     }
 
+    // ── PETRECO scanners: one document per meter per day ──────────
+    //
+    //  PETRECO is the central processing facility. These are its own readings —
+    //  tank drains and crude oil, twice a day on twelve-hour periods — and they
+    //  are nothing to do with any single tank battery, so a tank battery
+    //  operator has no business here.
+    //
+    //  Document id is `2026-09-14__pgb1`; `2026-09-14__remarks` holds the day's
+    //  note. Unlike the tank batteries there is no per-meter split of access:
+    //  PETRECO's operators record all of their own facility's meters.
+    match /pfReadings/{docId} {
+      allow read:  if isAdmin() || isPetreco();
+      allow write: if isAdmin() || isPetreco();
+    }
+    match /pfReadingsMeta/{docId} {
+      allow read:  if isAdmin() || isPetreco();
+      allow write: if isAdmin() || isPetreco();
+    }
+
     // ── Deny everything else ──────────────────────────────────────
     // Including any collection a future feature adds: it will fail loudly here
     // rather than quietly inheriting someone else's permissions.
