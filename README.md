@@ -145,6 +145,7 @@ rather than a white field — so a derived number never looks like an empty inpu
 |---|---|---|
 | `index.html` | 84 KB | everything: markup, styles, logic |
 | `sw.js` | 4 KB | offline cache — **bump `CACHE_NAME` every release** |
+| `xlsx.full.min.js` | 861 KB | reads the history workbook. Deployed but **not** precached — loaded on demand by the admin import only |
 | `manifest.json` | 1 KB | makes it installable |
 | `icon.png`, `icon-192.png` | 64 KB | home-screen icon |
 | `firebase-app-compat.js` | 32 KB | ┐ |
@@ -165,7 +166,7 @@ offers — take only the config values from it.
 | `README.md`, `SETUP.md`, `DEVELOPER_REFERENCE.md` | documentation |
 | `firestore.rules` | paste into the Firebase console; never served |
 | `test.html`, `test_petreco.html`, `test_plant.html`, `test_tb.html`, `firebase-stub.js` | offline test harness |
-| `import_history.html` | one-off daily-history import — **run locally, do not deploy** |
+
 | `test_hist.html`, `test_hist_rg.html` | the same harness seeded with ~120 generated days across five months — what the daily record is tested against |
 | `test_build.py`, `test_build_hist.py` | regenerate the harnesses; run after every edit to `index.html` |
 

@@ -172,6 +172,16 @@ body.light-mode .login-card{ border-top:4px solid var(--gold); }
 .login-field label{ display:block; font-size:10px; letter-spacing:1px; text-transform:uppercase;
   color:var(--muted); font-family:var(--font-num); margin-bottom:6px; }
 .login-field input{ width:100%; }
+/* Password reveal. A long password typed on a phone keyboard with nothing but
+   dots to check it against is how people end up locked out. */
+.pw-wrap{ position:relative; }
+.pw-wrap input{ padding-right:46px; }
+.pw-btn{ position:absolute; right:6px; top:50%; transform:translateY(-50%);
+  background:transparent; border:0; color:var(--muted); cursor:pointer; padding:7px;
+  display:flex; align-items:center; border-radius:8px; }
+.pw-btn:hover{ color:var(--text); }
+.pw-btn.on{ color:var(--accent2); }
+.pw-btn .ico{ width:19px; height:19px; }
 .login-btn{
   width:100%; background:var(--accent); color:var(--on-accent); border:1px solid var(--accent);
   border-radius:11px; padding:13px; font-size:15px; font-weight:700; letter-spacing:.3px;
@@ -466,13 +476,72 @@ table.tb-tbl .tb-din{max-width:88px;}
 .tb-days .tag{font-size:9px;color:var(--gold);border:1px solid var(--gold);border-radius:3px;
   padding:0 3px;font-weight:700;}
 .tb-days .tag.imp{color:var(--muted);border-color:var(--border);}
-.tb-heat{overflow-x:auto;margin-top:10px;}
+/* Import panel. Admin only, and used perhaps once a month, so it sits at the
+   bottom of the page and stays quiet until it is given a file. */
+.tb-imp{background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:14px 16px;margin-top:10px;}
+.tb-imp p{font-size:12.5px;color:var(--muted);margin-bottom:11px;line-height:1.55;}
+.tb-imp label.rg-btn{display:inline-flex;}
+.tb-imp .fname{font-size:12px;color:var(--muted);margin-left:10px;font-family:var(--font-num);}
+.tb-imp .sum{margin-top:13px;font-size:13px;}
+.tb-imp .sum b{color:var(--text);}
+.tb-imp .warn{border:1px solid var(--red);background:rgba(220,38,38,.08);color:var(--red);
+  border-radius:8px;padding:8px 11px;margin-top:9px;font-size:12px;line-height:1.5;}
+.tb-imp .note2{border:1px solid var(--gold);background:rgba(202,138,4,.08);color:var(--gold);
+  border-radius:8px;padding:8px 11px;margin-top:9px;font-size:12px;line-height:1.5;}
+.tb-period{background:var(--surface);border:1.5px solid var(--border);border-radius:10px;
+  color:var(--text);padding:9px 11px;font-family:inherit;font-size:13px;font-weight:600;}
+.tb-imp select{background:var(--surface);border:1.5px solid var(--border);border-radius:9px;
+  color:var(--text);padding:8px 10px;font-family:inherit;font-size:13px;margin-right:9px;}
+.tb-imp .prog{font-family:var(--font-num);font-size:12px;color:var(--muted);margin-top:9px;}
+/* The grid has ten columns. On a phone, ten columns of a 90%-wide table are
+   about 30px each and a five-figure number simply does not fit in one — it
+   spilled over its cell. A minimum width keeps every number inside its own
+   cell and lets the table scroll the small amount it needs instead, and the
+   type steps down so that amount stays small. */
+/* A chart is a shape, not a figure. Tapping one opens it larger WITH the
+   numbers written out, because reading a value off a bar is guesswork and the
+   people using this page are reconciling production. */
+.tb-zoomable{position:relative;cursor:pointer;border-radius:12px;}
+.tb-zoomable:hover{box-shadow:0 0 0 2px var(--accent2);}
+.tb-zoomable:focus-visible{outline:2px solid var(--accent2);outline-offset:2px;}
+.tb-zoomable .zoom-tag{position:absolute;right:9px;top:7px;display:inline-flex;align-items:center;
+  gap:5px;font-size:10px;font-weight:700;color:var(--muted);background:var(--card);
+  border:1px solid var(--border);border-radius:8px;padding:3px 7px;pointer-events:none;}
+.tb-zoomable .zoom-tag .ico{width:12px;height:12px;}
+.tb-modal{position:fixed;inset:0;background:rgba(8,15,22,.72);z-index:120;display:flex;
+  align-items:center;justify-content:center;padding:16px;}
+.tb-modal-box{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  width:100%;max-width:940px;max-height:92vh;display:flex;flex-direction:column;
+  box-shadow:0 20px 60px rgba(0,0,0,.45);}
+.tb-modal-hd{display:flex;align-items:center;gap:12px;padding:14px 16px;
+  border-bottom:1px solid var(--border);}
+.tb-modal-hd h3{font-size:16px;font-weight:800;color:var(--text);}
+.tb-modal-x{margin-left:auto;background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;color:var(--muted);padding:8px;cursor:pointer;display:flex;}
+.tb-modal-x:hover{color:var(--text);}
+.tb-modal-x .ico{width:18px;height:18px;}
+.tb-modal-bd{padding:14px 16px 18px;overflow:auto;}
+.tb-modal-bd .zt{width:100%;border-collapse:collapse;margin-top:14px;
+  font-family:var(--font-num);font-size:13px;font-variant-numeric:tabular-nums;}
+.tb-modal-bd .zt th{background:var(--surface);color:var(--muted);font-size:10px;letter-spacing:.6px;
+  text-transform:uppercase;padding:8px 9px;border-bottom:2px solid var(--border);text-align:center;}
+.tb-modal-bd .zt th:first-child,.tb-modal-bd .zt td:first-child{text-align:left;white-space:nowrap;}
+.tb-modal-bd .zt td{padding:8px 9px;text-align:center;border-bottom:1px solid var(--border);}
+.tb-modal-bd .zt tr:nth-child(even) td{background:rgba(148,163,184,.05);}
+.tb-modal-bd .zt td.gain{color:var(--green);font-weight:800;}
+.tb-modal-bd .zt td.loss{color:var(--red);font-weight:800;}
+.tb-modal-bd .zt td.na{color:var(--muted);}
+.tb-heat{overflow-x:auto;margin-top:10px;-webkit-overflow-scrolling:touch;}
 /* Sized to the page rather than to its contents: 90% of the available width,
    centred, so the figures are readable across a room. */
 .tb-heat table{border-collapse:separate;border-spacing:5px;font-family:var(--font-num);
   font-size:15px;width:90%;margin:0 auto;table-layout:fixed;}
 .tb-heat table thead th:first-child{width:165px;}
 .tb-heat table th.row{padding-right:12px;}
+.tb-heat table tr:first-child th:first-child{width:120px;}
+  .tb-heat tr.hrow th{font-size:9.5px;padding:8px 2px 3px;}
+}
 .tb-heat th{font-size:11.5px;color:var(--muted);font-weight:700;padding:4px 6px;white-space:nowrap;
   letter-spacing:.4px;text-transform:uppercase;}
 /* A clock header sits directly above the batteries that run it. Spaced away
@@ -486,6 +555,23 @@ table.tb-tbl .tb-din{max-width:88px;}
   background:var(--surface);color:var(--text);font-variant-numeric:tabular-nums;font-weight:700;}
 .tb-heat td.na{color:var(--muted);}
 .tb-heat td.rst{outline:2px solid var(--red);color:var(--red);font-weight:700;}
+
+/* On a phone the columns are given back to the CONTENT. `table-layout:fixed`
+   divides the width evenly whatever is in the cells, so a five-figure number
+   in a 30px column simply spills out of it — which is what happened. Sized to
+   content, no cell can be too small for what it holds, and the grid scrolls the
+   little it needs inside its own box without dragging the page sideways. */
+@media (max-width:760px){
+  .tb-heat table{table-layout:auto;width:auto;min-width:100%;font-size:12px;border-spacing:3px;}
+  .tb-heat table tr:first-child th:first-child{width:auto;}
+  .tb-heat td{padding:9px 6px;min-width:0;}
+  .tb-heat th.row{font-size:11px;padding-right:5px;}
+  .tb-heat tr.hrow th{font-size:10px;padding:9px 3px 3px;letter-spacing:0;}
+}
+@media (max-width:420px){
+  .tb-heat table{font-size:10.5px;border-spacing:2px;}
+  .tb-heat td{padding:7px 3px;border-radius:5px;}
+  .tb-heat th.row{font-size:10px;padding-right:3px;}
 .tb-legend{display:flex;gap:12px;align-items:center;font-size:10.5px;color:var(--muted);margin-top:7px;flex-wrap:wrap;}
 .tb-legend .bar{width:76px;height:9px;border-radius:3px;
   background:linear-gradient(90deg,rgba(220,38,38,.55),rgba(148,163,184,.18),rgba(22,163,74,.55));}
@@ -509,6 +595,11 @@ table.tb-tbl .tb-din{max-width:88px;}
 <symbol id="i-refresh" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v4.5h-4.5"/></g></symbol>
 <symbol id="i-warn" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 21 19.5H3z"/><path d="M12 9.5v4.2"/><path d="M12 16.8h.01"/></g></symbol>
 <symbol id="i-sun" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.6V5"/><path d="M12 19v2.4"/><path d="M2.6 12H5"/><path d="M19 12h2.4"/><path d="m5.6 5.6 1.7 1.7"/><path d="m16.7 16.7 1.7 1.7"/><path d="m18.4 5.6-1.7 1.7"/><path d="m7.3 16.7-1.7 1.7"/></g></symbol>
+<symbol id="i-eye" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/></g></symbol>
+<symbol id="i-eye-off" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 5.8A9.6 9.6 0 0 1 12 5.5c6 0 9.5 6.5 9.5 6.5a17 17 0 0 1-3 3.8"/><path d="M6.5 7.7A17 17 0 0 0 2.5 12S6 18.5 12 18.5a9.4 9.4 0 0 0 3.6-.7"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/><path d="m3.5 3.5 17 17"/></g></symbol>
+<symbol id="i-expand" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V5a1 1 0 0 1 1-1h4"/><path d="M20 9V5a1 1 0 0 0-1-1h-4"/><path d="M4 15v4a1 1 0 0 0 1 1h4"/><path d="M20 15v4a1 1 0 0 1-1 1h-4"/></g></symbol>
+<symbol id="i-close" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6 18 18"/><path d="M18 6 6 18"/></g></symbol>
+<symbol id="i-upload" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/><path d="m7.5 8.5 4.5-4.5 4.5 4.5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></g></symbol>
 <symbol id="i-tank" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><rect x="4" y="7" width="7.5" height="13" rx="1.2"/><rect x="14" y="11" width="6" height="9" rx="1.2"/><path d="M4 11h7.5"/><path d="M14 14.5h6"/><path d="M7.75 7V4.5"/><path d="M6 4.5h3.5"/></g></symbol>
 <symbol id="i-moon" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.2A8.4 8.4 0 0 1 9.8 4 8.5 8.5 0 1 0 20 14.2z"/></g></symbol>
 </defs></svg>
@@ -527,12 +618,49 @@ table.tb-tbl .tb-din{max-width:88px;}
     </div>
     <div class="login-field">
       <label for="loginPassword">Password</label>
-      <input type="password" id="loginPassword" placeholder="Enter password" autocomplete="current-password">
+      <div class="pw-wrap">
+        <input type="password" id="loginPassword" placeholder="Enter password" autocomplete="current-password">
+        <button type="button" id="pwToggle" class="pw-btn" aria-label="Show password" aria-pressed="false">
+          <svg class="ico" aria-hidden="true"><use href="#i-eye"/></svg>
+        </button>
+      </div>
     </div>
     <button class="login-btn" id="loginBtn" onclick="handleLogin()">Sign In</button>
     <div class="login-error" id="loginError"></div>
   </div>
 </div>
+
+<script>
+// Password reveal. In its OWN script block, and delegated from the document,
+// on purpose: it used to sit in the shell block alongside the Firebase boot,
+// and when that boot threw — a bad API key is enough — the listener was never
+// reached and the button did nothing. Nothing here can be taken down by an
+// unrelated failure elsewhere.
+//
+// A long password typed on a phone keyboard with nothing but dots to check it
+// against is how people end up locked out.
+document.addEventListener('click', function(e){
+  // Climb by hand rather than with closest(): a real tap lands on the <svg>
+  // inside the button, and closest() is not dependable from an SVG target
+  // across browsers. A button-sized loop is.
+  let btn = e.target;
+  while(btn && btn !== document && btn.id !== 'pwToggle') btn = btn.parentNode;
+  if(!btn || btn.id !== 'pwToggle') return;
+  const inp = document.getElementById('loginPassword');
+  if(!inp) return;
+  const show = inp.type === 'password';
+  inp.type = show ? 'text' : 'password';
+  btn.classList.toggle('on', show);
+  btn.setAttribute('aria-pressed', show ? 'true' : 'false');
+  btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+  btn.innerHTML = '<svg class="ico" aria-hidden="true"><use href="#i-' +
+                  (show ? 'eye-off' : 'eye') + '"/></svg>';
+  // Changing the type sends the caret to the end, so put it back.
+  const v = inp.value;
+  inp.focus();
+  try { inp.setSelectionRange(v.length, v.length); } catch(err){}
+});
+</script>
 
 <!-- ══ HEADER ════════════════════════════════════════════════════════ -->
 <div class="app-header" id="appHeader" style="display:none;">
@@ -607,7 +735,7 @@ table.tb-tbl .tb-din{max-width:88px;}
 <div id="page-tb" style="display:none;">
   <div class="page-hdr">
     <h2 id="tbHeading"><svg class="ico ico-h" aria-hidden="true"><use href="#i-tank"/></svg> Tank Batteries</h2>
-    <p id="tbSubtitle">Scanner readings every three hours, 05:00 → 05:00, production by difference</p>
+    <p id="tbSubtitle"></p>
   </div>
   <div style="padding:12px 14px 30px;">
 
@@ -639,6 +767,25 @@ table.tb-tbl .tb-din{max-width:88px;}
     </div><!-- /tb-page-entry -->
 
     <!-- ── ADMIN ONLY: the scanners, across days ─────────────────────── -->
+    <!-- ── the card colleagues are used to ──────────────────────────── -->
+    <div id="tb-page-old" style="display:none;">
+      <div class="rg-bar">
+        <label class="rg-lbl" for="tbOldDate">Shift day</label>
+        <input type="date" id="tbOldDate" class="rg-date">
+        <button class="rg-btn" id="tbOldToday">Today</button>
+        <select id="tbOldPeriod" class="tb-period">
+          <option value="day">24 hours</option>
+          <option value="h1">First 12 hours</option>
+          <option value="h2">Second 12 hours</option>
+        </select>
+      </div>
+      <div id="tbOldCard"></div>
+      <div class="rg-actions" id="tbOldActions">
+        <button class="rg-btn rg-btn-primary" id="tbOldPrint"><svg class="ico" aria-hidden="true"><use href="#i-print"/></svg> Print report</button>
+        <button class="rg-btn rg-btn-primary" id="tbOldMail"><svg class="ico" aria-hidden="true"><use href="#i-mail"/></svg> Send by e-mail</button>
+      </div>
+    </div>
+
     <div id="tb-page-view" style="display:none;">
 
       <div class="rg-bar">
@@ -661,6 +808,16 @@ table.tb-tbl .tb-din{max-width:88px;}
 
       <div class="rg-sec-title">Monitoring Production real-time</div>
       <div id="tbHeat"></div>
+
+      <div class="rg-sec-title">Import daily history</div>
+      <div class="tb-imp" id="tbImport">
+        <label class="rg-btn rg-btn-primary" for="tbFile">
+          <svg class="ico" aria-hidden="true"><use href="#i-upload"/></svg> Choose workbook…
+        </label>
+        <input type="file" id="tbFile" accept=".xlsx,.xlsm,.xls,.csv" style="display:none;">
+        <span class="fname" id="tbFileName"></span>
+        <div id="tbImpOut"></div>
+      </div>
 
     <div id="tbHistWrap" style="display:none;">
       <div class="rg-rec-head">
@@ -689,6 +846,20 @@ table.tb-tbl .tb-din{max-width:88px;}
       </div>
     </div>
     </div><!-- /tb-page-view -->
+
+    <!-- Chart detail. One overlay reused by every chart on the page. -->
+    <div class="tb-modal" id="tbModal" style="display:none;" role="dialog" aria-modal="true"
+         aria-labelledby="tbModalTitle">
+      <div class="tb-modal-box">
+        <div class="tb-modal-hd">
+          <h3 id="tbModalTitle"></h3>
+          <button class="tb-modal-x" id="tbModalClose" aria-label="Close">
+            <svg class="ico" aria-hidden="true"><use href="#i-close"/></svg>
+          </button>
+        </div>
+        <div class="tb-modal-bd" id="tbModalBody"></div>
+      </div>
+    </div>
 
   </div>
 </div>
@@ -2800,9 +2971,30 @@ document.addEventListener('DOMContentLoaded', function(){
     }
     return cell;
   }
+  // Days recorded before the boundary was linked can still be missing one end
+  // of it. The reading exists on the neighbouring day, so it is used rather
+  // than leaving an interval unaccounted for. Read-only: it fills the gap on
+  // screen and in the totals, and writes nothing.
+  function tbBoundaryFill(dateStr, out){
+    const prev = TB_DAYS[tbPrevDate(dateStr)];
+    const next = TB_DAYS[tbNextDate(dateStr)];
+    TB_LIST.forEach(function(b){
+      const cell = out.tbs[b.id];
+      if(cell.s[0] == null && prev && prev.tbs && prev.tbs[b.id]){
+        const v = prev.tbs[b.id].s;
+        if(v && v[TB_READS-1] != null) cell.s[0] = v[TB_READS-1];
+      }
+      if(cell.s[TB_READS-1] == null && next && next.tbs && next.tbs[b.id]){
+        const v = next.tbs[b.id].s;
+        if(v && v[0] != null) cell.s[TB_READS-1] = v[0];
+      }
+    });
+    return out;
+  }
+
   function tbGetDay(dateStr){
     const d = TB_DAYS[dateStr];
-    if(!d) return tbBlankDay(dateStr);
+    if(!d) return tbBoundaryFill(dateStr, tbBlankDay(dateStr));
     const out = tbBlankDay(dateStr);
     out.updatedBy = d.updatedBy || '';
     out.updatedAt = d.updatedAt || 0;
@@ -2817,7 +3009,7 @@ document.addEventListener('DOMContentLoaded', function(){
         out.tbs[b.id].d[i] = (src.d && src.d[i] != null) ? src.d[i] : null;
       }
     });
-    return out;
+    return tbBoundaryFill(dateStr, out);
   }
   function tbSaveLocal(){ lsSet(TB_LS, JSON.stringify(TB_DAYS)); }
   function tbLoadLocal(){
@@ -2953,15 +3145,11 @@ document.addEventListener('DOMContentLoaded', function(){
     let notes = '';
     if(c.neg) notes += '<div class="note warn">' + c.neg + ' interval(s) read LOWER than the reading before — ' +
                        'meter reset, rollover or a misread. Check before this day is used.</div>';
-    const prev = tbPrevClose(day.date, b.id);
-    if(prev != null && cell.s[0] != null && Math.abs(prev - cell.s[0]) > 0.0001){
-      notes += '<div class="note warn">Opening ' + tbFmt(cell.s[0],1) +
-               ' does not match yesterday\'s closing ' + tbFmt(prev,1) +
-               ' (' + tbFmt(cell.s[0] - prev, 1) + ' m³ apart).</div>';
-    } else if(prev != null && cell.s[0] == null){
-      notes += '<div class="note">Yesterday closed at <b>' + tbFmt(prev,1) +
-               '</b> m³ — the opening reading should match it.</div>';
-    }
+    // The opening-versus-yesterday's-closing notes were removed. They existed
+    // to tell an operator that the two ends of the shift boundary disagreed —
+    // but the boundary is now ONE reading written to both days, so they cannot
+    // disagree, and the notes were English text explaining a problem that no
+    // longer happens to people who do not read English.
     if(c.dayOnly) notes += '<div class="note">Daily figure only — ' + tbFmt(c.total,1) +
       ' m³ imported from the scanner sheet. No three-hour readings for this day; ' +
       'entering any will replace the imported figure.</div>';
@@ -2969,13 +3157,13 @@ document.addEventListener('DOMContentLoaded', function(){
                                 ' intervals complete — the total below covers those only.</div>';
 
     const totTxt = (c.total == null) ? '—' : tbFmt(c.total, 1);
-    const bsh = tbShiftDates(day.date, b);
+    // No shift-window line on the panel. The times are printed down the left of
+    // the table the operator is filling in, which says the same thing without a
+    // sentence to read.
     return '<div class="tb-panel">' +
       '<div class="bar"></div>' +
       '<div class="hd"><h3>' + escHtml(b.name) + '</h3>' +
         '<div class="tot">' + totTxt + ' <i>m³/d</i></div></div>' +
-      '<div class="note">Shift ' + tbLabel(0, b) + ' ' + escHtml(bsh.from) + ' → ' +
-        tbLabel(0, b) + ' ' + escHtml(bsh.to) + '</div>' +
       notes +
       '<div class="bd"><div class="rg-tbl-wrap"><table class="rg-tbl tb-tbl">' +
         '<thead><tr>' +
@@ -2998,6 +3186,13 @@ document.addEventListener('DOMContentLoaded', function(){
   function tbRenderTotals(){
     const el = document.getElementById('tbTotals');
     if(!el) return;
+    // ADMIN ONLY. An operator's job is the nine readings in front of him, and
+    // the summary above them was worse than merely surplus: an operator holds
+    // only his own battery's data, so a card labelled "Belayim Tank Batteries"
+    // was showing ONE battery's figure under the name of the whole group. His
+    // own day total is on the panel header where he is already looking.
+    if(!_tbAdmin()){ el.innerHTML = ''; el.style.display = 'none'; return; }
+    el.style.display = '';
     const day  = tbGetDay(_tbDate);
     const calc = tbCalcDay(day);
     const seen = tbVisible().some(function(b){ return calc.per[b.id].total != null; });
@@ -3175,15 +3370,18 @@ document.addEventListener('DOMContentLoaded', function(){
   // charts. Admin only — an operator has entry and nothing else, so drawing him
   // a pair of chips he cannot use would be furniture.
   let _tbSub = 'entry';
-  const _TB_SUBS = [ { k:'entry', label:'Entry', icon:'edit' },
-                     { k:'view',  label:'Scanners', icon:'trend' } ];
+  const _TB_SUBS = [ { k:'entry', label:'Entry',       icon:'edit'  },
+                     { k:'view',  label:'Scanners',    icon:'trend' },
+                     { k:'old',   label:'Report card', icon:'print' } ];
   function tbShowSub(k){
     if(!_tbAdmin()) k = 'entry';
     _tbSub = k;
     const e = document.getElementById('tb-page-entry');
     const v = document.getElementById('tb-page-view');
+    const o = document.getElementById('tb-page-old');
     if(e) e.style.display = (k === 'entry') ? '' : 'none';
     if(v) v.style.display = (k === 'view')  ? '' : 'none';
+    if(o) o.style.display = (k === 'old')   ? '' : 'none';
     const bar = document.getElementById('tbSubTabs');
     if(bar) Array.prototype.forEach.call(bar.querySelectorAll('button'), function(b){
       b.classList.toggle('on', b.getAttribute('data-sub') === k);
@@ -3191,6 +3389,7 @@ document.addEventListener('DOMContentLoaded', function(){
     // The charts were written into a hidden container and came out sized zero,
     // the same trap the main tabs have. Redraw on the way in.
     if(k === 'view') tbRenderView();
+    if(k === 'old')  tbRenderOld();
   }
   function tbRenderSubTabs(){
     const bar = document.getElementById('tbSubTabs');
@@ -3281,6 +3480,16 @@ document.addEventListener('DOMContentLoaded', function(){
       if(yest[i] != null) bars += '<rect x="' + (cx - bw - 1).toFixed(1) + '" y="' + sy(Math.max(0,yest[i])).toFixed(1) +
         '" width="' + bw + '" height="' + Math.max(1, y0 - sy(Math.max(0,yest[i]))).toFixed(1) +
         '" rx="2" fill="' + cY + '"/>';
+      if(opt.showValues && today[i] != null)
+        bars += '<text x="' + (cx + 1 + bw/2).toFixed(1) + '" y="' +
+          (sy(Math.max(0,today[i])) - 4).toFixed(1) + '" text-anchor="middle" fill="' + cT +
+          '" font-size="10" font-weight="700" font-family="' + fN + '">' +
+          tbFmt(today[i], 0) + '</text>';
+      if(opt.showValues && yest[i] != null)
+        bars += '<text x="' + (cx - bw - 1 + bw/2).toFixed(1) + '" y="' +
+          (sy(Math.max(0,yest[i])) - 4).toFixed(1) + '" text-anchor="middle" fill="' + cTx +
+          '" font-size="10" font-weight="700" font-family="' + fN + '">' +
+          tbFmt(yest[i], 0) + '</text>';
       if(today[i] != null) bars += '<rect x="' + (cx + 1).toFixed(1) + '" y="' + sy(Math.max(0,today[i])).toFixed(1) +
         '" width="' + bw + '" height="' + Math.max(1, y0 - sy(Math.max(0,today[i]))).toFixed(1) +
         '" rx="2" fill="' + (today[i] < 0 ? cNeg : cT) + '"/>';
@@ -3360,7 +3569,7 @@ document.addEventListener('DOMContentLoaded', function(){
       // deliberately no all-five chart: the two groups do not share a line.
       fieldEl.innerHTML = tbGroupsVisible().map(function(g){
         if(tbGroupList(g).length < 2) return '';   // 10/1 is its own mini below
-        const a = tbGroupCalc(_tbDate, g).iv, b = tbGroupCalc(y, g).iv;
+        const a = tbGroupCalc(_tbDate, g).iv, b = tbGroupCalc(y, g).iv, c0 = b;
         const st = tbGroupList(g)[0];
         const labels = [];
         for(let i = 1; i < TB_READS; i++)
@@ -3368,7 +3577,11 @@ document.addEventListener('DOMContentLoaded', function(){
         return '<div class="tb-mini tb-mini-g"><div class="cap"><h4>' + escHtml(g.name) + '</h4>' +
           '<span class="clk">' + tbGroupList(g).length + ' batteries · shipped to PETRECO</span>' +
           tbDeltaChip(tbSum(a), tbSum(b)) + '</div>' +
-          tbBarChart(labels, a, b, { h:220 }) + '</div>';
+          tbZoomable('iv-' + g.id, g.name + ' — three-hour production',
+            tbBarChart(labels, a, b, { h:220 }),
+            { kind:'bar', axis:'Interval', labels:labels, diff:true,
+              series:[{ name:'Today ' + _tbDate, vals:a },
+                      { name:'Yesterday ' + y, vals:c0 }] }) + '</div>';
       }).join('');
     }
     const grid = document.getElementById('tbIntervalGrid');
@@ -3380,9 +3593,13 @@ document.addEventListener('DOMContentLoaded', function(){
         const solo = tbGroupList(tbGroupOf(b.id)).length < 2;
         return '<div class="tb-mini' + (solo ? ' tb-mini-g' : '') + '"><div class="cap"><h4>' +
           escHtml(b.name) + '</h4>' +
-          '<span class="clk">' + tbLabel(0, b) + ' shift' + (solo ? ' · shipped to PETRECO' : '') + '</span>' +
+          (solo ? '<span class="clk">shipped to PETRECO</span>' : '') +
           tbDeltaChip(tbSum(a), tbSum(c)) + '</div>' +
-          tbBarChart(labels, a, c, { h:170 }) + '</div>';
+          tbZoomable('ivb-' + b.id, b.name + ' — three-hour production',
+            tbBarChart(labels, a, c, { h:170 }),
+            { kind:'bar', axis:'Interval', labels:labels, diff:true,
+              series:[{ name:'Today ' + _tbDate, vals:a },
+                      { name:'Yesterday ' + y, vals:c }] }) + '</div>';
       }).join('');
     }
   }
@@ -3614,7 +3831,568 @@ document.addEventListener('DOMContentLoaded', function(){
     el.innerHTML = html || '<div class="rg-empty">No production recorded for this shift.</div>';
   }
 
+  // ── importing the daily scanner workbook ────────────────────────────────
+  // Columns are found by their HEADINGS, not by position. The sheet's layout
+  // will drift — a column inserted, a block moved — and an import that trusts
+  // column L will one day file the wrong figures under the right battery
+  // without complaining. Matching the heading fails loudly instead.
+  //
+  // The headings are stacked across several merged rows, so each column is
+  // reduced to the joined text of every header row above the DATE row, and the
+  // battery is identified from that.
+  function tbNorm(v){
+    return String(v == null ? '' : v).replace(/\s+/g, ' ').trim().toUpperCase();
+  }
+  // A spreadsheet's declared range is not the data in it. This workbook says
+  // A2:XFD1955 — every one of Excel's 16,384 columns — and asking a converter
+  // for a dense grid of that builds THIRTY-TWO MILLION cells and takes the
+  // browser tab down with it. That is exactly what happened on the first try.
+  //
+  // So the extent is measured from the cells that actually exist rather than
+  // from what the file claims, with a hard cap as a backstop. Only populated
+  // cells are keys on the sheet object, so this is cheap.
+  const TB_MAX_COLS = 128, TB_MAX_ROWS = 60000;
+  function tbSheetGrid(ws){
+    if(!ws || !ws['!ref']) return [];
+    let maxC = 0, maxR = 0;
+    Object.keys(ws).forEach(function(k){
+      if(k.charAt(0) === '!') return;
+      const cell = XLSX.utils.decode_cell(k);
+      if(cell.c > maxC) maxC = cell.c;
+      if(cell.r > maxR) maxR = cell.r;
+    });
+    const dec = XLSX.utils.decode_range(ws['!ref']);
+    const range = { s:{ r:0, c:0 },
+                    e:{ r:Math.min(maxR, dec.e.r, TB_MAX_ROWS - 1),
+                        c:Math.min(maxC, dec.e.c, TB_MAX_COLS - 1) } };
+    return XLSX.utils.sheet_to_json(ws, { header:1, raw:true, defval:null, range:range });
+  }
+  window.__TB_GRID__ = tbSheetGrid;
+
+  function tbParseHistory(grid){
+    const warn = [];
+    // The header row is the one whose first cells contain DATE.
+    let hRow = -1, dCol = -1;
+    for(let r = 0; r < Math.min(30, grid.length) && hRow < 0; r++){
+      for(let c = 0; c < Math.min(8, (grid[r]||[]).length); c++){
+        if(tbNorm(grid[r][c]) === 'DATE'){ hRow = r; dCol = c; break; }
+      }
+    }
+    if(hRow < 0) return { error:'No DATE column found — is this the daily scanner sheet?' };
+
+    // Stack every heading above and including the DATE row, per column.
+    const width = grid.slice(0, hRow + 1).reduce(function(m, r){
+      return Math.max(m, (r||[]).length); }, 0);
+    const stack = [];
+    for(let c = 0; c < width; c++){
+      let t = '';
+      for(let r = 0; r <= hRow; r++) t += ' ' + tbNorm((grid[r]||[])[c]);
+      stack.push(t.replace(/\s+/g, ' ').trim());
+    }
+
+    // Battery columns. TOTAL is excluded explicitly: a total column carries the
+    // same battery names in the block above it and would otherwise match.
+    const want = [
+      { id:'tb6_1',  re:/(^| )6\s*\/\s*1( |$|,)/ },
+      { id:'tb6_2',  re:/(^| )6\s*\/\s*2( |$|,)/ },
+      { id:'tb8_1',  re:/(^| )8\s*\/\s*1( |$|,)/ },
+      { id:'tb8_2',  re:/(^| )8\s*\/\s*2( |$|,)/ },
+      // 10/1 appears twice — the metered column and a gas column. NET OIL is
+      // what distinguishes the one we want.
+      { id:'tb10_1', re:/10\s*\/\s*1/, also:/NET OIL/ }
+    ];
+    const col = {}, unmatched = [];
+    want.forEach(function(w){
+      let found = -1;
+      for(let c = 0; c < stack.length; c++){
+        const t = stack[c];
+        if(t.indexOf('TOTAL') !== -1) continue;
+        if(!w.re.test(t)) continue;
+        if(w.also && !w.also.test(t)) continue;
+        found = c; break;
+      }
+      if(found < 0) unmatched.push(w.id); else col[w.id] = found;
+    });
+    if(unmatched.length)
+      return { error:'These batteries have no column in the sheet: ' +
+                     unmatched.join(', ') + '. The headings may have changed.' };
+
+    // A TOTAL column, if there is one, is used only as a cross-check.
+    let totCol = -1;
+    for(let c = 0; c < stack.length; c++)
+      if(/TOTAL GROSS/.test(stack[c])){ totCol = c; break; }
+
+    function toDate(v){
+      // Duck-typed, not `instanceof Date`: the workbook reader may hand back a
+      // Date built in another realm, where instanceof is false for a perfectly
+      // good date.
+      if(v && typeof v.getFullYear === 'function' && !isNaN(v.getTime())) return _isoDate(v);
+      if(typeof v === 'number' && v > 20000 && v < 80000){
+        // Excel serial: days since 1899-12-30.
+        return _isoDate(new Date(Date.UTC(1899, 11, 30) + v * 86400000));
+      }
+      const s2 = String(v || '').trim();
+      const m = s2.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      return m ? m[1] + '-' + m[2] + '-' + m[3] : null;
+    }
+
+    const days = [], seen = {};
+    for(let r = hRow + 1; r < grid.length; r++){
+      const row = grid[r] || [];
+      const date = toDate(row[dCol]);
+      if(!date) continue;
+      if(seen[date]){ warn.push('Duplicate row for ' + date + ' — the later one was used.'); }
+      const vals = {}; let any = false, missing = [];
+      TB_LIST.forEach(function(b){
+        const raw = row[col[b.id]];
+        const n = (raw === '' || raw == null) ? null : Number(raw);
+        if(n == null || isNaN(n)){ missing.push(b.name); return; }
+        vals[b.id] = n; any = true;
+      });
+      if(!any) continue;
+      seen[date] = true;
+      const rec = { date:date, vals:vals, missing:missing };
+      if(totCol >= 0){
+        const t = Number(row[totCol]);
+        const sum = TB_GROUPS[0].members.reduce(function(a, id){
+          return a + (vals[id] == null ? 0 : vals[id]); }, 0);
+        if(!isNaN(t) && Math.abs(t - sum) > 1)
+          rec.mismatch = { sheet:t, sum:sum };
+      }
+      days.push(rec);
+    }
+    if(!days.length) return { error:'No dated rows found below the DATE heading.' };
+    days.sort(function(a, b){ return a.date < b.date ? -1 : 1; });
+    return { days:days, warnings:warn, columns:col };
+  }
+  window.__TB_PARSE__ = tbParseHistory;
+
+  // SheetJS is ~860 KB and only an admin importing a workbook ever needs it, so
+  // it is NOT in the service worker's precache and NOT loaded with the page.
+  // Fetched on demand, once.
+  let _xlsxLoading = null;
+  function tbLoadXLSX(){
+    if(typeof XLSX !== 'undefined') return Promise.resolve();
+    if(_xlsxLoading) return _xlsxLoading;
+    _xlsxLoading = new Promise(function(res, rej){
+      const sc = document.createElement('script');
+      sc.src = './xlsx.full.min.js';
+      sc.onload = function(){ res(); };
+      sc.onerror = function(){
+        rej(new Error('Could not load the spreadsheet reader. It is not stored ' +
+                      'for offline use — this needs a connection.'));
+      };
+      document.head.appendChild(sc);
+    });
+    return _xlsxLoading;
+  }
+
+  let _impDays = null;
+  function tbImpOut(html){
+    const el = document.getElementById('tbImpOut');
+    if(el) el.innerHTML = html;
+  }
+  function tbMonthsOf(days){
+    const m = [];
+    days.forEach(function(d){
+      const k = d.date.slice(0,7);
+      if(m.indexOf(k) === -1) m.push(k);
+    });
+    return m;
+  }
+  function tbMonthName(k){
+    const p = k.split('-');
+    return TB_MON[Number(p[1]) - 1] + ' ' + p[0];
+  }
+
+  async function tbHandleFile(file){
+    if(!_tbAdmin()) return;
+    tbImpOut('<div class="prog">Reading ' + escHtml(file.name) + '…</div>');
+    let parsed;
+    try {
+      await tbLoadXLSX();
+      const buf = await file.arrayBuffer();
+      const wb  = XLSX.read(buf, { type:'array', cellDates:true });
+      // Prefer a sheet that names itself, but fall back to the first one that
+      // actually parses rather than giving up on a renamed tab.
+      const names = wb.SheetNames.slice().sort(function(a, b){
+        const sa = /SCANNER/i.test(a) ? 0 : 1, sb = /SCANNER/i.test(b) ? 0 : 1;
+        return sa - sb;
+      });
+      let err = null;
+      for(const nm of names){
+        const grid = tbSheetGrid(wb.Sheets[nm]);
+        const r = tbParseHistory(grid);
+        if(!r.error){ parsed = r; parsed.sheet = nm; break; }
+        if(!err) err = r.error;
+      }
+      if(!parsed){ tbImpOut('<div class="warn">' + escHtml(err || 'Could not read this file.') +
+                            '</div>'); return; }
+    } catch(e){
+      tbImpOut('<div class="warn">' + escHtml(e.message || String(e)) + '</div>');
+      return;
+    }
+
+    _impDays = parsed.days;
+    const months = tbMonthsOf(parsed.days);
+    // Default to the last month that is actually a month. The newest one is
+    // usually a few days of the current month, and offering that as the
+    // default invites importing two days when a month was meant.
+    let last = months[months.length - 1];
+    for(let i = months.length - 1; i >= 0; i--){
+      const n = parsed.days.filter(function(d){ return d.date.slice(0,7) === months[i]; }).length;
+      if(n >= 20){ last = months[i]; break; }
+    }
+    const opts = months.slice().reverse().map(function(k){
+      const n = parsed.days.filter(function(d){ return d.date.slice(0,7) === k; }).length;
+      return '<option value="' + k + '"' + (k === last ? ' selected' : '') + '>' +
+             escHtml(tbMonthName(k)) + ' — ' + n + ' day(s)</option>';
+    }).join('');
+
+    const mism = parsed.days.filter(function(d){ return d.mismatch; });
+    const miss = parsed.days.filter(function(d){ return d.missing.length; });
+
+    tbImpOut(
+      '<div class="sum">Read <b>' + parsed.days.length + '</b> day(s) from sheet <b>' +
+        escHtml(parsed.sheet) + '</b>, ' + escHtml(parsed.days[0].date) + ' to ' +
+        escHtml(parsed.days[parsed.days.length-1].date) + '.</div>' +
+      (mism.length ? '<div class="note2"><b>' + mism.length + ' day(s)</b> where the sheet\'s own ' +
+        'TOTAL GROSS does not equal its four Belayim batteries added up (first: ' +
+        escHtml(mism[0].date) + ', sheet ' + tbFmt(mism[0].mismatch.sheet,0) + ' against ' +
+        tbFmt(mism[0].mismatch.sum,0) + '). The per-battery figures are what get imported.</div>' : '') +
+      (miss.length ? '<div class="note2"><b>' + miss.length + ' day(s)</b> missing a battery ' +
+        'figure (first: ' + escHtml(miss[0].date) + ' — ' + escHtml(miss[0].missing.join(', ')) +
+        '). Those batteries are skipped for those days; the rest still import.</div>' : '') +
+      '<div class="note2">The Belayim columns are <b>gross</b> and the T.B. 10/1 column is ' +
+        '<b>net oil</b>. They are different quantities and the app cannot tell them apart.</div>' +
+      '<div style="margin-top:12px;">' +
+        '<select id="tbImpMonth">' + opts + '</select>' +
+        '<button class="rg-btn rg-btn-primary" id="tbImpGo">Import this month</button>' +
+      '</div><div class="prog" id="tbImpProg"></div>');
+
+    const go = document.getElementById('tbImpGo');
+    if(go) go.addEventListener('click', function(){
+      const k = document.getElementById('tbImpMonth').value;
+      tbDoImport(_impDays.filter(function(d){ return d.date.slice(0,7) === k; }), k);
+    });
+  }
+
+  async function tbDoImport(days, monthKey){
+    if(!_tbAdmin() || !days.length) return;
+    if(typeof db === 'undefined' || !FIREBASE_OK || !currentUser){
+      tbImpOut('<div class="warn">No cloud connection — cannot import.</div>'); return;
+    }
+    const btn = document.getElementById('tbImpGo');
+    if(btn) btn.disabled = true;
+    const prog = document.getElementById('tbImpProg');
+    const who  = currentUser.name || currentUser.email || 'import';
+    let ok = 0, fail = 0;
+    for(const d of days){
+      for(const b of TB_LIST){
+        const v = d.vals[b.id];
+        if(v == null) continue;
+        try {
+          // merge:true — a day that already has real readings keeps them, and
+          // the imported total is only ever used where there is no reading.
+          await db.collection(TB_COL).doc(tbDocId(d.date, b.id)).set({
+            date:d.date, battery:b.id, dayTotal:v,
+            source:'scanner workbook ' + monthKey,
+            updatedBy:who, updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge:true });
+          ok++;
+        } catch(e){ fail++; console.error('[import]', d.date, b.id, e); }
+      }
+      if(prog) prog.textContent = 'Written ' + ok + ' figure(s)…';
+    }
+    // Without bumping the stamp no client, including this one, notices.
+    try {
+      const snap = await db.collection(TB_COL).get();
+      const dates = [];
+      snap.forEach(function(doc){
+        const dt = (doc.data() || {}).date;
+        if(dt && dates.indexOf(dt) === -1) dates.push(dt);
+      });
+      dates.sort();
+      await db.collection(TB_META.col).doc(TB_META.doc).set({
+        dates:dates, count:dates.length,
+        updatedAt:firebase.firestore.FieldValue.serverTimestamp(), updatedBy:who
+      });
+    } catch(e){ console.error('[import] stamp', e); }
+    if(btn) btn.disabled = false;
+    if(prog) prog.textContent = '';
+    tbImpOut('<div class="sum"><b>' + tbMonthName(monthKey) + ' imported.</b> ' + ok +
+      ' figure(s) written' + (fail ? ', ' + fail + ' failed — see the console' : '') + '.</div>');
+    showToast(fail ? 'Import finished with ' + fail + ' failure(s)' : 'History imported');
+  }
+
+  // ── the report card ─────────────────────────────────────────────────────
+  // The layout colleagues already read every morning — scanner, today,
+  // yesterday, difference — kept close to the card they know, but in the app's
+  // own colours rather than the original blue and yellow.
+  //
+  // The original covered twelve hours. That is offered alongside the full day,
+  // because a twelve-hour card and a twenty-four-hour card are different
+  // reports and the heading has to say which one is on the page.
+  const TB_PERIODS = { day:{ from:0, to:8, label:'24 HRS' },
+                       h1: { from:0, to:4, label:'FIRST 12 HRS' },
+                       h2: { from:4, to:8, label:'SECOND 12 HRS' } };
+  let _tbOldPeriod = 'day';
+
+  function tbPeriodTotal(dateStr, id, p){
+    const c = tbCalcOne(tbGetDay(dateStr).tbs[id]);
+    // An imported day carries a day total and no intervals, so it can answer
+    // for the whole day and must not pretend to answer for half of it.
+    if(c.dayOnly) return (p === 'day') ? c.total : null;
+    return tbSum(c.prod.slice(1).slice(TB_PERIODS[p].from, TB_PERIODS[p].to));
+  }
+  function tbPeriodGroup(dateStr, g, p){
+    let t = null;
+    g.members.forEach(function(id){
+      const v = tbPeriodTotal(dateStr, id, p);
+      if(v != null) t = (t == null ? 0 : t) + v;
+    });
+    return t;
+  }
+
+  function tbOldCardHTML(dateStr, p, forPrint){
+    const y = tbPrevDate(dateStr);
+    const C = forPrint
+      ? { ink:'#16232f', mute:'#5d7286', line:'#dbe4ee', head:'#123a5a', headInk:'#ffffff',
+          band:'#eef3f8', gain:'#15803d', loss:'#b91c1c', totalBg:'#fbf6e9', card:'#ffffff' }
+      : { ink:'var(--text)', mute:'var(--muted)', line:'var(--border)', head:'var(--accent)',
+          headInk:'var(--on-accent)', band:'var(--surface)', gain:'var(--green)',
+          loss:'var(--red)', totalBg:'rgba(202,138,4,.12)', card:'var(--card)' };
+
+    function diffPill(a, b){
+      if(a == null || b == null) return '<span class="pill nil">—</span>';
+      const d = a - b;
+      return '<span class="pill ' + (d > 0 ? 'up' : d < 0 ? 'down' : 'flat') + '">' +
+             (d > 0 ? '+' : d < 0 ? '−' : '±') + tbFmt(Math.abs(d), 0) + ' m³</span>';
+    }
+    function row(name, a, b, cls){
+      return '<tr' + (cls ? ' class="' + cls + '"' : '') + '>' +
+        '<td class="nm">' + escHtml(name) + '</td>' +
+        '<td class="v">' + (a == null ? '—' : tbFmt(a,0) + ' m³') + '</td>' +
+        '<td class="v y">' + (b == null ? '—' : tbFmt(b,0) + ' m³') + '</td>' +
+        '<td class="d">' + diffPill(a, b) + '</td></tr>';
+    }
+
+    // ── the R/G side, in the same card ──────────────────────────────────
+    // PETRECO against Ras Gara for the same date. Read through window.__RG so
+    // this stays a view of the readings module rather than a second copy of
+    // its arithmetic.
+    //
+    // There is NO total row here: PETRECO and Ras Gara meter the same oil at
+    // two points, so adding them would double-count it. The figure that means
+    // something is the difference between them, and that gets its own row.
+    let rgBlock = '';
+    const RG = window.__RG;
+    if(RG && RG.getDay && RG.calc){
+      function rgFor(dt){
+        try { return RG.calc(RG.getDay(dt)); } catch(e){ return null; }
+      }
+      const rt = rgFor(dateStr), ry = rgFor(y);
+      if(rt && (rt.pTotal != null || rt.rTotal != null)){
+        let rows = '';
+        rows += row('PETRECO', rt.pTotal, ry ? ry.pTotal : null);
+        rows += row('Ras Gara', rt.rTotal, ry ? ry.rTotal : null);
+        rows += row('Difference', rt.loss, ry ? ry.loss : null, 'tot');
+        rgBlock = '<div class="blk"><div class="blk-h">R/G Production</div>' +
+          '<table><thead><tr><th class="nm">Meter</th><th>Today</th><th>Yesterday</th>' +
+          '<th>Difference</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+      }
+    }
+
+    let blocks = '';
+    TB_GROUPS.forEach(function(g){
+      let rows = '';
+      tbGroupList(g).forEach(function(bt){
+        rows += row(bt.name, tbPeriodTotal(dateStr, bt.id, p), tbPeriodTotal(y, bt.id, p));
+      });
+      // A group of one is already its own total; printing the same figure twice
+      // under two names only invites the question of why they differ.
+      if(tbGroupList(g).length > 1)
+        rows += row('TOTAL', tbPeriodGroup(dateStr, g, p), tbPeriodGroup(y, g, p), 'tot');
+      blocks += '<div class="blk"><div class="blk-h">' + escHtml(g.name) + '</div>' +
+        '<table><thead><tr><th class="nm">Scanner</th><th>Today</th><th>Yesterday</th>' +
+        '<th>Difference</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+    });
+
+    const css =
+      '.tbcard{background:' + C.card + ';border:1px solid ' + C.line + ';border-radius:16px;' +
+        'overflow:hidden;max-width:820px;margin:0 auto;}' +
+      '.tbcard .hd{background:' + C.head + ';color:' + C.headInk + ';padding:16px 20px;' +
+        'display:flex;align-items:center;gap:14px;flex-wrap:wrap;}' +
+      '.tbcard .hd h2{font-size:22px;font-weight:800;letter-spacing:-.02em;margin:0;}' +
+      '.tbcard .hd .sub{font-size:11.5px;letter-spacing:1.4px;font-weight:700;opacity:.88;' +
+        'text-transform:uppercase;margin-top:3px;}' +
+      '.tbcard .hd .date{margin-left:auto;background:rgba(255,255,255,.16);border-radius:10px;' +
+        'padding:9px 14px;font-size:15px;font-weight:800;font-family:ui-monospace,monospace;}' +
+      '.tbcard .bd{padding:16px 18px 18px;}' +
+      '.tbcard .blk + .blk{margin-top:18px;}' +
+      '.tbcard .blk-h{font-size:11px;letter-spacing:1.2px;text-transform:uppercase;' +
+        'color:' + C.mute + ';font-weight:800;margin-bottom:6px;}' +
+      '.tbcard table{width:100%;border-collapse:collapse;}' +
+      '.tbcard th{background:' + C.band + ';color:' + C.mute + ';font-size:10.5px;letter-spacing:1px;' +
+        'text-transform:uppercase;padding:9px 10px;text-align:center;border-bottom:2px solid ' + C.line + ';}' +
+      '.tbcard th.nm{text-align:left;}' +
+      '.tbcard td{padding:11px 10px;text-align:center;border-bottom:1px solid ' + C.line + ';' +
+        'font-family:ui-monospace,monospace;font-size:17px;font-weight:700;color:' + C.ink + ';}' +
+      '.tbcard td.nm{text-align:left;font-size:15px;font-weight:800;font-family:inherit;}' +
+      '.tbcard td.y{color:' + C.mute + ';font-weight:600;}' +
+      '.tbcard tr.tot td{background:' + C.totalBg + ';font-size:18px;font-weight:800;}' +
+      '.tbcard .pill{display:inline-block;border-radius:9px;padding:6px 12px;font-size:15px;' +
+        'font-weight:800;color:#fff;font-family:ui-monospace,monospace;white-space:nowrap;}' +
+      '.tbcard .pill.up{background:' + C.gain + ';}' +
+      '.tbcard .pill.down{background:' + C.loss + ';}' +
+      '.tbcard .pill.flat{background:' + C.mute + ';}' +
+      '.tbcard .pill.nil{background:transparent;color:' + C.mute + ';font-weight:600;}' +
+      '@media (max-width:560px){' +
+        '.tbcard td{font-size:14px;padding:9px 5px;}' +
+        '.tbcard td.nm{font-size:12.5px;}' +
+        '.tbcard .pill{font-size:12.5px;padding:5px 8px;}' +
+        '.tbcard th{font-size:9px;padding:7px 4px;letter-spacing:.4px;}' +
+        '.tbcard .hd h2{font-size:18px;} .tbcard .hd .date{font-size:13px;padding:7px 10px;}' +
+      '}';
+
+    const dt = new Date(dateStr + 'T00:00:00');
+    const pretty = ('0' + dt.getDate()).slice(-2) + '/' +
+                   ('0' + (dt.getMonth()+1)).slice(-2) + '/' + dt.getFullYear();
+    return '<style>' + css + '</style>' +
+      '<div class="tbcard"><div class="hd">' +
+        '<div><h2>Production Report</h2>' +
+        '<div class="sub">PETROBEL · Scanners for ' + TB_PERIODS[p].label + '</div></div>' +
+        '<div class="date">' + pretty + '</div>' +
+      '</div><div class="bd">' + blocks + rgBlock + '</div></div>';
+  }
+
+  function tbRenderOld(){
+    const dv = document.getElementById('tbOldDate');
+    if(dv && dv.value !== _tbDate) dv.value = _tbDate;
+    const sel = document.getElementById('tbOldPeriod');
+    if(sel && sel.value !== _tbOldPeriod) sel.value = _tbOldPeriod;
+    const el = document.getElementById('tbOldCard');
+    if(el) el.innerHTML = tbOldCardHTML(_tbDate, _tbOldPeriod, false);
+  }
+
+  function tbOldDoc(){
+    return '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Production Report ' +
+      escHtml(_tbDate) + '</title><style>' +
+      '*{box-sizing:border-box;margin:0;padding:0;}' +
+      'body{font-family:Arial,Helvetica,sans-serif;background:#fff;padding:26px;}' +
+      '@page{size:A4 portrait;margin:12mm;}' +
+      '@media print{body{padding:0;} tr{break-inside:avoid;} .blk{break-inside:avoid;}}' +
+      '.foot{margin-top:18px;text-align:center;font-size:10px;color:#5d7286;}' +
+      '</style></head><body>' + tbOldCardHTML(_tbDate, _tbOldPeriod, true) +
+      '<div class="foot">Generated by PETROBEL Sinai Field on ' +
+      new Date().toLocaleString('en-GB') + '<br>Powered by Sherif Morshed</div>' +
+      '</body></html>';
+  }
+  function tbOldPrint(){
+    const R = window.__REPORT__;
+    if(!R){ showToast('Report tools unavailable', true); return; }
+    R.printHTML(tbOldDoc());
+  }
+  async function tbOldEmail(){
+    const R = window.__REPORT__;
+    if(!R){ showToast('Report tools unavailable', true); return; }
+    showToast('Building PDF…');
+    let blob;
+    try { blob = await R.pdfFromHTML(tbOldDoc()); }
+    catch(err){ showToast('Could not build the PDF: ' + ((err && err.message) || 'unknown'), true); return; }
+    if(!blob || !blob.size){ showToast('The PDF came out empty', true); return; }
+    R.offerPdf(blob, 'Production_Report_' + _tbDate + '.pdf',
+      'Sinai Field production report — ' + _tbDate,
+      'T.B. scanners for ' + TB_PERIODS[_tbOldPeriod].label + ', ' + _tbDate +
+      '.\n(The card is in the attached PDF.)');
+  }
+
+  // ── charts you can open ─────────────────────────────────────────────────
+  // Every chart on this page registers what it is drawing, so tapping it can
+  // redraw the same data larger AND write the figures out underneath. A bar is
+  // a shape; production accounting needs the number.
+  let _tbZoom = {};
+  function tbZoomable(id, title, inner, spec){
+    _tbZoom[id] = { title:title, spec:spec };
+    return '<div class="tb-zoomable" data-zoom="' + escAttr(id) + '" role="button" tabindex="0" ' +
+           'aria-label="Open ' + escAttr(title) + ' with exact figures">' + inner +
+           '<span class="zoom-tag"><svg class="ico" aria-hidden="true"><use href="#i-expand"/></svg>' +
+           ' exact figures</span></div>';
+  }
+  function tbZoomTable(spec){
+    const s2 = spec.series;
+    let head = '<tr><th>' + escHtml(spec.axis || '') + '</th>';
+    s2.forEach(function(x){ head += '<th>' + escHtml(x.name) + '</th>'; });
+    // Only where the two series are the same measurement at two different
+    // times. Never inferred from the series count: two series can just as
+    // easily be two separate delivery lines, and subtracting one from the
+    // other would be a number that means nothing.
+    const wantDiff = (spec.diff === true && s2.length === 2);
+    if(wantDiff) head += '<th>Difference</th>';
+    head += '</tr>';
+    let body = '';
+    spec.labels.forEach(function(lb, i){
+      let cells = '';
+      s2.forEach(function(x){
+        const v = x.vals[i];
+        cells += '<td' + (v == null ? ' class="na"' : '') + '>' + tbFmt(v, 1) + '</td>';
+      });
+      if(wantDiff){
+        const a = s2[0].vals[i], b = s2[1].vals[i];
+        if(a == null || b == null) cells += '<td class="na">—</td>';
+        else {
+          const dd = a - b;
+          cells += '<td class="' + (dd > 0 ? 'gain' : dd < 0 ? 'loss' : '') + '">' +
+                   (dd > 0 ? '+' : dd < 0 ? '−' : '±') + tbFmt(Math.abs(dd), 1) + '</td>';
+        }
+      }
+      body += '<tr><td>' + escHtml(lb) + '</td>' + cells + '</tr>';
+    });
+    // A totals row, but only where adding the column means something — summing
+    // a run of daily totals does, summing a line of daily averages would not.
+    if(spec.total !== false){
+      let tcells = '';
+      s2.forEach(function(x){ tcells += '<td><b>' + tbFmt(tbSum(x.vals), 1) + '</b></td>'; });
+      if(wantDiff){
+        const a = tbSum(s2[0].vals), b = tbSum(s2[1].vals);
+        const dd = (a == null || b == null) ? null : a - b;
+        tcells += '<td class="' + (dd == null ? 'na' : dd > 0 ? 'gain' : dd < 0 ? 'loss' : '') + '"><b>' +
+          (dd == null ? '—' : (dd > 0 ? '+' : dd < 0 ? '−' : '±') + tbFmt(Math.abs(dd), 1)) + '</b></td>';
+      }
+      body += '<tr><td><b>Total</b></td>' + tcells + '</tr>';
+    }
+    return '<table class="zt"><thead>' + head + '</thead><tbody>' + body + '</tbody></table>';
+  }
+  function tbOpenZoom(id){
+    const z = _tbZoom[id];
+    if(!z) return;
+    const t = document.getElementById('tbModalTitle');
+    const b = document.getElementById('tbModalBody');
+    const m = document.getElementById('tbModal');
+    if(!m || !b) return;
+    if(t) t.textContent = z.title;
+    const sp = z.spec;
+    let chart;
+    if(sp.kind === 'bar'){
+      chart = tbBarChart(sp.labels, sp.series[0].vals, sp.series[1].vals,
+                         { h:300, w:860, showValues:true });
+    } else {
+      chart = tbLineChart(sp.labels, sp.series.map(function(x, i){
+        return { label:x.name, color:x.color || tbColor(i), vals:x.vals };
+      }), sp.unit || '', false, 320);
+    }
+    b.innerHTML = chart + tbZoomTable(sp);
+    m.style.display = 'flex';
+    const x = document.getElementById('tbModalClose');
+    if(x) x.focus();
+  }
+  function tbCloseZoom(){
+    const m = document.getElementById('tbModal');
+    if(m) m.style.display = 'none';
+  }
+
   function tbRenderView(){
+    _tbZoom = {};
     const dv = document.getElementById('tbViewDate');
     if(dv && dv.value !== _tbDate) dv.value = _tbDate;
     tbRenderDayKpis();
@@ -3653,7 +4431,12 @@ document.addEventListener('DOMContentLoaded', function(){
         return { label:g.name, color:tbColor(i === 0 ? 2 : 0),
                  vals: rows.map(function(r){ return tbGroupCalc(r.date, g).total; }) };
       });
-      all.innerHTML = tbLineChart(dates.map(tbDayLabel), series, 'Daily production m³/d');
+      all.innerHTML = tbZoomable('daily-all', 'Daily production — all groups',
+        tbLineChart(dates.map(tbDayLabel), series, 'Daily production m³/d'),
+        { kind:'line', axis:'Day', unit:'Daily production m³/d',
+          labels:dates.map(tbDayLabel),
+          series:series.map(function(x){ return { name:x.label, color:x.color, vals:x.vals }; }),
+          total:false });
     }
 
     // One chart per battery, so a single battery's trend can be read without
@@ -3664,8 +4447,10 @@ document.addEventListener('DOMContentLoaded', function(){
         const vals = rows.map(function(r){ return r.per[b.id].total; });
         return '<div class="tb-panel"><div class="bar"></div>' +
           '<div class="hd"><h3>' + escHtml(b.name) + '</h3></div>' +
-          '<div class="bd">' + tbLineChart(dates.map(tbDayLabel),
-                                           [{ label:b.name, color:tbColor(i), vals:vals }], 'm³/d') +
+          '<div class="bd">' + tbZoomable('daily-' + b.id, b.name + ' — daily production',
+            tbLineChart(dates.map(tbDayLabel), [{ label:b.name, color:tbColor(i), vals:vals }], 'm³/d'),
+            { kind:'line', axis:'Day', unit:'m³/d', labels:dates.map(tbDayLabel),
+              series:[{ name:b.name, color:tbColor(i), vals:vals }], total:false }) +
           '</div></div>';
       }).join('');
     }
@@ -4118,28 +4903,21 @@ gRows.map(function(r){
   function tbRenderAll(){
     const inp = document.getElementById('tbDate');
     if(inp && inp.value !== _tbDate) inp.value = _tbDate;
-    const vis0 = tbVisible();
+    // Nothing above the table. The times run down the left of the table the
+    // operator is filling in, which says the same thing without a sentence to
+    // read — and the people entering these readings do not read English.
     const hint = document.getElementById('tbShiftHint');
-    if(hint){
-      if(tbOneClock(vis0)){
-        const sh = tbShiftDates(_tbDate, vis0[0]);
-        hint.textContent = 'Shift ' + sh.from + ' ' + tbLabel(0, vis0[0]) + ' → ' +
-          sh.to + ' ' + tbLabel(0, vis0[0]) +
-          ' · nine readings, three hours apart. Production is the difference ' +
-          'between one reading and the one before it.';
-      } else {
-        // The batteries run different clocks, so no single shift line fits them
-        // all. Each panel states its own window instead.
-        hint.textContent = 'Nine readings, three hours apart, per battery. ' +
-          'Production is the difference between one reading and the one before it.';
-      }
-    }
+    if(hint){ hint.textContent = ''; hint.style.display = 'none'; }
     const sub = document.getElementById('tbSubtitle');
-    if(sub) sub.textContent = (_tbAdmin() && _tbSub === 'view')
-      ? 'Three-hour production against yesterday, and the record across days'
-      : tbCanEdit()
-        ? 'Enter the scanner reading and WHP at each of the nine times'
-        : 'Scanner readings and production, read-only';
+    if(sub){
+      // Nothing on the entry page: the table says what it wants. An empty
+      // subtitle is HIDDEN rather than left blank, or it holds open a gap the
+      // heading then floats above.
+      const txt = (_tbAdmin() && _tbSub === 'view')
+        ? 'Three-hour production against yesterday, and the record across days' : '';
+      sub.textContent = txt;
+      sub.style.display = txt ? '' : 'none';
+    }
     tbRenderSubTabs();
     tbShowSub(_tbAdmin() ? _tbSub : 'entry');
     tbRenderTotals();
@@ -4159,6 +4937,7 @@ gRows.map(function(r){
     // Only when it is on screen: five charts redrawn on every keystroke of the
     // entry table would be wasted work on a phone.
     if(_tbAdmin() && _tbSub === 'view') tbRenderView();
+    if(_tbAdmin() && _tbSub === 'old')  tbRenderOld();
     const sv = document.getElementById('tbSaved');
     const day = tbGetDay(_tbDate);
     if(sv) sv.textContent = day.updatedAt
@@ -4176,25 +4955,60 @@ gRows.map(function(r){
   // holds blanks for everything entered since, and a full write would push
   // those blanks over the admin's work — the exact failure the readings
   // module already had to be rebuilt to avoid. Patch what you touched.
+  // { date: { batteryId: { rowIndex:true } } } — keyed by DATE now, because one
+  // entry at the shift boundary legitimately changes two days at once.
   let _tbDirty = {};
-  function tbMarkDirty(id, i){
-    if(!_tbDirty[id]) _tbDirty[id] = {};
-    _tbDirty[id][i] = true;
+  function tbMarkDirty(date, id, i){
+    if(!_tbDirty[date]) _tbDirty[date] = {};
+    if(!_tbDirty[date][id]) _tbDirty[date][id] = {};
+    _tbDirty[date][id][i] = true;
+  }
+  function tbCellOn(date, id){
+    if(!TB_DAYS[date]) TB_DAYS[date] = tbBlankDay(date);
+    const day = TB_DAYS[date];
+    if(!day.tbs) day.tbs = {};
+    if(!day.tbs[id]) day.tbs[id] = tbBlankCell();
+    const cell = day.tbs[id];
+    ['s','w','d'].forEach(function(k){
+      if(!cell[k] || cell[k].length !== TB_READS){
+        const blank = tbBlankCell();
+        cell[k] = (cell[k] || []).concat(blank[k]).slice(0, TB_READS);
+      }
+    });
+    return cell;
+  }
+  function tbNextDate(dateStr){
+    const d = new Date(dateStr + 'T00:00:00');
+    d.setDate(d.getDate() + 1);
+    return _isoDate(d);
+  }
+
+  // THE SHIFT BOUNDARY IS ONE READING, NOT TWO.
+  //
+  // A day's closing reading and the next day's opening reading are the same
+  // meter at the same moment, written down twice. Operators were entering it on
+  // one day and not the other, which left whichever day missed out short of an
+  // interval — through no fault of theirs, because there is only one reading to
+  // take.
+  //
+  // So it is now entered once, on EITHER day, and written to both. Nothing is
+  // invented: this is not a guess at a reading nobody took, it is the reading
+  // they did take, filed where it also belongs. Nothing has to be explained to
+  // anyone and there is nothing new on screen to misread — the other day is
+  // simply already correct when they get to it.
+  //
+  // `d` is deliberately NOT mirrored. A correction at index 8 belongs to that
+  // day's last interval; at index 0 of the next day it would belong to an
+  // interval that does not exist.
+  function tbBoundaryTwin(id, i){
+    if(i === TB_READS - 1) return { date:tbNextDate(_tbDate), i:0 };          // closing → next opening
+    if(i === 0)            return { date:tbPrevDate(_tbDate), i:TB_READS-1 }; // opening → previous closing
+    return null;
   }
 
   function tbApplyInput(id, kind, i, raw){
     if(!tbCanEdit()) return;
-    if(!TB_DAYS[_tbDate]) TB_DAYS[_tbDate] = tbBlankDay(_tbDate);
-    const day = TB_DAYS[_tbDate];
-    if(!day.tbs) day.tbs = {};
-    if(!day.tbs[id]) day.tbs[id] = tbBlankCell();
-    const cell = day.tbs[id];
-    if(!cell.s || cell.s.length !== TB_READS){ const b = tbBlankCell();
-      cell.s = (cell.s || []).concat(b.s).slice(0, TB_READS); }
-    if(!cell.w || cell.w.length !== TB_READS){ const b = tbBlankCell();
-      cell.w = (cell.w || []).concat(b.w).slice(0, TB_READS); }
-    if(!cell.d || cell.d.length !== TB_READS){ const b = tbBlankCell();
-      cell.d = (cell.d || []).concat(b.d).slice(0, TB_READS); }
+    const cell = tbCellOn(_tbDate, id);
     if(kind === 'd'){
       // Only a value that actually differs from the meter is a correction. This
       // keeps a day the admin merely tabbed through from filling up with
@@ -4206,7 +5020,15 @@ gRows.map(function(r){
     } else {
       cell[kind][i] = tbNum(raw);
     }
-    tbMarkDirty(id, i);
+    tbMarkDirty(_tbDate, id, i);
+    if(kind !== 'd'){
+      const twin = tbBoundaryTwin(id, i);
+      if(twin){
+        const other = tbCellOn(twin.date, id);
+        other[kind][twin.i] = cell[kind][i];
+        tbMarkDirty(twin.date, id, twin.i);
+      }
+    }
     tbSaveLocal();
   }
 
@@ -4220,8 +5042,6 @@ gRows.map(function(r){
     if(!tbCanEdit()) return;
     if(typeof db === 'undefined' || !FIREBASE_OK || !currentUser) return;
     const who = currentUser.name || currentUser.email || 'unknown';
-    const day = TB_DAYS[_tbDate];
-    if(!day) return;
     // Taken and cleared BEFORE the await so edits made while the write is in
     // flight are not lost with it; restored on failure so nothing is dropped.
     const dirty = _tbDirty;
@@ -4238,11 +5058,13 @@ gRows.map(function(r){
       // cells this client typed go in it: merge:true then patches row by row,
       // so an admin editing another hour of the same battery is not overwritten.
       // Nulls ARE sent for cells cleared on purpose — clearing has to clear.
-      const ids = Object.keys(dirty);
-      for(const id of ids){
-        const cell = (day.tbs && day.tbs[id]) || tbBlankCell();
+      for(const dt of Object.keys(dirty)){
+        const dday = TB_DAYS[dt];
+        if(!dday) continue;
+        for(const id of Object.keys(dirty[dt])){
+        const cell = (dday.tbs && dday.tbs[id]) || tbBlankCell();
         const rows = {};
-        Object.keys(dirty[id]).forEach(function(k){
+        Object.keys(dirty[dt][id]).forEach(function(k){
           const i = Number(k);
           rows[String(i)] = { s: cell.s[i] == null ? null : cell.s[i],
                               w: cell.w[i] == null ? null : cell.w[i],
@@ -4250,17 +5072,18 @@ gRows.map(function(r){
         });
         // `battery` is a stored field, not just part of the id, because the
         // rules and the operator's query both match on it.
-        await db.collection(TB_COL).doc(tbDocId(_tbDate, id)).set({
-          date:_tbDate, battery:id, startHour:tbStart(id), rows:rows,
+        await db.collection(TB_COL).doc(tbDocId(dt, id)).set({
+          date:dt, battery:id, startHour:tbStart(id), rows:rows,
           updatedBy:who, updatedAt:firebase.firestore.FieldValue.serverTimestamp()
         }, { merge:true });
+        }
+        dday.updatedAt = Date.now(); dday.updatedBy = who;
       }
       const dates = Object.keys(TB_DAYS).sort();
       await db.collection(TB_META.col).doc(TB_META.doc).set({
         dates:dates, count:dates.length,
         updatedAt:firebase.firestore.FieldValue.serverTimestamp(), updatedBy:who
       });
-      day.updatedAt = Date.now(); day.updatedBy = who;
       tbSaveLocal();
       const sv = document.getElementById('tbSaved');
       if(sv) sv.textContent = 'saved ' + new Date().toLocaleTimeString('en-GB');
@@ -4268,8 +5091,10 @@ gRows.map(function(r){
     } catch(err){
       // Put the cells back in the dirty set — losing the write AND the record
       // of what was in it would silently drop a reading.
-      Object.keys(dirty).forEach(function(id){
-        Object.keys(dirty[id]).forEach(function(i){ tbMarkDirty(id, i); });
+      Object.keys(dirty).forEach(function(dt){
+        Object.keys(dirty[dt]).forEach(function(id){
+          Object.keys(dirty[dt][id]).forEach(function(i){ tbMarkDirty(dt, id, i); });
+        });
       });
       console.error('[TankBatteries] save failed', err);
       showToast('Could not save to cloud: ' + (err.code || err.message), true);
@@ -4382,6 +5207,49 @@ gRows.map(function(r){
     const todayBtn = document.getElementById('tbTodayBtn');
     if(todayBtn) todayBtn.addEventListener('click', function(){ _tbDate = tbToday(); tbRenderAll(); });
 
+    const fi = document.getElementById('tbFile');
+    if(fi) fi.addEventListener('change', function(){
+      const f = this.files && this.files[0];
+      if(!f) return;
+      const nm = document.getElementById('tbFileName');
+      if(nm) nm.textContent = f.name;
+      tbHandleFile(f);
+    });
+
+    // Delegated: the charts are rebuilt on every render, so a listener bound to
+    // one would die with it.
+    const vp = document.getElementById('tb-page-view');
+    if(vp){
+      vp.addEventListener('click', function(e){
+        let n = e.target;
+        while(n && n !== vp && !(n.getAttribute && n.getAttribute('data-zoom'))) n = n.parentNode;
+        if(n && n.getAttribute && n.getAttribute('data-zoom')) tbOpenZoom(n.getAttribute('data-zoom'));
+      });
+      vp.addEventListener('keydown', function(e){
+        if(e.key !== 'Enter' && e.key !== ' ') return;
+        const n = e.target;
+        if(n && n.getAttribute && n.getAttribute('data-zoom')){
+          e.preventDefault(); tbOpenZoom(n.getAttribute('data-zoom'));
+        }
+      });
+    }
+    const mx = document.getElementById('tbModalClose');
+    if(mx) mx.addEventListener('click', tbCloseZoom);
+    const md = document.getElementById('tbModal');
+    if(md) md.addEventListener('click', function(e){ if(e.target === md) tbCloseZoom(); });
+    document.addEventListener('keydown', function(e){ if(e.key === 'Escape') tbCloseZoom(); });
+
+    const od = document.getElementById('tbOldDate');
+    if(od) od.addEventListener('change', function(){ _tbDate = this.value || tbToday(); tbRenderAll(); });
+    const ot = document.getElementById('tbOldToday');
+    if(ot) ot.addEventListener('click', function(){ _tbDate = tbToday(); tbRenderAll(); });
+    const op = document.getElementById('tbOldPeriod');
+    if(op) op.addEventListener('change', function(){ _tbOldPeriod = this.value; tbRenderOld(); });
+    const opb = document.getElementById('tbOldPrint');
+    if(opb) opb.addEventListener('click', tbOldPrint);
+    const omb = document.getElementById('tbOldMail');
+    if(omb) omb.addEventListener('click', tbOldEmail);
+
     const vd = document.getElementById('tbViewDate');
     if(vd) vd.addEventListener('change', function(){ _tbDate = this.value || tbToday(); tbRenderAll(); });
     const vt = document.getElementById('tbViewToday');
@@ -4462,6 +5330,8 @@ gRows.map(function(r){
                     getDay:tbGetDay, reads:TB_READS,
                     groups:TB_GROUPS, groupCalc:tbGroupCalc, groupHalf:tbGroupHalf,
                     reportHTML:tbReportHTML, summaryText:tbSummaryText,
+                    oldCard:tbOldCardHTML, oldDoc:tbOldDoc,
+                    setPeriod:function(p){ _tbOldPeriod = p; tbRenderOld(); },
                     histReportHTML:tbHistReportHTML, histRows:tbHistRows,
                     setRange:function(r){ _tbRange = r; tbRenderHist(); },
                     setDate:function(d){ _tbDate = d; tbRenderAll(); } };
