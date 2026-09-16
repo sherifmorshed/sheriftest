@@ -55,8 +55,9 @@ columns), and `tb10-1@`…`tb8-2@petrobel.org` (each sees one tank battery only)
 
 **Tank Batteries** — five batteries, one totalizing scanner each, read every
 three hours. T.B. 10/1 runs 06:00 → 06:00; the other four run 05:00 → 05:00, so
-a reading time belongs to the battery, not the module. Admin gets three sub-pages:
-Entry, Scanners and Report card. Nine readings give eight intervals;
+a reading time belongs to the battery, not the module. Admin sees two tabs — R/G Production and A/R Production — and A/R Production
+has three pages: Entry (tank batteries and PETRECO together), Report card and
+Scanner analysis. Nine readings give eight intervals;
 production is the difference between consecutive readings. WHP typed alongside.
 One account per battery (`tb10-1@`, `tb6-1@`, `tb6-2@`, `tb8-1@`,
 `tb8-2@petrobel.org`). Each sees ONLY its own readings — enforced in
