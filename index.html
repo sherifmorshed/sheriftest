@@ -12,36 +12,39 @@
    accounts and its own release cycle, and it shares nothing with any other
    PETROBEL app. Nothing here should ever need to reach outside this folder.
 
-   WHAT IS WHERE                                                    (approx.)
+   WHAT IS WHERE                                        (line numbers, v15)
    ─────────────────────────────────────────────────────────────────────────
      CSS
-       Design tokens — every colour lives here, light + dark ........ line 62
-       Header, login, toast, footer ................................ line 95
-       The readings page: table, inputs, cards, chart .............. line 202
+       Design tokens — every colour lives here, light + dark ...... line 74
+       Header, login, toast, footer .............................. line 107
+       Pages: readings, tank batteries, scanners, PETRECO ........ line 239
      MARKUP
-       Icon sprite — every icon, drawn inline ..................... line 280
-       Login screen .............................................. line 298
-       Header bar ................................................ line 319
-       The readings page ......................................... line 331
-     SCRIPT 1 — the shell
-       ►► CONFIGURATION — Firebase config + who is admin/petreco/rasgara . line 387
-       Boot, helpers, chart colours .............................. line 430
-       Sign in / sign out, roles ................................. line 536
-     SCRIPT 2 — the application
-       Readings, totals, chart, printed report, PDF, cloud sync ... line 650
-     SCRIPT 3 — the extras
-       Day / night theme ......................................... line 1494
-       Service worker registration ............................... line 1521
+       Icon sprite — every icon, drawn inline .................... line 647
+       Login screen .............................................. line 667
+       Header bar ................................................ line 725
+       Pages: R/G, A/R, PETRECO, no-access ....................... line 737
+     SCRIPT — the shell
+       ►► CONFIGURATION — Firebase config + role lists ........... line 1014
+       Boot, helpers, unsaved-edits queue, footer status ......... line 1088
+       Sign in / sign out, roles, tabs ........................... line 1375
+     SCRIPT — R/G Production (hourly PETRECO vs Ras Gara) ........ line 1614
+     SCRIPT — A/R Production (tank batteries, report card,
+              scanner analysis, temperature, workbook import) .... line 3079
+     SCRIPT — day / night theme, service worker .................. line 6447
+     SCRIPT — PETRECO scanners ................................... line 6512
 
-   THE THREE ROLES
-     admin    both columns, the difference, the chart, print and e-mail
-     petreco  the PETRECO column and its own total, nothing else
-     rasgara  the Ras Gara columns and its own total, nothing else
+   THE ROLES
+     admin     both R/G sides, A/R Production, every report
+     petreco   PETRECO's R/G column, and the PETRECO scanners tab
+     rasgara   Ras Gara's R/G columns only
+     tb…       one tank battery only (enforced by the rules)
+     no role   a "no access" page; the rules refuse it everything
 
    TO CHANGE WHO CAN SIGN IN
-     Edit ADMIN_EMAILS / PETRECO_EMAILS / PLANT_EMAILS in the CONFIGURATION
-     block AND the matching functions in firestore.rules. They are two halves
-     of one decision — change one without the other and saving fails silently.
+     Edit ADMIN_EMAILS / PETRECO_EMAILS / PLANT_EMAILS / TB_ACCOUNTS in the
+     CONFIGURATION block AND the matching functions in firestore.rules. They
+     are two halves of one decision — change one without the other and
+     saving fails.
 
    BEFORE YOU RELEASE
      Bump CACHE_NAME in sw.js. Otherwise nobody sees your change.
@@ -386,6 +389,11 @@ table.tb-tbl .rg-in{width:100%;max-width:104px;padding-left:2px;padding-right:2p
 table.tb-tbl td{padding:3px 3px;}
 table.tb-tbl th{padding:6px 3px;}
 table.tb-tbl th.tb-grp3{color:var(--s3);border-bottom:2px solid var(--s3);}
+table.tb-tbl th.tb-grp4{color:var(--gold);border-bottom:2px solid var(--gold);}
+/* An hour with no scanner reading: those three columns have nothing in them,
+   and an empty box there would invite somebody to fill it. */
+table.tb-tbl td.tb-off{background:rgba(148,163,184,.07);}
+table.tb-tbl tr.tb-hour td.rg-time{color:var(--muted);font-weight:600;}
 /* The opening and closing readings are not production hours — they are the
    two ends the day is measured between. Tinted so nobody reads the opening
    row as a missing three hours. */
@@ -435,6 +443,7 @@ table.tb-tbl .tb-din{max-width:88px;}
    one contributor to it. */
 .rg-card.rg-card-g{border-color:var(--accent2);box-shadow:0 2px 8px var(--ring);}
 .rg-card.rg-card-g .k{color:var(--accent2);font-weight:800;}
+.tb-halves td.part{font-style:italic;color:var(--muted);}
 .tb-halves{overflow-x:auto;margin-top:10px;}
 .tb-halves table{width:100%;border-collapse:collapse;font-family:var(--font-num);
   font-size:12.5px;font-variant-numeric:tabular-nums;}
@@ -533,8 +542,8 @@ table.tb-tbl .tb-din{max-width:88px;}
 .tb-modal-bd .zt td.loss{color:var(--red);font-weight:800;}
 .tb-modal-bd .zt td.na{color:var(--muted);}
 /* ── PETRECO scanners ────────────────────────────────────────────────
-   Two periods a day and five meters, so a plain table rather than the tank
-   batteries' nine-row panels. A period is a quantity for those twelve hours,
+   Eight three-hour periods a day and five meters, so a plain table rather than
+   the tank batteries' panels. A period is a quantity for those three hours,
    not a meter reading — nothing here is differenced. */
 /* Embedded inside A/R Production → Entry: the page around it belongs to that
    screen, so its own header and date bar are hidden rather than duplicated. */
@@ -543,6 +552,9 @@ table.tb-tbl .tb-din{max-width:88px;}
 #page-pf.pf-embedded > div{padding-top:0;}
 .pf-sec{background:var(--card);border:1px solid var(--border);border-radius:14px;
   box-shadow:var(--shadow);overflow:hidden;margin-top:16px;}
+.pf-wrap tr.half th.row,.pf-wrap tr.half td{background:var(--surface);font-weight:700;}
+.pf-wrap td.part{font-style:italic;color:var(--muted);}
+.pf-note{margin:6px 2px 0;font-size:11.5px;line-height:1.45;color:var(--muted);}
 .pf-h{font-size:12px;letter-spacing:1px;text-transform:uppercase;font-weight:800;
   color:var(--accent2);padding:12px 15px 0;}
 .pf-wrap{overflow-x:auto;padding:8px 12px 13px;-webkit-overflow-scrolling:touch;}
@@ -574,6 +586,12 @@ table.tb-tbl .tb-din{max-width:88px;}
   .pf-sec th.row{font-size:12px;}
   .pf-sec td{padding:6px 4px;}
 }
+/* The temperature grid is 25 columns wide, so it is sized to be scanned
+   rather than to fill the page. */
+.tb-temp table{width:100%;min-width:0;font-size:14px;border-spacing:4px;}
+.tb-temp td{padding:11px 6px;min-width:0;border-radius:7px;}
+.tb-temp th{font-size:10.5px;padding:3px;}
+.tb-temp th.row{font-size:13px;padding-right:10px;}
 .tb-heat{overflow-x:auto;margin-top:10px;-webkit-overflow-scrolling:touch;}
 /* Sized to the page rather than to its contents: 90% of the available width,
    centred, so the figures are readable across a room. */
@@ -815,9 +833,11 @@ document.addEventListener('click', function(e){
         <label class="rg-lbl" for="tbOldDate">Shift day</label>
         <input type="date" id="tbOldDate" class="rg-date">
         <button class="rg-btn" id="tbOldToday">Today</button>
-        <select id="tbOldPeriod" class="tb-period">
-          <option value="day">24 hours</option>
+        <select id="tbOldPeriod" class="tb-period" aria-label="Period">
+          <option value="h3">First 3 hours</option>
+          <option value="h6">First 6 hours</option>
           <option value="h1">First 12 hours</option>
+          <option value="day" selected>24 hours</option>
           <option value="h2">Second 12 hours</option>
         </select>
       </div>
@@ -826,6 +846,20 @@ document.addEventListener('click', function(e){
         <button class="rg-btn rg-btn-primary" id="tbOldPrint"><svg class="ico" aria-hidden="true"><use href="#i-print"/></svg> Print report</button>
         <button class="rg-btn rg-btn-primary" id="tbOldMail"><svg class="ico" aria-hidden="true"><use href="#i-mail"/></svg> Send by e-mail</button>
       </div>
+    </div>
+
+    <!-- ── temperature, admin only ──────────────────────────────────── -->
+    <div id="tb-page-temp" style="display:none;">
+      <div class="rg-bar">
+        <label class="rg-lbl" for="tbTempDate">Shift day</label>
+        <input type="date" id="tbTempDate" class="rg-date">
+        <button class="rg-btn" id="tbTempToday">Today</button>
+      </div>
+      <div id="tbTempKpis"></div>
+      <div class="rg-sec-title">Temperature through the day</div>
+      <div id="tbTempChart"></div>
+      <div class="rg-sec-title">Hour by hour</div>
+      <div id="tbTempGrid"></div>
     </div>
 
     <div id="tb-page-view" style="display:none;">
@@ -855,7 +889,7 @@ document.addEventListener('click', function(e){
       <div class="rg-sec-title">PETRECO — today at a glance</div>
       <div id="pfaKpis"></div>
 
-      <div class="rg-sec-title">PETRECO — twelve-hour production, today vs yesterday</div>
+      <div class="rg-sec-title">PETRECO — three-hour production, today vs yesterday</div>
       <div id="pfaField"></div>
       <div class="tb-grid" id="pfaGrid"></div>
 
@@ -921,8 +955,6 @@ document.addEventListener('click', function(e){
   </div>
 </div>
 
-</div>
-
 <!-- ══ PETRECO SCANNERS ══════════════════════════════════════════════ -->
 <div id="page-pf" style="display:none;">
   <div class="page-hdr">
@@ -943,6 +975,19 @@ document.addEventListener('click', function(e){
     </div>
   </div>
 </div>
+
+<!-- ══ NO ACCESS ═════════════════════════════════════════════════════
+     An account that is in none of the role lists. The rules refuse it every
+     collection, so this is all it gets. -->
+<div id="page-noaccess" style="display:none;">
+  <div class="page-hdr">
+    <h2><svg class="ico ico-h" aria-hidden="true"><use href="#i-warn"/></svg> No access</h2>
+    <p>This account is not set up for Sinai Field. Ask the administrator to add it, then sign in again.</p>
+  </div>
+</div>
+
+</div>
+
 
 
 <div class="app-footer" id="appFooter" style="display:none;">
@@ -1002,29 +1047,23 @@ const firebaseConfig = {
 //           they never see PETRECO or Ras Gara, and the rules refuse them those
 //           collections outright rather than merely hiding the columns.
 //
-// Anyone who signs in successfully but is in NEITHER list is treated as a
-// read-only viewer: they can look, they cannot type. That is deliberate — an
-// account added in the Firebase console by mistake should not gain write access
-// just by existing. The security rules enforce the same split server-side; this
-// list only decides what the screen offers.
+// Anyone who signs in successfully but is in NONE of these lists gets a "no
+// access" page and nothing else. The rules refuse such an account every
+// collection, so there is nothing it could be shown — an account added in the
+// Firebase console by mistake gains nothing just by existing. This list only
+// decides what the screen offers; firestore.rules is what actually refuses.
 const ADMIN_EMAILS   = ['sherifmorshed@gmail.com'];
 const PLANT_EMAILS   = ['rasgara@petrobel.org'];
 const PETRECO_EMAILS = ['petreco@petrobel.org'];
-// One account PER OPERATOR, not one shared account. All five have identical
-// rights — the split is for ATTRIBUTION, not permission: `updatedBy` records
-// who entered a reading, so a figure that looks wrong weeks later can be taken
-// back to the man who read the meter. A shared login makes every entry
-// anonymous and makes removing one person a password change for all five.
+// One account PER BATTERY. Each sees and writes ONLY its own battery, and that
+// is enforced by firestore.rules (tbBattery()), not just hidden on screen: the
+// shift day is stored as one document per battery, so a rule can allow or
+// deny a single battery.
 //
-// These five phones edit the same day document at the same time, which is why
-// a save patches ONLY the cells that phone typed — see tbPushToCloud. Do not
-// "simplify" it to write the whole day, or whoever saves last erases the rest.
+// A save still patches ONLY the cells that phone typed — see tbPushToCloud —
+// because the admin edits the same documents. Do not "simplify" it to write
+// whole rows or whole days, or a phone with a stale copy erases corrections.
 //
-// The rules do NOT restrict a given account to a given battery, and cannot:
-// the whole day is one document, and a rule allows or denies all of it. The
-// same limitation is documented for rasGara. Convention, not enforcement.
-//
-// Keep this in step with isTankBattery() in firestore.rules.
 // The address IS the battery, so a login is self-documenting and `updatedBy`
 // names the battery a reading came from without a lookup table.
 //
@@ -1144,6 +1183,135 @@ function _downloadBlob(blob, filename){
   setTimeout(function(){ URL.revokeObjectURL(url); a.remove(); }, 60000);
 }
 
+// ── Unsaved edits ──────────────────────────────────────────────────────
+// Every typed cell is recorded HERE, with its value, until the cloud has
+// accepted it. Three things depend on that record, and each was a way to lose
+// a reading before it existed:
+//
+//  1. A sync from another device replaces a module's local copy wholesale.
+//     Anything still waiting to upload is laid back over the fresh copy
+//     (overlay), so it is not reverted on screen and then never sent.
+//  2. The save sends exactly the recorded cells — field by field, not row by
+//     row — so a phone with a stale copy cannot push old values over a
+//     correction somebody else made to a different field of the same row.
+//  3. Cells are keyed by DATE. Changing the date before the save fires used to
+//     send whichever day was on screen at that moment instead.
+//
+// The record is kept in localStorage PER ACCOUNT, so closing the app inside
+// the save delay, or a save that fails, leaves it to be sent next time — by
+// the same account, never by whoever signs in next on that device.
+//
+//   const P = makePending('rasgara_days_v1__pending');
+//   P.load()                        at sign-in, once currentUser is set
+//   P.mark(date, key, value)        on every edit (value may be null: cleared)
+//   const s = P.take()              right before writing; moves cells in-flight
+//   P.done(s) / P.fail(s)           after the write succeeds / fails
+//   P.each(fn(date, key, value))    in-flight first, then newer typed cells
+function makePending(lsKey){
+  let owner = '', cells = {}, flight = {};
+  function me(){
+    return (typeof currentUser !== 'undefined' && currentUser && currentUser.email)
+      ? String(currentUser.email).toLowerCase() : '';
+  }
+  function storeKey(){ return lsKey + '__' + owner; }
+  function persist(){
+    if(!owner) return;
+    const empty = !Object.keys(cells).length && !Object.keys(flight).length;
+    if(empty) lsRemove(storeKey());
+    else lsSet(storeKey(), JSON.stringify({ cells:cells, flight:flight }));
+  }
+  function put(map, d, k, v){ (map[d] = map[d] || {})[k] = v; }
+  function drop(map, d, k){
+    if(!map[d]) return;
+    delete map[d][k];
+    if(!Object.keys(map[d]).length) delete map[d];
+  }
+  return {
+    load: function(){
+      owner = me(); cells = {}; flight = {};
+      if(!owner) return;
+      let raw = null;
+      try { raw = JSON.parse(lsGet(storeKey()) || 'null'); } catch(e){}
+      if(raw){
+        // A write that was in flight when the app closed may or may not have
+        // reached the server. Sending it again is harmless — the same value
+        // merged twice — so it goes back into the queue.
+        [raw.flight || {}, raw.cells || {}].forEach(function(m){
+          Object.keys(m).forEach(function(d){
+            Object.keys(m[d]).forEach(function(k){ put(cells, d, k, m[d][k]); });
+          });
+        });
+      }
+      persist();
+    },
+    mark: function(d, k, v){
+      if(!owner) owner = me();
+      put(cells, d, k, v == null ? null : v);
+      persist();
+    },
+    count: function(){
+      let n = 0;
+      Object.keys(cells).forEach(function(d){ n += Object.keys(cells[d]).length; });
+      return n;
+    },
+    take: function(){
+      const snap = cells;
+      cells = {};
+      Object.keys(snap).forEach(function(d){
+        Object.keys(snap[d]).forEach(function(k){ put(flight, d, k, snap[d][k]); });
+      });
+      persist();
+      return snap;
+    },
+    done: function(snap){
+      Object.keys(snap).forEach(function(d){
+        Object.keys(snap[d]).forEach(function(k){
+          if(flight[d] && flight[d][k] === snap[d][k]) drop(flight, d, k);
+        });
+      });
+      persist();
+    },
+    fail: function(snap){
+      Object.keys(snap).forEach(function(d){
+        Object.keys(snap[d]).forEach(function(k){
+          if(flight[d] && flight[d][k] === snap[d][k]) drop(flight, d, k);
+          // A cell typed again while the write was out is newer — keep that.
+          if(!(cells[d] && Object.prototype.hasOwnProperty.call(cells[d], k)))
+            put(cells, d, k, snap[d][k]);
+        });
+      });
+      persist();
+    },
+    each: function(fn){
+      [flight, cells].forEach(function(m){
+        Object.keys(m).forEach(function(d){
+          Object.keys(m[d]).forEach(function(k){ fn(d, k, m[d][k]); });
+        });
+      });
+    }
+  };
+}
+
+// Send whatever is waiting, now, instead of when the save delay runs out.
+// Called when the app is hidden (a phone put back in a pocket), when the page
+// is closed, and before sign-out. Each module registers its own save.
+//
+// The saves issue every write BEFORE their first await, so a write is handed to
+// Firestore's offline queue synchronously — which is what makes this work on a
+// page that is about to disappear.
+const _flushers = [];
+function registerFlush(fn){ _flushers.push(fn); }
+function flushSaves(){
+  _flushers.forEach(function(f){
+    try { const r = f(); if(r && typeof r.catch === 'function') r.catch(function(){}); }
+    catch(e){ console.warn('[flush]', e); }
+  });
+}
+document.addEventListener('visibilitychange', function(){
+  if(document.visibilityState === 'hidden') flushSaves();
+});
+window.addEventListener('pagehide', flushSaves);
+
 // Two datasets report here now — the readings and the tank batteries — and each
 // has its own listener. Last-writer-wins would let a healthy line paint over a
 // real error, which is the failure this line already had once and is the whole
@@ -1217,8 +1385,8 @@ function _roleOf(email){
 // ── Tabs ───────────────────────────────────────────────────────────────
 // Which views a role may open. A tank battery operator gets ONE tab and
 // never learns the other exists; the PETRECO and Ras Gara operators keep
-// exactly what they had. Anyone in no list is a read-only viewer and, as
-// before, may look at everything.
+// exactly what they had. An account in no list gets NO tab at all — the rules
+// refuse it every collection, so any tab would only be an error message.
 //
 // This also decides which LISTENERS start. That is not a nicety: attaching
 // the Ras Gara listener for a tank battery operator would be refused by the
@@ -1232,6 +1400,7 @@ function _tabsFor(){
   // one battery sent.
   if(isPetreco && !isAdmin)  return ['rg','pf'];
   if(isRasGara && !isAdmin)  return ['rg'];
+  if(!isAdmin)               return [];
   // Admin gets TWO tabs, not three. Everything downstream of Ras Gara — the
   // tank batteries and PETRECO's own scanners — lives under A/R Production,
   // because for an admin they are one job: check the day, read it, print it.
@@ -1252,6 +1421,8 @@ const _TAB_DEF = {
 function showTab(tab){
   if(!_mayOpen(tab)) return;
   _activeTab = tab;
+  const na = document.getElementById('page-noaccess');
+  if(na) na.style.display = 'none';
   Object.keys(_TAB_DEF).forEach(function(k){
     const el = document.getElementById(_TAB_DEF[k].page);
     if(el) el.style.display = (k === tab) ? '' : 'none';
@@ -1308,7 +1479,25 @@ function showApp(user){
   document.getElementById('ubRole').textContent = label;
 
   console.log('[auth] ' + user.email + ' — ' + label);
+  // The PETRECO entry is EMBEDDED in A/R Production for admin (no heading, no
+  // date bar of its own) and a full tab for PETRECO's operators. Set it from
+  // the role on every sign-in: the class used to be added for admin and never
+  // removed, so a PETRECO sign-in after an admin sign-out on the same page got
+  // a PETRECO tab with no heading and no date picker.
+  const pfPage = document.getElementById('page-pf');
+  if(pfPage){ pfPage.classList.toggle('pf-embedded', !!isAdmin); pfPage.style.display = 'none'; }
   _renderTabs();
+  if(!_tabsFor().length){
+    // No role: say so plainly and start nothing. Every read would be refused.
+    Object.keys(_TAB_DEF).forEach(function(k){
+      const el = document.getElementById(_TAB_DEF[k].page);
+      if(el) el.style.display = 'none';
+    });
+    const na = document.getElementById('page-noaccess');
+    if(na) na.style.display = '';
+    updateCloudStatus('error', 'This account has no access to Sinai Field', 'acct');
+    return;
+  }
   showTab(_tabsFor()[0]);
   if(_mayOpen('rg')){
     if(typeof window.refreshRasGaraPage   === 'function') window.refreshRasGaraPage();
@@ -1336,6 +1525,8 @@ function showLogin(){
   // Otherwise the next sign-in inherits the last account's footer line —
   // including an error it has nothing to do with.
   if(typeof resetCloudStatus === 'function') resetCloudStatus();
+  const pfPage = document.getElementById('page-pf');
+  if(pfPage){ pfPage.style.display = 'none'; pfPage.classList.remove('pf-embedded'); }
   document.getElementById('login-page').classList.remove('hidden');
   document.getElementById('appHeader').style.display = 'none';
   document.getElementById('app-body').style.display  = 'none';
@@ -1378,6 +1569,9 @@ function handleLogin(){
 
 function handleLogout(){
   if(!FIREBASE_OK){ showLogin(); return; }
+  // Anything still inside the save delay goes now, while this account is
+  // still signed in to send it.
+  flushSaves();
   auth.signOut().catch(function(e){ console.warn('[auth] signOut', e); });
 }
 
@@ -1453,6 +1647,27 @@ document.addEventListener('DOMContentLoaded', function(){
   let _rgDate = null;              // yyyy-mm-dd of the shift currently open
   let _rgMetaUnsub = null, _rgLastTs = 0, _rgFirstSnap = true, _rgSkipNext = false;
   let _rgSaveTimer = null;
+  // Typed cells not yet accepted by the cloud: { date: { "7.p": value } }.
+  // See makePending() in the shell for why this exists.
+  const _rgPend = makePending(RG_LS + '__pending');
+  function rgMayWrite(f){ return f === 'p' ? rgCanEditPetreco() : rgCanEditRasGara(); }
+  // Lay every unsent cell over `days` — a freshly downloaded copy, or the
+  // cached one at sign-in. Without this a sync from the other side reverted a
+  // reading that had been typed but not yet sent, and it was never sent at all.
+  function rgOverlayPending(days){
+    _rgPend.each(function(dt, key, val){
+      const dot = key.indexOf('.');
+      const i = parseInt(key.slice(0, dot), 10), f = key.slice(dot + 1);
+      if(isNaN(i) || i < 0 || i >= RG_HOURS || ['p','r','rc'].indexOf(f) === -1) return;
+      if(!days[dt]) days[dt] = rgBlankDay(dt);
+      const d = days[dt];
+      if(!Array.isArray(d.rows)) d.rows = rgRowsToArray(d.rows);
+      while(d.rows.length < RG_HOURS) d.rows.push({ p:null, r:null, rc:null });
+      if(!d.rows[i]) d.rows[i] = { p:null, r:null, rc:null };
+      d.rows[i][f] = val;
+    });
+    return days;
+  }
 
   // ── helpers ─────────────────────────────────────────────────────────────
   function rgHourLabel(i){
@@ -1570,7 +1785,7 @@ document.addEventListener('DOMContentLoaded', function(){
   function rgReadOnly(){ return !rgCanEditPetreco() && !rgCanEditRasGara(); }
 
   // Which side of the comparison this user is here for:
-  //   'both'     admin, and read-only viewers (they may look at everything)
+  //   'both'     admin (an account with no role never reaches this page)
   //   'petreco'  the PETRECO operators
   //   'rasgara'  the Ras Gara plant operators
   //
@@ -1643,6 +1858,24 @@ document.addEventListener('DOMContentLoaded', function(){
                        cell('rc', i, row.rc, 1, edR);
       body += '<tr>' + tds + '</tr>';
     }
+    // A sync from another device lands while somebody is typing. Rebuilding
+    // the table then would destroy the focused input — and with it the phone's
+    // keyboard and half a typed number. Same table, same date: update the
+    // OTHER cells in place and leave the one being typed in alone.
+    const layout = _rgDate + '|' + side + '|' + edP + '|' + edR;
+    const focused = document.activeElement;
+    if(area.getAttribute('data-layout') === layout && focused && area.contains(focused) &&
+       focused.classList && focused.classList.contains('rg-in')){
+      Array.prototype.forEach.call(area.querySelectorAll('input.rg-in'), function(inp){
+        if(inp === focused) return;
+        const v = day.rows[parseInt(inp.getAttribute('data-i'), 10)][inp.getAttribute('data-rg')];
+        const s = (v == null) ? '' : String(v);
+        if(inp.value !== s) inp.value = s;
+      });
+      rgRepaintCum(c);
+      rgRenderHint(edP, edR);
+      return;
+    }
     const CUM_CALC = 'Cumulative<br><span style="font-weight:400;text-transform:none;">calculated</span>';
     let head;
     if(side === 'petreco'){
@@ -1659,7 +1892,21 @@ document.addEventListener('DOMContentLoaded', function(){
     area.innerHTML =
       '<div class="rg-tbl-wrap"><table class="rg-tbl">' +
         '<thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>';
-
+    area.setAttribute('data-layout', layout);
+    rgRenderHint(edP, edR);
+  }
+  // PETRECO's running total, repainted in place. It sits in the third cell of
+  // a row whenever the PETRECO columns are on screen — which includes
+  // PETRECO's own three-column view, not only admin's.
+  function rgRepaintCum(c){
+    if(rgSide() === 'rasgara') return;
+    const rows = document.querySelectorAll('#rgTableArea tbody tr');
+    for(let i = 0; i < rows.length; i++){
+      const cell = rows[i].children[2];
+      if(cell) cell.textContent = rgFmt(c.pCum[i], 1);
+    }
+  }
+  function rgRenderHint(edP, edR){
     const hint = document.getElementById('rgShiftHint');
     if(hint){
       const endDate = rgRowDate(_rgDate, RG_HOURS - 1);
@@ -2141,6 +2388,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
   // ── editing & persistence ───────────────────────────────────────────────
   function rgApplyInput(kind, i, raw){
+    if(!rgMayWrite(kind)) return false;
     const day = RG_DAYS[_rgDate] || rgBlankDay(_rgDate);
     if(!day.rows) day.rows = rgBlankDay(_rgDate).rows;
     while(day.rows.length < RG_HOURS) day.rows.push({ p:null, r:null, rc:null });
@@ -2151,6 +2399,7 @@ document.addEventListener('DOMContentLoaded', function(){
     day.date = _rgDate;
     day.startHour = RG_START_HOUR;
     RG_DAYS[_rgDate] = day;
+    _rgPend.mark(_rgDate, i + '.' + kind, day.rows[i][kind]);
     return true;
   }
   function rgSaveLocal(){
@@ -2162,56 +2411,72 @@ document.addEventListener('DOMContentLoaded', function(){
     // Debounced: an operator typing 24 rows should produce one write, not 24.
     _rgSaveTimer = setTimeout(function(){ _rgSaveTimer = null; rgPushToCloud(); }, 1200);
   }
+  // Sends EXACTLY the cells recorded in _rgPend — field by field, for every
+  // date that has any — merged into each day server-side.
+  //
+  // History, because each step here fixed a real loss:
+  //  · It once sent the whole day from this device's copy. PETRECO saving at
+  //    14:10 with a 13:00 copy of the Ras Gara column erased Ras Gara's 14:00.
+  //  · Then it sent every field this ROLE owns, all 24 rows. Still too much: an
+  //    admin correction to PETRECO's 09:00 was erased by a PETRECO phone that
+  //    had not synced since 08:00 and saved its 11:00.
+  //  · It sent the day ON SCREEN when the delay ran out, so typing on the 17th
+  //    and switching to the 16th wrote the 16th and stranded the 17th.
+  // Now: only what was typed, on the date it was typed on.
+  //
+  // One exception: a day still stored in the old ARRAY shape is sent whole
+  // once, because merging a map into an array replaces it. After that the
+  // document is a map and every save is a patch again.
+  //
+  // Every write is issued before the first await, so flushSaves() on a page
+  // that is closing still hands them all to Firestore's offline queue.
   async function rgPushToCloud(){
+    if(_rgSaveTimer){ clearTimeout(_rgSaveTimer); _rgSaveTimer = null; }
     if(rgReadOnly()) return;
     if(typeof db === 'undefined' || typeof FIREBASE_OK === 'undefined' || !FIREBASE_OK) return;
-    const day = RG_DAYS[_rgDate];
-    if(!day) return;
-    const who = (typeof currentUser !== 'undefined' && currentUser) ? currentUser.name : 'user';
+    if(!currentUser || !_rgPend.count()) return;
+    const who = currentUser.name || 'user';
+    const snap = _rgPend.take();
+    const upgraded = [];
     try {
       _rgSkipNext = true;
-      // Write ONLY the fields this role owns, merged into whatever is already
-      // there.
-      //
-      // The previous version sent the entire day from this device's local copy.
-      // With one operator group that was survivable; with two it is data loss:
-      // the PETRECO operator saves at 14:10 carrying a copy of the Ras Gara
-      // column from 13:00, and Ras Gara's 14:00 entry is silently gone. Worst
-      // offline, where a phone can queue a write for hours before replaying it
-      // — which is exactly the case this app is built for.
-      //
-      // merge:true deep-merges maps, so `{rows:{"7":{p:5}}}` leaves
-      // rows["7"].r and .rc untouched, and the merge happens server-side at
-      // replay time rather than against a stale local snapshot.
-      // One exception to "own fields only": a day still stored in the old array
-      // shape has to be rewritten whole, because merging a map into an array
-      // replaces it rather than merging. Sending both sides once converts the
-      // document; every later save is a proper partial patch. The local copy is
-      // authoritative for that single write because the listener has just
-      // synced it.
-      const upgrade = !!(RG_DAYS[_rgDate] && RG_DAYS[_rgDate]._legacyRows);
-      const edP = rgCanEditPetreco() || upgrade;
-      const edR = rgCanEditRasGara() || upgrade;
-      const rowsPatch = {};
-      for(let i = 0; i < RG_HOURS; i++){
-        const src = day.rows[i] || {};
-        const cell = {};
-        if(edP) cell.p = src.p == null ? null : src.p;
-        if(edR){ cell.r  = src.r  == null ? null : src.r;
-                 cell.rc = src.rc == null ? null : src.rc; }
-        rowsPatch[String(i)] = cell;
-      }
-      if(upgrade) RG_DAYS[_rgDate]._legacyRows = false;
-      await db.collection(RG_COL).doc(_rgDate).set({
-        date:_rgDate, startHour:RG_START_HOUR, rows:rowsPatch,
-        updatedBy:who, updatedAt:firebase.firestore.FieldValue.serverTimestamp()
-      }, { merge:true });
+      const writes = [];
+      Object.keys(snap).forEach(function(dt){
+        const rows = {};
+        const local = RG_DAYS[dt];
+        if(local && local._legacyRows){
+          const full = rgGetDay(dt);
+          for(let i = 0; i < RG_HOURS; i++){
+            rows[String(i)] = { p:full.rows[i].p, r:full.rows[i].r, rc:full.rows[i].rc };
+          }
+          local._legacyRows = false;
+          upgraded.push(dt);
+        } else {
+          Object.keys(snap[dt]).forEach(function(key){
+            const dot = key.indexOf('.');
+            const i = key.slice(0, dot), f = key.slice(dot + 1);
+            if(!rgMayWrite(f)) return;        // not this role's field: never sent
+            (rows[i] = rows[i] || {})[f] = snap[dt][key];
+          });
+        }
+        if(!Object.keys(rows).length) return;
+        writes.push(db.collection(RG_COL).doc(dt).set({
+          date:dt, startHour:RG_START_HOUR, rows:rows,
+          updatedBy:who, updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge:true }));
+      });
+      await Promise.all(writes);
+      // The version stamp goes AFTER the days: writing it first would tell
+      // every other device to download a half-written set.
       const dates = Object.keys(RG_DAYS).sort();
       await db.collection(RG_META.col).doc(RG_META.doc).set({
         dates:dates, count:dates.length,
         updatedAt:firebase.firestore.FieldValue.serverTimestamp(), updatedBy:who
       });
-      day.updatedAt = Date.now(); day.updatedBy = who;
+      _rgPend.done(snap);
+      Object.keys(snap).forEach(function(dt){
+        if(RG_DAYS[dt]){ RG_DAYS[dt].updatedAt = Date.now(); RG_DAYS[dt].updatedBy = who; }
+      });
       rgSaveLocal();
       const sv = document.getElementById('rgSaved');
       if(sv) sv.textContent = 'saved ' + new Date().toLocaleTimeString('en-GB');
@@ -2220,11 +2485,15 @@ document.addEventListener('DOMContentLoaded', function(){
       // The save is already reported, with a time, by #rgSaved above.
       rgCloudIdle();
     } catch(err){
+      _rgSkipNext = false;
+      _rgPend.fail(snap);
+      upgraded.forEach(function(dt){ if(RG_DAYS[dt]) RG_DAYS[dt]._legacyRows = true; });
       console.error('[RasGara] save failed', err);
       showToast('Could not save to cloud: ' + (err.code || err.message), true);
       rgCloudError(err);
     }
   }
+  registerFlush(rgPushToCloud);
 
   // ── cloud sync (same cache-version pattern as the other datasets) ──────
   // The footer line is the ONLY thing telling anyone whether this app is
@@ -2255,6 +2524,11 @@ document.addEventListener('DOMContentLoaded', function(){
   }
   function rgStartListener(){
     rgStopListener();
+    // This account's unsent cells, from last time if the app closed before
+    // they went. Laid over the cached days now, and sent once connected.
+    _rgPend.load();
+    rgOverlayPending(RG_DAYS);
+    if(_rgPend.count()) rgQueueSave();
     if(typeof db === 'undefined' || typeof FIREBASE_OK === 'undefined' || !FIREBASE_OK){
       rgCloud('error', (typeof window.__BOOT_ERROR__ === 'string' && window.__BOOT_ERROR__)
         ? 'No cloud: ' + window.__BOOT_ERROR__ : 'No cloud connection');
@@ -2294,7 +2568,7 @@ document.addEventListener('DOMContentLoaded', function(){
             updatedAt:(dd.updatedAt && dd.updatedAt.toMillis) ? dd.updatedAt.toMillis() : 0
           };
         });
-        RG_DAYS = obj;
+        RG_DAYS = rgOverlayPending(obj);
         rgSaveLocal();
         setSyncedVersion(RG_VERK, ts);
         rgRenderAll();
@@ -2406,13 +2680,7 @@ document.addEventListener('DOMContentLoaded', function(){
   // Repaint the calculated cells + totals + chart without touching inputs.
   function rgRefreshDerived(){
     const day = rgGetDay(_rgDate), c = rgCalc(day);
-    if(!rgOwnSideOnly()){
-      const rows = document.querySelectorAll('#rgTableArea tbody tr');
-      for(let i = 0; i < rows.length; i++){
-        const cell = rows[i].children[2];   // PETRECO cumulative column
-        if(cell) cell.textContent = rgFmt(c.pCum[i], 1);
-      }
-    }
+    rgRepaintCum(c);
     rgRenderTotals(); rgRenderChart();
   }
 
@@ -2924,6 +3192,35 @@ document.addEventListener('DOMContentLoaded', function(){
     for(let i = 0; i < TB_LIST.length; i++) if(TB_LIST[i].id === id) return TB_LIST[i];
     return null;
   }
+  const TB_SPAN = 24;                    // hours a shift covers
+  // Hours between temperature readings. Every battery reads at its SCANNER
+  // times — the same nine rows, with temperature as a fourth column. The
+  // property exists so a battery could be put on a different cadence later
+  // without the table having to be rebuilt; nothing uses that today.
+  function tbTempEvery(b){
+    if(typeof b === 'string') b = tbById(b);
+    return (b && b.tempEvery) ? b.tempEvery : TB_STEP;
+  }
+  // The finest cadence in the field — what the analysis grid and chart are
+  // ruled by, so every battery's readings land on a column.
+  function tbFinestStep(){
+    let m = TB_STEP;
+    TB_LIST.forEach(function(b){ const e = tbTempEvery(b); if(e < m) m = e; });
+    return m;
+  }
+  // The hour offsets this battery is read at — the rows of its table.
+  function tbOffsets(b){
+    const step = tbTempEvery(b), out = [];
+    for(let o = 0; o <= TB_SPAN; o += step) out.push(o);
+    return out;
+  }
+  // A scanner reading sits every three hours, so offset 0,3,6… is scanner
+  // index 0,1,2… and every other offset is temperature only.
+  function tbScanIndex(o){ return (o % TB_STEP === 0) ? (o / TB_STEP) : -1; }
+  function tbOffsetLabel(o, b){
+    const h = (tbStart(b) + o) % 24;
+    return (h < 10 ? '0' : '') + h + ':00';
+  }
   function tbWUnit(b){
     if(typeof b === 'string') b = tbById(b);
     return (b && b.wUnit) ? b.wUnit : 'psi';
@@ -2958,6 +3255,29 @@ document.addEventListener('DOMContentLoaded', function(){
 
   let TB_DAYS = {};
   let _tbDate = tbToday();
+  // Typed cells not yet accepted by the cloud, keyed by date and then
+  // "battery|field+index": "tb6_1|s3" (scanner), "|w3" (WHP), "|d3" (admin
+  // correction), "|c12" (temperature at hour offset 12). See makePending().
+  const _tbPend = makePending('tb_days_v1__pending');
+  function tbPendKey(id, kind, i){ return id + '|' + kind + i; }
+  function tbMayWrite(id, kind){
+    if(_tbAdmin()) return true;
+    if(!_tbOper() || id !== tbMine()) return false;   // an operator: his battery only
+    return kind !== 'd';                              // corrections are admin's
+  }
+  function tbOverlayPending(days){
+    _tbPend.each(function(dt, key, val){
+      const bar = key.indexOf('|');
+      const id = key.slice(0, bar), kind = key.charAt(bar + 1);
+      const i = parseInt(key.slice(bar + 2), 10);
+      if(!tbById(id) || isNaN(i) || 'swdc'.indexOf(kind) === -1) return;
+      if(!days[dt]) days[dt] = tbBlankDay(dt);
+      const cell = tbCellIn(days[dt], id);
+      if(kind === 'c'){ if(i >= 0 && i <= TB_SPAN) cell.c[i] = val; }
+      else if(i >= 0 && i < TB_READS) cell[kind][i] = val;
+    });
+    return days;
+  }
   let _tbMetaUnsub = null, _tbLastTs = 0, _tbFirstSnap = true, _tbSkipNext = false;
 
   // ── permissions ─────────────────────────────────────────────────────────
@@ -3049,9 +3369,12 @@ document.addEventListener('DOMContentLoaded', function(){
   // one steps aside. Such a day can be totalled and compared, but it has no
   // three-hour detail and never pretends to.
   function tbBlankCell(){
-    const s = [], w = [], d = [];
+    const s = [], w = [], d = [], c = [];
     for(let i = 0; i < TB_READS; i++){ s.push(null); w.push(null); d.push(null); }
-    return { s:s, w:w, d:d, t:null, src:'' };
+    // c = temperature in °C, indexed by HOUR OFFSET from the shift start, so
+    // 0..24 inclusive whatever the battery's cadence.
+    for(let o = 0; o <= TB_SPAN; o++) c.push(null);
+    return { s:s, w:w, d:d, c:c, t:null, src:'' };
   }
   function tbBlankDay(dateStr){
     const tbs = {};
@@ -3072,6 +3395,14 @@ document.addEventListener('DOMContentLoaded', function(){
       cell.s[i] = (r.s == null) ? null : Number(r.s);
       cell.w[i] = (r.w == null) ? null : Number(r.w);
       cell.d[i] = (r.d == null) ? null : Number(r.d);
+    }
+    return cell;
+  }
+  function tbTempToArray(temp, cell){
+    if(!temp || typeof temp !== 'object') return cell;
+    for(let o = 0; o <= TB_SPAN; o++){
+      const v = temp[String(o)];
+      cell.c[o] = (v == null) ? null : Number(v);
     }
     return cell;
   }
@@ -3112,6 +3443,8 @@ document.addEventListener('DOMContentLoaded', function(){
         out.tbs[b.id].w[i] = (src.w && src.w[i] != null) ? src.w[i] : null;
         out.tbs[b.id].d[i] = (src.d && src.d[i] != null) ? src.d[i] : null;
       }
+      for(let o = 0; o <= TB_SPAN; o++)
+        out.tbs[b.id].c[o] = (src.c && src.c[o] != null) ? src.c[o] : null;
     });
     return tbBoundaryFill(dateStr, out);
   }
@@ -3205,55 +3538,56 @@ document.addEventListener('DOMContentLoaded', function(){
     const cell = day.tbs[b.id];
     const c    = calc.per[b.id];
     const ed   = tbCanEdit();
+    const offs = tbOffsets(b);
     let rows = '';
-    for(let i = 0; i < TB_READS; i++){
-      const edge = (i === 0 || i === TB_READS - 1);
-      const tag  = i === 0 ? 'open' : (i === TB_READS - 1 ? 'close' : '');
-      const p    = c.prod[i];
-      const fx   = c.fixed[i];
+    offs.forEach(function(o){
+      const si   = tbScanIndex(o);            // -1 on a temperature-only hour
+      const edge = (o === 0 || o === TB_SPAN);
+      const tag  = o === 0 ? 'open' : (o === TB_SPAN ? 'close' : '');
+      const p    = (si >= 0) ? c.prod[si] : null;
+      const fx   = (si >= 0) ? c.fixed[si] : false;
       const pCls = 'rg-calc' + (p != null && p < 0 ? ' tb-neg' : '') + (fx ? ' tb-fix' : '');
-      // Rate alongside the interval figure. The column is production over three
-      // hours; m³/hr is that divided by three, shown because it is the number
-      // the rest of the field is discussed in.
-      const rate = (p == null) ? '' :
+      const rate = (si < 0 || p == null) ? '' :
         '<span class="tb-rate">' + tbFmt(p / TB_STEP, 1) + ' m³/hr</span>';
-      rows +=
-        '<tr' + (edge ? ' class="tb-edge"' : '') + '>' +
-          '<td class="rg-time">' + tbLabel(i, b) +
-            (tag ? '<span class="tb-tag">' + tag + '</span>' : '') + '</td>' +
-          '<td><input class="rg-in" type="number" inputmode="decimal" step="any" ' +
-            'data-tb="' + escAttr(b.id) + '" data-k="s" data-i="' + i + '" ' +
-            'value="' + (cell.s[i] == null ? '' : cell.s[i]) + '"' +
-            (ed ? '' : ' disabled') + '></td>' +
-          '<td class="' + pCls + '">' +
-            (i === 0 ? '—'
-              : (_tbAdmin()
-                  // Admin edits the DIFFERENCE, not the reading. The box always
-                  // shows the figure in force, so the production is readable at
-                  // a glance rather than hiding in a placeholder. A correction
-                  // is only RECORDED when the typed value differs from what the
-                  // meter gives; clearing the box hands it back to the meter.
-                  ? '<input class="rg-in tb-din" type="number" inputmode="decimal" step="any" ' +
-                    'data-tb="' + escAttr(b.id) + '" data-k="d" data-i="' + i + '" ' +
-                    'value="' + (p == null ? '' : Math.round(p * 100) / 100) + '">' + rate
-                  : tbFmt(p, 1) + rate)) +
-          '</td>' +
-          '<td><input class="rg-in" type="number" inputmode="decimal" step="any" ' +
-            'data-tb="' + escAttr(b.id) + '" data-k="w" data-i="' + i + '" ' +
-            'value="' + (cell.w[i] == null ? '' : cell.w[i]) + '"' +
-            (ed ? '' : ' disabled') + '></td>' +
-        '</tr>';
-    }
 
-    // Notes, worst first. Each one is a thing a person has to act on.
+      // Scanner, production and WHP only exist on a scanner hour. On the hours
+      // in between there is nothing to put in those columns and an empty box
+      // would invite somebody to fill it.
+      let scanCell, prodCell, whpCell;
+      if(si >= 0){
+        scanCell = '<td><input class="rg-in" type="number" inputmode="decimal" step="any" ' +
+          'data-tb="' + escAttr(b.id) + '" data-k="s" data-i="' + si + '" ' +
+          'value="' + (cell.s[si] == null ? '' : cell.s[si]) + '"' + (ed ? '' : ' disabled') + '></td>';
+        prodCell = '<td class="' + pCls + '">' +
+          (si === 0 ? '—'
+            : (_tbAdmin()
+                ? '<input class="rg-in tb-din" type="number" inputmode="decimal" step="any" ' +
+                  'data-tb="' + escAttr(b.id) + '" data-k="d" data-i="' + si + '" ' +
+                  'value="' + (p == null ? '' : Math.round(p * 100) / 100) + '">' + rate
+                : tbFmt(p, 1) + rate)) + '</td>';
+        whpCell  = '<td><input class="rg-in" type="number" inputmode="decimal" step="any" ' +
+          'data-tb="' + escAttr(b.id) + '" data-k="w" data-i="' + si + '" ' +
+          'value="' + (cell.w[si] == null ? '' : cell.w[si]) + '"' + (ed ? '' : ' disabled') + '></td>';
+      } else {
+        scanCell = '<td class="tb-off"></td>';
+        prodCell = '<td class="tb-off"></td>';
+        whpCell  = '<td class="tb-off"></td>';
+      }
+      const tempCell = '<td><input class="rg-in" type="number" inputmode="decimal" step="any" ' +
+        'data-tb="' + escAttr(b.id) + '" data-k="c" data-i="' + o + '" ' +
+        'value="' + (cell.c[o] == null ? '' : cell.c[o]) + '"' + (ed ? '' : ' disabled') + '></td>';
+
+      rows +=
+        '<tr' + (edge ? ' class="tb-edge"' : (si < 0 ? ' class="tb-hour"' : '')) + '>' +
+          '<td class="rg-time">' + tbOffsetLabel(o, b) +
+            (tag ? '<span class="tb-tag">' + tag + '</span>' : '') + '</td>' +
+          scanCell + prodCell + whpCell + tempCell +
+        '</tr>';
+    });
+
     let notes = '';
     if(c.neg) notes += '<div class="note warn">' + c.neg + ' interval(s) read LOWER than the reading before — ' +
                        'meter reset, rollover or a misread. Check before this day is used.</div>';
-    // The opening-versus-yesterday's-closing notes were removed. They existed
-    // to tell an operator that the two ends of the shift boundary disagreed —
-    // but the boundary is now ONE reading written to both days, so they cannot
-    // disagree, and the notes were English text explaining a problem that no
-    // longer happens to people who do not read English.
     if(c.dayOnly) notes += '<div class="note">Daily figure only — ' + tbFmt(c.total,1) +
       ' m³ imported from the scanner sheet. No three-hour readings for this day; ' +
       'entering any will replace the imported figure.</div>';
@@ -3261,9 +3595,6 @@ document.addEventListener('DOMContentLoaded', function(){
                                 ' intervals complete — the total below covers those only.</div>';
 
     const totTxt = (c.total == null) ? '—' : tbFmt(c.total, 1);
-    // No shift-window line on the panel. The times are printed down the left of
-    // the table the operator is filling in, which says the same thing without a
-    // sentence to read.
     return '<div class="tb-panel">' +
       '<div class="bar"></div>' +
       '<div class="hd"><h3>' + escHtml(b.name) + '</h3>' +
@@ -3275,6 +3606,7 @@ document.addEventListener('DOMContentLoaded', function(){
           '<th class="rg-grp">Scanner<br>m³</th>' +
           '<th class="tb-grp3">Production<br>m³/3h</th>' +
           '<th class="rg-grp2">WHP<br>' + escHtml(tbWUnit(b)) + '</th>' +
+          '<th class="tb-grp4">Temp<br>°C</th>' +
         '</tr></thead><tbody>' + rows + '</tbody></table></div></div>' +
     '</div>';
   }
@@ -3284,7 +3616,27 @@ document.addEventListener('DOMContentLoaded', function(){
     if(!el) return;
     const day  = tbGetDay(_tbDate);
     const calc = tbCalcDay(day);
+    // Another battery's save reaches every phone as a sync. Rebuilding the
+    // panels then took the focused box, the keyboard and a half-typed reading
+    // with it. Same date, same panels: update the other boxes in place.
+    const layout = _tbDate + '|' + tbVisible().map(function(b){ return b.id; }).join(',') +
+                   '|' + (_tbAdmin() ? 'a' : 'o') + (tbCanEdit() ? 'e' : '');
+    const focused = document.activeElement;
+    if(el.getAttribute('data-layout') === layout && focused && el.contains(focused) &&
+       focused.getAttribute && focused.getAttribute('data-tb')){
+      Array.prototype.forEach.call(el.querySelectorAll('input[data-tb]'), function(inp){
+        const k = inp.getAttribute('data-k');
+        if(inp === focused || k === 'd') return;       // corrections: tbRepaintDerived
+        const cell = day.tbs[inp.getAttribute('data-tb')];
+        const v = cell ? cell[k][parseInt(inp.getAttribute('data-i'), 10)] : null;
+        const s = (v == null) ? '' : String(v);
+        if(inp.value !== s) inp.value = s;
+      });
+      tbRepaintDerived();
+      return;
+    }
     el.innerHTML = tbVisible().map(function(b){ return tbPanel(b, day, calc); }).join('');
+    el.setAttribute('data-layout', layout);
   }
 
   function tbRenderTotals(){
@@ -3480,24 +3832,31 @@ document.addEventListener('DOMContentLoaded', function(){
   let _tbSub = 'entry';
   const _TB_SUBS = [ { k:'entry', label:'Entry',            icon:'edit'  },
                      { k:'old',   label:'Report card',      icon:'print' },
-                     { k:'view',  label:'Scanner analysis', icon:'trend' } ];
+                     { k:'view',  label:'Scanner analysis', icon:'trend' },
+                     { k:'temp',  label:'Temperature',       icon:'trend' } ];
   function tbShowSub(k){
     if(!_tbAdmin()) k = 'entry';
     _tbSub = k;
     const e = document.getElementById('tb-page-entry');
     const v = document.getElementById('tb-page-view');
     const o = document.getElementById('tb-page-old');
+    const tp = document.getElementById('tb-page-temp');
+    if(tp) tp.style.display = (k === 'temp') ? '' : 'none';
     if(e) e.style.display = (k === 'entry') ? '' : 'none';
     if(v) v.style.display = (k === 'view')  ? '' : 'none';
     if(o) o.style.display = (k === 'old')   ? '' : 'none';
     // PETRECO's entry rides along on the Entry page for admin — one screen for
     // "anything that needs correcting today". It keeps its own top-level tab
     // for PETRECO's own operators, who never see this page.
+    // Only while A/R Production is the open tab. This runs on every tank
+    // battery render — including a sync while admin is on R/G Production —
+    // and used to un-hide the PETRECO tables underneath the R/G page.
     const pf = document.getElementById('page-pf');
     if(pf && _tbAdmin()){
-      const on = (k === 'entry');
+      const arOpen = (typeof _activeTab === 'undefined') || _activeTab === 'tb';
+      const on = (k === 'entry') && arOpen;
       pf.style.display = on ? '' : 'none';
-      pf.classList.toggle('pf-embedded', true);
+      pf.classList.add('pf-embedded');
       // One date picker per screen. The embedded copy follows the date chosen
       // above it; two "Shift day" boxes on one page is a question, not a tool.
       if(on && window.__PF__ && window.__PF__.setDate) window.__PF__.setDate(_tbDate);
@@ -3510,6 +3869,7 @@ document.addEventListener('DOMContentLoaded', function(){
     // the same trap the main tabs have. Redraw on the way in.
     if(k === 'view') tbRenderView();
     if(k === 'old')  tbRenderOld();
+    if(k === 'temp') tbRenderTemp();
   }
   function tbRenderSubTabs(){
     const bar = document.getElementById('tbSubTabs');
@@ -3633,6 +3993,13 @@ document.addEventListener('DOMContentLoaded', function(){
   // Absolute m³, not a percentage. A percentage hides the size of the thing it
   // describes: "down 4%" on Belayim and "down 4%" on 10/1 are two very
   // different barrels, and barrels are what gets shipped.
+  // A chip, or a word saying why there is no chip. Same rule as the report
+  // card: a shift still being read is not compared with a finished one.
+  function tbDoneChip(aDone, bDone, a, b){
+    if(!aDone) return '<span class="d">not complete</span>';
+    if(!bDone) return '<span class="d">yesterday incomplete</span>';
+    return tbDeltaChip(a, b);
+  }
   function tbDeltaChip(a, b){
     if(a == null || b == null) return '';
     const d = a - b;
@@ -3700,7 +4067,8 @@ document.addEventListener('DOMContentLoaded', function(){
           labels.push(tbLabel(i-1, st).slice(0,2) + '–' + tbLabel(i, st).slice(0,2));
         return '<div class="tb-mini tb-mini-g"><div class="cap"><h4>' + escHtml(g.name) + '</h4>' +
           '<span class="clk">' + tbGroupList(g).length + ' batteries · shipped to PETRECO</span>' +
-          tbDeltaChip(tbSum(a), tbSum(b)) + '</div>' +
+          tbDoneChip(tbGroupCalc(_tbDate, g).allDone, tbGroupCalc(y, g).allDone,
+                     tbSum(a), tbSum(b)) + '</div>' +
           tbZoomable('iv-' + g.id, g.name + ' — three-hour production',
             tbBarChart(labels, a, b, { h:220 }),
             { kind:'bar', axis:'Interval', labels:labels, diff:true,
@@ -3718,7 +4086,9 @@ document.addEventListener('DOMContentLoaded', function(){
         return '<div class="tb-mini' + (solo ? ' tb-mini-g' : '') + '"><div class="cap"><h4>' +
           escHtml(b.name) + '</h4>' +
           (solo ? '<span class="clk">shipped to PETRECO</span>' : '') +
-          tbDeltaChip(tbSum(a), tbSum(c)) + '</div>' +
+          tbDoneChip(tbCalcOne(tbGetDay(_tbDate).tbs[b.id]).done,
+                     tbCalcOne(tbGetDay(y).tbs[b.id]).done,
+                     tbSum(a), tbSum(c)) + '</div>' +
           tbZoomable('ivb-' + b.id, b.name + ' — three-hour production',
             tbBarChart(labels, a, c, { h:170 }),
             { kind:'bar', axis:'Interval', labels:labels, diff:true,
@@ -3733,9 +4103,17 @@ document.addEventListener('DOMContentLoaded', function(){
   // first twelve hours of that battery's own shift, 5-8 the second. Split by
   // interval NUMBER, not clock, for the same reason the field roll-up is —
   // T.B. 10/1 starts an hour later and its first twelve hours are its own.
+  function tbHalfSlice(iv, which){ return which === 0 ? iv.slice(0,4) : iv.slice(4,8); }
   function tbHalf(dateStr, id, which){
-    const iv = tbIntervals(dateStr, id);
-    return tbSum(which === 0 ? iv.slice(0,4) : iv.slice(4,8));
+    return tbSum(tbHalfSlice(tbIntervals(dateStr, id), which));
+  }
+  // A half is complete when all four of its three-hour readings are in. Its
+  // comparison waits for that, the same as everything else.
+  function tbHalfDone(dateStr, id, which){
+    return tbHalfSlice(tbIntervals(dateStr, id), which).every(function(v){ return v != null; });
+  }
+  function tbGroupHalfDone(dateStr, g, which){
+    return tbGroupList(g).every(function(b){ return tbHalfDone(dateStr, b.id, which); });
   }
   function tbDeltaCell(a, b){
     if(a == null || b == null) return '<td class="na">—</td>';
@@ -3743,6 +4121,11 @@ document.addEventListener('DOMContentLoaded', function(){
     const cls  = diff > 0 ? 'gain' : (diff < 0 ? 'loss' : '');
     return '<td class="' + cls + '">' + (diff > 0 ? '+' : diff < 0 ? '−' : '±') +
            tbFmt(Math.abs(diff),1) + '</td>';
+  }
+  // Today, yesterday and the change for one twelve-hour half.
+  function halfCells(a, aDone, b, bDone){
+    return '<td' + (a != null && !aDone ? ' class="part"' : '') + '>' + tbFmt(a,1) + '</td>' +
+           '<td class="dim">' + tbFmt(b,1) + '</td>' + tbDoneCell(a, aDone, b, bDone);
   }
   function tbHalvesHTML(dateStr){
     const y = tbPrevDate(dateStr);
@@ -3761,16 +4144,16 @@ document.addEventListener('DOMContentLoaded', function(){
         if(a0 != null || a1 != null) any = true;
         body += '<tr><th class="row">' + escHtml(b.name) +
           (tbOneClock() ? '' : ' <span class="clk">' + tbLabel(0,b) + '</span>') + '</th>' +
-          '<td>' + tbFmt(a0,1) + '</td><td class="dim">' + tbFmt(b0,1) + '</td>' + tbDeltaCell(a0,b0) +
-          '<td>' + tbFmt(a1,1) + '</td><td class="dim">' + tbFmt(b1,1) + '</td>' + tbDeltaCell(a1,b1) +
+          halfCells(a0, tbHalfDone(_tbDate, b.id, 0), b0, tbHalfDone(y, b.id, 0)) +
+          halfCells(a1, tbHalfDone(_tbDate, b.id, 1), b1, tbHalfDone(y, b.id, 1)) +
           '</tr>';
       });
       if(members.length < 2) return;   // a lone battery is already its own row
       const ga0 = tbGroupHalf(_tbDate, g, 0), gb0 = tbGroupHalf(y, g, 0);
       const ga1 = tbGroupHalf(_tbDate, g, 1), gb1 = tbGroupHalf(y, g, 1);
       body += '<tr class="tot"><th class="row">' + escHtml(g.name) + '</th>' +
-        '<td>' + tbFmt(ga0,1) + '</td><td class="dim">' + tbFmt(gb0,1) + '</td>' + tbDeltaCell(ga0,gb0) +
-        '<td>' + tbFmt(ga1,1) + '</td><td class="dim">' + tbFmt(gb1,1) + '</td>' + tbDeltaCell(ga1,gb1) +
+        halfCells(ga0, tbGroupHalfDone(_tbDate, g, 0), gb0, tbGroupHalfDone(y, g, 0)) +
+        halfCells(ga1, tbGroupHalfDone(_tbDate, g, 1), gb1, tbGroupHalfDone(y, g, 1)) +
         '</tr>';
     });
     if(!any) return '';
@@ -3848,6 +4231,14 @@ document.addEventListener('DOMContentLoaded', function(){
   // of gain/loss charts: the question "how much did this battery lose today" is
   // answered by a number, and reading a number off a bar is worse than reading
   // the number.
+  // Gain or loss only between two complete shifts — the unread hours of a day
+  // in progress are not a loss. The same rule as the report card, and this
+  // table goes into the printed day report as well.
+  function tbDoneCell(a, aDone, b, bDone){
+    if(a != null && !aDone) return '<td class="na">not complete</td>';
+    if(!bDone) return '<td class="na">—</td>';
+    return tbDeltaCell(a, b);
+  }
   function tbDayCompareHTML(dateStr){
     const y = tbPrevDate(dateStr);
     const day = tbGetDay(dateStr), yday = tbGetDay(y);
@@ -3855,18 +4246,22 @@ document.addEventListener('DOMContentLoaded', function(){
     TB_GROUPS.forEach(function(g){
       const members = tbGroupList(g);
       members.forEach(function(b){
-        const a = tbCalcOne(day.tbs[b.id]).total, c = tbCalcOne(yday.tbs[b.id]).total;
+        const ca = tbCalcOne(day.tbs[b.id]), cy = tbCalcOne(yday.tbs[b.id]);
+        const a = ca.total, c = cy.total;
         if(a != null) any = true;
         body += '<tr><th class="row">' + escHtml(b.name) + '</th>' +
-          '<td>' + tbFmt(a,1) + '</td><td class="dim">' + tbFmt(c,1) + '</td>' +
-          tbDeltaCell(a, c) +
+          '<td' + (a != null && !ca.done ? ' class="part"' : '') + '>' + tbFmt(a,1) + '</td>' +
+          '<td class="dim">' + tbFmt(c,1) + '</td>' +
+          tbDoneCell(a, ca.done, c, cy.done) +
           '<td class="dim">' + (a == null ? '—' : tbFmt(a * TB_BBL,0)) + '</td></tr>';
       });
       if(members.length < 2) return;
-      const ga = tbGroupCalc(dateStr, g).total, gc = tbGroupCalc(y, g).total;
+      const gA = tbGroupCalc(dateStr, g), gY = tbGroupCalc(y, g);
+      const ga = gA.total, gc = gY.total;
       body += '<tr class="tot"><th class="row">' + escHtml(g.name) + '</th>' +
-        '<td>' + tbFmt(ga,1) + '</td><td class="dim">' + tbFmt(gc,1) + '</td>' +
-        tbDeltaCell(ga, gc) +
+        '<td' + (ga != null && !gA.allDone ? ' class="part"' : '') + '>' + tbFmt(ga,1) + '</td>' +
+        '<td class="dim">' + tbFmt(gc,1) + '</td>' +
+        tbDoneCell(ga, gA.allDone, gc, gY.allDone) +
         '<td class="dim">' + (ga == null ? '—' : tbFmt(ga * TB_BBL,0)) + '</td></tr>';
     });
     if(!any) return '';
@@ -3944,6 +4339,40 @@ document.addEventListener('DOMContentLoaded', function(){
       if(r.got) anything = true;
       body += r.html;
     });
+    // PETRECO's scanners read on the same three-hour cadence from 06:00, so
+    // they sit in the same grid under their own header — with their own label
+    // on it, because these are not tank batteries and must never be read as a
+    // sixth one or added into a battery total. Screen only: the printed tank
+    // battery report is about the batteries.
+    const PFh = window.__PF__;
+    if(!forPrint && PFh){
+      let h = '<tr class="hrow"><th>PETRECO</th>';
+      PFh.periods.forEach(function(pr){ h += '<th>' + escHtml(pr.label.split(' → ')[1]) + '</th>'; });
+      body += h + '<th>Day</th></tr>';
+      PFh.list.forEach(function(m){
+        // A day recorded before v15 holds twelve-hour halves and has no
+        // three-hour detail to show; its day total still stands.
+        const iv = PFh.periods.map(function(pr){ return PFh.period(_tbDate, m.id, pr.k); });
+        const ok = iv.filter(function(v){ return v != null; });
+        const mean = ok.length ? ok.reduce(function(x,y2){ return x+y2; },0) / ok.length : null;
+        let cells = '';
+        iv.forEach(function(v){
+          if(v == null){ cells += '<td class="na">—</td>'; return; }
+          anything = true;
+          let bg = 'var(--surface)';
+          if(mean && mean > 0){
+            const dev = Math.max(-1, Math.min(1, ((v - mean) / mean) / 0.4));
+            const a = (Math.abs(dev) * 0.5).toFixed(2);
+            bg = dev >= 0 ? 'rgba(22,163,74,' + a + ')' : 'rgba(220,38,38,' + a + ')';
+          }
+          cells += '<td style="background:' + bg + '">' + tbFmt(v,1) + '</td>';
+        });
+        const tot = PFh.meterTotal(_tbDate, m.id);
+        if(tot != null) anything = true;
+        body += '<tr><th class="row">' + escHtml(m.name) + '</th>' + cells +
+                '<td style="font-weight:700">' + tbFmt(tot,1) + '</td></tr>';
+      });
+    }
     if(!anything) return '';
     return '<div class="tb-heat"><table><tbody>' + body + '</tbody></table></div>';
   }
@@ -4254,28 +4683,87 @@ document.addEventListener('DOMContentLoaded', function(){
   // yesterday, difference — kept close to the card they know, but in the app's
   // own colours rather than the original blue and yellow.
   //
-  // The original covered twelve hours. That is offered alongside the full day,
-  // because a twelve-hour card and a twenty-four-hour card are different
-  // reports and the heading has to say which one is on the page.
-  const TB_PERIODS = { day:{ from:0, to:8, label:'24 HRS' },
-                       h1: { from:0, to:4, label:'FIRST 12 HRS' },
-                       h2: { from:4, to:8, label:'SECOND 12 HRS' } };
+  // PERIODS. Every period is a window of the shift measured from its start —
+  // `from` / `to` in HOURS. Each line on the card reads that window on its own
+  // clock: the Belayim batteries from 05:00, T.B. 10/1, R/G and PETRECO from
+  // 06:00. So "first 3 hours" is 05:00–08:00 for Belayim and 06:00–09:00 for
+  // the rest, and each block heading prints its own clock.
+  //
+  // Window boundaries must fall on a tank battery reading (every 3 h). Keys
+  // day/h1/h2 are kept from earlier releases.
+  const TB_PERIODS = {
+    h3:  { from:0,  to:3,  label:'FIRST 3 HRS'   },
+    h6:  { from:0,  to:6,  label:'FIRST 6 HRS'   },
+    h1:  { from:0,  to:12, label:'FIRST 12 HRS'  },
+    day: { from:0,  to:24, label:'24 HRS'        },
+    h2:  { from:12, to:24, label:'SECOND 12 HRS' }
+  };
   let _tbOldPeriod = 'day';
 
-  function tbPeriodTotal(dateStr, id, p){
-    const c = tbCalcOne(tbGetDay(dateStr).tbs[id]);
-    // An imported day carries a day total and no intervals, so it can answer
-    // for the whole day and must not pretend to answer for half of it.
-    if(c.dayOnly) return (p === 'day') ? c.total : null;
-    return tbSum(c.prod.slice(1).slice(TB_PERIODS[p].from, TB_PERIODS[p].to));
-  }
-  function tbPeriodGroup(dateStr, g, p){
-    let t = null;
-    g.members.forEach(function(id){
-      const v = tbPeriodTotal(dateStr, id, p);
-      if(v != null) t = (t == null ? 0 : t) + v;
+  // ── complete before compared ────────────────────────────────────────────
+  // A window is COMPLETE when every reading inside it exists. Today's figure is
+  // compared with yesterday's ONLY when both windows are complete. Until then
+  // today's figure is shown marked "so far", yesterday's is shown for
+  // reference, and the Difference stays empty — six hours read today against a
+  // finished yesterday is not a loss, it is hours not read yet. The same rule
+  // holds for every period and every line, totals included: a total is complete
+  // only when every line in it is.
+  //
+  // A pair is { a, aDone, b, bDone, na, bNa }. `na` / `bNa` mean the line cannot
+  // be measured over this window at all on that day — a PETRECO scanner day
+  // recorded as two twelve-hour halves has no 3- or 6-hour figure — and the
+  // cell says "12 h only" rather than showing a dash that reads as unread.
+  function tbWin(vals){
+    // vals: the window's readings (null = not read), or null = not measurable
+    if(vals == null) return { v:null, done:false, na:true };
+    let v = null, done = vals.length > 0;
+    vals.forEach(function(x){
+      if(x == null){ done = false; return; }
+      v = (v == null ? 0 : v) + x;
     });
-    return t;
+    return { v:v, done:done, na:false };
+  }
+  function tbPairOf(getVals, dateStr, yDate){
+    const t = tbWin(getVals(dateStr)), w = tbWin(getVals(yDate));
+    return { a:t.v, aDone:t.done, b:w.v, bDone:w.done, na:t.na, bNa:w.na };
+  }
+  // Lines added together: complete only if every line is, measurable only if
+  // every line is.
+  function tbPairSum(pairs){
+    const out = { a:null, aDone:pairs.length > 0, b:null, bDone:pairs.length > 0, na:false, bNa:false };
+    pairs.forEach(function(q){
+      if(q.na) out.na = true;
+      if(q.bNa) out.bNa = true;
+      if(q.a != null) out.a = (out.a == null ? 0 : out.a) + q.a;
+      if(q.b != null) out.b = (out.b == null ? 0 : out.b) + q.b;
+      if(!q.aDone) out.aDone = false;
+      if(!q.bDone) out.bDone = false;
+    });
+    if(out.na){ out.a = null; out.aDone = false; }
+    if(out.bNa){ out.b = null; out.bDone = false; }
+    return out;
+  }
+  // One battery over the window: its three-hour productions inside it. An
+  // imported daily-only day answers for the whole day and nothing shorter.
+  function tbBatWindow(id, p){
+    const P = TB_PERIODS[p];
+    return function(dt){
+      const c = tbCalcOne(tbGetDay(dt).tbs[id]);
+      if(c.dayOnly) return (P.from === 0 && P.to === 24) ? [c.total] : [null];
+      return c.prod.slice(1).slice(P.from / TB_STEP, P.to / TB_STEP);
+    };
+  }
+  function tbBatPair(dateStr, yDate, id, p){
+    return tbPairOf(tbBatWindow(id, p), dateStr, yDate);
+  }
+  function tbGroupPair(dateStr, yDate, g, p){
+    return tbPairSum(g.members.map(function(id){ return tbBatPair(dateStr, yDate, id, p); }));
+  }
+  // The window as clock times on a given shift start: "05:00–08:00".
+  function tbWinClock(start, p){
+    const P = TB_PERIODS[p];
+    const h = function(o){ const x = (start + o) % 24; return (x < 10 ? '0' : '') + x + ':00'; };
+    return h(P.from) + '–' + h(P.to);
   }
 
   function tbOldCardHTML(dateStr, p, forPrint){
@@ -4287,72 +4775,92 @@ document.addEventListener('DOMContentLoaded', function(){
           headInk:'var(--on-accent)', band:'var(--surface)', gain:'var(--green)',
           loss:'var(--red)', totalBg:'rgba(202,138,4,.12)', card:'var(--card)' };
 
-    function diffPill(a, b){
-      if(a == null || b == null) return '<span class="pill nil">—</span>';
-      const d = a - b;
+    // Today and yesterday cells. A figure from an unfinished window is shown
+    // with a "so far" tag; a line that cannot be measured over this window
+    // says so instead of showing a dash that looks like a missing reading.
+    function valCell(v, done, na, cls){
+      if(na) return '<td class="v ' + cls + ' na">12 h only</td>';
+      if(v == null) return '<td class="v ' + cls + '">—</td>';
+      // Today is still being read ("so far"); yesterday is over, so a short
+      // window there means readings are missing ("incomplete").
+      return '<td class="v ' + cls + (done ? '' : ' part') + '">' + tbFmt(v, 0) + ' m³' +
+             (done ? '' : '<span class="sofar">' + (cls === 'y' ? 'incomplete' : 'so far') + '</span>') + '</td>';
+    }
+    // Difference: only between two COMPLETE windows.
+    function diffPill(q){
+      if(q.na) return '<span class="pill nil">—</span>';
+      if(q.a != null && !q.aDone) return '<span class="pill wait">not complete</span>';
+      if(q.a == null || q.b == null || !q.bDone) return '<span class="pill nil">—</span>';
+      const d = q.a - q.b;
       return '<span class="pill ' + (d > 0 ? 'up' : d < 0 ? 'down' : 'flat') + '">' +
              (d > 0 ? '+' : d < 0 ? '−' : '±') + tbFmt(Math.abs(d), 0) + ' m³</span>';
     }
-    function row(name, a, b, cls){
+    function row(name, q, cls){
       return '<tr' + (cls ? ' class="' + cls + '"' : '') + '>' +
         '<td class="nm">' + escHtml(name) + '</td>' +
-        '<td class="v">' + (a == null ? '—' : tbFmt(a,0) + ' m³') + '</td>' +
-        '<td class="v y">' + (b == null ? '—' : tbFmt(b,0) + ' m³') + '</td>' +
-        '<td class="d">' + diffPill(a, b) + '</td></tr>';
+        valCell(q.a, q.aDone, q.na, '') +
+        valCell(q.b, q.bDone, q.bNa, 'y') +
+        '<td class="d">' + diffPill(q) + '</td></tr>';
+    }
+    function blockHead(title, clock){
+      return '<div class="blk-h">' + escHtml(title) +
+             (clock ? '<span class="clk">' + escHtml(clock) + '</span>' : '') + '</div>';
+    }
+    // Every today-figure that is still short, so the heading can say so.
+    let unfinished = 0;
+    function track(q){ if(!q.na && q.a != null && !q.aDone) unfinished++; return q; }
+
+    // ── the R/G side ────────────────────────────────────────────────────
+    // Read through window.__RG so this stays a view of the readings module
+    // rather than a second copy of its arithmetic. R/G is 24 hourly rows from
+    // 06:00, so a window of hours is the same range of rows.
+    //
+    // There is NO total row: PETRECO and Ras Gara meter the same oil at two
+    // points, so adding them would double-count it. The figure that means
+    // something is the gap between them, and that gets its own row.
+    const RG = window.__RG;
+    const PER = TB_PERIODS[p];
+    function rgPair(side){
+      if(!RG || !RG.getDay) return { a:null, aDone:false, b:null, bDone:false, na:false };
+      return tbPairOf(function(dt){
+        let d;
+        try { d = RG.getDay(dt); } catch(e){ return []; }
+        const out = [];
+        for(let i = PER.from; i < PER.to; i++) out.push(d.rows[i] ? d.rows[i][side] : null);
+        return out;
+      }, dateStr, y);
+    }
+    // The gap exists only where BOTH meters have the whole window.
+    function gapPair(pr, rr){
+      const aOk = pr.aDone && rr.aDone, bOk = pr.bDone && rr.bDone;
+      return { a: aOk ? pr.a - rr.a : null, aDone:aOk,
+               b: bOk ? pr.b - rr.b : null, bDone:bOk, na:false };
     }
 
-    // ── the R/G side, in the same card ──────────────────────────────────
-    // PETRECO against Ras Gara for the same date. Read through window.__RG so
-    // this stays a view of the readings module rather than a second copy of
-    // its arithmetic.
-    //
-    // There is NO total row here: PETRECO and Ras Gara meter the same oil at
-    // two points, so adding them would double-count it. The figure that means
-    // something is the difference between them, and that gets its own row.
     let rgBlock = '';
-    const RG = window.__RG;
     if(RG && RG.getDay && RG.calc){
-      function rgFor(dt){
-        try { return RG.calc(RG.getDay(dt)); } catch(e){ return null; }
-      }
-      const rt = rgFor(dateStr), ry = rgFor(y);
-      if(rt){
-        let rows = '';
-        // Named for what the figure IS rather than for the meter it came from:
-        // one is what arrived at PETRECO, the other is what Ras Gara sent.
-        // Sent first, received second, then the gap between them — the order
-        // the oil actually travels in.
-        rows += row('From Ras Gara', rt.rTotal, ry ? ry.rTotal : null);
-        rows += row('Received at PETRECO', rt.pTotal, ry ? ry.pTotal : null);
-        rows += row('Difference', rt.loss, ry ? ry.loss : null, 'tot');
-        rgBlock = '<div class="blk"><div class="blk-h">R/G Production</div>' +
-          '<table><thead><tr><th class="nm">Meter</th><th>Today</th><th>Yesterday</th>' +
-          '<th>Difference</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
-      }
+      const pr = track(rgPair('p')), rr = track(rgPair('r'));
+      let rows = '';
+      // Sent first, received second, then the gap — the order the oil travels.
+      rows += row('From Ras Gara', rr);
+      rows += row('Received at PETRECO', pr);
+      rows += row('Difference', gapPair(pr, rr), 'tot');
+      rgBlock = '<div class="blk">' + blockHead('R/G Production', tbWinClock(RG.START || 6, p)) +
+        '<table><thead><tr><th class="nm">Meter</th><th>Today</th><th>Yesterday</th>' +
+        '<th>Difference</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
     }
 
     // ── PETRECO's own scanners ──────────────────────────────────────────
-    // Read through window.__PF__, the same way the R/G figures are read through
-    // window.__RG__ — a view of the module that owns them, not a second copy of
-    // its arithmetic.
-    //
-    // PETRECO records twelve-hour periods, so 'day' adds both and h1/h2 take
-    // one. That maps onto the card's period selector exactly.
+    // Read through window.__PF__. PETRECO records three-hour periods from
+    // 06:00, the same cadence as the batteries, so every window here has a
+    // figure — except on a day recorded before v15 as two twelve-hour halves,
+    // where `PF.window` returns null for anything shorter than a half and the
+    // line reads "12 h only".
     const PF = window.__PF__;
-    function pfVal(dt, id){
-      if(!PF) return null;
-      if(p === 'day') return PF.meterTotal(dt, id);
-      return PF.period(dt, id, p === 'h1' ? 0 : 1);
-    }
-    function pfSec(dt, grp){
-      if(!PF) return null;
-      let t = null;
-      PF.list.forEach(function(m){
-        if(m.grp !== grp) return;
-        const v = pfVal(dt, m.id);
-        if(v != null) t = (t == null ? 0 : t) + v;
-      });
-      return t;
+    const PF_START_H = (PF && PF.start) || 6;
+    function pfPair(id){
+      if(!PF) return { a:null, aDone:false, b:null, bDone:false, na:true };
+      return tbPairOf(function(dt){ return PF.window(dt, id, PER.from, PER.to); }, dateStr, y);
     }
 
     // Only the Belayim group is a tank battery block of its own. T.B. 10/1 is
@@ -4362,15 +4870,11 @@ document.addEventListener('DOMContentLoaded', function(){
     TB_GROUPS.filter(function(g){ return tbGroupList(g).length > 1; }).forEach(function(g){
       let rows = '';
       tbGroupList(g).forEach(function(bt){
-        rows += row(bt.name, tbPeriodTotal(dateStr, bt.id, p), tbPeriodTotal(y, bt.id, p));
+        rows += row(bt.name, track(tbBatPair(dateStr, y, bt.id, p)));
       });
-      // A group of one is already its own total; printing the same figure twice
-      // under two names only invites the question of why they differ.
-      if(tbGroupList(g).length > 1)
-        rows += row('TOTAL', tbPeriodGroup(dateStr, g, p), tbPeriodGroup(y, g, p), 'tot');
-      // On the card this block is headed the way the circulated report heads
-      // it, which is not the name the group carries elsewhere in the app.
-      blocks += '<div class="blk"><div class="blk-h">Belayim T.B. Scanners</div>' +
+      rows += row('TOTAL', tbGroupPair(dateStr, y, g, p), 'tot');
+      // Headed the way the circulated report heads it.
+      blocks += '<div class="blk">' + blockHead('Belayim T.B. Scanners', tbWinClock(tbGroupStart(g), p)) +
         '<table><thead><tr><th class="nm">Scanner</th><th>Today</th><th>Yesterday</th>' +
         '<th>Difference</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
     });
@@ -4414,6 +4918,14 @@ document.addEventListener('DOMContentLoaded', function(){
       '.tbcard .pill.down{background:' + C.loss + ';}' +
       '.tbcard .pill.flat{background:' + C.mute + ';}' +
       '.tbcard .pill.nil{background:transparent;color:' + C.mute + ';font-weight:600;}' +
+      '.tbcard .pill.wait{background:transparent;color:' + C.mute + ';font-weight:700;' +
+        'border:1px dashed ' + C.line + ';font-size:' + (Z.pill - 2.5) + 'px;font-family:inherit;}' +
+      '.tbcard td.part{color:' + C.mute + ';font-style:italic;}' +
+      '.tbcard td.na{color:' + C.mute + ';font-weight:600;font-size:' + (Z.nm - 1.5) + 'px;font-family:inherit;}' +
+      '.tbcard .sofar{display:block;font-size:' + (Z.th) + 'px;font-style:normal;font-weight:700;' +
+        'letter-spacing:.6px;text-transform:uppercase;font-family:inherit;line-height:1.2;}' +
+      '.tbcard .blk-h .clk{margin-left:8px;font-family:ui-monospace,monospace;letter-spacing:.3px;' +
+        'text-transform:none;font-weight:700;opacity:.8;}' +
       '.tbcard .blk.remarks{border:1px solid ' + C.line + ';border-radius:12px;padding:' + Z.remP + ';' +
         'background:' + C.totalBg + ';}' +
       '.tbcard .blk.remarks p{font-size:' + Z.rem + 'px;line-height:1.5;color:' + C.ink + ';margin-top:2px;}' +
@@ -4444,65 +4956,56 @@ document.addEventListener('DOMContentLoaded', function(){
         '.tbcard .bd{padding:11px 10px 12px;}' +
       '}';
 
-    // PETRECO scanners — drains, then crude oil, each with its own total.
+    // PETRECO scanners — the drains, with their own total. Always drawn: the
+    // card is a standing form, and a section that vanishes reads as "where did
+    // it go?".
     let pfBlocks = '';
     if(PF){
-      // Drains only. L.O.T.F and M.O.T.F are crude oil and belong to PTB
-      // Production, not to the drain total.
-      [{ grp:'drain', title:'PETRECO Scanners — drain of the tanks' }].forEach(function(sec){
-        // Always drawn, filled or not. The card is a standing form — a section
-        // that vanishes on a quiet day reads as "where did it go?", which is a
-        // worse question than a row of dashes.
-        let rows = '';
-        PF.list.forEach(function(m){
-          if(m.grp !== sec.grp) return;
-          rows += row(m.name, pfVal(dateStr, m.id), pfVal(y, m.id));
-        });
-        rows += row('TOTAL', pfSec(dateStr, sec.grp), pfSec(y, sec.grp), 'tot');
-        pfBlocks += '<div class="blk"><div class="blk-h">' + escHtml(sec.title) + '</div>' +
-          '<table><thead><tr><th class="nm">Scanner</th><th>Today</th><th>Yesterday</th>' +
-          '<th>Difference</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
-      });
+      const drains = PF.list.filter(function(m){ return m.grp === 'drain'; });
+      const pairs = drains.map(function(m){ return pfPair(m.id); });
+      let rows = '';
+      drains.forEach(function(m, i){ rows += row(m.name, track(pairs[i])); });
+      rows += row('TOTAL', tbPairSum(pairs), 'tot');
+      pfBlocks = '<div class="blk">' +
+        blockHead('PETRECO Scanners — drain of the tanks', tbWinClock(PF_START_H, p)) +
+        '<table><thead><tr><th class="nm">Scanner</th><th>Today</th><th>Yesterday</th>' +
+        '<th>Difference</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
     }
 
     // ── PTB Production ──────────────────────────────────────────────────
     // The streams that arrive at PETRECO in their own right, added together:
     // the two crude oil scanners, T.B. 10/1 on its own line, and what was
-    // received at PETRECO from Ras Gara. Laid out the way the card colleagues
-    // already circulate lays it out.
+    // received at PETRECO from Ras Gara. All four run on the 06:00 clock, and
+    // all four now read every three hours. On a day recorded before v15 the
+    // crude oil scanners have no figure under twelve hours, and then the TOTAL
+    // has none either — a total missing two of its four streams is not the PTB
+    // figure.
     let ptbBlock = '';
     {
-      const rtP = (RG && RG.getDay && RG.calc) ? (function(){
-        try { return RG.calc(RG.getDay(dateStr)); } catch(e){ return null; } })() : null;
-      const ryP = (RG && RG.getDay && RG.calc) ? (function(){
-        try { return RG.calc(RG.getDay(y)); } catch(e){ return null; } })() : null;
       const items = [
-        { name:'L.O.T.F',             a:PF ? pfVal(dateStr,'plotf') : null, b:PF ? pfVal(y,'plotf') : null },
-        { name:'M.O.T.F',             a:PF ? pfVal(dateStr,'pmotf') : null, b:PF ? pfVal(y,'pmotf') : null },
-        { name:'T.B. 10/1',           a:tbPeriodTotal(dateStr,'tb10_1',p), b:tbPeriodTotal(y,'tb10_1',p) },
-        { name:'Received at PETRECO', a:rtP ? rtP.pTotal : null,           b:ryP ? ryP.pTotal : null }
+        { name:'L.O.T.F',             q:pfPair('plotf') },
+        { name:'M.O.T.F',             q:pfPair('pmotf') },
+        { name:'T.B. 10/1',           q:tbBatPair(dateStr, y, 'tb10_1', p) },
+        { name:'Received at PETRECO', q:rgPair('p') }
       ];
-      let rows = '', ta = null, tb2 = null;
-      items.forEach(function(it){
-        rows += row(it.name, it.a, it.b);
-        if(it.a != null) ta  = (ta  == null ? 0 : ta)  + it.a;
-        if(it.b != null) tb2 = (tb2 == null ? 0 : tb2) + it.b;
-      });
-      rows += row('TOTAL', ta, tb2, 'tot');
-      ptbBlock = '<div class="blk"><div class="blk-h">PTB Production</div>' +
+      let rows = '';
+      items.forEach(function(it){ rows += row(it.name, track(it.q)); });
+      rows += row('TOTAL', tbPairSum(items.map(function(it){ return it.q; })), 'tot');
+      ptbBlock = '<div class="blk">' + blockHead('PTB Production', tbWinClock(tbStart('tb10_1'), p)) +
         '<table><thead><tr><th class="nm">Scanner</th><th>Today</th><th>Yesterday</th>' +
         '<th>Difference</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
     }
 
-    // Remarks, only when there is one. An empty box on a printed report is a
-    // question nobody can answer.
-    // Always present, and says so when there is nothing — a missing Remarks
-    // block reads as "was it forgotten?", which is the question the block is
-    // there to answer.
+    // Remarks: always present, and says so when there is nothing — a missing
+    // block reads as "was it forgotten?".
     const note = PF ? (PF.getDay(dateStr).remarks || '').trim() : '';
     const remarksBlock = '<div class="blk remarks"><div class="blk-h">Remarks</div>' +
       '<p' + (note ? '' : ' class="none"') + '>' +
       (note ? escHtml(note) : '— No remarks —') + '</p></div>';
+
+    // When any line is still short, the heading says so: those lines carry no
+    // difference yet.
+    const partial = unfinished > 0;
 
     const dt = new Date(dateStr + 'T00:00:00');
     const pretty = ('0' + dt.getDate()).slice(-2) + '/' +
@@ -4510,7 +5013,8 @@ document.addEventListener('DOMContentLoaded', function(){
     return '<style>' + css + '</style>' +
       '<div class="tbcard"><div class="hd">' +
         '<div><h2>Production Report</h2>' +
-        '<div class="sub">PETROBEL · Scanners for ' + TB_PERIODS[p].label + '</div></div>' +
+        '<div class="sub">PETROBEL · Scanners for ' + TB_PERIODS[p].label +
+        (partial ? ' · IN PROGRESS' : '') + '</div></div>' +
         '<div class="date">' + pretty + '</div>' +
       '</div><div class="bd">' + blocks + pfBlocks + ptbBlock + rgBlock + remarksBlock +
       '</div></div>';
@@ -4642,9 +5146,14 @@ document.addEventListener('DOMContentLoaded', function(){
   }
 
   // ── PETRECO analysis ────────────────────────────────────────────────────
-  // The same treatment the batteries get, on PETRECO's own shape: two
-  // twelve-hour periods instead of eight three-hour ones. Read through
-  // window.__PF__ so the arithmetic stays in the module that owns it.
+  // The same treatment the batteries get, on the same cadence: eight
+  // three-hour periods from 06:00. Read through window.__PF__ so the
+  // arithmetic stays in the module that owns it.
+  //
+  // Comparisons follow the card's rule — a day still being read is not
+  // compared with a finished one. A day recorded before v15 as two
+  // twelve-hour halves has no three-hour detail, so its bars are empty while
+  // its day total is not.
   const PFA_SECS = [
     { grp:'drain', title:'Drain of the tanks' },
     { grp:'crude', title:'Crude oil to Fieran' }
@@ -4671,6 +5180,9 @@ document.addEventListener('DOMContentLoaded', function(){
     for(let k = 0; k < 60 && out.length < n; k++){
       d.setDate(d.getDate() - 1);
       const iso = _isoDate(d);
+      // Only complete days: a part day would drag the average down as if
+      // production had fallen.
+      if(!PF.sectionDone(iso, grp)) continue;
       const v = PF.sectionTotal(iso, grp, null);
       if(v != null) out.push(v);
     }
@@ -4689,28 +5201,53 @@ document.addEventListener('DOMContentLoaded', function(){
       const t = PF.sectionTotal(_tbDate, sec.grp, null);
       if(t == null) return;
       any = true;
+      const done  = PF.sectionDone(_tbDate, sec.grp);
+      const yDone = PF.sectionDone(y, sec.grp);
       const yv = PF.sectionTotal(y, sec.grp, null);
-      const d  = (yv == null) ? null : t - yv;
-      const av7 = pfaTrailing(_tbDate, sec.grp, 7);
+      const d  = (!done || !yDone || yv == null) ? null : t - yv;
+      const av7 = done ? pfaTrailing(_tbDate, sec.grp, 7) : null;
       out += '<div class="rg-sec-title">' + escHtml(sec.title) + '</div><div class="rg-tot">' +
         '<div class="rg-card rg-card-g"><div class="k">Today</div><div class="v">' +
-          tbFmt(t,0) + '</div><div class="s">m³/d · ' + tbFmt(t * TB_BBL,0) + ' bbl/d</div></div>' +
+          tbFmt(t,0) + '</div><div class="s">m³/d · ' + tbFmt(t * TB_BBL,0) + ' bbl/d' +
+          (done ? '' : ' · so far') + '</div></div>' +
         '<div class="rg-card"><div class="k">vs yesterday</div><div class="v">' +
           (d == null ? '—' : (d > 0 ? '+' : '−') + tbFmt(Math.abs(d),0)) + '</div>' +
-          '<div class="s">' + (yv == null ? 'no reading yesterday' : 'yesterday ' + tbFmt(yv,0) + ' m³') +
-          '</div></div>' +
+          '<div class="s">' + (!done ? 'shift not complete'
+              : (yv == null) ? 'no reading yesterday'
+              : !yDone ? 'yesterday incomplete'
+              : 'yesterday ' + tbFmt(yv,0) + ' m³') + '</div></div>' +
         '<div class="rg-card"><div class="k">vs 7-day average</div><div class="v">' +
           (av7 == null ? '—' : (t - av7 > 0 ? '+' : '−') + tbFmt(Math.abs(t - av7),0)) + '</div>' +
-          '<div class="s">' + (av7 == null ? 'not enough days' : 'average ' + tbFmt(av7,0) + ' m³/d') +
-          '</div></div>' +
-        PF.periods.map(function(pr){
-          const pv = PF.sectionTotal(_tbDate, sec.grp, pr.k);
-          return '<div class="rg-card"><div class="k">' + escHtml(pr.label) + '</div>' +
-            '<div class="v">' + tbFmt(pv,0) + '</div><div class="s">m³</div></div>';
+          '<div class="s">' + (!done ? 'shift not complete'
+              : av7 == null ? 'not enough complete days'
+              : 'average ' + tbFmt(av7,0) + ' m³/d') + '</div></div>' +
+        // The two twelve-hour halves — the figures the shift is reported in.
+        PF.halves.map(function(H){
+          const w = PF.sectionWin(_tbDate, sec.grp, H.from, H.to);
+          return '<div class="rg-card"><div class="k">' + escHtml(H.label) + '</div>' +
+            '<div class="v">' + tbFmt(w.v,0) + '</div><div class="s">m³' +
+            (w.v != null && !w.done ? ' · so far' : '') + '</div></div>';
         }).join('') +
       '</div>';
     });
     el.innerHTML = any ? out : '<div class="rg-empty">No PETRECO readings for this shift.</div>';
+  }
+
+  // The chip on a chart: a gain or loss only between two complete shifts.
+  function pfaChip(grp, id, a, b){
+    const PF = window.__PF__;
+    const y  = tbPrevDate(_tbDate);
+    const done  = grp ? PF.sectionDone(_tbDate, grp) : PF.meterDone(_tbDate, id);
+    const yDone = grp ? PF.sectionDone(y, grp)       : PF.meterDone(y, id);
+    if(!done)  return '<span class="chip flat">not complete</span>';
+    if(!yDone) return '<span class="chip flat">yesterday incomplete</span>';
+    return tbDeltaChip(tbSum(a), tbSum(b));
+  }
+  // A cell comparing today with yesterday, under the same rule.
+  function pfaDeltaCell(a, aDone, b, bDone){
+    if(a != null && !aDone) return '<td class="na">not complete</td>';
+    if(!bDone) return '<td class="na">—</td>';
+    return tbDeltaCell(a, b);
   }
 
   function pfaRenderIntervals(){
@@ -4726,9 +5263,10 @@ document.addEventListener('DOMContentLoaded', function(){
         const b = PF.periods.map(function(pr){ return PF.sectionTotal(y, sec.grp, pr.k); });
         if(a.every(function(v){ return v == null; }) && b.every(function(v){ return v == null; })) return '';
         return '<div class="tb-mini tb-mini-g"><div class="cap"><h4>' + escHtml(sec.title) + '</h4>' +
-          '<span class="clk">' + pfaMeters(sec.grp).length + ' scanners</span>' +
-          tbDeltaChip(tbSum(a), tbSum(b)) + '</div>' +
-          tbZoomable('pfa-' + sec.grp, sec.title + ' — twelve-hour production',
+          '<span class="clk">' + pfaMeters(sec.grp).length + ' scanners · every ' +
+            PF.step + ' h from ' + (PF.start < 10 ? '0' : '') + PF.start + ':00</span>' +
+          pfaChip(sec.grp, null, a, b) + '</div>' +
+          tbZoomable('pfa-' + sec.grp, sec.title + ' — three-hour production',
             tbBarChart(labels, a, b, { h:200 }),
             { kind:'bar', axis:'Period', labels:PF.periods.map(function(pr){ return pr.label; }),
               diff:true,
@@ -4741,8 +5279,8 @@ document.addEventListener('DOMContentLoaded', function(){
         const a = PF.periods.map(function(pr){ return PF.period(_tbDate, m.id, pr.k); });
         const b = PF.periods.map(function(pr){ return PF.period(y, m.id, pr.k); });
         return '<div class="tb-mini"><div class="cap"><h4>' + escHtml(m.name) + '</h4>' +
-          tbDeltaChip(tbSum(a), tbSum(b)) + '</div>' +
-          tbZoomable('pfam-' + m.id, m.name + ' — twelve-hour production',
+          pfaChip(null, m.id, a, b) + '</div>' +
+          tbZoomable('pfam-' + m.id, m.name + ' — three-hour production',
             tbBarChart(labels, a, b, { h:165 }),
             { kind:'bar', axis:'Period', labels:PF.periods.map(function(pr){ return pr.label; }),
               diff:true,
@@ -4762,15 +5300,19 @@ document.addEventListener('DOMContentLoaded', function(){
     PFA_SECS.forEach(function(sec){
       pfaMeters(sec.grp).forEach(function(m){
         const a = PF.meterTotal(_tbDate, m.id), b = PF.meterTotal(y, m.id);
+        const ad = PF.meterDone(_tbDate, m.id), bd = PF.meterDone(y, m.id);
         if(a != null) any = true;
         body += '<tr><th class="row">' + escHtml(m.name) + '</th>' +
-          '<td>' + tbFmt(a,0) + '</td><td class="dim">' + tbFmt(b,0) + '</td>' +
-          tbDeltaCell(a, b) + '<td class="dim">' + (a == null ? '—' : tbFmt(a * TB_BBL,0)) + '</td></tr>';
+          '<td' + (a != null && !ad ? ' class="part"' : '') + '>' + tbFmt(a,0) + '</td>' +
+          '<td class="dim">' + tbFmt(b,0) + '</td>' +
+          pfaDeltaCell(a, ad, b, bd) + '<td class="dim">' + (a == null ? '—' : tbFmt(a * TB_BBL,0)) + '</td></tr>';
       });
-      const sa = PF.sectionTotal(_tbDate, sec.grp, null), sb = PF.sectionTotal(y, sec.grp, null);
+      const sw = PF.sectionWin(_tbDate, sec.grp, 0, 24), sy = PF.sectionWin(y, sec.grp, 0, 24);
       body += '<tr class="tot"><th class="row">' + escHtml(sec.title) + '</th>' +
-        '<td>' + tbFmt(sa,0) + '</td><td class="dim">' + tbFmt(sb,0) + '</td>' +
-        tbDeltaCell(sa, sb) + '<td class="dim">' + (sa == null ? '—' : tbFmt(sa * TB_BBL,0)) + '</td></tr>';
+        '<td' + (sw.v != null && !sw.done ? ' class="part"' : '') + '>' + tbFmt(sw.v,0) + '</td>' +
+        '<td class="dim">' + tbFmt(sy.v,0) + '</td>' +
+        pfaDeltaCell(sw.v, sw.done, sy.v, sy.done) +
+        '<td class="dim">' + (sw.v == null ? '—' : tbFmt(sw.v * TB_BBL,0)) + '</td></tr>';
     });
     el.innerHTML = any
       ? '<div class="tb-halves"><table><thead><tr><th></th>' +
@@ -4809,10 +5351,16 @@ document.addEventListener('DOMContentLoaded', function(){
       for(let i = dates.length - 1; i >= 0; i--){
         const d = dates[i];
         let cells = '';
-        PF.list.forEach(function(m){ cells += '<td>' + tbFmt(PF.meterTotal(d, m.id),0) + '</td>'; });
+        let short = false;
+        PF.list.forEach(function(m){
+          const v = PF.meterTotal(d, m.id), ok = PF.meterDone(d, m.id);
+          if(v != null && !ok) short = true;
+          cells += '<td' + (v != null && !ok ? ' class="part"' : '') + '>' + tbFmt(v,0) + '</td>';
+        });
         const dt2 = new Date(d + 'T00:00:00');
         const dow = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dt2.getDay()];
-        body += '<tr><td class="dt"><b>' + dow + '</b> ' + tbDayLabel(d) + '</td>' + cells +
+        body += '<tr><td class="dt"><b>' + dow + '</b> ' + tbDayLabel(d) +
+          (short ? '<span class="tag">part</span>' : '') + '</td>' + cells +
           '<td class="g">' + tbFmt(PF.sectionTotal(d,'drain',null),0) + '</td>' +
           '<td class="g2">' + tbFmt(PF.sectionTotal(d,'crude',null),0) + '</td></tr>';
       }
@@ -4826,6 +5374,102 @@ document.addEventListener('DOMContentLoaded', function(){
     pfaRenderIntervals();
     pfaRenderCompare();
     pfaRenderDaily();
+  }
+
+  // ── temperature analysis ────────────────────────────────────────────────
+  // Temperatures are spot readings, never differenced and never summed. What
+  // is worth seeing is the shape through the day, the spread, and where a
+  // battery sits against the others — so: a line per battery, and a grid.
+  function tbTempSeries(dateStr, b){
+    const cell = tbGetDay(dateStr).tbs[b.id];
+    return tbOffsets(b).map(function(o){ return cell.c[o]; });
+  }
+  function tbTempStats(dateStr, b){
+    const v = tbTempSeries(dateStr, b).filter(function(x){ return x != null; });
+    if(!v.length) return null;
+    let mn = v[0], mx = v[0], sum = 0;
+    v.forEach(function(x){ if(x < mn) mn = x; if(x > mx) mx = x; sum += x; });
+    return { n:v.length, min:mn, max:mx, avg:sum / v.length, spread:mx - mn };
+  }
+  function tbRenderTemp(){
+    const dv = document.getElementById('tbTempDate');
+    if(dv && dv.value !== _tbDate) dv.value = _tbDate;
+
+    const kp = document.getElementById('tbTempKpis');
+    if(kp){
+      let cards = '', any = false;
+      TB_LIST.forEach(function(b){
+        const st = tbTempStats(_tbDate, b);
+        if(!st) return;
+        any = true;
+        cards += '<div class="rg-card"><div class="k">' + escHtml(b.name) + '</div>' +
+          '<div class="v">' + tbFmt(st.avg,1) + ' °C</div>' +
+          '<div class="s">' + tbFmt(st.min,1) + ' – ' + tbFmt(st.max,1) +
+          ' · spread ' + tbFmt(st.spread,1) + ' · ' + st.n + ' reading(s)</div></div>';
+      });
+      kp.innerHTML = any ? '<div class="rg-tot">' + cards + '</div>'
+                         : '<div class="rg-empty">No temperatures recorded for this shift.</div>';
+    }
+
+    // One chart, all five batteries. They are all read on the same clock face
+    // even though 10/1 reports a third as often, so its line simply has fewer
+    // points — the x axis is the hour, not the reading number.
+    const ch = document.getElementById('tbTempChart');
+    if(ch){
+      const step = tbFinestStep();
+      const cols = [];
+      for(let o = 0; o <= TB_SPAN; o += step) cols.push(o);
+      const labels = cols.map(function(o){ return tbOffsetLabel(o, TB_LIST[0]); });
+      const series = TB_LIST.map(function(b, i){
+        const cell = tbGetDay(_tbDate).tbs[b.id];
+        return { label:b.name, color:tbColor(i),
+                 vals:cols.map(function(o){ return cell.c[o]; }) };
+      });
+      const anyVal = series.some(function(x){ return x.vals.some(function(v){ return v != null; }); });
+      ch.innerHTML = anyVal
+        ? tbZoomable('temp-day', 'Temperature through the day',
+            tbLineChart(labels, series, 'Temperature °C', false, 280),
+            { kind:'line', axis:'Hour', unit:'Temperature °C', labels:labels,
+              series:series.map(function(x){ return { name:x.label, color:x.color, vals:x.vals }; }),
+              total:false })
+        : '<div class="rg-empty">No temperatures recorded for this shift.</div>';
+    }
+
+    // The grid reads across the clock, so every battery is on the same hours
+    // and a gap is visible as a gap rather than as a shorter row.
+    const gr = document.getElementById('tbTempGrid');
+    if(gr){
+      const gstep = tbFinestStep();
+      const gcols = [];
+      for(let o = 0; o <= TB_SPAN; o += gstep) gcols.push(o);
+      let head = '<tr><th></th>';
+      gcols.forEach(function(o){ head += '<th>' + tbOffsetLabel(o, TB_LIST[0]) + '</th>'; });
+      head += '<th>Avg</th></tr>';
+      let body = '', any = false;
+      TB_LIST.forEach(function(b){
+        const cell = tbGetDay(_tbDate).tbs[b.id];
+        const st = tbTempStats(_tbDate, b);
+        let cells = '';
+        gcols.forEach(function(o){
+          const v = cell.c[o];
+          if(v == null){ cells += '<td class="na">·</td>'; return; }
+          any = true;
+          // Shaded against this battery's own range for the day, so a hot
+          // battery and a cool one are each read against themselves.
+          let bg = 'var(--surface)';
+          if(st && st.spread > 0){
+            const f = (v - st.min) / st.spread;
+            bg = 'rgba(202,138,4,' + (0.10 + f * 0.45).toFixed(2) + ')';
+          }
+          cells += '<td style="background:' + bg + '">' + tbFmt(v,1) + '</td>';
+        });
+        body += '<tr><th class="row">' + escHtml(b.name) + '</th>' + cells +
+                '<td style="font-weight:700">' + (st ? tbFmt(st.avg,1) : '—') + '</td></tr>';
+      });
+      gr.innerHTML = any
+        ? '<div class="tb-heat tb-temp"><table><tbody>' + head + body + '</tbody></table></div>'
+        : '<div class="rg-empty">No temperatures recorded for this shift.</div>';
+    }
   }
 
   function tbRenderView(){
@@ -5059,6 +5703,7 @@ document.addEventListener('DOMContentLoaded', function(){
 '.tb-halves th.row{text-align:left;color:#16232f;font-size:10px;text-transform:none;letter-spacing:0;}' +
 '.tb-halves th.row .clk{color:#8296a8;font-size:8px;}' +
 '.tb-halves td.dim,.tb-halves td.na{color:#8296a8;}' +
+'.tb-halves td.part{font-style:italic;color:#8296a8;}' +
 '.tb-halves td.gain{color:#15803d;font-weight:700;} .tb-halves td.loss{color:#b91c1c;font-weight:700;}' +
 '.tb-halves td .pc{display:block;font-size:8px;}' +
 '.tb-halves tr.tot td,.tb-halves tr.tot th{border-top:1.5px solid #dbe4ee;font-weight:700;background:#f4f7fa;}' +
@@ -5383,6 +6028,7 @@ gRows.map(function(r){
     // entry table would be wasted work on a phone.
     if(_tbAdmin() && _tbSub === 'view') tbRenderView();
     if(_tbAdmin() && _tbSub === 'old')  tbRenderOld();
+    if(_tbAdmin() && _tbSub === 'temp') tbRenderTemp();
     const sv = document.getElementById('tbSaved');
     const day = tbGetDay(_tbDate);
     if(sv) sv.textContent = day.updatedAt
@@ -5402,15 +6048,10 @@ gRows.map(function(r){
   // module already had to be rebuilt to avoid. Patch what you touched.
   // { date: { batteryId: { rowIndex:true } } } — keyed by DATE now, because one
   // entry at the shift boundary legitimately changes two days at once.
-  let _tbDirty = {};
-  function tbMarkDirty(date, id, i){
-    if(!_tbDirty[date]) _tbDirty[date] = {};
-    if(!_tbDirty[date][id]) _tbDirty[date][id] = {};
-    _tbDirty[date][id][i] = true;
-  }
-  function tbCellOn(date, id){
-    if(!TB_DAYS[date]) TB_DAYS[date] = tbBlankDay(date);
-    const day = TB_DAYS[date];
+  // (The record of what was typed is _tbPend, declared with the state above.
+  // It holds FIELDS, not rows: sending a whole row let an operator's stale copy
+  // of the admin's correction overwrite it when he only changed the WHP.)
+  function tbCellIn(day, id){
     if(!day.tbs) day.tbs = {};
     if(!day.tbs[id]) day.tbs[id] = tbBlankCell();
     const cell = day.tbs[id];
@@ -5420,7 +6061,14 @@ gRows.map(function(r){
         cell[k] = (cell[k] || []).concat(blank[k]).slice(0, TB_READS);
       }
     });
+    if(!cell.c || cell.c.length !== TB_SPAN + 1){
+      cell.c = (cell.c || []).concat(tbBlankCell().c).slice(0, TB_SPAN + 1);
+    }
     return cell;
+  }
+  function tbCellOn(date, id){
+    if(!TB_DAYS[date]) TB_DAYS[date] = tbBlankDay(date);
+    return tbCellIn(TB_DAYS[date], id);
   }
   function tbNextDate(dateStr){
     const d = new Date(dateStr + 'T00:00:00');
@@ -5452,8 +6100,15 @@ gRows.map(function(r){
   }
 
   function tbApplyInput(id, kind, i, raw){
-    if(!tbCanEdit()) return;
+    if(!tbMayWrite(id, kind)) return;
     const cell = tbCellOn(_tbDate, id);
+    if(kind === 'c'){
+      // Temperature is keyed by hour offset, not by scanner index.
+      cell.c[i] = tbNum(raw);
+      _tbPend.mark(_tbDate, tbPendKey(id, 'c', i), cell.c[i]);
+      tbSaveLocal();
+      return;
+    }
     if(kind === 'd'){
       // Only a value that actually differs from the meter is a correction. This
       // keeps a day the admin merely tabbed through from filling up with
@@ -5465,13 +6120,13 @@ gRows.map(function(r){
     } else {
       cell[kind][i] = tbNum(raw);
     }
-    tbMarkDirty(_tbDate, id, i);
+    _tbPend.mark(_tbDate, tbPendKey(id, kind, i), cell[kind][i]);
     if(kind !== 'd'){
       const twin = tbBoundaryTwin(id, i);
       if(twin){
         const other = tbCellOn(twin.date, id);
         other[kind][twin.i] = cell[kind][i];
-        tbMarkDirty(twin.date, id, twin.i);
+        _tbPend.mark(twin.date, tbPendKey(id, kind, twin.i), cell[kind][i]);
       }
     }
     tbSaveLocal();
@@ -5483,69 +6138,75 @@ gRows.map(function(r){
     _tbSaveTimer = setTimeout(tbPushToCloud, 900);
   }
 
+  // Sends EXACTLY the fields recorded in _tbPend, one merge-write per battery
+  // per date. merge:true deep-merges `rows.{i}.{field}`, so a field nobody here
+  // typed — another hour, or the admin's correction on the same hour — is left
+  // exactly as the server has it. Nulls ARE sent for cells cleared on purpose.
+  //
+  // Every write is issued before the first await (see flushSaves).
   async function tbPushToCloud(){
+    clearTimeout(_tbSaveTimer);
     if(!tbCanEdit()) return;
     if(typeof db === 'undefined' || !FIREBASE_OK || !currentUser) return;
+    if(!_tbPend.count()) return;
     const who = currentUser.name || currentUser.email || 'unknown';
-    // Taken and cleared BEFORE the await so edits made while the write is in
-    // flight are not lost with it; restored on failure so nothing is dropped.
-    const dirty = _tbDirty;
-    _tbDirty = {};
-    if(!Object.keys(dirty).length) return;
+    const snap = _tbPend.take();
     try {
       _tbSkipNext = true;
-      // Only the cells this client typed, as a MAP at every level:
-      // tbs.{id}.rows.{i} = {s,w}. merge:true then deep-merges key by key, so
-      // a battery — or a row — nobody here touched is left exactly as it is.
-      // Nulls ARE sent for cells that were cleared on purpose: clearing has to
-      // clear in the cloud too, and a cleared cell is a dirty cell.
-      // One write per battery that changed, each to its own document. Only the
-      // cells this client typed go in it: merge:true then patches row by row,
-      // so an admin editing another hour of the same battery is not overwritten.
-      // Nulls ARE sent for cells cleared on purpose — clearing has to clear.
-      for(const dt of Object.keys(dirty)){
-        const dday = TB_DAYS[dt];
-        if(!dday) continue;
-        for(const id of Object.keys(dirty[dt])){
-        const cell = (dday.tbs && dday.tbs[id]) || tbBlankCell();
-        const rows = {};
-        Object.keys(dirty[dt][id]).forEach(function(k){
-          const i = Number(k);
-          rows[String(i)] = { s: cell.s[i] == null ? null : cell.s[i],
-                              w: cell.w[i] == null ? null : cell.w[i],
-                              d: cell.d[i] == null ? null : cell.d[i] };
+      const docs = {};
+      Object.keys(snap).forEach(function(dt){
+        Object.keys(snap[dt]).forEach(function(key){
+          const bar = key.indexOf('|');
+          const id = key.slice(0, bar), kind = key.charAt(bar + 1);
+          const i = String(parseInt(key.slice(bar + 2), 10));
+          // Never sent: another battery's cell from an operator, or a
+          // correction from anyone but admin. The rules would refuse the whole
+          // write, and it would then fail on every retry.
+          if(!tbById(id) || !tbMayWrite(id, kind)) return;
+          const docId = tbDocId(dt, id);
+          // `battery` is a stored field, not just part of the id, because the
+          // rules and the operator's query both match on it.
+          const doc = docs[docId] = docs[docId] || { date:dt, battery:id, startHour:tbStart(id),
+            updatedBy:who, updatedAt:firebase.firestore.FieldValue.serverTimestamp() };
+          const val = snap[dt][key];
+          if(kind === 'c') (doc.temp = doc.temp || {})[i] = val;
+          else {
+            doc.rows = doc.rows || {};
+            (doc.rows[i] = doc.rows[i] || {})[kind] = val;
+          }
         });
-        // `battery` is a stored field, not just part of the id, because the
-        // rules and the operator's query both match on it.
-        await db.collection(TB_COL).doc(tbDocId(dt, id)).set({
-          date:dt, battery:id, startHour:tbStart(id), rows:rows,
-          updatedBy:who, updatedAt:firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge:true });
-        }
-        dday.updatedAt = Date.now(); dday.updatedBy = who;
+      });
+      const writes = Object.keys(docs).map(function(docId){
+        return db.collection(TB_COL).doc(docId).set(docs[docId], { merge:true });
+      });
+      await Promise.all(writes);
+      // Only admin holds every battery, so only admin rewrites the list of
+      // dates. An operator's copy is his battery alone and would shrink it.
+      const meta = { updatedAt:firebase.firestore.FieldValue.serverTimestamp(), updatedBy:who };
+      if(_tbAdmin()){
+        const dates = Object.keys(TB_DAYS).sort();
+        meta.dates = dates; meta.count = dates.length;
       }
-      const dates = Object.keys(TB_DAYS).sort();
-      await db.collection(TB_META.col).doc(TB_META.doc).set({
-        dates:dates, count:dates.length,
-        updatedAt:firebase.firestore.FieldValue.serverTimestamp(), updatedBy:who
+      await db.collection(TB_META.col).doc(TB_META.doc).set(meta, { merge:true });
+      _tbPend.done(snap);
+      Object.keys(snap).forEach(function(dt){
+        if(TB_DAYS[dt]){ TB_DAYS[dt].updatedAt = Date.now(); TB_DAYS[dt].updatedBy = who; }
       });
       tbSaveLocal();
       const sv = document.getElementById('tbSaved');
       if(sv) sv.textContent = 'saved ' + new Date().toLocaleTimeString('en-GB');
       tbCloudIdle();
     } catch(err){
-      // Put the cells back in the dirty set — losing the write AND the record
-      // of what was in it would silently drop a reading.
-      Object.keys(dirty).forEach(function(dt){
-        Object.keys(dirty[dt]).forEach(function(id){
-          Object.keys(dirty[dt][id]).forEach(function(i){ tbMarkDirty(dt, id, i); });
-        });
-      });
+      _tbSkipNext = false;
+      // Back into the queue — losing the write AND the record of what was in
+      // it would silently drop a reading.
+      _tbPend.fail(snap);
       console.error('[TankBatteries] save failed', err);
       showToast('Could not save to cloud: ' + (err.code || err.message), true);
       tbCloudError(err);
     }
   }
+  registerFlush(tbPushToCloud);
 
   // ── cloud sync ──────────────────────────────────────────────────────────
   // Same contract as the readings listener: every path through here, healthy
@@ -5566,8 +6227,28 @@ gRows.map(function(r){
       : 'Tank batteries cloud error: ' + code);
     console.error('[Firestore]', err);
   }
+  // The cached days belong to whoever was signed in when they were cached. An
+  // operator caches ONE battery; an admin caches all five. If the account
+  // changes on this device and the cache is kept, the version stamp still
+  // matches and the collection read is skipped — so an admin signing in after
+  // an operator would see that operator's single battery and nothing else.
+  // Found exactly that way, on a shared browser.
+  const TB_OWNER = TB_LS + '__owner';
+  function tbCheckOwner(){
+    const who = (currentUser && currentUser.email) ? String(currentUser.email).toLowerCase() : '';
+    if(lsGet(TB_OWNER) === who) return;
+    TB_DAYS = {};
+    tbSaveLocal();
+    setSyncedVersion(TB_VERK, 0);
+    lsSet(TB_OWNER, who);
+  }
+
   function tbStartListener(){
     tbStopListener();
+    tbCheckOwner();
+    _tbPend.load();
+    tbOverlayPending(TB_DAYS);
+    if(_tbPend.count()) tbQueueSave();
     if(typeof db === 'undefined' || typeof FIREBASE_OK === 'undefined' || !FIREBASE_OK){
       tbCloud('error', (typeof window.__BOOT_ERROR__ === 'string' && window.__BOOT_ERROR__)
         ? 'No cloud: ' + window.__BOOT_ERROR__ : 'No cloud connection');
@@ -5608,7 +6289,7 @@ gRows.map(function(r){
           const bid  = dd.battery || String(d.id).split('__')[1];
           if(!date || !bid) return;
           if(!obj[date]) obj[date] = tbBlankDay(date);
-          obj[date].tbs[bid] = tbRowsToArrays(dd.rows);
+          obj[date].tbs[bid] = tbTempToArray(dd.temp, tbRowsToArrays(dd.rows));
           if(dd.dayTotal != null){
             obj[date].tbs[bid].t   = Number(dd.dayTotal);
             obj[date].tbs[bid].src = dd.source || 'imported';
@@ -5620,7 +6301,7 @@ gRows.map(function(r){
             obj[date].updatedBy = dd.updatedBy || '';
           }
         });
-        TB_DAYS = obj;
+        TB_DAYS = tbOverlayPending(obj);
         tbSaveLocal();
         setSyncedVersion(TB_VERK, ts);
         tbRenderAll();
@@ -5689,6 +6370,11 @@ gRows.map(function(r){
     if(md) md.addEventListener('click', function(e){ if(e.target === md) tbCloseZoom(); });
     document.addEventListener('keydown', function(e){ if(e.key === 'Escape') tbCloseZoom(); });
 
+    const td2 = document.getElementById('tbTempDate');
+    if(td2) td2.addEventListener('change', function(){ _tbDate = this.value || tbToday(); tbRenderAll(); });
+    const tt = document.getElementById('tbTempToday');
+    if(tt) tt.addEventListener('click', function(){ _tbDate = tbToday(); tbRenderAll(); });
+
     const od = document.getElementById('tbOldDate');
     if(od) od.addEventListener('change', function(){ _tbDate = this.value || tbToday(); tbRenderAll(); });
     const ot = document.getElementById('tbOldToday');
@@ -5735,9 +6421,12 @@ gRows.map(function(r){
     tbRenderAll();
   });
 
-  // Repaint the calculated cells and the total cards in place, without
-  // touching any <input>. This is what keeps the on-screen keyboard up while
-  // a reading is being typed.
+  // Repaint the calculated cells and the total cards in place, without touching
+  // any <input>. This is what keeps the on-screen keyboard up while a reading
+  // is being typed.
+  //
+  // Rows are HOUR OFFSETS now, and only every third one carries a production
+  // figure — the rest are temperature-only and have nothing to repaint.
   function tbRepaintDerived(){
     const day  = tbGetDay(_tbDate);
     const calc = tbCalcDay(day);
@@ -5747,23 +6436,23 @@ gRows.map(function(r){
       if(!panel) return;
       const c = calc.per[b.id];
       const rows = panel.querySelectorAll('tbody tr');
-      for(let i = 0; i < rows.length; i++){
-        const td = rows[i].children[2];
+      const offs = tbOffsets(b);
+      for(let r = 0; r < rows.length; r++){
+        const si = tbScanIndex(offs[r]);
+        if(si < 0) continue;                       // a temperature-only hour
+        const td = rows[r].children[2];
         if(!td) continue;
-        const p = c.prod[i];
+        const p = c.prod[si];
         td.className = 'rg-calc' + (p != null && p < 0 ? ' tb-neg' : '') +
-                       (c.fixed[i] ? ' tb-fix' : '');
+                       (c.fixed[si] ? ' tb-fix' : '');
         const inp = td.querySelector('input');
         if(inp){
-          // Admin's cell holds a live input. Only the value it does not own —
-          // the rate — is repainted, and only when the caret is elsewhere is
-          // the number itself refreshed from the meter.
           const rt = td.querySelector('.tb-rate');
           if(rt) rt.textContent = (p == null) ? '' : tbFmt(p / TB_STEP, 1) + ' m³/hr';
           if(document.activeElement !== inp)
             inp.value = (p == null) ? '' : String(Math.round(p * 100) / 100);
         } else {
-          td.innerHTML = (i === 0) ? '—' : tbFmt(p, 1) +
+          td.innerHTML = (si === 0) ? '—' : tbFmt(p, 1) +
             (p == null ? '' : '<span class="tb-rate">' + tbFmt(p / TB_STEP, 1) + ' m³/hr</span>');
         }
       }
@@ -5780,6 +6469,7 @@ gRows.map(function(r){
                     getDay:tbGetDay, reads:TB_READS,
                     groups:TB_GROUPS, groupCalc:tbGroupCalc, groupHalf:tbGroupHalf,
                     reportHTML:tbReportHTML, summaryText:tbSummaryText,
+                    tempStats:tbTempStats, tempSeries:tbTempSeries, offsets:tbOffsets,
                     oldCard:tbOldCardHTML, oldDoc:tbOldDoc,
                     setPeriod:function(p){ _tbOldPeriod = p; tbRenderOld(); },
                     histReportHTML:tbHistReportHTML, histRows:tbHistRows,
@@ -5861,20 +6551,47 @@ if('serviceWorker' in navigator){
 // them sent, which is why these readings live in their own collection and are
 // never added to a battery's figures.
 //
-// Two things get recorded, both TWICE A DAY on twelve-hour periods:
+// Two things get recorded, both EVERY THREE HOURS from 06:00 — eight periods,
+// 06:00→09:00 … 03:00→06:00, the same cadence as the tank battery scanners:
 //   • Drain of the tanks — 29 BIS, GB #1, GB #3
 //   • Crude oil          — L.O.T.F, M.O.T.F
 //
-// A period is a QUANTITY FOR THOSE TWELVE HOURS, not a meter reading to be
-// differenced. The day total is the two periods added, so unlike the tank
+// A period is a QUANTITY FOR THOSE THREE HOURS, not a meter reading to be
+// differenced. The day total is the eight periods added, so unlike the tank
 // batteries there is no opening reading and no boundary to share.
+//
+// TWELVE-HOUR HISTORY. Until v15 the same scanners were recorded twice a day,
+// 06:00→18:00 and 18:00→06:00, and those days are still in the database under
+// `v`. They are read as they always were: a half-day with no three-hour figures
+// answers for the whole half and for nothing shorter, so an old day still
+// totals and still compares over 12 and 24 hours, and shows "12 h only" on a
+// three- or six-hour card instead of a wrong number. The moment any period of
+// that half is typed, the half is three-hour data and the old figure for it is
+// no longer counted. Each half decides this for itself, so the changeover day —
+// morning entered the old way, evening the new — is right both halves.
 (function(){
 
-  const PF_START = 6;                 // first period begins 06:00
-  const PF_PERIODS = [
-    { k:0, label:'06:00 → 18:00', short:'06–18' },
-    { k:1, label:'18:00 → 06:00', short:'18–06' }
+  const PF_START = 6;                 // the first period begins 06:00
+  const PF_STEP  = 3;                 // hours per period
+  const PF_N     = 8;                 // periods in a shift day
+  function pfClock(off){
+    const h = (PF_START + off) % 24;
+    return (h < 10 ? '0' : '') + h + ':00';
+  }
+  // The eight periods, in order. `from`/`to` are hours from the shift start.
+  const PF_PERIODS = [];
+  for(let _s = 0; _s < PF_N; _s++){
+    PF_PERIODS.push({ k:_s, from:_s * PF_STEP, to:(_s + 1) * PF_STEP,
+      label:pfClock(_s * PF_STEP) + ' → ' + pfClock((_s + 1) * PF_STEP),
+      short:pfClock(_s * PF_STEP).slice(0,2) + '–' + pfClock((_s + 1) * PF_STEP).slice(0,2) });
+  }
+  // The two twelve-hour halves: the shape of the old data, and still the way
+  // the shift is talked about.
+  const PF_HALVES = [
+    { k:0, from:0,  to:12, label:pfClock(0)  + ' → ' + pfClock(12) },
+    { k:1, from:12, to:24, label:pfClock(12) + ' → ' + pfClock(24) }
   ];
+  const PF_PER_HALF = PF_N / 2;
   // ►►►► THE METERS. `grp` decides which table a meter appears under; the
   //      order here is the order on screen and on the report card.
   const PF_LIST = [
@@ -5928,46 +6645,114 @@ if('serviceWorker' in navigator){
     for(let i = 0; i < PF_LIST.length; i++) if(PF_LIST[i].id === id) return PF_LIST[i];
     return null;
   }
-
+  function pfBlankMeter(){
+    const q = [];
+    for(let i = 0; i < PF_N; i++) q.push(null);
+    return { q:q, v:[null, null] };     // q: three-hour periods · v: the old halves
+  }
   function pfBlankDay(dateStr){
     const m = {};
-    PF_LIST.forEach(function(x){ m[x.id] = [null, null]; });
+    PF_LIST.forEach(function(x){ m[x.id] = pfBlankMeter(); });
     return { date:dateStr, meters:m, remarks:'', updatedBy:'', updatedAt:0 };
+  }
+  // Accepts both shapes: the current { q, v } and a bare [a, b] left in an old
+  // local cache, which is twelve-hour data.
+  function pfNormMeter(raw){
+    const out = pfBlankMeter();
+    if(!raw) return out;
+    if(Array.isArray(raw)){
+      out.v = [ raw[0] == null ? null : Number(raw[0]), raw[1] == null ? null : Number(raw[1]) ];
+      return out;
+    }
+    if(raw.q) for(let i = 0; i < PF_N; i++){
+      const x = Array.isArray(raw.q) ? raw.q[i] : raw.q[String(i)];
+      out.q[i] = (x == null) ? null : Number(x);
+    }
+    if(raw.v) for(let h = 0; h < 2; h++){
+      const x = Array.isArray(raw.v) ? raw.v[h] : raw.v[String(h)];
+      out.v[h] = (x == null) ? null : Number(x);
+    }
+    return out;
   }
   function pfGetDay(dateStr){
     const d = PF_DAYS[dateStr];
     const out = pfBlankDay(dateStr);
     if(!d) return out;
-    out.remarks  = d.remarks || '';
+    out.remarks   = d.remarks || '';
     out.updatedBy = d.updatedBy || '';
     out.updatedAt = d.updatedAt || 0;
-    PF_LIST.forEach(function(x){
-      const v = d.meters && d.meters[x.id];
-      if(!v) return;
-      out.meters[x.id] = [ v[0] == null ? null : Number(v[0]),
-                           v[1] == null ? null : Number(v[1]) ];
-    });
+    PF_LIST.forEach(function(x){ out.meters[x.id] = pfNormMeter(d.meters && d.meters[x.id]); });
     return out;
   }
-  // The day is the two periods added. A period missing is simply not counted —
+  // Is this half three-hour data ('q'), an old twelve-hour figure ('v'), or
+  // nothing yet ('none')? Typing any period of a half makes it 'q' and the old
+  // figure for that half stops counting.
+  function pfHalfMode(cell, h){
+    for(let i = h * PF_PER_HALF; i < (h + 1) * PF_PER_HALF; i++)
+      if(cell.q[i] != null) return 'q';
+    return (cell.v[h] != null) ? 'v' : 'none';
+  }
+  function pfLegacyHalves(dateStr, id){
+    const cell = pfGetDay(dateStr).meters[id], out = [];
+    PF_HALVES.forEach(function(H){ if(pfHalfMode(cell, H.k) === 'v') out.push(H); });
+    return out;
+  }
+  // The readings inside a window of the shift, `from`/`to` in hours from 06:00.
+  // Returns null when the window CANNOT be measured — a twelve-hour half asked
+  // for three hours of itself. Nulls inside the array are periods not read.
+  function pfWindow(dateStr, id, from, to){
+    const cell = pfGetDay(dateStr).meters[id];
+    const out = [];
+    for(let h = 0; h < 2; h++){
+      const H = PF_HALVES[h];
+      const a = Math.max(from, H.from), b = Math.min(to, H.to);
+      if(a >= b) continue;                               // half not in the window
+      if(pfHalfMode(cell, h) === 'v'){
+        if(a !== H.from || b !== H.to) return null;      // only the whole half
+        out.push(cell.v[h]);
+      } else {
+        for(let s = a / PF_STEP; s < b / PF_STEP; s++) out.push(cell.q[s]);
+      }
+    }
+    return out;
+  }
+  function pfSum(vals){
+    if(vals == null) return null;
+    let t = null;
+    vals.forEach(function(v){ if(v != null) t = (t == null ? 0 : t) + v; });
+    return t;
+  }
+  function pfDoneOf(vals){
+    return !!vals && vals.length > 0 && vals.every(function(v){ return v != null; });
+  }
+  function pfPeriod(dateStr, id, k){
+    return pfSum(pfWindow(dateStr, id, k * PF_STEP, (k + 1) * PF_STEP));
+  }
+  function pfHalf(dateStr, id, h){
+    return pfSum(pfWindow(dateStr, id, PF_HALVES[h].from, PF_HALVES[h].to));
+  }
+  // The day is its periods added. A period missing is simply not counted —
   // never treated as zero, which would report a shut-in that did not happen.
-  function pfMeterTotal(dateStr, id){
-    const v = pfGetDay(dateStr).meters[id];
-    let t = null;
-    if(v[0] != null) t = (t == null ? 0 : t) + v[0];
-    if(v[1] != null) t = (t == null ? 0 : t) + v[1];
-    return t;
-  }
-  function pfPeriod(dateStr, id, k){ return pfGetDay(dateStr).meters[id][k]; }
-  function pfSectionTotal(dateStr, grp, k){
-    let t = null;
-    PF_LIST.forEach(function(x){
-      if(x.grp !== grp) return;
-      const v = (k == null) ? pfMeterTotal(dateStr, x.id) : pfPeriod(dateStr, x.id, k);
-      if(v != null) t = (t == null ? 0 : t) + v;
+  function pfMeterTotal(dateStr, id){ return pfSum(pfWindow(dateStr, id, 0, 24)); }
+  function pfMeterDone(dateStr, id){ return pfDoneOf(pfWindow(dateStr, id, 0, 24)); }
+  function pfGrpList(grp){ return PF_LIST.filter(function(x){ return x.grp === grp; }); }
+  // A section over a window: complete only when every meter in it is.
+  function pfSectionWin(dateStr, grp, from, to){
+    let v = null, done = true, na = false;
+    pfGrpList(grp).forEach(function(m){
+      const w = pfWindow(dateStr, m.id, from, to);
+      if(w == null){ na = true; done = false; return; }
+      if(!pfDoneOf(w)) done = false;
+      const s = pfSum(w);
+      if(s != null) v = (v == null ? 0 : v) + s;
     });
-    return t;
+    return { v:na ? null : v, done:!na && done, na:na };
   }
+  function pfSectionTotal(dateStr, grp, k){
+    return (k == null) ? pfSectionWin(dateStr, grp, 0, 24).v
+                       : pfSectionWin(dateStr, grp, k * PF_STEP, (k + 1) * PF_STEP).v;
+  }
+  function pfSectionDone(dateStr, grp){ return pfSectionWin(dateStr, grp, 0, 24).done; }
   function pfSaveLocal(){ lsSet(PF_LS, JSON.stringify(PF_DAYS)); }
   function pfLoadLocal(){
     try { const raw = lsGet(PF_LS); if(raw) PF_DAYS = JSON.parse(raw) || {}; }
@@ -5981,64 +6766,103 @@ if('serviceWorker' in navigator){
   // were the other way round, and an operator who moves between the two screens
   // should not have to re-learn which axis is which.
   //
-  // The two period rows are the only things typed. Everything below them is
-  // derived: the day is the two periods added, then yesterday and the change.
+  // Eight period rows are the only things typed. Everything below and between
+  // them is derived: each twelve-hour half, then the day, then yesterday and
+  // the change — and the change only once the day is fully entered, because a
+  // day still being read against a finished one is not a comparison.
   function pfRenderArea(){
     const el = document.getElementById('pfArea');
     if(!el) return;
     const ed = pfCanEdit();
     const y  = pfPrevDate(_pfDate);
+    // A sync while a value is being typed: update the other boxes in place
+    // rather than rebuilding the table under the operator's finger.
+    const layout = _pfDate + '|' + (ed ? 'e' : '');
+    const focused = document.activeElement;
+    if(el.getAttribute('data-layout') === layout && focused && el.contains(focused) &&
+       focused.getAttribute && focused.getAttribute('data-pf')){
+      Array.prototype.forEach.call(el.querySelectorAll('input[data-pf]'), function(inp){
+        if(inp === focused) return;
+        const cell = pfGetDay(_pfDate).meters[inp.getAttribute('data-pf')];
+        const v = cell.q[Number(inp.getAttribute('data-k'))];
+        const s = (v == null) ? '' : String(v);
+        if(inp.value !== s) inp.value = s;
+      });
+      pfRepaint();
+      return;
+    }
+    el.setAttribute('data-layout', layout);
     el.innerHTML = PF_SECTIONS.map(function(sec){
-      const mets = PF_LIST.filter(function(x){ return x.grp === sec.grp; });
+      const mets = pfGrpList(sec.grp);
 
       let head = '<tr><th class="row">Time</th>';
       mets.forEach(function(m){ head += '<th>' + escHtml(m.name) + '</th>'; });
       head += '<th class="tot-col">Total</th></tr>';
 
+      const today = pfGetDay(_pfDate);
       let body = '';
       PF_PERIODS.forEach(function(pr){
         let cells = '';
         mets.forEach(function(m){
-          const v = pfPeriod(_pfDate, m.id, pr.k);
+          const v = today.meters[m.id].q[pr.k];
           cells += '<td><input class="rg-in" type="number" inputmode="decimal" step="any" ' +
             'data-pf="' + escAttr(m.id) + '" data-k="' + pr.k + '" ' +
             'value="' + (v == null ? '' : v) + '"' + (ed ? '' : ' disabled') + '></td>';
         });
         cells += '<td class="tot-col rg-calc">' + pfFmt(pfSectionTotal(_pfDate, sec.grp, pr.k)) + '</td>';
-        body += '<tr><th class="row">' + pr.label + '</th>' + cells + '</tr>';
+        body += '<tr data-pfrow="p' + pr.k + '"><th class="row">' + pr.label + '</th>' + cells + '</tr>';
+        // The twelve-hour subtotal sits under the four periods it covers —
+        // that is the figure the shift is reported in, and the one an old day
+        // holds instead of the four.
+        if(pr.k % PF_PER_HALF === PF_PER_HALF - 1){
+          const H = PF_HALVES[(pr.k + 1) / PF_PER_HALF - 1];
+          let hc = '';
+          mets.forEach(function(m){ hc += '<td class="rg-calc">' + pfFmt(pfHalf(_pfDate, m.id, H.k)) + '</td>'; });
+          hc += '<td class="tot-col rg-calc">' + pfFmt(pfSectionWin(_pfDate, sec.grp, H.from, H.to).v) + '</td>';
+          body += '<tr class="calc half" data-pfrow="h' + H.k + '"><th class="row">' +
+                  H.label + '</th>' + hc + '</tr>';
+        }
       });
-
-      function derived(label, fn, cls){
-        let cells = '';
-        mets.forEach(function(m){ cells += '<td class="' + (cls || '') + '">' + fn(m) + '</td>'; });
-        return { open:'<tr class="' + (cls === 'd' ? 'diff' : 'calc') + '"><th class="row">' +
-                      label + '</th>' + cells, };
-      }
 
       let dayCells = '', yCells = '', dCells = '';
       mets.forEach(function(m){
-        const t = pfMeterTotal(_pfDate, m.id), yt = pfMeterTotal(y, m.id);
-        const d = (t == null || yt == null) ? null : t - yt;
-        dayCells += '<td class="rg-calc">' + pfFmt(t) + '</td>';
+        const t  = pfMeterTotal(_pfDate, m.id), td = pfMeterDone(_pfDate, m.id);
+        const yt = pfMeterTotal(y, m.id),       yd = pfMeterDone(y, m.id);
+        dayCells += '<td class="rg-calc' + (td ? '' : ' part') + '">' + pfFmt(t) + '</td>';
         yCells   += '<td class="dim">' + pfFmt(yt) + '</td>';
-        dCells   += '<td class="' + (d == null ? 'na' : d > 0 ? 'gain' : d < 0 ? 'loss' : '') + '">' +
-                    (d == null ? '—' : (d > 0 ? '+' : d < 0 ? '−' : '±') + pfFmt(Math.abs(d))) + '</td>';
+        dCells   += pfDiffCell(t, td, yt, yd, '');
       });
-      const st = pfSectionTotal(_pfDate, sec.grp, null);
-      const sy = pfSectionTotal(y, sec.grp, null);
-      const sd = (st == null || sy == null) ? null : st - sy;
-      body += '<tr class="tot"><th class="row">Day total</th>' + dayCells +
-              '<td class="tot-col rg-calc">' + pfFmt(st) + '</td></tr>';
-      body += '<tr class="yst"><th class="row">Yesterday</th>' + yCells +
-              '<td class="tot-col dim">' + pfFmt(sy) + '</td></tr>';
-      body += '<tr class="dif"><th class="row">Difference</th>' + dCells +
-              '<td class="tot-col ' + (sd == null ? 'na' : sd > 0 ? 'gain' : sd < 0 ? 'loss' : '') + '">' +
-              (sd == null ? '—' : (sd > 0 ? '+' : sd < 0 ? '−' : '±') + pfFmt(Math.abs(sd))) + '</td></tr>';
+      const st = pfSectionWin(_pfDate, sec.grp, 0, 24), sy = pfSectionWin(y, sec.grp, 0, 24);
+      body += '<tr class="tot" data-pfrow="day"><th class="row">Day total</th>' + dayCells +
+              '<td class="tot-col rg-calc' + (st.done ? '' : ' part') + '">' + pfFmt(st.v) + '</td></tr>';
+      body += '<tr class="yst" data-pfrow="yst"><th class="row">Yesterday</th>' + yCells +
+              '<td class="tot-col dim">' + pfFmt(sy.v) + '</td></tr>';
+      body += '<tr class="dif" data-pfrow="dif"><th class="row">Difference</th>' + dCells +
+              pfDiffCell(st.v, st.done, sy.v, sy.done, 'tot-col ') + '</tr>';
+
+      // Old twelve-hour figures still standing in for a half of this day.
+      const legacy = [];
+      mets.forEach(function(m){
+        pfLegacyHalves(_pfDate, m.id).forEach(function(H){
+          legacy.push(m.name + ' ' + H.label + ' = ' + pfFmt(pfHalf(_pfDate, m.id, H.k)));
+        });
+      });
+      const notes =
+        (legacy.length ? '<p class="pf-note">Entered as twelve-hour figures: ' +
+            escHtml(legacy.join(' · ')) + '. Typing any three-hour period of that half replaces it.</p>' : '') +
+        (st.done ? '' : '<p class="pf-note">The comparison with yesterday appears once all eight periods are entered.</p>');
 
       return '<div class="pf-sec"><div class="pf-h">' + escHtml(sec.title) + '</div>' +
         '<div class="pf-wrap"><table><thead>' + head + '</thead><tbody>' + body +
-        '</tbody></table></div></div>';
+        '</tbody></table></div>' + notes + '</div>';
     }).join('');
+  }
+  // Today against yesterday, only when BOTH days are completely entered.
+  function pfDiffCell(t, tDone, yt, yDone, cls){
+    if(t != null && !tDone) return '<td class="' + cls + 'na">not complete</td>';
+    const d = (t == null || yt == null || !yDone) ? null : t - yt;
+    return '<td class="' + cls + (d == null ? 'na' : d > 0 ? 'gain' : d < 0 ? 'loss' : '') + '">' +
+           (d == null ? '—' : (d > 0 ? '+' : d < 0 ? '−' : '±') + pfFmt(Math.abs(d))) + '</td>';
   }
 
   function pfRenderAll(){
@@ -6060,71 +6884,122 @@ if('serviceWorker' in navigator){
   window.refreshPetrecoPage = pfRenderAll;
 
   // ── editing ─────────────────────────────────────────────────────────────
-  let _pfDirty = {};
-  function pfMarkDirty(id){ _pfDirty[id] = true; }
+  // Typed values not yet accepted by the cloud, keyed by date and then
+  // "meter|s{period}" ("pgb1|s3") or "__remarks". See makePending() in the
+  // shell. A key of "meter|0" or "meter|1" is a twelve-hour value queued by a
+  // version before v15 and still on the phone; it is sent where it belongs.
+  //
+  // PERIOD, not meter: sending both periods of a meter let a phone with an old
+  // copy of the night period overwrite a correction to it when only the day
+  // period was typed. And DATE, not whatever is on screen: the save used to
+  // send the date showing when the delay ran out, so a value typed on one day
+  // and followed by a date change never reached the cloud.
+  const _pfPend = makePending(PF_LS + '__pending');
+  function pfDayOf(days, dt){
+    if(!days[dt]) days[dt] = pfBlankDay(dt);
+    const day = days[dt];
+    if(!day.meters) day.meters = {};
+    return day;
+  }
+  function pfOverlayPending(days){
+    _pfPend.each(function(dt, key, val){
+      const day = pfDayOf(days, dt);
+      if(key === '__remarks'){ day.remarks = val || ''; return; }
+      const bar = key.indexOf('|');
+      const id = key.slice(0, bar), rest = key.slice(bar + 1);
+      if(!pfById(id)) return;
+      const cell = day.meters[id] = pfNormMeter(day.meters[id]);
+      if(rest.charAt(0) === 's'){
+        const k = parseInt(rest.slice(1), 10);
+        if(k >= 0 && k < PF_N) cell.q[k] = val;
+      } else {
+        const h = parseInt(rest, 10);          // a twelve-hour value from before v15
+        if(h === 0 || h === 1) cell.v[h] = val;
+      }
+    });
+    return days;
+  }
   function pfApply(id, k, raw){
     if(!pfCanEdit()) return;
-    if(!PF_DAYS[_pfDate]) PF_DAYS[_pfDate] = pfBlankDay(_pfDate);
-    const day = PF_DAYS[_pfDate];
-    if(!day.meters) day.meters = {};
-    if(!day.meters[id]) day.meters[id] = [null, null];
-    day.meters[id][k] = pfNum(raw);
-    pfMarkDirty(id);
+    const day = pfDayOf(PF_DAYS, _pfDate);
+    const cell = day.meters[id] = pfNormMeter(day.meters[id]);
+    cell.q[k] = pfNum(raw);
+    _pfPend.mark(_pfDate, id + '|s' + k, cell.q[k]);
     pfSaveLocal();
   }
   function pfApplyRemarks(text){
     if(!pfCanEdit()) return;
-    if(!PF_DAYS[_pfDate]) PF_DAYS[_pfDate] = pfBlankDay(_pfDate);
-    PF_DAYS[_pfDate].remarks = text;
-    pfMarkDirty('__remarks');
+    pfDayOf(PF_DAYS, _pfDate).remarks = text;
+    _pfPend.mark(_pfDate, '__remarks', text);
     pfSaveLocal();
   }
 
   let _pfTimer = null;
   function pfQueueSave(){ clearTimeout(_pfTimer); _pfTimer = setTimeout(pfPush, 900); }
 
+  // Sends exactly the recorded periods and remarks, on the dates they were
+  // typed. merge:true patches `q.{period}`, so the others are untouched.
+  // Every write is issued before the first await (see flushSaves).
   async function pfPush(){
+    clearTimeout(_pfTimer);
     if(!pfCanEdit()) return;
     if(typeof db === 'undefined' || !FIREBASE_OK || !currentUser) return;
+    if(!_pfPend.count()) return;
     const who = currentUser.name || currentUser.email || 'unknown';
-    const day = PF_DAYS[_pfDate];
-    if(!day) return;
-    const dirty = _pfDirty; _pfDirty = {};
-    if(!Object.keys(dirty).length) return;
+    const snap = _pfPend.take();
     try {
       _pfSkipNext = true;
-      for(const id of Object.keys(dirty)){
-        if(id === '__remarks'){
-          await db.collection(PF_COL).doc(pfDocId(_pfDate, 'remarks')).set({
-            date:_pfDate, meter:'remarks', text:day.remarks || '',
-            updatedBy:who, updatedAt:firebase.firestore.FieldValue.serverTimestamp()
-          }, { merge:true });
-          continue;
-        }
-        const v = day.meters[id] || [null, null];
-        await db.collection(PF_COL).doc(pfDocId(_pfDate, id)).set({
-          date:_pfDate, meter:id,
-          v:{ '0': v[0] == null ? null : v[0], '1': v[1] == null ? null : v[1] },
-          updatedBy:who, updatedAt:firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge:true });
-      }
+      const docs = {};
+      Object.keys(snap).forEach(function(dt){
+        Object.keys(snap[dt]).forEach(function(key){
+          const val = snap[dt][key];
+          if(key === '__remarks'){
+            docs[pfDocId(dt, 'remarks')] = { date:dt, meter:'remarks', text:val || '',
+              updatedBy:who, updatedAt:firebase.firestore.FieldValue.serverTimestamp() };
+            return;
+          }
+          const bar = key.indexOf('|');
+          const id = key.slice(0, bar), rest = key.slice(bar + 1);
+          if(!pfById(id)) return;
+          const docId = pfDocId(dt, id);
+          const doc = docs[docId] = docs[docId] || { date:dt, meter:id,
+            updatedBy:who, updatedAt:firebase.firestore.FieldValue.serverTimestamp() };
+          if(rest.charAt(0) === 's'){
+            const k = String(parseInt(rest.slice(1), 10));
+            if(!(Number(k) >= 0 && Number(k) < PF_N)) return;
+            (doc.q = doc.q || {})[k] = val;
+          } else {
+            if(rest !== '0' && rest !== '1') return;     // pre-v15 twelve-hour value
+            (doc.v = doc.v || {})[rest] = val;
+          }
+        });
+      });
+      const writes = Object.keys(docs).map(function(docId){
+        return db.collection(PF_COL).doc(docId).set(docs[docId], { merge:true });
+      });
+      await Promise.all(writes);
       const dates = Object.keys(PF_DAYS).sort();
       await db.collection(PF_META.col).doc(PF_META.doc).set({
         dates:dates, count:dates.length,
         updatedAt:firebase.firestore.FieldValue.serverTimestamp(), updatedBy:who
       }, { merge:true });
-      day.updatedAt = Date.now(); day.updatedBy = who;
+      _pfPend.done(snap);
+      Object.keys(snap).forEach(function(dt){
+        if(PF_DAYS[dt]){ PF_DAYS[dt].updatedAt = Date.now(); PF_DAYS[dt].updatedBy = who; }
+      });
       pfSaveLocal();
       const sv = document.getElementById('pfSaved');
       if(sv) sv.textContent = 'saved ' + new Date().toLocaleTimeString('en-GB');
       pfCloudIdle();
     } catch(err){
-      Object.keys(dirty).forEach(function(id){ pfMarkDirty(id); });
+      _pfSkipNext = false;
+      _pfPend.fail(snap);
       console.error('[PETRECO] save failed', err);
       showToast('Could not save to cloud: ' + (err.code || err.message), true);
       pfCloudError(err);
     }
   }
+  registerFlush(pfPush);
 
   // ── cloud ───────────────────────────────────────────────────────────────
   function pfCloud(st, txt){
@@ -6142,8 +7017,25 @@ if('serviceWorker' in navigator){
       : 'PETRECO cloud error: ' + code);
     console.error('[Firestore]', err);
   }
+  // Same reasoning as the tank batteries: cached days belong to the account
+  // that cached them, and a different account on the same device must not
+  // inherit them.
+  const PF_OWNER = PF_LS + '__owner';
+  function pfCheckOwner(){
+    const who = (currentUser && currentUser.email) ? String(currentUser.email).toLowerCase() : '';
+    if(lsGet(PF_OWNER) === who) return;
+    PF_DAYS = {};
+    pfSaveLocal();
+    setSyncedVersion(PF_VERK, 0);
+    lsSet(PF_OWNER, who);
+  }
+
   function pfStart(){
     pfStop();
+    pfCheckOwner();
+    _pfPend.load();
+    pfOverlayPending(PF_DAYS);
+    if(_pfPend.count()) pfQueueSave();
     if(typeof db === 'undefined' || typeof FIREBASE_OK === 'undefined' || !FIREBASE_OK){
       pfCloud('error', 'No cloud connection'); return;
     }
@@ -6171,13 +7063,14 @@ if('serviceWorker' in navigator){
           if(!obj[date]) obj[date] = pfBlankDay(date);
           if(x.meter === 'remarks'){ obj[date].remarks = x.text || ''; }
           else if(x.meter && obj[date].meters[x.meter]){
-            obj[date].meters[x.meter] = [ x.v && x.v['0'] != null ? Number(x.v['0']) : null,
-                                          x.v && x.v['1'] != null ? Number(x.v['1']) : null ];
+            // `q` is the three-hour data; `v` is a day recorded before v15 and
+            // is used for any half that has no three-hour figures.
+            obj[date].meters[x.meter] = pfNormMeter({ q:x.q, v:x.v });
           }
           const t = (x.updatedAt && x.updatedAt.toMillis) ? x.updatedAt.toMillis() : 0;
           if(t > (obj[date].updatedAt || 0)){ obj[date].updatedAt = t; obj[date].updatedBy = x.updatedBy || ''; }
         });
-        PF_DAYS = obj;
+        PF_DAYS = pfOverlayPending(obj);
         pfSaveLocal();
         setSyncedVersion(PF_VERK, ts);
         pfRenderAll();
@@ -6223,41 +7116,54 @@ if('serviceWorker' in navigator){
   // Row order: one row per period, then day total, yesterday, difference.
   function pfRepaint(){
     const y = pfPrevDate(_pfDate);
-    document.querySelectorAll('#pfArea .pf-sec').forEach(function(sec, si){
+    document.querySelectorAll('#pfArea .pf-sec').forEach(function(el, si){
       const grp  = PF_SECTIONS[si].grp;
-      const mets = PF_LIST.filter(function(x){ return x.grp === grp; });
-      const trs  = sec.querySelectorAll('tbody tr');
-      // the Total column on each period row
+      const mets = pfGrpList(grp);
+      const tb = el.querySelector('tbody');
+      if(!tb) return;
+      function rowOf(k){ return tb.querySelector('[data-pfrow="' + k + '"]'); }
+      // Period totals and the twelve-hour subtotals.
       PF_PERIODS.forEach(function(pr){
-        const tr = trs[pr.k]; if(!tr) return;
-        tr.children[mets.length + 1].textContent = pfFmt(pfSectionTotal(_pfDate, grp, pr.k));
+        const r = rowOf('p' + pr.k);
+        if(r) r.children[mets.length + 1].textContent = pfFmt(pfSectionTotal(_pfDate, grp, pr.k));
       });
-      const dayRow = trs[PF_PERIODS.length];
-      const yRow   = trs[PF_PERIODS.length + 1];
-      const dRow   = trs[PF_PERIODS.length + 2];
+      PF_HALVES.forEach(function(H){
+        const r = rowOf('h' + H.k);
+        if(!r) return;
+        mets.forEach(function(m, i){ r.children[i + 1].textContent = pfFmt(pfHalf(_pfDate, m.id, H.k)); });
+        r.children[mets.length + 1].textContent = pfFmt(pfSectionWin(_pfDate, grp, H.from, H.to).v);
+      });
+      const dayRow = rowOf('day'), yRow = rowOf('yst'), dRow = rowOf('dif');
       if(!dayRow || !yRow || !dRow) return;
+      const tmp = document.createElement('tr');
       mets.forEach(function(m, i){
-        const t = pfMeterTotal(_pfDate, m.id), yt = pfMeterTotal(y, m.id);
-        const d = (t == null || yt == null) ? null : t - yt;
+        const t  = pfMeterTotal(_pfDate, m.id), td = pfMeterDone(_pfDate, m.id);
+        const yt = pfMeterTotal(y, m.id),       yd = pfMeterDone(y, m.id);
+        dayRow.children[i + 1].className = 'rg-calc' + (td ? '' : ' part');
         dayRow.children[i + 1].textContent = pfFmt(t);
         yRow.children[i + 1].textContent   = pfFmt(yt);
-        dRow.children[i + 1].className = (d == null ? 'na' : d > 0 ? 'gain' : d < 0 ? 'loss' : '');
-        dRow.children[i + 1].textContent =
-          (d == null ? '—' : (d > 0 ? '+' : d < 0 ? '−' : '±') + pfFmt(Math.abs(d)));
+        tmp.innerHTML = pfDiffCell(t, td, yt, yd, '');
+        dRow.children[i + 1].className   = tmp.firstChild.className;
+        dRow.children[i + 1].textContent = tmp.firstChild.textContent;
       });
-      const st = pfSectionTotal(_pfDate, grp, null), sy = pfSectionTotal(y, grp, null);
-      const sd = (st == null || sy == null) ? null : st - sy;
-      dayRow.children[mets.length + 1].textContent = pfFmt(st);
-      yRow.children[mets.length + 1].textContent   = pfFmt(sy);
+      const st = pfSectionWin(_pfDate, grp, 0, 24), sy = pfSectionWin(y, grp, 0, 24);
+      dayRow.children[mets.length + 1].className = 'tot-col rg-calc' + (st.done ? '' : ' part');
+      dayRow.children[mets.length + 1].textContent = pfFmt(st.v);
+      yRow.children[mets.length + 1].textContent   = pfFmt(sy.v);
+      tmp.innerHTML = pfDiffCell(st.v, st.done, sy.v, sy.done, 'tot-col ');
       const dc = dRow.children[mets.length + 1];
-      dc.className = 'tot-col ' + (sd == null ? 'na' : sd > 0 ? 'gain' : sd < 0 ? 'loss' : '');
-      dc.textContent = (sd == null ? '—' : (sd > 0 ? '+' : sd < 0 ? '−' : '±') + pfFmt(Math.abs(sd)));
+      dc.className   = tmp.firstChild.className;
+      dc.textContent = tmp.firstChild.textContent;
     });
   }
 
   window.__PF__ = { list:PF_LIST, sections:PF_SECTIONS, periods:PF_PERIODS,
+                    halves:PF_HALVES, start:PF_START, step:PF_STEP, count:PF_N,
                     days:function(){ return PF_DAYS; }, getDay:pfGetDay,
-                    meterTotal:pfMeterTotal, period:pfPeriod, sectionTotal:pfSectionTotal,
+                    meterTotal:pfMeterTotal, meterDone:pfMeterDone, period:pfPeriod,
+                    half:pfHalf, window:pfWindow, sectionTotal:pfSectionTotal,
+                    sectionWin:pfSectionWin, sectionDone:pfSectionDone,
+                    legacyHalves:pfLegacyHalves, grpList:pfGrpList,
                     fmt:pfFmt, today:pfToday, byId:pfById,
                     setDate:function(d){ _pfDate = d; pfRenderAll(); },
                     get date(){ return _pfDate; } };

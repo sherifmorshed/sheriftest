@@ -109,9 +109,9 @@ Set by `ADMIN_EMAILS`, `PETRECO_EMAILS` and `PLANT_EMAILS` at the top of
 Neither operator group ever sees the other's figures on screen, or the
 difference between them. The comparison is PETROBEL's to make.
 
-An account in none of the three lists can sign in but is **read-only** — it can
-look, not type. That is deliberate: an account added to the console by mistake
-should not gain write access just by existing.
+An account in none of the lists can sign in but gets only a **"No access"**
+page. The rules refuse it every collection, so an account added to the console
+by mistake gains nothing just by existing.
 
 > **The screen hides each side from the other; the accounts can still read it.**
 > Both sides live in one document per day and the rules let either operator read
@@ -139,7 +139,7 @@ rather than a white field — so a derived number never looks like an empty inpu
 
 ## Files
 
-**Upload these nine — this is the whole app:**
+**Upload these ten — this is the whole app:**
 
 | File | | |
 |---|---|---|
@@ -165,7 +165,7 @@ offers — take only the config values from it.
 |---|---|
 | `README.md`, `SETUP.md`, `DEVELOPER_REFERENCE.md` | documentation |
 | `firestore.rules` | paste into the Firebase console; never served |
-| `test.html`, `test_petreco.html`, `test_plant.html`, `test_tb.html`, `test_pf.html`, `firebase-stub.js` | offline test harness |
+| `test.html`, `test_petreco.html`, `test_plant.html`, `test_tb.html`, `test_pf.html`, `test_viewer.html`, `test_empty.html`, `test_stray.html`, `firebase-stub.js` | offline test harness |
 
 | `test_hist.html`, `test_hist_rg.html` | the same harness seeded with ~120 generated days across five months — what the daily record is tested against |
 | `test_build.py`, `test_build_hist.py` | regenerate the harnesses; run after every edit to `index.html` |

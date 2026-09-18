@@ -1,6 +1,6 @@
 # Sinai Field — start here
 
-**Attach `sinai-field-v12.zip` to the new chat and paste the block below as your
+**Attach `sinai-field-v15.zip` to the new chat and paste the block below as your
 first message.** Everything Claude needs is in the zip; nothing from any other
 conversation is required.
 
@@ -16,7 +16,7 @@ conversation is required.
 > The attached zip is the whole project. Read `README.md`, then
 > `DEVELOPER_REFERENCE.md`, then `CHANGELOG.md` before changing anything.
 >
-> Current release: **v12**, service-worker cache `sinai-field-v12`.
+> Current release: **v15**, service-worker cache `sinai-field-v15`.
 >
 > How I work: show me the change, test it before you say it is done, and tell me
 > plainly when something I asked for is a bad idea.
@@ -41,12 +41,12 @@ columns), and `tb10-1@`…`tb8-2@petrobel.org` (each sees one tank battery only)
 - After editing `index.html`, **regenerate the test harnesses** or you are
   testing the old build:
   ```bash
-  python3 test_build.py        # 3 days, all three roles, plus empty & stray states
+  python3 test_build.py        # every role, a no-role account, empty & stray states
   python3 test_build_hist.py   # ~120 generated days across 5 months
   ```
 - `firestore.rules` is the real access control. The e-mail lists in `index.html`
   only decide what the screen offers. Change them together.
-- Twelve files get deployed; `README.md` lists exactly which. Everything else is
+- Ten files get deployed; `SETUP.md` lists exactly which. Everything else is
   documentation or the offline test harness — do not upload those.
 
 ## The two tabs
@@ -71,10 +71,25 @@ tank battery total to a Ras Gara total.
 
 ## Where things stand
 
-Nothing is outstanding. The last few releases fixed: the cloud status line
-(it used to say "Connecting…" forever), "Send by e-mail" (it silently did
-nothing), the daily-record header and ranges, the chart's x-axis stopping two
-hours early, and the printed day report spilling onto a second page.
+v15 moved the five PETRECO scanners to three-hour entry from 06:00 (eight
+periods), with days recorded before it still read as twelve-hour halves. v14
+added 3/6/12/24-hour periods to the report card, compared only once today's
+window is complete. v13 fixed three ways readings were silently lost (a sync during typing, a save
+overwriting another person's field, a date change before the save went out)
+and four display faults — see `CHANGELOG.md`. Typed values now sit in a
+per-account queue until the cloud accepts them; read "Unsaved edits" in
+`DEVELOPER_REFERENCE.md` before touching any save.
+
+Complete-before-compared is now the rule everywhere a day or a window is
+compared with another: the report card, both analysis tables, the chart chips
+and the printed day report.
+
+Known and not yet changed (waiting on the owner):
+- The tank battery record report and its e-mail text still add Belayim gross
+  and T.B. 10/1 net oil into one "Field total", against the rule that the two
+  groups are never summed.
+- The e-mailed record PDF squeezes the whole range onto one A4 page.
+- Some comparisons still print a percentage beside the m³ figure.
 
 The 2026 history import was built and then removed at my request — do not
 reintroduce it.

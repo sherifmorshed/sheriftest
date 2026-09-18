@@ -65,6 +65,8 @@ _isoDate(date)                     local-calendar ISO date
 lsGet, lsSet                       localStorage with try/catch
 getSyncedVersion, setSyncedVersion, isCacheCurrent
 checkStorageHeadroom
+makePending(lsKey)                 the unsaved-edits queue (see §4)
+registerFlush(fn), flushSaves()    send pending saves now (hide / close / sign-out)
 html2canvas                        global, for the PDF
 ```
 
@@ -117,6 +119,36 @@ again.
 | `rasgara_days_v1` | every day, mirrored for offline |
 | `rasgara_days_v1__syncver` | which cloud version that mirror came from |
 | `rasgara_theme` | light / dark |
+| `…__pending__{email}` | unsent typed cells, one per module and per account |
+
+### Unsaved edits: one queue per module
+
+Every typed value goes into a queue — `_rgPend`, `_tbPend`, `_pfPend`, each made
+by `makePending()` in the shell — keyed by the DATE it was typed on and then by
+the FIELD, with the value:
+
+| Module | Key | Example |
+|---|---|---|
+| R/G | `row.field` | `"7.p"`, `"7.rc"` |
+| Tank batteries | `battery` \| `field` `index` | `"tb6_1\|s3"`, `"tb6_1\|d3"`, `"tb6_1\|c12"` |
+| PETRECO | `meter` \| `period`, or `__remarks` | `"pgb1\|0"` |
+
+A save sends exactly that and nothing else, one merge-write per document, and
+then clears what was sent. Three rules follow from it, each of which was a
+real loss before v13:
+
+- **A download never replaces local data bare.** It goes through
+  `rgOverlayPending` / `tbOverlayPending` / `pfOverlayPending`, which lay the
+  queue back over it. Otherwise a sync from another device reverts a value
+  typed a second ago, and it is never sent.
+- **A save never sends a whole row, a whole meter or a whole day.** A phone's
+  copy of the fields it did not touch may be hours old.
+- **A save never looks at the date on screen.** The queue carries its own dates.
+
+The queue is persisted per account, so a failed save is retried and one pending
+at close is sent next time — by the same account only. Each save issues all its
+writes BEFORE its first `await`; that is what lets `flushSaves()` hand them to
+Firestore's offline queue from a page that is being hidden or closed.
 
 **Sync**, in one paragraph: devices watch `rasGaraMeta/info`, not the day
 documents. When its `updatedAt` changes, the device compares it against the
@@ -136,6 +168,13 @@ writing meta first would tell everyone to fetch a half-written set.
 - **`<use href="#i-…">` does not resolve there either.** The sprite is in the
   main document. The report carries its own inline markup; do not "tidy" it to
   use the sprite.
+
+- **Never rebuild a table while one of its boxes has focus.** A sync can
+  arrive at any moment; rebuilding destroys the focused input, which on a
+  phone closes the keyboard and loses a half-typed number. `rgRenderTable`,
+  `tbRenderArea` and `pfRenderArea` check for this and update the other boxes
+  in place instead (`data-layout` records what the table was built for). A new
+  entry table needs the same guard.
 
 - **`.rg-calc` is on the `<td>` itself, not on a child.** Never give it a
   `display` — an `inline-block` table cell drops out of table layout and the
@@ -211,6 +250,18 @@ writing meta first would tell everyone to fetch a half-written set.
   read-only viewer. Use the `typeof x !== 'undefined' && x` form — that is what
   `_admin()` / `_plant()` / `_petreco()` are for.
 
+- **An account in no role list gets nothing.** `_tabsFor()` returns no tabs,
+  `showApp()` shows `#page-noaccess` and starts no listener. The rules refuse
+  such an account every collection, so there is nothing to show it and any
+  read would only paint an error. Do not "restore" a read-only viewer without
+  first deciding, in `firestore.rules`, what it may read.
+
+- **`#page-pf` is two things.** PETRECO's own tab for PETRECO's operators, and
+  embedded (`.pf-embedded`: no heading, no date bar) in A/R Production → Entry
+  for admin. `showApp()` sets the class from the role on every sign-in, and
+  `tbShowSub()` shows it only while A/R Production is the open tab. It must stay
+  inside `#app-body`.
+
 - **Adding a role means four edits, not one.** The list in CONFIGURATION,
   `rgSide()`, the rules, and `test_build.py`. `rgSide()` is the single place
   that decides which columns, totals, history and heading a user gets — put
@@ -225,6 +276,12 @@ writing meta first would tell everyone to fetch a half-written set.
 seed three days, so everything works with no project and no network. The stub
 implements `merge:true` with real deep-merge semantics — without that, the
 merge-write test would pass for the wrong reason.
+
+`firebase-stub.js` enforces the same rules as `firestore.rules` for every
+collection — reads, writes and listeners — and records every refusal in
+`window.__IO__.denied`. `window.__STUB__.store` is the fake cloud, for a test
+that needs to change it behind the app's back (another device's edit that this
+one has not synced). `test_viewer.html` signs in as an account in no role list.
 
 `test_empty.html` seeds **nothing** — connected, authenticated, empty. That is
 what a fresh deployment actually looks like, and where a wrong status line makes
@@ -295,6 +352,21 @@ which matters more at a plant than the typeface does.
 Second tab, its own collection, its own shift. Five batteries, one totalizing
 scanner each, read every three hours on an **05:00 → 05:00** day.
 
+**Two groups.** `TB_GROUPS` is a fact about the field, not a display choice —
+Belayim (6/1, 6/2, 8/1, 8/2) is one line into PETRECO, T.B. 10/1 is another.
+`tbGroupCalc`, `tbGroupHalf` and `tbGroupTrailing` are the only correct way to
+total more than one battery. Never sum across groups.
+
+**Temperature cadence.** Every battery reads temperature at its nine scanner
+times. `tempEvery` in `TB_LIST` exists so a battery could be put on a finer
+cadence later; none uses it today. Table rows are HOUR OFFSETS (`tbOffsets`), and
+`tbScanIndex(o)` maps an offset back to a scanner index or -1 when that hour has
+no scanner reading. Temperatures are stored in a separate `temp` map keyed by
+offset, never inside `rows`.
+
+**Two pressure units.** `wUnit` in `TB_LIST` — 10/1 is bar, the rest psi. Read
+through `tbWUnit(b)`. Never assume psi.
+
 **Two clocks.** T.B. 10/1 starts at 06:00, the rest at 05:00 — see `start` in
 `TB_LIST`, and `tbStart(b)`. `tbLabel`, `tbHour`, `tbRowDate` and `tbShiftDates`
 all take a battery. Never reintroduce a module-wide start hour: `TB_START_HOUR`
@@ -304,6 +376,41 @@ whether a shared Time column can be printed without mislabelling a reading — t
 printed report falls back to bracketed second times, the heat grid to ordinal
 columns. Those are LABELS and must stay; the commentary that used to sit beside
 them was removed at the owner's request.
+
+**The operator's screen is the table.** No summary cards, no shift sentences, no
+sub-tabs — an operator sees his date, his panel and his nine rows. Anything
+group-level is admin only, because an operator's data cannot answer a
+group-level question.
+
+**The report card compares only complete windows.** A period is a window in
+hours from the shift start (`TB_PERIODS`: h3, h6, h1 = first 12, day, h2 =
+second 12), read by each line on its own clock. `tbWin` / `tbPairOf` /
+`tbPairSum` give each line `{a, aDone, b, bDone, na}`; the Difference is drawn
+only when `aDone && bDone`, and a total is done only when every line in it is.
+An unfinished today shows "so far", an unfinished yesterday "incomplete". `na`
+is a line that cannot be measured over the window at all — PETRECO's scanners
+on that day — and makes any total containing it `na` too. Window boundaries
+must fall on a reading: every line now reads every 3 h, so 3, 6, 12 and 24 all
+work. The one `na` case left is a PETRECO day recorded before v15 as two
+twelve-hour halves, asked for less than a half.
+
+**PETRECO scanners: three-hour periods, twelve-hour history.** A meter-day is
+`{ q:[8], v:[2] }` — `q` the three-hour periods from 06:00, `v` the two
+twelve-hour halves every day before v15 was written with. `pfHalfMode(cell, h)`
+decides per HALF which one counts: any `q` value in the half wins, otherwise
+the old `v` figure stands. `pfWindow(date, id, fromHour, toHour)` is the one
+accessor everything else is built on — totals, the card, the analysis — and it
+returns `null` when the window cannot be measured (a twelve-hour half asked for
+three hours of itself) rather than a number nobody recorded. Writes go to
+`q.{period}`; `v` is never rewritten.
+
+Elsewhere (the Scanner analysis page) comparisons still use their own rules;
+never compare a running total against a finished one.
+
+**The boundary is shared.** Row 8 of a day and row 0 of the next are the same
+reading. `tbApplyInput` writes both (`tbBoundaryTwin`), and `tbBoundaryFill`
+reads one across when the other is missing. Never "fix" this by making either
+day's boundary independent — it is one number.
 
 **Nine readings, eight intervals.** Production is `reading[i] − reading[i-1]`.
 The ninth reading (the closing 05:00, on the NEXT calendar day) is not a spare —
@@ -327,11 +434,12 @@ can both match on.
 safe rather than trimming the result, so an unfiltered read is denied outright
 even though some documents are his. `firebase-stub.js` simulates this.
 
-**Concurrency.** `tbPushToCloud` sends ONLY the cells that client typed, tracked
-in `_tbDirty`, one write per battery that changed. Sending whole rows would let
-a phone that has been in a pocket since 08:00 push its blanks over an admin's
-corrections. The dirty set is taken and cleared before the await, and restored
-if the write fails.
+**Concurrency.** `tbPushToCloud` sends ONLY the fields that client typed,
+from `_tbPend` (see "Unsaved edits" in §4), one write per battery per date.
+Sending whole rows let an operator who changed only a WHP reset the admin's
+correction on the same row. An operator's save never carries a correction (`d`)
+or another battery's cell, and only admin rewrites `dates` in the stamp — an
+operator's copy is one battery and would shrink the list.
 
 **Listeners are role-gated.** `_tabsFor()` decides both which tabs are drawn and
 which listeners start. A tank battery operator never attaches the Ras Gara
