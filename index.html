@@ -12,26 +12,26 @@
    accounts and its own release cycle, and it shares nothing with any other
    PETROBEL app. Nothing here should ever need to reach outside this folder.
 
-   WHAT IS WHERE                                        (line numbers, v15)
+   WHAT IS WHERE                                        (line numbers, v20)
    ─────────────────────────────────────────────────────────────────────────
      CSS
        Design tokens — every colour lives here, light + dark ...... line 74
        Header, login, toast, footer .............................. line 107
        Pages: readings, tank batteries, scanners, PETRECO ........ line 239
      MARKUP
-       Icon sprite — every icon, drawn inline .................... line 647
-       Login screen .............................................. line 667
-       Header bar ................................................ line 725
-       Pages: R/G, A/R, PETRECO, no-access ....................... line 737
+       Icon sprite — every icon, drawn inline .................... line 651
+       Login screen .............................................. line 671
+       Header bar ................................................ line 729
+       Pages: R/G, A/R, PETRECO, no-access ....................... line 741
      SCRIPT — the shell
-       ►► CONFIGURATION — Firebase config + role lists ........... line 1014
-       Boot, helpers, unsaved-edits queue, footer status ......... line 1088
-       Sign in / sign out, roles, tabs ........................... line 1375
-     SCRIPT — R/G Production (hourly PETRECO vs Ras Gara) ........ line 1614
+       ►► CONFIGURATION — Firebase config + role lists ........... line 1035
+       Boot, helpers, unsaved-edits queue, footer status ......... line 1109
+       Sign in / sign out, roles, tabs ........................... line 1396
+     SCRIPT — R/G Production (hourly PETRECO vs Ras Gara) ........ line 1635
      SCRIPT — A/R Production (tank batteries, report card,
-              scanner analysis, temperature, workbook import) .... line 3079
-     SCRIPT — day / night theme, service worker .................. line 6447
-     SCRIPT — PETRECO scanners ................................... line 6512
+              scanner analysis, temperature, chemical, import) ..... line 3100
+     SCRIPT — day / night theme, service worker .................. line 6706
+     SCRIPT — PETRECO scanners ................................... line 6771
 
    THE ROLES
      admin     both R/G sides, A/R Production, every report
@@ -390,6 +390,7 @@ table.tb-tbl td{padding:3px 3px;}
 table.tb-tbl th{padding:6px 3px;}
 table.tb-tbl th.tb-grp3{color:var(--s3);border-bottom:2px solid var(--s3);}
 table.tb-tbl th.tb-grp4{color:var(--gold);border-bottom:2px solid var(--gold);}
+table.tb-tbl th.tb-grp5{color:var(--s2);border-bottom:2px solid var(--s2);}
 /* An hour with no scanner reading: those three columns have nothing in them,
    and an empty box there would invite somebody to fill it. */
 table.tb-tbl td.tb-off{background:rgba(148,163,184,.07);}
@@ -474,6 +475,9 @@ table.tb-tbl .tb-din{max-width:88px;}
 .tb-days th.dt{text-align:left;}
 .tb-days th.g,.tb-days td.g{background:rgba(15,118,110,.10);font-weight:800;}
 .tb-days th.g2,.tb-days td.g2{background:rgba(202,138,4,.10);font-weight:800;}
+.tb-days th.g3,.tb-days td.g3{background:rgba(37,99,235,.10);font-weight:800;}
+.tb-days th.pf,.tb-days td.pf{background:rgba(148,163,184,.06);}
+.tb-days td.part{font-style:italic;color:var(--muted);}
 .tb-days td{padding:9px 8px;text-align:center;border-bottom:1px solid var(--border);}
 .tb-days td.dt{text-align:left;white-space:nowrap;color:var(--text);font-weight:600;}
 .tb-days td.dt b{color:var(--accent2);margin-right:3px;}
@@ -860,6 +864,23 @@ document.addEventListener('click', function(e){
       <div id="tbTempChart"></div>
       <div class="rg-sec-title">Hour by hour</div>
       <div id="tbTempGrid"></div>
+    </div>
+
+    <!-- Chemical injection: the temperature page's twin, on its own six-hour
+         clock. Kept separate rather than added as more columns to the
+         temperature grid, because the two are read at different cadences and
+         one grid would be half empty. -->
+    <div id="tb-page-chem" style="display:none;">
+      <div class="rg-bar">
+        <label class="rg-lbl" for="tbChemDate">Shift day</label>
+        <input type="date" id="tbChemDate" class="rg-date">
+        <button class="rg-btn" id="tbChemToday">Today</button>
+      </div>
+      <div id="tbChemKpis"></div>
+      <div class="rg-sec-title">Chemical injection through the day</div>
+      <div id="tbChemChart"></div>
+      <div class="rg-sec-title">Every six hours</div>
+      <div id="tbChemGrid"></div>
     </div>
 
     <div id="tb-page-view" style="display:none;">
@@ -3214,6 +3235,22 @@ document.addEventListener('DOMContentLoaded', function(){
     for(let o = 0; o <= TB_SPAN; o += step) out.push(o);
     return out;
   }
+  // Chemical injection is recorded every SIX hours — 06:00, 12:00, 18:00,
+  // 00:00 and the closing 06:00 for a battery starting at 06:00 — so it lands
+  // on every second scanner row and the rows in between have no box. Six is
+  // the interval the chemical is dosed at; it is not tied to the scanner
+  // cadence, which is why it has its own constant.
+  const TB_CHEM_EVERY = 6;
+  function tbIsChemHour(o){ return o % TB_CHEM_EVERY === 0; }
+  function tbChemOffsets(){
+    const out = [];
+    for(let o = 0; o <= TB_SPAN; o += TB_CHEM_EVERY) out.push(o);
+    return out;
+  }
+  function tbChemUnit(b){
+    if(typeof b === 'string') b = tbById(b);
+    return (b && b.chemUnit) ? b.chemUnit : 'L';
+  }
   // A scanner reading sits every three hours, so offset 0,3,6… is scanner
   // index 0,1,2… and every other offset is temperature only.
   function tbScanIndex(o){ return (o % TB_STEP === 0) ? (o / TB_STEP) : -1; }
@@ -3257,7 +3294,8 @@ document.addEventListener('DOMContentLoaded', function(){
   let _tbDate = tbToday();
   // Typed cells not yet accepted by the cloud, keyed by date and then
   // "battery|field+index": "tb6_1|s3" (scanner), "|w3" (WHP), "|d3" (admin
-  // correction), "|c12" (temperature at hour offset 12). See makePending().
+  // correction), "|c12" (temperature at hour offset 12), "|x12" (chemical
+  // injection at hour offset 12). See makePending().
   const _tbPend = makePending('tb_days_v1__pending');
   function tbPendKey(id, kind, i){ return id + '|' + kind + i; }
   function tbMayWrite(id, kind){
@@ -3270,10 +3308,10 @@ document.addEventListener('DOMContentLoaded', function(){
       const bar = key.indexOf('|');
       const id = key.slice(0, bar), kind = key.charAt(bar + 1);
       const i = parseInt(key.slice(bar + 2), 10);
-      if(!tbById(id) || isNaN(i) || 'swdc'.indexOf(kind) === -1) return;
+      if(!tbById(id) || isNaN(i) || 'swdcx'.indexOf(kind) === -1) return;
       if(!days[dt]) days[dt] = tbBlankDay(dt);
       const cell = tbCellIn(days[dt], id);
-      if(kind === 'c'){ if(i >= 0 && i <= TB_SPAN) cell.c[i] = val; }
+      if(kind === 'c' || kind === 'x'){ if(i >= 0 && i <= TB_SPAN) cell[kind][i] = val; }
       else if(i >= 0 && i < TB_READS) cell[kind][i] = val;
     });
     return days;
@@ -3369,12 +3407,14 @@ document.addEventListener('DOMContentLoaded', function(){
   // one steps aside. Such a day can be totalled and compared, but it has no
   // three-hour detail and never pretends to.
   function tbBlankCell(){
-    const s = [], w = [], d = [], c = [];
+    const s = [], w = [], d = [], c = [], x = [];
     for(let i = 0; i < TB_READS; i++){ s.push(null); w.push(null); d.push(null); }
-    // c = temperature in °C, indexed by HOUR OFFSET from the shift start, so
-    // 0..24 inclusive whatever the battery's cadence.
-    for(let o = 0; o <= TB_SPAN; o++) c.push(null);
-    return { s:s, w:w, d:d, c:c, t:null, src:'' };
+    // c = temperature in °C and x = chemical injection, both indexed by HOUR
+    // OFFSET from the shift start — 0..24 inclusive — not by scanner index,
+    // because neither is tied to the scanner cadence. (The letter x, not a
+    // second c: c was already temperature in Celsius.)
+    for(let o = 0; o <= TB_SPAN; o++){ c.push(null); x.push(null); }
+    return { s:s, w:w, d:d, c:c, x:x, t:null, src:'' };
   }
   function tbBlankDay(dateStr){
     const tbs = {};
@@ -3398,12 +3438,21 @@ document.addEventListener('DOMContentLoaded', function(){
     }
     return cell;
   }
-  function tbTempToArray(temp, cell){
-    if(!temp || typeof temp !== 'object') return cell;
+  // An hour-offset map from the database ({ "0":41, "6":38 }) into its array.
+  function tbHourMapToArray(map, arr){
+    if(!map || typeof map !== 'object') return arr;
     for(let o = 0; o <= TB_SPAN; o++){
-      const v = temp[String(o)];
-      cell.c[o] = (v == null) ? null : Number(v);
+      const v = map[String(o)];
+      arr[o] = (v == null) ? null : Number(v);
     }
+    return arr;
+  }
+  function tbTempToArray(temp, cell){
+    tbHourMapToArray(temp, cell.c);
+    return cell;
+  }
+  function tbChemToArray(chem, cell){
+    tbHourMapToArray(chem, cell.x);
     return cell;
   }
   // Days recorded before the boundary was linked can still be missing one end
@@ -3443,8 +3492,10 @@ document.addEventListener('DOMContentLoaded', function(){
         out.tbs[b.id].w[i] = (src.w && src.w[i] != null) ? src.w[i] : null;
         out.tbs[b.id].d[i] = (src.d && src.d[i] != null) ? src.d[i] : null;
       }
-      for(let o = 0; o <= TB_SPAN; o++)
+      for(let o = 0; o <= TB_SPAN; o++){
         out.tbs[b.id].c[o] = (src.c && src.c[o] != null) ? src.c[o] : null;
+        out.tbs[b.id].x[o] = (src.x && src.x[o] != null) ? src.x[o] : null;
+      }
     });
     return tbBoundaryFill(dateStr, out);
   }
@@ -3576,12 +3627,20 @@ document.addEventListener('DOMContentLoaded', function(){
       const tempCell = '<td><input class="rg-in" type="number" inputmode="decimal" step="any" ' +
         'data-tb="' + escAttr(b.id) + '" data-k="c" data-i="' + o + '" ' +
         'value="' + (cell.c[o] == null ? '' : cell.c[o]) + '"' + (ed ? '' : ' disabled') + '></td>';
+      // Chemical injection every six hours. On the hours in between the cell is
+      // closed off rather than left as an empty box, the same way the scanner
+      // columns are on a temperature-only row.
+      const chemCell = tbIsChemHour(o)
+        ? '<td><input class="rg-in" type="number" inputmode="decimal" step="any" ' +
+          'data-tb="' + escAttr(b.id) + '" data-k="x" data-i="' + o + '" ' +
+          'value="' + (cell.x[o] == null ? '' : cell.x[o]) + '"' + (ed ? '' : ' disabled') + '></td>'
+        : '<td class="tb-off"></td>';
 
       rows +=
         '<tr' + (edge ? ' class="tb-edge"' : (si < 0 ? ' class="tb-hour"' : '')) + '>' +
           '<td class="rg-time">' + tbOffsetLabel(o, b) +
             (tag ? '<span class="tb-tag">' + tag + '</span>' : '') + '</td>' +
-          scanCell + prodCell + whpCell + tempCell +
+          scanCell + prodCell + whpCell + tempCell + chemCell +
         '</tr>';
     });
 
@@ -3607,6 +3666,7 @@ document.addEventListener('DOMContentLoaded', function(){
           '<th class="tb-grp3">Production<br>m³/3h</th>' +
           '<th class="rg-grp2">WHP<br>' + escHtml(tbWUnit(b)) + '</th>' +
           '<th class="tb-grp4">Temp<br>°C</th>' +
+          '<th class="tb-grp5">Chem. inj.<br>' + escHtml(tbChemUnit(b)) + '</th>' +
         '</tr></thead><tbody>' + rows + '</tbody></table></div></div>' +
     '</div>';
   }
@@ -3833,7 +3893,8 @@ document.addEventListener('DOMContentLoaded', function(){
   const _TB_SUBS = [ { k:'entry', label:'Entry',            icon:'edit'  },
                      { k:'old',   label:'Report card',      icon:'print' },
                      { k:'view',  label:'Scanner analysis', icon:'trend' },
-                     { k:'temp',  label:'Temperature',       icon:'trend' } ];
+                     { k:'temp',  label:'Temperature',       icon:'trend' },
+                     { k:'chem',  label:'Chemical injection', icon:'trend' } ];
   function tbShowSub(k){
     if(!_tbAdmin()) k = 'entry';
     _tbSub = k;
@@ -3842,6 +3903,8 @@ document.addEventListener('DOMContentLoaded', function(){
     const o = document.getElementById('tb-page-old');
     const tp = document.getElementById('tb-page-temp');
     if(tp) tp.style.display = (k === 'temp') ? '' : 'none';
+    const cp = document.getElementById('tb-page-chem');
+    if(cp) cp.style.display = (k === 'chem') ? '' : 'none';
     if(e) e.style.display = (k === 'entry') ? '' : 'none';
     if(v) v.style.display = (k === 'view')  ? '' : 'none';
     if(o) o.style.display = (k === 'old')   ? '' : 'none';
@@ -3870,6 +3933,7 @@ document.addEventListener('DOMContentLoaded', function(){
     if(k === 'view') tbRenderView();
     if(k === 'old')  tbRenderOld();
     if(k === 'temp') tbRenderTemp();
+    if(k === 'chem') tbRenderChem();
   }
   function tbRenderSubTabs(){
     const bar = document.getElementById('tbSubTabs');
@@ -4727,8 +4791,9 @@ document.addEventListener('DOMContentLoaded', function(){
     const t = tbWin(getVals(dateStr)), w = tbWin(getVals(yDate));
     return { a:t.v, aDone:t.done, b:w.v, bDone:w.done, na:t.na, bNa:w.na };
   }
-  // Lines added together: complete only if every line is, measurable only if
-  // every line is.
+  // Lines added together: complete only if every line is — a total of just the
+  // lines that happen to be read is not the total, and is never shown as one.
+  // Measurable only if every line is.
   function tbPairSum(pairs){
     const out = { a:null, aDone:pairs.length > 0, b:null, bDone:pairs.length > 0, na:false, bNa:false };
     pairs.forEach(function(q){
@@ -4775,22 +4840,21 @@ document.addEventListener('DOMContentLoaded', function(){
           headInk:'var(--on-accent)', band:'var(--surface)', gain:'var(--green)',
           loss:'var(--red)', totalBg:'rgba(202,138,4,.12)', card:'var(--card)' };
 
-    // Today and yesterday cells. A figure from an unfinished window is shown
-    // with a "so far" tag; a line that cannot be measured over this window
-    // says so instead of showing a dash that looks like a missing reading.
+    // Today and yesterday cells. NO PART FIGURES: a window that is not fully
+    // read has no figure on this card at all — not the readings taken so far
+    // added up, which is a number nobody should act on and which reads like a
+    // finished one. Today says "Not yet"; yesterday, which is over, gets a
+    // dash. A line that cannot be measured over this window says so instead.
     function valCell(v, done, na, cls){
-      if(na) return '<td class="v ' + cls + ' na">12 h only</td>';
+      if(na)    return '<td class="v ' + cls + ' na">12 h only</td>';
+      if(!done) return '<td class="v ' + cls + ' nyet">' + (cls === 'y' ? '—' : 'Not yet') + '</td>';
       if(v == null) return '<td class="v ' + cls + '">—</td>';
-      // Today is still being read ("so far"); yesterday is over, so a short
-      // window there means readings are missing ("incomplete").
-      return '<td class="v ' + cls + (done ? '' : ' part') + '">' + tbFmt(v, 0) + ' m³' +
-             (done ? '' : '<span class="sofar">' + (cls === 'y' ? 'incomplete' : 'so far') + '</span>') + '</td>';
+      return '<td class="v ' + cls + '">' + tbFmt(v, 0) + ' m³</td>';
     }
     // Difference: only between two COMPLETE windows.
     function diffPill(q){
       if(q.na) return '<span class="pill nil">—</span>';
-      if(q.a != null && !q.aDone) return '<span class="pill wait">not complete</span>';
-      if(q.a == null || q.b == null || !q.bDone) return '<span class="pill nil">—</span>';
+      if(q.a == null || q.b == null || !q.aDone || !q.bDone) return '<span class="pill nil">—</span>';
       const d = q.a - q.b;
       return '<span class="pill ' + (d > 0 ? 'up' : d < 0 ? 'down' : 'flat') + '">' +
              (d > 0 ? '+' : d < 0 ? '−' : '±') + tbFmt(Math.abs(d), 0) + ' m³</span>';
@@ -4806,9 +4870,9 @@ document.addEventListener('DOMContentLoaded', function(){
       return '<div class="blk-h">' + escHtml(title) +
              (clock ? '<span class="clk">' + escHtml(clock) + '</span>' : '') + '</div>';
     }
-    // Every today-figure that is still short, so the heading can say so.
+    // Every line whose window is not fully read, so the heading can say so.
     let unfinished = 0;
-    function track(q){ if(!q.na && q.a != null && !q.aDone) unfinished++; return q; }
+    function track(q){ if(!q.na && !q.aDone) unfinished++; return q; }
 
     // ── the R/G side ────────────────────────────────────────────────────
     // Read through window.__RG so this stays a view of the readings module
@@ -4918,12 +4982,8 @@ document.addEventListener('DOMContentLoaded', function(){
       '.tbcard .pill.down{background:' + C.loss + ';}' +
       '.tbcard .pill.flat{background:' + C.mute + ';}' +
       '.tbcard .pill.nil{background:transparent;color:' + C.mute + ';font-weight:600;}' +
-      '.tbcard .pill.wait{background:transparent;color:' + C.mute + ';font-weight:700;' +
-        'border:1px dashed ' + C.line + ';font-size:' + (Z.pill - 2.5) + 'px;font-family:inherit;}' +
-      '.tbcard td.part{color:' + C.mute + ';font-style:italic;}' +
-      '.tbcard td.na{color:' + C.mute + ';font-weight:600;font-size:' + (Z.nm - 1.5) + 'px;font-family:inherit;}' +
-      '.tbcard .sofar{display:block;font-size:' + (Z.th) + 'px;font-style:normal;font-weight:700;' +
-        'letter-spacing:.6px;text-transform:uppercase;font-family:inherit;line-height:1.2;}' +
+      '.tbcard td.na,.tbcard td.nyet{color:' + C.mute + ';font-weight:600;' +
+        'font-size:' + (Z.nm - 1.5) + 'px;font-family:inherit;}' +
       '.tbcard .blk-h .clk{margin-left:8px;font-family:ui-monospace,monospace;letter-spacing:.3px;' +
         'text-transform:none;font-weight:700;opacity:.8;}' +
       '.tbcard .blk.remarks{border:1px solid ' + C.line + ';border-radius:12px;padding:' + Z.remP + ';' +
@@ -4974,20 +5034,22 @@ document.addEventListener('DOMContentLoaded', function(){
 
     // ── PTB Production ──────────────────────────────────────────────────
     // The streams that arrive at PETRECO in their own right, added together:
-    // the two crude oil scanners, T.B. 10/1 on its own line, and what was
-    // received at PETRECO from Ras Gara. All four run on the 06:00 clock, and
-    // all four now read every three hours. On a day recorded before v15 the
-    // crude oil scanners have no figure under twelve hours, and then the TOTAL
-    // has none either — a total missing two of its four streams is not the PTB
-    // figure.
+    // every crude oil scanner, T.B. 10/1 on its own line, and what was received
+    // at PETRECO from Ras Gara. They all run on the 06:00 clock and all read
+    // every three hours. On a day recorded before v15 the crude oil scanners
+    // have no figure under twelve hours, and then the TOTAL has none either — a
+    // total missing one of its streams is not the PTB figure.
+    //
+    // The crude lines are taken from PF_LIST's `crude` group rather than named
+    // here, so adding a scanner to that group puts it on this card too.
     let ptbBlock = '';
     {
-      const items = [
-        { name:'L.O.T.F',             q:pfPair('plotf') },
-        { name:'M.O.T.F',             q:pfPair('pmotf') },
+      const items = (PF ? PF.grpList('crude') : []).map(function(m){
+        return { name:m.name, q:pfPair(m.id) };
+      }).concat([
         { name:'T.B. 10/1',           q:tbBatPair(dateStr, y, 'tb10_1', p) },
         { name:'Received at PETRECO', q:rgPair('p') }
-      ];
+      ]);
       let rows = '';
       items.forEach(function(it){ rows += row(it.name, track(it.q)); });
       rows += row('TOTAL', tbPairSum(items.map(function(it){ return it.q; })), 'tot');
@@ -5003,8 +5065,8 @@ document.addEventListener('DOMContentLoaded', function(){
       '<p' + (note ? '' : ' class="none"') + '>' +
       (note ? escHtml(note) : '— No remarks —') + '</p></div>';
 
-    // When any line is still short, the heading says so: those lines carry no
-    // difference yet.
+    // When any line is not fully read, the heading says so: those lines show
+    // "Not yet" rather than a figure.
     const partial = unfinished > 0;
 
     const dt = new Date(dateStr + 'T00:00:00');
@@ -5472,6 +5534,123 @@ document.addEventListener('DOMContentLoaded', function(){
     }
   }
 
+  // ── chemical injection ──────────────────────────────────────────────────
+  // The temperature page's twin. Two things differ, and both come from what
+  // the number IS: a dose is recorded every six hours rather than at every
+  // scanner reading, and doses ADD UP over the day, where temperatures do not.
+  // So the headline figure here is the day's total, not the average.
+  // A column heading for the chart: one clock if the field runs one, both if
+  // it runs two.
+  function tbChemColLabel(o){
+    if(tbOneClock()) return tbOffsetLabel(o, TB_LIST[0]);
+    const seen = [];
+    TB_LIST.forEach(function(b){
+      const l = tbOffsetLabel(o, b);
+      if(seen.indexOf(l) === -1) seen.push(l);
+    });
+    return seen.join(' / ');
+  }
+  function tbChemSeries(dateStr, b){
+    const cell = tbGetDay(dateStr).tbs[b.id];
+    return tbChemOffsets().map(function(o){ return cell.x[o]; });
+  }
+  function tbChemStats(dateStr, b){
+    const v = tbChemSeries(dateStr, b).filter(function(x){ return x != null; });
+    if(!v.length) return null;
+    let mn = v[0], mx = v[0], sum = 0;
+    v.forEach(function(x){ if(x < mn) mn = x; if(x > mx) mx = x; sum += x; });
+    return { n:v.length, min:mn, max:mx, sum:sum, avg:sum / v.length,
+             of:tbChemOffsets().length };
+  }
+  function tbRenderChem(){
+    const dv = document.getElementById('tbChemDate');
+    if(dv && dv.value !== _tbDate) dv.value = _tbDate;
+
+    const kp = document.getElementById('tbChemKpis');
+    if(kp){
+      let cards = '', any = false;
+      TB_LIST.forEach(function(b){
+        const st = tbChemStats(_tbDate, b);
+        if(!st) return;
+        any = true;
+        cards += '<div class="rg-card"><div class="k">' + escHtml(b.name) + '</div>' +
+          '<div class="v">' + tbFmt(st.sum,1) + ' ' + escHtml(tbChemUnit(b)) + '</div>' +
+          '<div class="s">' + tbFmt(st.min,1) + ' – ' + tbFmt(st.max,1) +
+          ' per dose · avg ' + tbFmt(st.avg,1) +
+          ' · ' + st.n + ' of ' + st.of + ' dose(s)</div></div>';
+      });
+      kp.innerHTML = any ? '<div class="rg-tot">' + cards + '</div>'
+                         : '<div class="rg-empty">No chemical injection recorded for this shift.</div>';
+    }
+
+    // One chart, all five batteries. The two clocks are an hour apart, so a
+    // column is "the first dose", "the second dose" and so on — labelled with
+    // both clock times where the field runs two of them, never with one clock
+    // pretending to be everybody's.
+    const ch = document.getElementById('tbChemChart');
+    if(ch){
+      const cols = tbChemOffsets();
+      const labels = cols.map(tbChemColLabel);
+      const series = TB_LIST.map(function(b, i){
+        const cell = tbGetDay(_tbDate).tbs[b.id];
+        return { label:b.name, color:tbColor(i),
+                 vals:cols.map(function(o){ return cell.x[o]; }) };
+      });
+      const anyVal = series.some(function(x){ return x.vals.some(function(v){ return v != null; }); });
+      ch.innerHTML = anyVal
+        ? tbZoomable('chem-day', 'Chemical injection through the day',
+            tbLineChart(labels, series, 'Chemical injection ' + tbChemUnit(TB_LIST[0]), false, 280),
+            { kind:'line', axis:'Hour', unit:'Chemical injection ' + tbChemUnit(TB_LIST[0]),
+              labels:labels,
+              series:series.map(function(x){ return { name:x.label, color:x.color, vals:x.vals }; }),
+              total:false })
+        : '<div class="rg-empty">No chemical injection recorded for this shift.</div>';
+    }
+
+    // The grid reads across the clock, so a missed dose is visible as a gap
+    // rather than as a shorter row. The last column is the day's TOTAL, since
+    // doses add up.
+    const gr = document.getElementById('tbChemGrid');
+    if(gr){
+      const gcols = tbChemOffsets();
+      // A header per clock, sitting with the batteries that run it — the same
+      // way the monitoring grid handles the two shifts. One shared header
+      // would label 10/1's doses an hour early.
+      function headFor(b){
+        let h = '<tr class="hrow"><th></th>';
+        gcols.forEach(function(o){ h += '<th>' + tbOffsetLabel(o, b) + '</th>'; });
+        return h + '<th>Total</th></tr>';
+      }
+      let body = '', any = false, lastStart = null;
+      TB_LIST.forEach(function(b){
+        if(tbStart(b) !== lastStart){ body += headFor(b); lastStart = tbStart(b); }
+        const cell = tbGetDay(_tbDate).tbs[b.id];
+        const st = tbChemStats(_tbDate, b);
+        let cells = '';
+        gcols.forEach(function(o){
+          const v = cell.x[o];
+          if(v == null){ cells += '<td class="na">·</td>'; return; }
+          any = true;
+          // Shaded against this battery's own range for the day, so a heavily
+          // dosed battery and a lightly dosed one are each read against
+          // themselves.
+          let bg = 'var(--surface)';
+          if(st && st.max > st.min){
+            const f = (v - st.min) / (st.max - st.min);
+            bg = 'rgba(13,148,136,' + (0.10 + f * 0.45).toFixed(2) + ')';
+          }
+          cells += '<td style="background:' + bg + '">' + tbFmt(v,1) + '</td>';
+        });
+        body += '<tr><th class="row">' + escHtml(b.name) +
+                ' <span class="clk">' + escHtml(tbChemUnit(b)) + '</span></th>' + cells +
+                '<td style="font-weight:700">' + (st ? tbFmt(st.sum,1) : '—') + '</td></tr>';
+      });
+      gr.innerHTML = any
+        ? '<div class="tb-heat tb-temp"><table><tbody>' + body + '</tbody></table></div>'
+        : '<div class="rg-empty">No chemical injection recorded for this shift.</div>';
+    }
+  }
+
   function tbRenderView(){
     _tbZoom = {};
     const dv = document.getElementById('tbViewDate');
@@ -5551,11 +5730,31 @@ document.addEventListener('DOMContentLoaded', function(){
         // row, and each group carries its own change column in m³ rather than a
         // percentage. Newest first — the question is almost always "what has
         // happened lately".
+        // PETRECO's own scanners sit to the right of the batteries: the drains
+        // with a total of their own, then the crude oil scanners WITHOUT one.
+        // The drains are three readings of the same job and add up to a figure
+        // that means something; L.O.T.F, M.O.T.F and Sicies are separate
+        // streams and a column adding them would only invite a comparison
+        // nobody asked for. They are day totals for the same shift day, read
+        // through window.__PF__.
+        const PFd = window.__PF__;
+        const drains = PFd ? PFd.grpList('drain') : [];
+        const crude  = PFd ? PFd.grpList('crude') : [];
         let head = '<tr><th class="dt">Day</th>';
         tbGroupList(TB_GROUPS[0]).forEach(function(b){
           head += '<th>' + escHtml(b.name.replace('T.B. ','')) + '</th>'; });
         head += '<th class="g">Belayim</th><th class="g">Change</th>' +
-                '<th class="g2">10/1</th><th class="g2">Change</th></tr>';
+                '<th class="g2">10/1</th><th class="g2">Change</th>';
+        drains.forEach(function(m){ head += '<th class="pf">' + escHtml(m.name) + '</th>'; });
+        if(drains.length) head += '<th class="g3">Drains</th>';
+        crude.forEach(function(m){ head += '<th class="pf">' + escHtml(m.name) + '</th>'; });
+        head += '</tr>';
+        // One meter's day total, marked when the day is short of readings.
+        function pfCell(dateStr, id, cls){
+          const v = PFd.meterTotal(dateStr, id), done = PFd.meterDone(dateStr, id);
+          return '<td class="' + cls + (v != null && !done ? ' part' : '') + '">' +
+                 tbFmt(v, 0) + '</td>';
+        }
         let body = '';
         for(let i = rows.length - 1; i >= 0; i--){
           const r = rows[i], prev = rows[i-1];
@@ -5591,12 +5790,24 @@ document.addEventListener('DOMContentLoaded', function(){
             cells +
             '<td class="g">' + tbFmt(gb.total, 0) + '</td>' + chg(gb, pgb) +
             '<td class="g2">' + tbFmt(g1.total, 0) + '</td>' + chg(g1, pg1) +
+            drains.map(function(m){ return pfCell(r.date, m.id, 'pf'); }).join('') +
+            (drains.length
+              ? (function(){
+                  const w = PFd.sectionWin(r.date, 'drain', 0, 24);
+                  return '<td class="g3' + (w.v != null && !w.done ? ' part' : '') + '">' +
+                         tbFmt(w.v, 0) + '</td>';
+                })()
+              : '') +
+            crude.map(function(m){ return pfCell(r.date, m.id, 'pf'); }).join('') +
             '</tr>';
         }
         tbl.innerHTML = '<div class="tb-days"><table><thead>' + head +
           '</thead><tbody>' + body + '</tbody></table></div>' +
           '<div class="tb-legend"><span>All figures m³/d. A day tinted red produced ' +
-          'less at Belayim than the day before it.</span></div>';
+          'less at Belayim than the day before it. The PETRECO columns are that ' +
+          'day\'s totals; the drains are added together, the crude oil scanners ' +
+          'are not — they are separate streams. A figure in italics is a day ' +
+          'short of readings.</span></div>';
       }
     }
   }
@@ -6029,6 +6240,7 @@ gRows.map(function(r){
     if(_tbAdmin() && _tbSub === 'view') tbRenderView();
     if(_tbAdmin() && _tbSub === 'old')  tbRenderOld();
     if(_tbAdmin() && _tbSub === 'temp') tbRenderTemp();
+    if(_tbAdmin() && _tbSub === 'chem') tbRenderChem();
     const sv = document.getElementById('tbSaved');
     const day = tbGetDay(_tbDate);
     if(sv) sv.textContent = day.updatedAt
@@ -6061,9 +6273,11 @@ gRows.map(function(r){
         cell[k] = (cell[k] || []).concat(blank[k]).slice(0, TB_READS);
       }
     });
-    if(!cell.c || cell.c.length !== TB_SPAN + 1){
-      cell.c = (cell.c || []).concat(tbBlankCell().c).slice(0, TB_SPAN + 1);
-    }
+    ['c','x'].forEach(function(k){
+      if(!cell[k] || cell[k].length !== TB_SPAN + 1){
+        cell[k] = (cell[k] || []).concat(tbBlankCell()[k]).slice(0, TB_SPAN + 1);
+      }
+    });
     return cell;
   }
   function tbCellOn(date, id){
@@ -6102,10 +6316,12 @@ gRows.map(function(r){
   function tbApplyInput(id, kind, i, raw){
     if(!tbMayWrite(id, kind)) return;
     const cell = tbCellOn(_tbDate, id);
-    if(kind === 'c'){
-      // Temperature is keyed by hour offset, not by scanner index.
-      cell.c[i] = tbNum(raw);
-      _tbPend.mark(_tbDate, tbPendKey(id, 'c', i), cell.c[i]);
+    if(kind === 'c' || kind === 'x'){
+      // Temperature and chemical injection are keyed by hour offset, not by
+      // scanner index, and have no boundary twin: they are a reading at a
+      // moment, not a total carried across midnight.
+      cell[kind][i] = tbNum(raw);
+      _tbPend.mark(_tbDate, tbPendKey(id, kind, i), cell[kind][i]);
       tbSaveLocal();
       return;
     }
@@ -6170,6 +6386,7 @@ gRows.map(function(r){
             updatedBy:who, updatedAt:firebase.firestore.FieldValue.serverTimestamp() };
           const val = snap[dt][key];
           if(kind === 'c') (doc.temp = doc.temp || {})[i] = val;
+          else if(kind === 'x') (doc.chem = doc.chem || {})[i] = val;
           else {
             doc.rows = doc.rows || {};
             (doc.rows[i] = doc.rows[i] || {})[kind] = val;
@@ -6289,7 +6506,8 @@ gRows.map(function(r){
           const bid  = dd.battery || String(d.id).split('__')[1];
           if(!date || !bid) return;
           if(!obj[date]) obj[date] = tbBlankDay(date);
-          obj[date].tbs[bid] = tbTempToArray(dd.temp, tbRowsToArrays(dd.rows));
+          obj[date].tbs[bid] = tbChemToArray(dd.chem,
+                                 tbTempToArray(dd.temp, tbRowsToArrays(dd.rows)));
           if(dd.dayTotal != null){
             obj[date].tbs[bid].t   = Number(dd.dayTotal);
             obj[date].tbs[bid].src = dd.source || 'imported';
@@ -6369,6 +6587,11 @@ gRows.map(function(r){
     const md = document.getElementById('tbModal');
     if(md) md.addEventListener('click', function(e){ if(e.target === md) tbCloseZoom(); });
     document.addEventListener('keydown', function(e){ if(e.key === 'Escape') tbCloseZoom(); });
+
+    const cd = document.getElementById('tbChemDate');
+    if(cd) cd.addEventListener('change', function(){ _tbDate = this.value || tbToday(); tbRenderAll(); });
+    const ct = document.getElementById('tbChemToday');
+    if(ct) ct.addEventListener('click', function(){ _tbDate = tbToday(); tbRenderAll(); });
 
     const td2 = document.getElementById('tbTempDate');
     if(td2) td2.addEventListener('change', function(){ _tbDate = this.value || tbToday(); tbRenderAll(); });
@@ -6599,7 +6822,8 @@ if('serviceWorker' in navigator){
     { id:'pgb1',   name:'GB #1',   grp:'drain' },
     { id:'pgb3',   name:'GB #3',   grp:'drain' },
     { id:'plotf',  name:'L.O.T.F', grp:'crude' },
-    { id:'pmotf',  name:'M.O.T.F', grp:'crude' }
+    { id:'pmotf',  name:'M.O.T.F', grp:'crude' },
+    { id:'psicies', name:'Sicies',         grp:'crude' }
   ];
   const PF_SECTIONS = [
     { grp:'drain', title:'Drain of the tanks' },
@@ -6847,10 +7071,13 @@ if('serviceWorker' in navigator){
           legacy.push(m.name + ' ' + H.label + ' = ' + pfFmt(pfHalf(_pfDate, m.id, H.k)));
         });
       });
-      const notes =
-        (legacy.length ? '<p class="pf-note">Entered as twelve-hour figures: ' +
-            escHtml(legacy.join(' · ')) + '. Typing any three-hour period of that half replaces it.</p>' : '') +
-        (st.done ? '' : '<p class="pf-note">The comparison with yesterday appears once all eight periods are entered.</p>');
+      // Only the note about old twelve-hour figures, and only for admin. An
+      // operator is here to enter readings: telling him why a derived cell is
+      // empty is the app explaining itself to the wrong person.
+      const notes = (legacy.length && _pfAdmin())
+        ? '<p class="pf-note">Entered as twelve-hour figures: ' +
+          escHtml(legacy.join(' · ')) + '. Typing any three-hour period of that half replaces it.</p>'
+        : '';
 
       return '<div class="pf-sec"><div class="pf-h">' + escHtml(sec.title) + '</div>' +
         '<div class="pf-wrap"><table><thead>' + head + '</thead><tbody>' + body +

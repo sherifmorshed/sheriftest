@@ -1,6 +1,6 @@
 # Sinai Field — start here
 
-**Attach `sinai-field-v15.zip` to the new chat and paste the block below as your
+**Attach `sinai-field-v20.zip` to the new chat and paste the block below as your
 first message.** Everything Claude needs is in the zip; nothing from any other
 conversation is required.
 
@@ -16,7 +16,7 @@ conversation is required.
 > The attached zip is the whole project. Read `README.md`, then
 > `DEVELOPER_REFERENCE.md`, then `CHANGELOG.md` before changing anything.
 >
-> Current release: **v15**, service-worker cache `sinai-field-v15`.
+> Current release: **v20**, service-worker cache `sinai-field-v20`.
 >
 > How I work: show me the change, test it before you say it is done, and tell me
 > plainly when something I asked for is a bad idea.
@@ -71,7 +71,15 @@ tank battery total to a Ras Gara total.
 
 ## Where things stand
 
-v15 moved the five PETRECO scanners to three-hour entry from 06:00 (eight
+v20 put PETRECO's scanners on the Daily totals table (drains totalled, crude
+scanners not) and shortened "Sicies Scanner" to "Sicies". v19 added that third
+crude oil scanner alongside L.O.T.F and M.O.T.F. v18 added chemical injection:
+a column after Temp on every battery's table, entered every six hours, with its
+own admin analysis page beside Temperature. v17 removed the explanatory notes
+from the PETRECO entry table (operators enter readings; they are not told why a
+derived cell is empty). v16 made the report card show "Not yet" instead of a
+part figure for any line
+or total that is not fully read. v15 moved the five PETRECO scanners to three-hour entry from 06:00 (eight
 periods), with days recorded before it still read as twelve-hour halves. v14
 added 3/6/12/24-hour periods to the report card, compared only once today's
 window is complete. v13 fixed three ways readings were silently lost (a sync during typing, a save
