@@ -1,6 +1,6 @@
 # Sinai Field — start here
 
-**Attach `sinai-field-v20.zip` to the new chat and paste the block below as your
+**Attach `sinai-field-v24.zip` to the new chat and paste the block below as your
 first message.** Everything Claude needs is in the zip; nothing from any other
 conversation is required.
 
@@ -16,7 +16,7 @@ conversation is required.
 > The attached zip is the whole project. Read `README.md`, then
 > `DEVELOPER_REFERENCE.md`, then `CHANGELOG.md` before changing anything.
 >
-> Current release: **v20**, service-worker cache `sinai-field-v20`.
+> Current release: **v24**, service-worker cache `sinai-field-v24`.
 >
 > How I work: show me the change, test it before you say it is done, and tell me
 > plainly when something I asked for is a bad idea.
@@ -71,7 +71,14 @@ tank battery total to a Ras Gara total.
 
 ## Where things stand
 
-v20 put PETRECO's scanners on the Daily totals table (drains totalled, crude
+v24 split Scanner analysis into Figures and Graphs analysis and dropped its two
+on-screen comparison tables (the printed day report still has them). v23 added
+Arabic under the English on the entry screens — headings and hours on
+the batteries, the period column on the PETRECO scanners, the hour column on
+R/G. v22 put the remarks on the printed day report as well and made the report card
+scale to fit a phone screen (Full size button to turn it off). v21 gave every
+tank battery a Remarks box, collected with PETRECO's into one
+box on the report card. v20 put PETRECO's scanners on the Daily totals table (drains totalled, crude
 scanners not) and shortened "Sicies Scanner" to "Sicies". v19 added that third
 crude oil scanner alongside L.O.T.F and M.O.T.F. v18 added chemical injection:
 a column after Temp on every battery's table, entered every six hours, with its

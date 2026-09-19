@@ -12,26 +12,26 @@
    accounts and its own release cycle, and it shares nothing with any other
    PETROBEL app. Nothing here should ever need to reach outside this folder.
 
-   WHAT IS WHERE                                        (line numbers, v20)
+   WHAT IS WHERE                                        (line numbers, v24)
    ─────────────────────────────────────────────────────────────────────────
      CSS
        Design tokens — every colour lives here, light + dark ...... line 74
        Header, login, toast, footer .............................. line 107
        Pages: readings, tank batteries, scanners, PETRECO ........ line 239
      MARKUP
-       Icon sprite — every icon, drawn inline .................... line 651
-       Login screen .............................................. line 671
-       Header bar ................................................ line 729
-       Pages: R/G, A/R, PETRECO, no-access ....................... line 741
+       Icon sprite — every icon, drawn inline .................... line 680
+       Login screen .............................................. line 700
+       Header bar ................................................ line 758
+       Pages: R/G, A/R, PETRECO, no-access ....................... line 770
      SCRIPT — the shell
-       ►► CONFIGURATION — Firebase config + role lists ........... line 1035
-       Boot, helpers, unsaved-edits queue, footer status ......... line 1109
-       Sign in / sign out, roles, tabs ........................... line 1396
-     SCRIPT — R/G Production (hourly PETRECO vs Ras Gara) ........ line 1635
+       ►► CONFIGURATION — Firebase config + role lists ........... line 1078
+       Boot, helpers, unsaved-edits queue, footer status ......... line 1152
+       Sign in / sign out, roles, tabs ........................... line 1475
+     SCRIPT — R/G Production (hourly PETRECO vs Ras Gara) ........ line 1714
      SCRIPT — A/R Production (tank batteries, report card,
-              scanner analysis, temperature, chemical, import) ..... line 3100
-     SCRIPT — day / night theme, service worker .................. line 6706
-     SCRIPT — PETRECO scanners ................................... line 6771
+              scanner analysis, temperature, chemical, import) ..... line 3183
+     SCRIPT — day / night theme, service worker .................. line 6971
+     SCRIPT — PETRECO scanners ................................... line 7036
 
    THE ROLES
      admin     both R/G sides, A/R Production, every report
@@ -382,10 +382,13 @@ body.light-mode .tabs button.on{color:#fff;}
 .tb-panel .note.warn{color:var(--red);font-weight:700;}
 .tb-panel .bd{padding:9px 11px 12px;}
 /* Four short columns — no 520px floor, so nothing scrolls sideways. */
-table.tb-tbl{min-width:0;}
+/* Six columns, and two of the headings now carry Arabic under them. Below this
+   width the WHP box starts clipping its own digits, so the table scrolls a
+   little on a narrow phone rather than squeezing a reading out of sight. */
+table.tb-tbl{min-width:430px;}
 /* Four columns on a 360px screen: let the two inputs share what is left after
    the time and the calculated cell rather than holding a fixed 82px each. */
-table.tb-tbl .rg-in{width:100%;max-width:104px;padding-left:2px;padding-right:2px;}
+table.tb-tbl .rg-in{width:100%;min-width:40px;max-width:104px;padding-left:2px;padding-right:2px;}
 table.tb-tbl td{padding:3px 3px;}
 table.tb-tbl th{padding:6px 3px;}
 table.tb-tbl th.tb-grp3{color:var(--s3);border-bottom:2px solid var(--s3);}
@@ -426,6 +429,15 @@ table.tb-tbl .tb-din{max-width:88px;}
 .subtabs button .ico{width:17px;height:17px;}
 .subtabs button.on{background:var(--accent2);border-color:var(--accent2);color:#fff;
   box-shadow:0 3px 10px var(--ring);}
+/* The two halves of Scanner analysis. A lighter bar than the page's own
+   sub-tabs above it — this is a switch inside one page, not another page. */
+.viewtabs{display:flex;gap:6px;margin:2px 0 12px;background:var(--surface);
+  border:1px solid var(--border);border-radius:11px;padding:4px;}
+.viewtabs button{flex:1;background:transparent;border:0;border-radius:8px;cursor:pointer;
+  color:var(--muted);padding:9px 10px;font-size:13px;font-weight:800;font-family:inherit;
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;}
+.viewtabs button .ico{width:15px;height:15px;}
+.viewtabs button.on{background:var(--card);color:var(--accent2);box-shadow:0 1px 4px rgba(15,23,42,.10);}
 .tb-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin-top:12px;}
 .tb-mini.tb-mini-g{border-color:var(--accent2);box-shadow:0 2px 10px var(--ring);}
 .tb-mini.tb-mini-g .cap h4{color:var(--accent2);}
@@ -545,6 +557,23 @@ table.tb-tbl .tb-din{max-width:88px;}
 .tb-modal-bd .zt td.gain{color:var(--green);font-weight:800;}
 .tb-modal-bd .zt td.loss{color:var(--red);font-weight:800;}
 .tb-modal-bd .zt td.na{color:var(--muted);}
+/* The report card on a phone: the whole day on one screen, scaled down as a
+   picture rather than reflowed, so the layout the report is read in stays the
+   layout it was designed in. There is a floor on the scale — past it the
+   figures stop being readable and scrolling is the lesser evil — and a button
+   to go back to full size. */
+.tb-fit-bar{display:flex;justify-content:flex-end;margin:0 0 6px;}
+#tbOldCardFit{overflow:hidden;}
+#tbOldCardFit.fitting{display:flow-root;}
+#tbOldCardFit.fitting > #tbOldCard{transform-origin:top left;}
+/* Arabic under the English label. letter-spacing MUST be 0 — the headings and
+   time columns are letter-spaced, and spacing between Arabic letters breaks
+   the joins, so سكانر comes out as سكا نر. The !important is deliberate: those
+   rules are more specific than this one and would otherwise win. */
+.ar{display:block;letter-spacing:0 !important;text-transform:none;white-space:nowrap;
+  font-family:'Segoe UI','Noto Naskh Arabic',Tahoma,sans-serif;font-weight:700;
+  font-size:10px;line-height:1.55;}
+td.rg-time .ar,th.row .ar{color:var(--muted);font-weight:600;}
 /* ── PETRECO scanners ────────────────────────────────────────────────
    Eight three-hour periods a day and five meters, so a plain table rather than
    the tank batteries' panels. A period is a quantity for those three hours,
@@ -845,7 +874,10 @@ document.addEventListener('click', function(e){
           <option value="h2">Second 12 hours</option>
         </select>
       </div>
-      <div id="tbOldCard"></div>
+      <div class="tb-fit-bar">
+        <button class="rg-btn" id="tbFitBtn" aria-pressed="true">Fit to screen</button>
+      </div>
+      <div id="tbOldCardFit"><div id="tbOldCard"></div></div>
       <div class="rg-actions" id="tbOldActions">
         <button class="rg-btn rg-btn-primary" id="tbOldPrint"><svg class="ico" aria-hidden="true"><use href="#i-print"/></svg> Print report</button>
         <button class="rg-btn rg-btn-primary" id="tbOldMail"><svg class="ico" aria-hidden="true"><use href="#i-mail"/></svg> Send by e-mail</button>
@@ -891,72 +923,83 @@ document.addEventListener('click', function(e){
         <button class="rg-btn" id="tbViewToday">Today</button>
       </div>
 
-      <div id="tbDayKpis"></div>
+      <!-- Figures and charts are two different jobs. Checking a shift against
+           yesterday is reading numbers; looking for a drift is reading shapes.
+           They were one long scroll, so the numbers sat above five charts and
+           the charts below the numbers, and neither was quick to reach. -->
+      <div class="viewtabs" id="tbViewTabs"></div>
 
-      <div class="rg-sec-title">Three-hour production — today vs yesterday</div>
-      <div id="tbIntervalField"></div>
-      <div class="tb-grid" id="tbIntervalGrid"></div>
+      <div id="tbview-figures">
+        <div id="tbDayKpis"></div>
 
-      <div class="rg-sec-title">Twelve-hour halves — today vs yesterday</div>
-      <div id="tbHalves"></div>
+        <div class="rg-sec-title">Monitoring Production real-time</div>
+        <div id="tbHeat"></div>
 
-      <div class="rg-sec-title">Twenty-four hours — today vs yesterday</div>
-      <div id="tbDayCompare"></div>
+        <!-- ── PETRECO, given the same treatment as the batteries ──────── -->
+        <div class="rg-sec-title">PETRECO — today at a glance</div>
+        <div id="pfaKpis"></div>
 
-      <div class="rg-sec-title">Monitoring Production real-time</div>
-      <div id="tbHeat"></div>
+        <div class="rg-sec-title">PETRECO — twenty-four hours, today vs yesterday</div>
+        <div id="pfaCompare"></div>
 
-      <!-- ── PETRECO, given the same treatment as the batteries ──────── -->
-      <div class="rg-sec-title">PETRECO — today at a glance</div>
-      <div id="pfaKpis"></div>
+        <div class="rg-sec-title">PETRECO — daily production</div>
+        <div id="pfaTable"></div>
+        <div class="rg-sec-title">Import daily history</div>
+        <div class="tb-imp" id="tbImport">
+          <label class="rg-btn rg-btn-primary" for="tbFile">
+            <svg class="ico" aria-hidden="true"><use href="#i-upload"/></svg> Choose workbook…
+          </label>
+          <input type="file" id="tbFile" accept=".xlsx,.xlsm,.xls,.csv" style="display:none;">
+          <span class="fname" id="tbFileName"></span>
+          <div id="tbImpOut"></div>
+        </div>
 
-      <div class="rg-sec-title">PETRECO — three-hour production, today vs yesterday</div>
-      <div id="pfaField"></div>
-      <div class="tb-grid" id="pfaGrid"></div>
-
-      <div class="rg-sec-title">PETRECO — twenty-four hours, today vs yesterday</div>
-      <div id="pfaCompare"></div>
-
-      <div class="rg-sec-title">PETRECO — daily production</div>
-      <div id="pfaDaily"></div>
-      <div id="pfaTable"></div>
-
-      <div class="rg-sec-title">Import daily history</div>
-      <div class="tb-imp" id="tbImport">
-        <label class="rg-btn rg-btn-primary" for="tbFile">
-          <svg class="ico" aria-hidden="true"><use href="#i-upload"/></svg> Choose workbook…
-        </label>
-        <input type="file" id="tbFile" accept=".xlsx,.xlsm,.xls,.csv" style="display:none;">
-        <span class="fname" id="tbFileName"></span>
-        <div id="tbImpOut"></div>
-      </div>
-
-    <div id="tbHistWrap" style="display:none;">
-      <div class="rg-rec-head">
-        <div class="bar"></div>
-        <div class="in">
-          <div class="row">
-            <svg class="ico" aria-hidden="true"><use href="#i-trend"/></svg>
-            <div>
-              <h3>Tank battery record</h3>
-              <div class="sub" id="tbHistSub"></div>
+      <div id="tbHistWrap" style="display:none;">
+        <div class="rg-rec-head">
+          <div class="bar"></div>
+          <div class="in">
+            <div class="row">
+              <svg class="ico" aria-hidden="true"><use href="#i-trend"/></svg>
+              <div>
+                <h3>Tank battery record</h3>
+                <div class="sub" id="tbHistSub"></div>
+              </div>
             </div>
+            <div class="chips rg-range" id="tbRange"></div>
           </div>
-          <div class="chips rg-range" id="tbRange"></div>
+        </div>
+        <div class="rg-sec-title">Daily totals</div>
+        <div id="tbHistTable"></div>
+        <div class="rg-actions" id="tbRecActions">
+          <button class="rg-btn rg-btn-primary" id="tbRecPrintBtn"><svg class="ico" aria-hidden="true"><use href="#i-print"/></svg> Print record</button>
+          <button class="rg-btn rg-btn-primary" id="tbRecMailBtn"><svg class="ico" aria-hidden="true"><use href="#i-mail"/></svg> E-mail record</button>
         </div>
       </div>
-      <div id="tbCompare"></div>
-      <div class="rg-sec-title">All batteries</div>
-      <div id="tbChartAll"></div>
-      <div class="rg-sec-title">Each battery</div>
-      <div id="tbChartsEach"></div>
-      <div class="rg-sec-title">Daily totals</div>
-      <div id="tbHistTable"></div>
-      <div class="rg-actions" id="tbRecActions">
-        <button class="rg-btn rg-btn-primary" id="tbRecPrintBtn"><svg class="ico" aria-hidden="true"><use href="#i-print"/></svg> Print record</button>
-        <button class="rg-btn rg-btn-primary" id="tbRecMailBtn"><svg class="ico" aria-hidden="true"><use href="#i-mail"/></svg> E-mail record</button>
       </div>
-    </div>
+
+      <div id="tbview-graphs" style="display:none;">
+        <div class="rg-sec-title">Three-hour production — today vs yesterday</div>
+        <div id="tbIntervalField"></div>
+        <div class="tb-grid" id="tbIntervalGrid"></div>
+
+        <div class="rg-sec-title">PETRECO — three-hour production, today vs yesterday</div>
+        <div id="pfaField"></div>
+        <div class="tb-grid" id="pfaGrid"></div>
+
+        <!-- The record charts, with their own copy of the range chips: they
+             are on this tab and the chips that drive them are on the other. -->
+        <div id="tbGraphRecord" style="display:none;">
+          <div class="rg-sec-title">Tank battery record</div>
+          <div class="chips rg-range" id="tbRange2"></div>
+          <div class="rg-sec-title">All batteries</div>
+          <div id="tbChartAll"></div>
+          <div class="rg-sec-title">Each battery</div>
+          <div id="tbChartsEach"></div>
+          <div class="rg-sec-title">PETRECO — daily production</div>
+          <div id="pfaDaily"></div>
+        </div>
+      </div>
+
     </div><!-- /tb-page-view -->
 
     <!-- Chart detail. One overlay reused by every chart on the page. -->
@@ -1332,6 +1375,42 @@ document.addEventListener('visibilitychange', function(){
   if(document.visibilityState === 'hidden') flushSaves();
 });
 window.addEventListener('pagehide', flushSaves);
+
+// ── Arabic for the operators ────────────────────────────────────────────
+// The men at the batteries and at the PETRECO scanners read the sheet in
+// Arabic. The clock hour is printed UNDER the 24-hour time, never instead of
+// it: the same table is read in the office and goes into the reports, so the
+// English stays where it is and the Arabic is added beside it.
+//
+// "5 صباحاً" / "5 مساءً", the way the hour is said, not a transliteration of
+// "05:00". Written with a LATIN digit, because the digit sits next to the
+// 24-hour time above it and the two should read as the same number.
+function arHour(h24){
+  const h = ((h24 % 24) + 24) % 24;
+  // Noon and midnight get their own words: "12 مساءً" for midday is wrong to
+  // an Arabic ear, and "12 صباحاً" for midnight is worse.
+  if(h === 12) return '12 ظهراً';
+  if(h === 0)  return '12 ليلاً';
+  const h12 = (h % 12) === 0 ? 12 : (h % 12);
+  return h12 + ' ' + (h < 12 ? 'صباحاً' : 'مساءً');
+}
+// A single label or hour: right-to-left, so "6 صباحاً" sets the way Arabic is
+// read — the word first from the right, then the digit.
+function arSpan(txt){ return '<span class="ar" dir="rtl" lang="ar">' + txt + '</span>'; }
+// A period: "من 6 ص إلى 9 ص". Words, not an arrow — an arrow between two
+// Arabic runs is a neutral character whose side depends on the line's
+// direction, and a period that reads backwards is worse than a long label.
+// With من / إلى the whole line is plain right-to-left Arabic and there is
+// nothing to get the wrong way round. ص / م rather than صباحاً / مساءً because
+// this sits in a column that is already carrying the English time above it.
+function arShortHour(h24){
+  const h = ((h24 % 24) + 24) % 24;
+  const h12 = (h % 12) === 0 ? 12 : (h % 12);
+  return h12 + ' ' + (h < 12 ? 'ص' : 'م');
+}
+function arRange(a, b){
+  return arSpan('من ' + arShortHour(a) + ' إلى ' + arShortHour(b));
+}
 
 // Two datasets report here now — the readings and the tank batteries — and each
 // has its own listener. Last-writer-wins would let a healthy line paint over a
@@ -1869,7 +1948,11 @@ document.addEventListener('DOMContentLoaded', function(){
     let body = '';
     for(let i = 0; i < RG_HOURS; i++){
       const row = day.rows[i];
-      let tds = '<td class="rg-time">' + escHtml(rgHourLabel(i)) + '</td>';
+      // The hour in Arabic under the 24-hour time. The column headings stay
+      // English here: this table is PETRECO against Ras Gara and is read by
+      // both sides and by the office.
+      let tds = '<td class="rg-time">' + escHtml(rgHourLabel(i)) +
+                arSpan(arHour(RG_START_HOUR + i)) + '</td>';
       // PETRECO's cumulative is DERIVED — a running total, never typed — so it
       // stays a calculated cell in every view, including PETRECO's own.
       if(showP) tds += cell('p', i, row.p, 2, edP) +
@@ -3308,9 +3391,11 @@ document.addEventListener('DOMContentLoaded', function(){
       const bar = key.indexOf('|');
       const id = key.slice(0, bar), kind = key.charAt(bar + 1);
       const i = parseInt(key.slice(bar + 2), 10);
-      if(!tbById(id) || isNaN(i) || 'swdcx'.indexOf(kind) === -1) return;
+      if(!tbById(id) || 'swdcxr'.indexOf(kind) === -1) return;
       if(!days[dt]) days[dt] = tbBlankDay(dt);
       const cell = tbCellIn(days[dt], id);
+      if(kind === 'r'){ cell.note = val || ''; return; }
+      if(isNaN(i)) return;
       if(kind === 'c' || kind === 'x'){ if(i >= 0 && i <= TB_SPAN) cell[kind][i] = val; }
       else if(i >= 0 && i < TB_READS) cell[kind][i] = val;
     });
@@ -3414,7 +3499,10 @@ document.addEventListener('DOMContentLoaded', function(){
     // because neither is tied to the scanner cadence. (The letter x, not a
     // second c: c was already temperature in Celsius.)
     for(let o = 0; o <= TB_SPAN; o++){ c.push(null); x.push(null); }
-    return { s:s, w:w, d:d, c:c, x:x, t:null, src:'' };
+    // note = whatever the operator wants the next reader to know about this
+    // battery on this day. One per battery per day, in that battery's own
+    // document, so an operator writes his own and nobody else's.
+    return { s:s, w:w, d:d, c:c, x:x, note:'', t:null, src:'' };
   }
   function tbBlankDay(dateStr){
     const tbs = {};
@@ -3485,8 +3573,9 @@ document.addEventListener('DOMContentLoaded', function(){
     TB_LIST.forEach(function(b){
       const src = d.tbs && d.tbs[b.id];
       if(!src) return;
-      out.tbs[b.id].t   = (src.t == null) ? null : src.t;
-      out.tbs[b.id].src = src.src || '';
+      out.tbs[b.id].t    = (src.t == null) ? null : src.t;
+      out.tbs[b.id].src  = src.src || '';
+      out.tbs[b.id].note = src.note || '';
       for(let i = 0; i < TB_READS; i++){
         out.tbs[b.id].s[i] = (src.s && src.s[i] != null) ? src.s[i] : null;
         out.tbs[b.id].w[i] = (src.w && src.w[i] != null) ? src.w[i] : null;
@@ -3639,6 +3728,7 @@ document.addEventListener('DOMContentLoaded', function(){
       rows +=
         '<tr' + (edge ? ' class="tb-edge"' : (si < 0 ? ' class="tb-hour"' : '')) + '>' +
           '<td class="rg-time">' + tbOffsetLabel(o, b) +
+            arSpan(arHour(tbStart(b) + o)) +
             (tag ? '<span class="tb-tag">' + tag + '</span>' : '') + '</td>' +
           scanCell + prodCell + whpCell + tempCell + chemCell +
         '</tr>';
@@ -3654,6 +3744,11 @@ document.addEventListener('DOMContentLoaded', function(){
                                 ' intervals complete — the total below covers those only.</div>';
 
     const totTxt = (c.total == null) ? '—' : tbFmt(c.total, 1);
+    // Remarks for this battery, under its table. An operator sees one box —
+    // his own — and what he writes reaches the admin's report card.
+    const noteBox = '<div class="tb-note-wrap"><div class="rg-sec-title">Remarks</div>' +
+      '<textarea class="pf-remarks" rows="2" data-tb="' + escAttr(b.id) + '" data-k="r" data-i="0"' +
+      (ed ? '' : ' disabled') + '>' + escHtml(cell.note || '') + '</textarea></div>';
     return '<div class="tb-panel">' +
       '<div class="bar"></div>' +
       '<div class="hd"><h3>' + escHtml(b.name) + '</h3>' +
@@ -3662,12 +3757,13 @@ document.addEventListener('DOMContentLoaded', function(){
       '<div class="bd"><div class="rg-tbl-wrap"><table class="rg-tbl tb-tbl">' +
         '<thead><tr>' +
           '<th>Time</th>' +
-          '<th class="rg-grp">Scanner<br>m³</th>' +
+          '<th class="rg-grp">Scanner<br>m³' + arSpan('سكانر') + '</th>' +
           '<th class="tb-grp3">Production<br>m³/3h</th>' +
           '<th class="rg-grp2">WHP<br>' + escHtml(tbWUnit(b)) + '</th>' +
-          '<th class="tb-grp4">Temp<br>°C</th>' +
-          '<th class="tb-grp5">Chem. inj.<br>' + escHtml(tbChemUnit(b)) + '</th>' +
-        '</tr></thead><tbody>' + rows + '</tbody></table></div></div>' +
+          '<th class="tb-grp4">Temp<br>°C' + arSpan('الحرارة') + '</th>' +
+          '<th class="tb-grp5">Chem. inj.<br>' + escHtml(tbChemUnit(b)) +
+            arSpan('حقن الكيمكال') + '</th>' +
+        '</tr></thead><tbody>' + rows + '</tbody></table></div>' + noteBox + '</div>' +
     '</div>';
   }
 
@@ -3684,9 +3780,14 @@ document.addEventListener('DOMContentLoaded', function(){
     const focused = document.activeElement;
     if(el.getAttribute('data-layout') === layout && focused && el.contains(focused) &&
        focused.getAttribute && focused.getAttribute('data-tb')){
-      Array.prototype.forEach.call(el.querySelectorAll('input[data-tb]'), function(inp){
+      Array.prototype.forEach.call(el.querySelectorAll('input[data-tb], textarea[data-tb]'), function(inp){
         const k = inp.getAttribute('data-k');
         if(inp === focused || k === 'd') return;       // corrections: tbRepaintDerived
+        if(k === 'r'){
+          const note = (tbGetDay(_tbDate).tbs[inp.getAttribute('data-tb')] || {}).note || '';
+          if(inp.value !== note) inp.value = note;
+          return;
+        }
         const cell = day.tbs[inp.getAttribute('data-tb')];
         const v = cell ? cell[k][parseInt(inp.getAttribute('data-i'), 10)] : null;
         const s = (v == null) ? '' : String(v);
@@ -3867,18 +3968,23 @@ document.addEventListener('DOMContentLoaded', function(){
       '</svg></div>' + legend;
   }
 
+  // The same chips in two places — over the daily totals on Figures, and over
+  // the record charts on Graphs analysis. One set of state, drawn twice, so
+  // whichever tab you are on the range is the one you last chose.
   function tbRenderRange(){
-    const el = document.getElementById('tbRange');
-    if(!el) return;
-    el.innerHTML = TB_RANGES.map(function(r){
-      return '<button type="button" data-r="' + r.k + '"' +
-             (r.k === _tbRange ? ' class="on"' : '') + '>' + r.label + '</button>';
-    }).join('');
-    Array.prototype.forEach.call(el.querySelectorAll('button'), function(b){
-      b.addEventListener('click', function(){
-        _tbRange = b.getAttribute('data-r');
-        tbRenderHist();
-        pfaRenderDaily();   // the range chips drive the PETRECO record too
+    ['tbRange', 'tbRange2'].forEach(function(id){
+      const el = document.getElementById(id);
+      if(!el) return;
+      el.innerHTML = TB_RANGES.map(function(r){
+        return '<button type="button" data-r="' + r.k + '"' +
+               (r.k === _tbRange ? ' class="on"' : '') + '>' + r.label + '</button>';
+      }).join('');
+      Array.prototype.forEach.call(el.querySelectorAll('button'), function(b){
+        b.addEventListener('click', function(){
+          _tbRange = b.getAttribute('data-r');
+          tbRenderHist();
+          pfaRenderDaily();   // the range chips drive the PETRECO record too
+        });
       });
     });
   }
@@ -4191,6 +4297,8 @@ document.addEventListener('DOMContentLoaded', function(){
     return '<td' + (a != null && !aDone ? ' class="part"' : '') + '>' + tbFmt(a,1) + '</td>' +
            '<td class="dim">' + tbFmt(b,1) + '</td>' + tbDoneCell(a, aDone, b, bDone);
   }
+  // Kept although Scanner analysis no longer shows these two tables: the
+  // printed day report carries both, and that is where a shift is signed off.
   function tbHalvesHTML(dateStr){
     const y = tbPrevDate(dateStr);
     const _tbDate = dateStr;
@@ -4228,13 +4336,6 @@ document.addEventListener('DOMContentLoaded', function(){
       '<th>Today</th><th>Yest.</th><th>Change</th></tr></thead>' +
       '<tbody>' + body + '</tbody></table></div>';
   }
-  function tbRenderHalves(){
-    const el = document.getElementById('tbHalves');
-    if(!el) return;
-    el.innerHTML = tbHalvesHTML(_tbDate) ||
-      '<div class="rg-empty">No production recorded for this shift.</div>';
-  }
-
   // ── daily gain and loss ─────────────────────────────────────────────────
   // Each day against the day before it: bars up in green, down in red. This is
   // the shape of the question "are we better or worse than yesterday", asked of
@@ -4333,12 +4434,6 @@ document.addEventListener('DOMContentLoaded', function(){
       '<th>Today m³</th><th>Yesterday m³</th><th>Gain / loss m³</th><th>Today bbl</th>' +
       '</tr></thead><tbody>' + body + '</tbody></table></div>';
   }
-  function tbRenderDayCompare(){
-    const el = document.getElementById('tbDayCompare');
-    if(el) el.innerHTML = tbDayCompareHTML(_tbDate) ||
-      '<div class="rg-empty">No production recorded for this shift.</div>';
-  }
-
   function tbRenderGainLoss(){
     const el = document.getElementById('tbGainLoss');
     if(!el) return;
@@ -4833,6 +4928,16 @@ document.addEventListener('DOMContentLoaded', function(){
 
   function tbOldCardHTML(dateStr, p, forPrint){
     const y = tbPrevDate(dateStr);
+    // Remarks: every battery's, then PETRECO's, in one box. Each is headed
+    // with whose it is and underlined, because five notes run together read as
+    // one note about the wrong battery. A battery with nothing to say is left
+    // out entirely rather than given an empty heading. Collected up here
+    // because how many there are decides how much room the block may take.
+    const notes = tbRemarksList(dateStr);
+    // How much room the remarks may take: full size for one or two notes,
+    // tighter once the whole field has written something.
+    const remZ0 = forPrint ? 11 : 13.5;
+    const remZ = notes.length > 3 ? remZ0 - 1.5 : notes.length > 2 ? remZ0 - 0.8 : remZ0;
     const C = forPrint
       ? { ink:'#16232f', mute:'#5d7286', line:'#dbe4ee', head:'#123a5a', headInk:'#ffffff',
           band:'#eef3f8', gain:'#15803d', loss:'#b91c1c', totalBg:'#fbf6e9', card:'#ffffff' }
@@ -4988,8 +5093,16 @@ document.addEventListener('DOMContentLoaded', function(){
         'text-transform:none;font-weight:700;opacity:.8;}' +
       '.tbcard .blk.remarks{border:1px solid ' + C.line + ';border-radius:12px;padding:' + Z.remP + ';' +
         'background:' + C.totalBg + ';}' +
-      '.tbcard .blk.remarks p{font-size:' + Z.rem + 'px;line-height:1.5;color:' + C.ink + ';margin-top:2px;}' +
+      // Five batteries and PETRECO can all have something to say, and the card
+      // is meant to be ONE page. Past two notes the block tightens rather than
+      // pushing the day onto a second sheet.
+      '.tbcard .blk.remarks p{font-size:' + remZ + 'px;line-height:' + (notes.length > 2 ? 1.35 : 1.5) +
+        ';color:' + C.ink + ';margin-top:1px;}' +
       '.tbcard .blk.remarks p.none{color:' + C.mute + ';font-style:italic;}' +
+      '.tbcard .blk.remarks .rem{margin-top:' + (remZ * (notes.length > 2 ? 0.35 : 0.55)).toFixed(1) + 'px;}' +
+      '.tbcard .blk.remarks .rem:first-child{margin-top:0;}' +
+      '.tbcard .blk.remarks .rem-h{font-size:' + (remZ - 0.5) + 'px;font-weight:800;' +
+        'color:' + C.head + ';text-decoration:underline;text-underline-offset:2px;}' +
       // The TOTAL row carries its own font-size, which is more specific than
       // `.tbcard td` — so the phone rules shrank every cell except the totals
       // and the rows stopped lining up. Anything that sets a size above has to
@@ -5060,10 +5173,13 @@ document.addEventListener('DOMContentLoaded', function(){
 
     // Remarks: always present, and says so when there is nothing — a missing
     // block reads as "was it forgotten?".
-    const note = PF ? (PF.getDay(dateStr).remarks || '').trim() : '';
     const remarksBlock = '<div class="blk remarks"><div class="blk-h">Remarks</div>' +
-      '<p' + (note ? '' : ' class="none"') + '>' +
-      (note ? escHtml(note) : '— No remarks —') + '</p></div>';
+      (notes.length
+        ? notes.map(function(n){
+            return '<div class="rem"><div class="rem-h">' + escHtml(n.who) + '</div>' +
+                   '<p>' + escHtml(n.text) + '</p></div>';
+          }).join('')
+        : '<p class="none">— No remarks —</p>') + '</div>';
 
     // When any line is not fully read, the heading says so: those lines show
     // "Not yet" rather than a figure.
@@ -5082,6 +5198,11 @@ document.addEventListener('DOMContentLoaded', function(){
       '</div></div>';
   }
 
+  // Fit is ON by default where the card cannot fit anyway — a phone — and off
+  // on a desktop screen, where it already does.
+  let _tbFit = (typeof window !== 'undefined') && window.innerWidth <= 700;
+  const TB_FIT_FLOOR = 0.45;     // below this the figures stop being readable
+
   function tbRenderOld(){
     const dv = document.getElementById('tbOldDate');
     if(dv && dv.value !== _tbDate) dv.value = _tbDate;
@@ -5089,7 +5210,78 @@ document.addEventListener('DOMContentLoaded', function(){
     if(sel && sel.value !== _tbOldPeriod) sel.value = _tbOldPeriod;
     const el = document.getElementById('tbOldCard');
     if(el) el.innerHTML = tbOldCardHTML(_tbDate, _tbOldPeriod, false);
+    tbFitCard();
   }
+  // Scale the rendered card so the whole of it stands on the screen at once.
+  // The card is scaled as a block — one transform on the whole thing — because
+  // shrinking type and padding separately would rebalance the layout and the
+  // card would stop looking like the report people read on paper.
+  function tbFitCard(){
+    const wrap = document.getElementById('tbOldCardFit');
+    const card = document.getElementById('tbOldCard');
+    const btn  = document.getElementById('tbFitBtn');
+    if(!wrap || !card) return;
+    if(btn){
+      btn.textContent = _tbFit ? 'Full size' : 'Fit to screen';
+      btn.setAttribute('aria-pressed', _tbFit ? 'true' : 'false');
+    }
+    // Measure unscaled, always: a card measured while still scaled from the
+    // last render would shrink a little further every time.
+    card.style.transform = '';
+    card.style.width = '';
+    wrap.classList.remove('fitting');
+    wrap.style.height = '';
+    if(!_tbFit) return;
+    // The card is a page of its own: measured against the WHOLE screen below
+    // the sticky header, not against whatever is left under the date bar. The
+    // controls above it scroll away, and fitting scrolls the card up to meet
+    // the header so the whole of it stands on the screen at once.
+    const hdr = document.querySelector('.app-header');
+    const hdrH = (hdr && getComputedStyle(hdr).position === 'sticky') ? hdr.offsetHeight : 0;
+    const availW = wrap.clientWidth;
+    const availH = window.innerHeight - hdrH - 10;
+    if(availW <= 0 || availH <= 0) return;
+    if(card.scrollHeight <= availH) return;              // already fits
+
+    // A phone is narrow, so the card's own columns wrap and it grows TALL —
+    // squeezing that shape onto the screen wastes the width and leaves the
+    // figures tiny. Laying it out wider first, the way it is printed, and then
+    // scaling the whole block down gives a bigger scale for the same screen.
+    // The widths are tried rather than calculated because how tall the card
+    // gets at a given width depends on the day's own wrapping.
+    let best = { s:0, w:availW };
+    [availW, 520, 580, 640, 700, 760].forEach(function(W){
+      if(W < 300) return;
+      card.style.width = W + 'px';
+      const h = card.scrollHeight;
+      if(!h) return;
+      const s = Math.min(availW / W, availH / h, 1);
+      if(s > best.s) best = { s:s, w:W };
+    });
+    const s = Math.max(TB_FIT_FLOOR, best.s);
+    card.style.width = best.w + 'px';
+    card.style.transform = 'scale(' + s + ')';
+    wrap.classList.add('fitting');
+    wrap.style.height = Math.ceil(card.scrollHeight * s) + 'px';
+    tbScrollCardUp(hdrH);
+  }
+  // Bring the card up under the header, once, without fighting the user: if he
+  // has scrolled away from it himself, leave him where he is.
+  let _tbFitScrolled = '';
+  function tbScrollCardUp(hdrH){
+    const wrap = document.getElementById('tbOldCardFit');
+    if(!wrap) return;
+    const key = _tbDate + '|' + _tbOldPeriod;
+    if(_tbFitScrolled === key) return;
+    _tbFitScrolled = key;
+    const top = wrap.getBoundingClientRect().top + window.scrollY - hdrH - 6;
+    window.scrollTo({ top:Math.max(0, top), behavior:'smooth' });
+  }
+  let _tbFitTimer = null;
+  window.addEventListener('resize', function(){
+    clearTimeout(_tbFitTimer);
+    _tbFitTimer = setTimeout(function(){ if(_tbSub === 'old') tbFitCard(); }, 150);
+  });
 
   function tbOldDoc(){
     return '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Production Report ' +
@@ -5651,14 +5843,43 @@ document.addEventListener('DOMContentLoaded', function(){
     }
   }
 
+  // Which half of Scanner analysis is open. Figures first: that is what the
+  // morning check is.
+  let _tbView = 'figures';
+  const _TB_VIEWS = [ { k:'figures', label:'Figures',        icon:'tank'  },
+                      { k:'graphs',  label:'Graphs analysis', icon:'trend' } ];
+  function tbRenderViewTabs(){
+    const el = document.getElementById('tbViewTabs');
+    if(!el) return;
+    el.innerHTML = _TB_VIEWS.map(function(v){
+      return '<button type="button" data-va="' + v.k + '"' + (v.k === _tbView ? ' class="on"' : '') + '>' +
+             '<svg class="ico" aria-hidden="true"><use href="#i-' + v.icon + '"/></svg> ' +
+             escHtml(v.label) + '</button>';
+    }).join('');
+    Array.prototype.forEach.call(el.querySelectorAll('button'), function(b){
+      b.addEventListener('click', function(){ tbShowView(b.getAttribute('data-va')); });
+    });
+  }
+  function tbShowView(k){
+    _tbView = k;
+    const f = document.getElementById('tbview-figures');
+    const g = document.getElementById('tbview-graphs');
+    if(f) f.style.display = (k === 'figures') ? '' : 'none';
+    if(g) g.style.display = (k === 'graphs')  ? '' : 'none';
+    tbRenderViewTabs();
+    // The charts measure themselves against the width they are drawn in, so
+    // they are drawn when their tab is opened, not while it is hidden.
+    if(k === 'graphs'){ tbRenderIntervals(); tbRenderHist(); pfaRenderAll(); }
+  }
+
   function tbRenderView(){
     _tbZoom = {};
     const dv = document.getElementById('tbViewDate');
     if(dv && dv.value !== _tbDate) dv.value = _tbDate;
+    tbRenderViewTabs();
+    tbShowView(_tbView);
     tbRenderDayKpis();
     tbRenderIntervals();
-    tbRenderHalves();
-    tbRenderDayCompare();
     tbRenderHeat();
     tbRenderHist();
     pfaRenderAll();
@@ -5668,8 +5889,14 @@ document.addEventListener('DOMContentLoaded', function(){
     const wrap = document.getElementById('tbHistWrap');
     if(!wrap) return;
     // Admin only. An operator's job is the day in front of him.
-    if(!_tbAdmin()){ wrap.style.display = 'none'; return; }
+    const gr = document.getElementById('tbGraphRecord');
+    if(!_tbAdmin()){
+      wrap.style.display = 'none';
+      if(gr) gr.style.display = 'none';
+      return;
+    }
     wrap.style.display = '';
+    if(gr) gr.style.display = '';
     tbRenderRange();
 
     const rows  = tbHistRows();
@@ -5802,12 +6029,7 @@ document.addEventListener('DOMContentLoaded', function(){
             '</tr>';
         }
         tbl.innerHTML = '<div class="tb-days"><table><thead>' + head +
-          '</thead><tbody>' + body + '</tbody></table></div>' +
-          '<div class="tb-legend"><span>All figures m³/d. A day tinted red produced ' +
-          'less at Belayim than the day before it. The PETRECO columns are that ' +
-          'day\'s totals; the drains are added together, the crude oil scanners ' +
-          'are not — they are separate streams. A figure in italics is a day ' +
-          'short of readings.</span></div>';
+          '</thead><tbody>' + body + '</tbody></table></div>';
       }
     }
   }
@@ -5832,6 +6054,30 @@ document.addEventListener('DOMContentLoaded', function(){
   // chart are never split across the fold. If it has to come back to one page,
   // the honest cut is the gain/loss charts — the record report already carries
   // that view across the full range.
+  // Every battery's remark for the day, then PETRECO's — the one collection
+  // used by the report card and the printed day report, so the two cannot
+  // drift apart. Each is headed with whose it is; a battery with nothing to
+  // say is left out rather than given an empty heading.
+  function tbRemarksList(dateStr){
+    const out = [];
+    TB_LIST.forEach(function(b){
+      const n = ((tbGetDay(dateStr).tbs[b.id] || {}).note || '').trim();
+      if(n) out.push({ who:b.name, text:n });
+    });
+    const pf = window.__PF__ ? (window.__PF__.getDay(dateStr).remarks || '').trim() : '';
+    if(pf) out.push({ who:'PETRECO', text:pf });
+    return out;
+  }
+  function tbRemarksHTML(dateStr, withHeading){
+    const notes = tbRemarksList(dateStr);
+    if(!notes.length) return '';
+    return (withHeading ? '<h2>Remarks</h2>' : '') +
+      '<div class="remks">' + notes.map(function(n){
+        return '<div class="rem"><div class="rem-h">' + escHtml(n.who) + '</div>' +
+               '<p>' + escHtml(n.text) + '</p></div>';
+      }).join('') + '</div>';
+  }
+
   function tbReportHTML(day){
     const calc  = tbCalcDay(day);
     const yDate = tbPrevDate(day.date);
@@ -5968,6 +6214,7 @@ gRows.map(function(r){
 (tbDayCompareHTML(day.date) || '<div class="sub">Nothing recorded.</div>') +
 '<h2>Monitoring Production real-time</h2>' +
 (tbHeatHTML(day.date, true) || '<div class="sub">No production recorded for this shift.</div>') +
+tbRemarksHTML(day.date, true) +
 '<div class="foot">Generated by PETROBEL Sinai Field on ' + new Date().toLocaleString('en-GB') +
   (day.updatedBy ? ' · last data entry by ' + escHtml(day.updatedBy) : '') +
   '<br>Powered by Sherif Morshed</div>' +
@@ -6113,6 +6360,12 @@ gRows.map(function(r){
 'th.tot,td.tot{background:#f4fbf8;font-weight:700;}' +
 'td.neg{color:#b91c1c;font-weight:700;} td.pos{color:#15803d;}' +
 '.sw{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;vertical-align:-1px;}' +
+'.remks{border:1px solid #dbe4ee;border-radius:8px;background:#fbfdff;padding:7px 10px;' +
+  'margin-top:4px;break-inside:avoid;}' +
+'.remks .rem{margin-top:6px;} .remks .rem:first-child{margin-top:0;}' +
+'.remks .rem-h{font-size:9.5px;font-weight:800;color:#123a5a;text-decoration:underline;' +
+  'text-underline-offset:2px;}' +
+'.remks p{font-size:10.5px;line-height:1.45;color:#16232f;margin-top:1px;}' +
 '.tag{font-size:8.5px;color:#92400e;background:#fffbeb;border:1px solid #fde68a;' +
   'border-radius:3px;padding:0 3px;}' +
 '.rg-legend{display:flex;gap:11px;justify-content:center;font-size:9.5px;color:#475569;' +
@@ -6316,6 +6569,13 @@ gRows.map(function(r){
   function tbApplyInput(id, kind, i, raw){
     if(!tbMayWrite(id, kind)) return;
     const cell = tbCellOn(_tbDate, id);
+    if(kind === 'r'){
+      // A remark is text, not a reading: one per battery per day, no index.
+      cell.note = raw || '';
+      _tbPend.mark(_tbDate, tbPendKey(id, 'r', 0), cell.note);
+      tbSaveLocal();
+      return;
+    }
     if(kind === 'c' || kind === 'x'){
       // Temperature and chemical injection are keyed by hour offset, not by
       // scanner index, and have no boundary twin: they are a reading at a
@@ -6385,7 +6645,8 @@ gRows.map(function(r){
           const doc = docs[docId] = docs[docId] || { date:dt, battery:id, startHour:tbStart(id),
             updatedBy:who, updatedAt:firebase.firestore.FieldValue.serverTimestamp() };
           const val = snap[dt][key];
-          if(kind === 'c') (doc.temp = doc.temp || {})[i] = val;
+          if(kind === 'r') doc.remarks = val || '';
+          else if(kind === 'c') (doc.temp = doc.temp || {})[i] = val;
           else if(kind === 'x') (doc.chem = doc.chem || {})[i] = val;
           else {
             doc.rows = doc.rows || {};
@@ -6508,6 +6769,7 @@ gRows.map(function(r){
           if(!obj[date]) obj[date] = tbBlankDay(date);
           obj[date].tbs[bid] = tbChemToArray(dd.chem,
                                  tbTempToArray(dd.temp, tbRowsToArrays(dd.rows)));
+          obj[date].tbs[bid].note = dd.remarks || '';
           if(dd.dayTotal != null){
             obj[date].tbs[bid].t   = Number(dd.dayTotal);
             obj[date].tbs[bid].src = dd.source || 'imported';
@@ -6597,6 +6859,9 @@ gRows.map(function(r){
     if(td2) td2.addEventListener('change', function(){ _tbDate = this.value || tbToday(); tbRenderAll(); });
     const tt = document.getElementById('tbTempToday');
     if(tt) tt.addEventListener('click', function(){ _tbDate = tbToday(); tbRenderAll(); });
+
+    const fb = document.getElementById('tbFitBtn');
+    if(fb) fb.addEventListener('click', function(){ _tbFit = !_tbFit; tbFitCard(); });
 
     const od = document.getElementById('tbOldDate');
     if(od) od.addEventListener('change', function(){ _tbDate = this.value || tbToday(); tbRenderAll(); });
@@ -7034,7 +7299,9 @@ if('serviceWorker' in navigator){
             'value="' + (v == null ? '' : v) + '"' + (ed ? '' : ' disabled') + '></td>';
         });
         cells += '<td class="tot-col rg-calc">' + pfFmt(pfSectionTotal(_pfDate, sec.grp, pr.k)) + '</td>';
-        body += '<tr data-pfrow="p' + pr.k + '"><th class="row">' + pr.label + '</th>' + cells + '</tr>';
+        body += '<tr data-pfrow="p' + pr.k + '"><th class="row">' + pr.label +
+                arRange(PF_START + pr.from, PF_START + pr.to) +
+                '</th>' + cells + '</tr>';
         // The twelve-hour subtotal sits under the four periods it covers —
         // that is the figure the shift is reported in, and the one an old day
         // holds instead of the four.
@@ -7044,7 +7311,8 @@ if('serviceWorker' in navigator){
           mets.forEach(function(m){ hc += '<td class="rg-calc">' + pfFmt(pfHalf(_pfDate, m.id, H.k)) + '</td>'; });
           hc += '<td class="tot-col rg-calc">' + pfFmt(pfSectionWin(_pfDate, sec.grp, H.from, H.to).v) + '</td>';
           body += '<tr class="calc half" data-pfrow="h' + H.k + '"><th class="row">' +
-                  H.label + '</th>' + hc + '</tr>';
+                  H.label + arRange(PF_START + H.from, PF_START + H.to) +
+                  '</th>' + hc + '</tr>';
         }
       });
 
