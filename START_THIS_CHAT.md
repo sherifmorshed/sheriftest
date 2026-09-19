@@ -1,6 +1,6 @@
 # Sinai Field — start here
 
-**Attach `sinai-field-v24.zip` to the new chat and paste the block below as your
+**Attach `sinai-field-v27.zip` to the new chat and paste the block below as your
 first message.** Everything Claude needs is in the zip; nothing from any other
 conversation is required.
 
@@ -16,7 +16,7 @@ conversation is required.
 > The attached zip is the whole project. Read `README.md`, then
 > `DEVELOPER_REFERENCE.md`, then `CHANGELOG.md` before changing anything.
 >
-> Current release: **v24**, service-worker cache `sinai-field-v24`.
+> Current release: **v27**, service-worker cache `sinai-field-v27`.
 >
 > How I work: show me the change, test it before you say it is done, and tell me
 > plainly when something I asked for is a bad idea.
@@ -71,7 +71,10 @@ tank battery total to a Ras Gara total.
 
 ## Where things stand
 
-v24 split Scanner analysis into Figures and Graphs analysis and dropped its two
+v27 dropped the "x of 8 intervals complete" note from the battery panels. v26
+fixed the fitted report card shrinking and growing while scrolling on a
+phone (the address bar changing the viewport height). v25 put ملاحظات اليوم beside the Remarks heading on every entry screen. v24
+split Scanner analysis into Figures and Graphs analysis and dropped its two
 on-screen comparison tables (the printed day report still has them). v23 added
 Arabic under the English on the entry screens — headings and hours on
 the batteries, the period column on the PETRECO scanners, the hour column on
