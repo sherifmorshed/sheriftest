@@ -12,26 +12,26 @@
    accounts and its own release cycle, and it shares nothing with any other
    PETROBEL app. Nothing here should ever need to reach outside this folder.
 
-   WHAT IS WHERE                                        (line numbers, v28)
+   WHAT IS WHERE                                        (line numbers, v30)
    ─────────────────────────────────────────────────────────────────────────
      CSS
        Design tokens — every colour lives here, light + dark ...... line 74
        Header, login, toast, footer .............................. line 107
        Pages: readings, tank batteries, scanners, PETRECO ........ line 239
      MARKUP
-       Icon sprite — every icon, drawn inline .................... line 744
-       Login screen .............................................. line 764
-       Header bar ................................................ line 822
-       Pages: R/G, A/R, PETRECO, no-access ....................... line 834
+       Icon sprite — every icon, drawn inline .................... line 756
+       Login screen .............................................. line 776
+       Header bar ................................................ line 834
+       Pages: R/G, A/R, PETRECO, no-access ....................... line 846
      SCRIPT — the shell
-       ►► CONFIGURATION — Firebase config + role lists ........... line 1158
-       Boot, helpers, unsaved-edits queue, footer status ......... line 1232
-       Sign in / sign out, roles, tabs ........................... line 1555
-     SCRIPT — R/G Production (hourly PETRECO vs Ras Gara) ........ line 1794
+       ►► CONFIGURATION — Firebase config + role lists ........... line 1170
+       Boot, helpers, unsaved-edits queue, footer status ......... line 1244
+       Sign in / sign out, roles, tabs ........................... line 1567
+     SCRIPT — R/G Production (hourly PETRECO vs Ras Gara) ........ line 1806
      SCRIPT — A/R Production (tank batteries, report card,
-              scanner analysis, temperature, chemical, pumps) ..... line 3263
-     SCRIPT — day / night theme, service worker .................. line 7472
-     SCRIPT — PETRECO scanners ................................... line 7537
+              scanner analysis, temperature, chemical, pumps) ..... line 3275
+     SCRIPT — day / night theme, service worker .................. line 7514
+     SCRIPT — PETRECO scanners ................................... line 7579
 
    THE ROLES
      admin     both R/G sides, A/R Production, every report
@@ -376,7 +376,12 @@ body.light-mode .tabs button.on{color:#fff;}
 .tb-panel .bar{height:3px;background:linear-gradient(90deg,var(--accent) 0%,var(--gold) 100%);}
 .tb-panel .hd{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:11px 14px 2px;}
 .tb-panel .hd h3{font-size:15px;font-weight:800;color:var(--text);letter-spacing:-.01em;}
-.tb-panel .hd .tot{margin-left:auto;font-family:var(--font-num);font-size:14px;font-weight:800;color:var(--s3);}
+.tb-panel .hd .tots{margin-left:auto;text-align:right;}
+.tb-panel .hd .tot{font-family:var(--font-num);font-size:14px;font-weight:800;color:var(--s3);}
+.tb-panel .hd .ytot{font-family:var(--font-num);font-size:12px;font-weight:700;color:var(--muted);margin-top:1px;}
+.tb-panel .hd .ytot:empty{display:none;}
+.tb-panel .hd .ytot i{font-style:normal;font-size:10px;font-weight:600;}
+.tb-panel .hd .ytot .ar-in{font-family:'Segoe UI','Noto Naskh Arabic',Tahoma,sans-serif;font-size:13px;letter-spacing:0;}
 .tb-panel .hd .tot i{font-style:normal;font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.5px;}
 .tb-panel .note{font-size:11px;color:var(--muted);font-family:var(--font-num);padding:3px 14px 0;line-height:1.5;}
 .tb-panel .note.warn{color:var(--red);font-weight:700;}
@@ -652,6 +657,13 @@ td.rg-time .ar,th.row .ar{color:var(--muted);font-weight:600;}
 .pf-wrap tr.half th.row,.pf-wrap tr.half td{background:var(--surface);font-weight:700;}
 .pf-wrap td.part{font-style:italic;color:var(--muted);}
 .pf-note{margin:6px 2px 0;font-size:11.5px;line-height:1.45;color:var(--muted);}
+.pf-wrap td.pf-rd{padding-top:5px;padding-bottom:4px;}
+.pf-wrap .pf-dq{font-size:11.5px;font-weight:800;margin-top:3px;font-family:var(--font-num);}
+.pf-wrap .pf-dq .pos{color:var(--green);} .pf-wrap .pf-dq .neg{color:var(--red);}
+.pf-wrap .pf-dq .none{color:var(--muted);font-weight:600;}
+.pf-wrap tr.edge th.row,.pf-wrap tr.edge td{background:var(--surface);}
+.pf-wrap th.row .tb-tag{display:block;font-size:9.5px;font-weight:600;color:var(--muted);letter-spacing:.5px;
+  text-transform:uppercase;margin-top:1px;}
 .pf-h{font-size:12px;letter-spacing:1px;text-transform:uppercase;font-weight:800;
   color:var(--accent2);padding:12px 15px 0;}
 .pf-wrap{overflow-x:auto;padding:8px 12px 13px;-webkit-overflow-scrolling:touch;}
@@ -3810,6 +3822,32 @@ document.addEventListener('DOMContentLoaded', function(){
   }
 
   // ── table ───────────────────────────────────────────────────────────────
+  // Yesterday, over the SAME three-hour intervals today has read so far: at
+  // 08:00 the first interval of yesterday, at 11:00 the first two, and so on —
+  // so the two figures stacked in the header are always like for like, never a
+  // part day against a whole one. An interval yesterday did not read is left
+  // out of both. A day that was imported as one daily figure has no intervals
+  // to match, so it is only shown once today is complete.
+  function tbYesterdayLike(id, dateStr, cToday){
+    const ty = tbCalcOne(tbGetDay(dateStr).tbs[id]);
+    const t  = cToday || ty;
+    const y  = tbCalcOne(tbGetDay(tbPrevDate(dateStr)).tbs[id]);
+    if(t.dayOnly || t.total == null) return '';
+    let v = null;
+    if(y.dayOnly){
+      if(t.done && y.total != null) v = y.total;
+    } else {
+      for(let k = 1; k < TB_READS; k++){
+        if(t.prod[k] == null || y.prod[k] == null) continue;
+        v = (v == null ? 0 : v) + y.prod[k];
+      }
+    }
+    if(v == null) return '';
+    // Arabic for the man at the battery; the office reads English.
+    const lbl = _tbAdmin() ? 'Yesterday' : '<span dir="rtl" lang="ar" class="ar-in">أمس</span>';
+    return lbl + ' ' + tbFmt(v, 1) + ' <i>m³</i>';
+  }
+
   function tbPanel(b, day, calc){
     const cell = day.tbs[b.id];
     const c    = calc.per[b.id];
@@ -3915,6 +3953,7 @@ document.addEventListener('DOMContentLoaded', function(){
     // The two notes above stay: both are things he cannot see by looking.
 
     const totTxt = (c.total == null) ? '—' : tbFmt(c.total, 1);
+    const yTxt = tbYesterdayLike(b.id, _tbDate, c);
     // Remarks for this battery, under its table. An operator sees one box —
     // his own — and what he writes reaches the admin's report card.
     const noteBox = '<div class="tb-note-wrap"><div class="rg-sec-title">Remarks' +
@@ -3924,7 +3963,8 @@ document.addEventListener('DOMContentLoaded', function(){
     return '<div class="tb-panel">' +
       '<div class="bar"></div>' +
       '<div class="hd"><h3>' + escHtml(b.name) + '</h3>' +
-        '<div class="tot">' + totTxt + ' <i>m³/d</i></div></div>' +
+        '<div class="tots"><div class="tot">' + totTxt + ' <i>m³/d</i></div>' +
+        '<div class="ytot">' + yTxt + '</div></div></div>' +
       notes +
       '<div class="bd"><div class="rg-tbl-wrap"><table class="rg-tbl tb-tbl" style="min-width:' +
         (430 + 78 * tbPumps(b.id).length) + 'px">' +
@@ -7447,6 +7487,8 @@ tbRemarksHTML(day.date, true) +
       }
       const tot = panel.querySelector('.hd .tot');
       if(tot) tot.innerHTML = (c.total == null ? '—' : tbFmt(c.total, 1)) + ' <i>m³/d</i>';
+      const yt = panel.querySelector('.hd .ytot');
+      if(yt) yt.innerHTML = tbYesterdayLike(b.id, _tbDate, c);
     });
     tbRenderTotals();
   }
@@ -7636,10 +7678,19 @@ if('serviceWorker' in navigator){
     return null;
   }
   function pfBlankMeter(){
-    const q = [];
+    const q = [], r = [];
     for(let i = 0; i < PF_N; i++) q.push(null);
-    return { q:q, v:[null, null] };     // q: three-hour periods · v: the old halves
+    for(let i = 0; i <= PF_N; i++) r.push(null);
+    // q: three-hour quantities · v: the old twelve-hour halves
+    // r: the DRAIN scanners' totalizer readings, nine a day (06:00 … 06:00) —
+    //    for a drain meter q is worked out from r, see pfGetDay.
+    return { q:q, v:[null, null], r:r };
   }
+  // The drain scanners are TOTALIZERS, like the tank battery scanners: the
+  // operator types what the scanner shows, and the three hours' drain is the
+  // difference from the reading before. The crude oil scanners are not — they
+  // are still entered as the quantity for the three hours.
+  function pfIsTotalizer(id){ const m = pfById(id); return !!(m && m.grp === 'drain'); }
   function pfBlankDay(dateStr){
     const m = {};
     PF_LIST.forEach(function(x){ m[x.id] = pfBlankMeter(); });
@@ -7662,6 +7713,10 @@ if('serviceWorker' in navigator){
       const x = Array.isArray(raw.v) ? raw.v[h] : raw.v[String(h)];
       out.v[h] = (x == null) ? null : Number(x);
     }
+    if(raw.r) for(let k = 0; k <= PF_N; k++){
+      const x = Array.isArray(raw.r) ? raw.r[k] : raw.r[String(k)];
+      out.r[k] = (x == null) ? null : Number(x);
+    }
     return out;
   }
   function pfGetDay(dateStr){
@@ -7672,7 +7727,29 @@ if('serviceWorker' in navigator){
     out.updatedBy = d.updatedBy || '';
     out.updatedAt = d.updatedAt || 0;
     PF_LIST.forEach(function(x){ out.meters[x.id] = pfNormMeter(d.meters && d.meters[x.id]); });
+    pfDeriveDrains(out, dateStr);
     return out;
+  }
+  // For a drain meter with readings: the opening is yesterday's closing when it
+  // was not typed (one moment, one reading), and each period's quantity is the
+  // difference between the readings either side of it. A day entered before
+  // the drains were read as totalizers has no readings and keeps its typed
+  // quantities untouched.
+  function pfDeriveDrains(out, dateStr){
+    PF_LIST.forEach(function(x){
+      if(x.grp !== 'drain') return;
+      const m = out.meters[x.id];
+      if(m.r[0] == null){
+        const pd = PF_DAYS[pfPrevDate(dateStr)];
+        const pr = pd && pd.meters && pd.meters[x.id] ? pfNormMeter(pd.meters[x.id]).r[PF_N] : null;
+        if(pr != null){ m.r[0] = pr; m.r0carried = true; }
+      }
+      let any = false;
+      for(let k = 1; k <= PF_N; k++) if(m.r[k] != null) any = true;
+      if(!any) return;
+      for(let k = 0; k < PF_N; k++)
+        m.q[k] = (m.r[k] != null && m.r[k + 1] != null) ? m.r[k + 1] - m.r[k] : null;
+    });
   }
   // Is this half three-hour data ('q'), an old twelve-hour figure ('v'), or
   // nothing yet ('none')? Typing any period of a half makes it 'q' and the old
@@ -7760,6 +7837,52 @@ if('serviceWorker' in navigator){
   // them is derived: each twelve-hour half, then the day, then yesterday and
   // the change — and the change only once the day is fully entered, because a
   // day still being read against a finished one is not a comparison.
+  // The drain section: one row per scanner reading, 06:00 to the next 06:00.
+  // Under each reading, the drain since the reading before — the difference,
+  // worked out here, never typed. The twelve-hour subtotals sit under 18:00
+  // and under the closing 06:00, the readings that end each half.
+  function pfDrainRows(today, mets, ed){
+    let body = '';
+    for(let k = 0; k <= PF_N; k++){
+      const o = k * PF_STEP;
+      let cells = '';
+      mets.forEach(function(m){
+        const md = today.meters[m.id];
+        const v = md.r[k];
+        const carried = (k === 0 && md.r0carried);
+        cells += '<td class="pf-rd">' +
+          '<input class="rg-in" type="number" inputmode="decimal" step="any" ' +
+          'data-pf="' + escAttr(m.id) + '" data-k="' + k + '" data-kind="r" ' +
+          'value="' + (v == null ? '' : v) + '"' + (ed ? '' : ' disabled') +
+          (carried ? ' title="yesterday\'s closing reading"' : '') + '>' +
+          '<div class="pf-dq">' + pfDeltaText(k === 0 ? null : md.q[k - 1], k) + '</div></td>';
+      });
+      cells += '<td class="tot-col rg-calc" data-tc="1">' +
+        (k === 0 ? '—' : pfFmt(pfSectionTotal(_pfDate, 'drain', k - 1))) + '</td>';
+      body += '<tr data-pfrow="r' + k + '"' + (k === 0 || k === PF_N ? ' class="edge"' : '') + '>' +
+        '<th class="row">' + pfClock(o) + arSpan(arHour(PF_START + o)) +
+        (k === 0 ? '<span class="tb-tag">open</span>' : k === PF_N ? '<span class="tb-tag">close</span>' : '') +
+        '</th>' + cells + '</tr>';
+      if(k === PF_PER_HALF || k === PF_N){
+        const H = PF_HALVES[k === PF_N ? 1 : 0];
+        let hc = '';
+        mets.forEach(function(m){ hc += '<td class="rg-calc">' + pfFmt(pfHalf(_pfDate, m.id, H.k)) + '</td>'; });
+        hc += '<td class="tot-col rg-calc">' + pfFmt(pfSectionWin(_pfDate, 'drain', H.from, H.to).v) + '</td>';
+        body += '<tr class="calc half" data-pfrow="h' + H.k + '"><th class="row">' +
+                H.label + arRange(PF_START + H.from, PF_START + H.to) + '</th>' + hc + '</tr>';
+      }
+    }
+    return body;
+  }
+  // The difference under a reading. A NEGATIVE one is a reading lower than the
+  // one before it — a reset or a misread — and is shown in red so it is
+  // checked, never passed off as production.
+  function pfDeltaText(d, k){
+    if(k === 0) return '';
+    if(d == null) return '<span class="none">—</span>';
+    return '<span class="' + (d < 0 ? 'neg' : 'pos') + '">' + (d > 0 ? '+' : '') + pfFmt(d) + '</span>';
+  }
+
   function pfRenderArea(){
     const el = document.getElementById('pfArea');
     if(!el) return;
@@ -7774,7 +7897,8 @@ if('serviceWorker' in navigator){
       Array.prototype.forEach.call(el.querySelectorAll('input[data-pf]'), function(inp){
         if(inp === focused) return;
         const cell = pfGetDay(_pfDate).meters[inp.getAttribute('data-pf')];
-        const v = cell.q[Number(inp.getAttribute('data-k'))];
+        const v = inp.getAttribute('data-kind') === 'r' ? cell.r[Number(inp.getAttribute('data-k'))]
+                                                         : cell.q[Number(inp.getAttribute('data-k'))];
         const s = (v == null) ? '' : String(v);
         if(inp.value !== s) inp.value = s;
       });
@@ -7791,6 +7915,9 @@ if('serviceWorker' in navigator){
 
       const today = pfGetDay(_pfDate);
       let body = '';
+      if(sec.grp === 'drain'){
+        body = pfDrainRows(today, mets, ed);
+      } else
       PF_PERIODS.forEach(function(pr){
         let cells = '';
         mets.forEach(function(m){
@@ -7908,6 +8035,9 @@ if('serviceWorker' in navigator){
       if(rest.charAt(0) === 's'){
         const k = parseInt(rest.slice(1), 10);
         if(k >= 0 && k < PF_N) cell.q[k] = val;
+      } else if(rest.charAt(0) === 'r'){
+        const k = parseInt(rest.slice(1), 10);
+        if(k >= 0 && k <= PF_N) cell.r[k] = val;
       } else {
         const h = parseInt(rest, 10);          // a twelve-hour value from before v15
         if(h === 0 || h === 1) cell.v[h] = val;
@@ -7922,6 +8052,28 @@ if('serviceWorker' in navigator){
     cell.q[k] = pfNum(raw);
     _pfPend.mark(_pfDate, id + '|s' + k, cell.q[k]);
     pfSaveLocal();
+  }
+  // A drain scanner reading. The closing reading (06:00) is the next day's
+  // opening and the opening is the day before's closing — written to both, so
+  // a difference across the day boundary is never lost.
+  function pfApplyReading(id, k, raw){
+    if(!pfCanEdit()) return;
+    const v = pfNum(raw);
+    function put(dt, kk){
+      const day = pfDayOf(PF_DAYS, dt);
+      const cell = day.meters[id] = pfNormMeter(day.meters[id]);
+      cell.r[kk] = v;
+      _pfPend.mark(dt, id + '|r' + kk, v);
+    }
+    put(_pfDate, k);
+    if(k === PF_N) put(pfNextDate(_pfDate), 0);
+    if(k === 0)    put(pfPrevDate(_pfDate), PF_N);
+    pfSaveLocal();
+  }
+  function pfNextDate(dateStr){
+    const d = new Date(dateStr + 'T00:00:00');
+    d.setDate(d.getDate() + 1);
+    return _isoDate(d);
   }
   function pfApplyRemarks(text){
     if(!pfCanEdit()) return;
@@ -7964,6 +8116,10 @@ if('serviceWorker' in navigator){
             const k = String(parseInt(rest.slice(1), 10));
             if(!(Number(k) >= 0 && Number(k) < PF_N)) return;
             (doc.q = doc.q || {})[k] = val;
+          } else if(rest.charAt(0) === 'r'){
+            const k = String(parseInt(rest.slice(1), 10));
+            if(!(Number(k) >= 0 && Number(k) <= PF_N)) return;
+            (doc.r = doc.r || {})[k] = val;
           } else {
             if(rest !== '0' && rest !== '1') return;     // pre-v15 twelve-hour value
             (doc.v = doc.v || {})[rest] = val;
@@ -8061,7 +8217,7 @@ if('serviceWorker' in navigator){
           else if(x.meter && obj[date].meters[x.meter]){
             // `q` is the three-hour data; `v` is a day recorded before v15 and
             // is used for any half that has no three-hour figures.
-            obj[date].meters[x.meter] = pfNormMeter({ q:x.q, v:x.v });
+            obj[date].meters[x.meter] = pfNormMeter({ q:x.q, v:x.v, r:x.r });
           }
           const t = (x.updatedAt && x.updatedAt.toMillis) ? x.updatedAt.toMillis() : 0;
           if(t > (obj[date].updatedAt || 0)){ obj[date].updatedAt = t; obj[date].updatedBy = x.updatedBy || ''; }
@@ -8095,7 +8251,8 @@ if('serviceWorker' in navigator){
       area.addEventListener('input', function(e){
         const t = e.target;
         if(!t || !t.getAttribute || !t.getAttribute('data-pf')) return;
-        pfApply(t.getAttribute('data-pf'), Number(t.getAttribute('data-k')), t.value);
+        if(t.getAttribute('data-kind') === 'r') pfApplyReading(t.getAttribute('data-pf'), Number(t.getAttribute('data-k')), t.value);
+        else pfApply(t.getAttribute('data-pf'), Number(t.getAttribute('data-k')), t.value);
         t.classList.add('rg-dirty');
         pfRepaint();
         pfQueueSave();
@@ -8118,6 +8275,18 @@ if('serviceWorker' in navigator){
       const tb = el.querySelector('tbody');
       if(!tb) return;
       function rowOf(k){ return tb.querySelector('[data-pfrow="' + k + '"]'); }
+      if(grp === 'drain'){
+        const today = pfGetDay(_pfDate);
+        for(let k = 0; k <= PF_N; k++){
+          const r = rowOf('r' + k);
+          if(!r) continue;
+          mets.forEach(function(m, i){
+            const dq = r.children[i + 1].querySelector('.pf-dq');
+            if(dq) dq.innerHTML = pfDeltaText(k === 0 ? null : today.meters[m.id].q[k - 1], k);
+          });
+          r.children[mets.length + 1].textContent = k === 0 ? '—' : pfFmt(pfSectionTotal(_pfDate, 'drain', k - 1));
+        }
+      }
       // Period totals and the twelve-hour subtotals.
       PF_PERIODS.forEach(function(pr){
         const r = rowOf('p' + pr.k);
