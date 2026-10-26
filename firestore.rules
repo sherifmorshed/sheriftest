@@ -130,7 +130,8 @@ service cloud.firestore {
     //
     //  Shift day is 05:00 → 05:00 (06:00 for T.B. 10/1) and the date is the day
     //  the shift STARTS. Rows are a map keyed "0".."8" = { s, w, d }, and
-    //  `temp` and `chem` are maps keyed by HOUR OFFSET "0".."24"; never arrays,
+    //  `temp` and `chem` are maps keyed by HOUR OFFSET "0".."24"; `pumps` and
+    //  `pumpWhy` are maps of pump → reading → state / reason; never arrays,
     //  because an array is one atomic value and writing it replaces the whole
     //  thing. No rule here names a field: a battery's account may write its own
     //  document, and what is in it is the app's business.

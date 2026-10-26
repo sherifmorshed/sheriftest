@@ -130,7 +130,7 @@ the FIELD, with the value:
 | Module | Key | Example |
 |---|---|---|
 | R/G | `row.field` | `"7.p"`, `"7.rc"` |
-| Tank batteries | `battery` \| `field` `index` | `"tb6_1\|s3"`, `"tb6_1\|d3"`, `"tb6_1\|c12"` |
+| Tank batteries | `battery` \| `field` `index` | `"tb6_1\|s3"`, `"tb6_1\|d3"`, `"tb6_1\|c12"`, `"tb6_1\|x12"` |
 | PETRECO | `meter` \| `period`, or `__remarks` | `"pgb1\|0"` |
 
 A save sends exactly that and nothing else, one merge-write per document, and
@@ -387,7 +387,8 @@ hours from the shift start (`TB_PERIODS`: h3, h6, h1 = first 12, day, h2 =
 second 12), read by each line on its own clock. `tbWin` / `tbPairOf` /
 `tbPairSum` give each line `{a, aDone, b, bDone, na}`; the Difference is drawn
 only when `aDone && bDone`, and a total is done only when every line in it is.
-An unfinished today shows "so far", an unfinished yesterday "incomplete". `na`
+An unfinished window shows NO FIGURE on the card — "Not yet" for today, a dash
+for yesterday — and never the readings so far added up, totals included. `na`
 is a line that cannot be measured over the window at all — PETRECO's scanners
 on that day — and makes any total containing it `na` too. Window boundaries
 must fall on a reading: every line now reads every 3 h, so 3, 6, 12 and 24 all
@@ -433,6 +434,44 @@ can both match on.
 `.where('battery','==', his own)` — Firestore rejects a query it cannot prove
 safe rather than trimming the result, so an unfiltered read is denied outright
 even though some documents are his. `firebase-stub.js` simulates this.
+
+**Pump station.** `TB_PUMPS` lists each battery's pumps; a pump's INDEX in
+its list is its key in the database, so new pumps go at the END and a list is
+never reordered. Each scanner row holds every pump's state (`cell.ps[pump][row]`)
+and, where it went out, a reason (`cell.py`); a PM day is `cell.pmd[pump]`.
+Save-queue keys pack pump and row into one number — `tbPumpKey(i, r)` = `i*100+r`
+— under kinds `q` (state) and `y` (reason); PM is kind `m` with the pump index.
+Hours are derived, never stored: `tbPumpSlots` walks every recorded row across
+days and gives each the three hours that FOLLOW it (row 8 is the next day's row
+0 and starts nothing). `tbPumpHours`, `tbPumpLatest`, `tbPumpOOS` and `tbPumpPM`
+are all built on it. `TB_PUMP_PM_HOURS` holds the PM intervals — placeholders.
+The state picker is a `<select>`; it is blurred before the panel redraws,
+because the "don't rebuild under a focused box" rule would otherwise keep the
+reason line from opening.
+
+**Arabic labels.** `arHour(h)`, `arShortHour(h)`, `arSpan(txt)` and
+`arRange(a, b)` live in the shell and are used by all three modules. Arabic goes
+UNDER the English, never instead of it. Two rules a new label must follow: set
+`letter-spacing:0` (the `.ar` class does, with `!important`, because the
+heading rules are more specific) or the letters stop joining; and never put a
+bare arrow between two Arabic runs — use `arRange`, which writes من … إلى … in
+one right-to-left line.
+
+**Remarks are per battery per day.** `note` on the cell, `remarks` on the
+document, pending key `"tb6_1|r0"` (kind `r`, no index — it is text, not a
+reading). The report card collects every battery's, then PETRECO's, into one
+box; how many there are decides the type size, which is why `notes` is built at
+the top of `tbOldCardHTML` before the size tokens.
+
+**Two hour-offset fields, not scanner-indexed.** `c` is temperature (°C, read
+at every scanner hour) and `x` is chemical injection (every `TB_CHEM_EVERY` = 6
+hours), both arrays indexed 0..24 by HOUR OFFSET from that battery's shift
+start, and both stored as maps — `temp` and `chem` — on the battery's document.
+Neither has a boundary twin: they are a reading at a moment, not a total
+carried across midnight. A new reading of this kind needs a letter in
+`tbApplyInput`/`tbPushToCloud`/`tbOverlayPending`, a slot in `tbBlankCell`,
+`tbCellIn` and `tbGetDay` (that last one is easy to forget — the array is
+silently empty everywhere if you do), and a column in `tbPanel`.
 
 **Concurrency.** `tbPushToCloud` sends ONLY the fields that client typed,
 from `_tbPend` (see "Unsaved edits" in §4), one write per battery per date.

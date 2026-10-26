@@ -12,26 +12,26 @@
    accounts and its own release cycle, and it shares nothing with any other
    PETROBEL app. Nothing here should ever need to reach outside this folder.
 
-   WHAT IS WHERE                                        (line numbers, v27)
+   WHAT IS WHERE                                        (line numbers, v28)
    ─────────────────────────────────────────────────────────────────────────
      CSS
        Design tokens — every colour lives here, light + dark ...... line 74
        Header, login, toast, footer .............................. line 107
        Pages: readings, tank batteries, scanners, PETRECO ........ line 239
      MARKUP
-       Icon sprite — every icon, drawn inline .................... line 683
-       Login screen .............................................. line 703
-       Header bar ................................................ line 761
-       Pages: R/G, A/R, PETRECO, no-access ....................... line 773
+       Icon sprite — every icon, drawn inline .................... line 744
+       Login screen .............................................. line 764
+       Header bar ................................................ line 822
+       Pages: R/G, A/R, PETRECO, no-access ....................... line 834
      SCRIPT — the shell
-       ►► CONFIGURATION — Firebase config + role lists ........... line 1081
-       Boot, helpers, unsaved-edits queue, footer status ......... line 1155
-       Sign in / sign out, roles, tabs ........................... line 1478
-     SCRIPT — R/G Production (hourly PETRECO vs Ras Gara) ........ line 1717
+       ►► CONFIGURATION — Firebase config + role lists ........... line 1158
+       Boot, helpers, unsaved-edits queue, footer status ......... line 1232
+       Sign in / sign out, roles, tabs ........................... line 1555
+     SCRIPT — R/G Production (hourly PETRECO vs Ras Gara) ........ line 1794
      SCRIPT — A/R Production (tank batteries, report card,
-              scanner analysis, temperature, chemical, import) ..... line 3186
-     SCRIPT — day / night theme, service worker .................. line 7012
-     SCRIPT — PETRECO scanners ................................... line 7077
+              scanner analysis, temperature, chemical, pumps) ..... line 3263
+     SCRIPT — day / night theme, service worker .................. line 7472
+     SCRIPT — PETRECO scanners ................................... line 7537
 
    THE ROLES
      admin     both R/G sides, A/R Production, every report
@@ -439,6 +439,67 @@ table.tb-tbl .tb-din{max-width:88px;}
 .viewtabs button .ico{width:15px;height:15px;}
 .viewtabs button.on{background:var(--card);color:var(--accent2);box-shadow:0 1px 4px rgba(15,23,42,.10);}
 .tb-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin-top:12px;}
+/* ── Pump station ────────────────────────────────────────────────────
+   Green in service, amber standby, red out of service — the same three
+   colours on the operator's grid, admin's chips and the report. */
+table.tb-tbl th.tb-grp6{color:var(--accent2);border-bottom:2px solid var(--accent2);white-space:nowrap;}
+table.tb-tbl td.ps{padding:3px 2px;}
+/* The time stays on screen while the pump columns scroll sideways. */
+table.tb-tbl td.rg-time,table.tb-tbl thead th:first-child{position:sticky;left:0;z-index:1;background:var(--card);}
+table.tb-tbl tr.tb-edge td.rg-time{background:var(--surface);}
+table.tb-tbl tr.why-row td{background:rgba(220,38,38,.05);text-align:left;border-bottom:1px solid var(--border);}
+/* The reason line spans the whole table, which on a phone is wider than the
+   screen. Its contents are pinned to the visible part and sized to it, so the
+   box he types in is never half off the edge. */
+table.tb-tbl tr.why-row td > *{position:sticky;left:4px;display:block;box-sizing:border-box;
+  width:min(100%, calc(100vw - 64px));text-align:right;}
+table.tb-tbl tr.why-row label{display:block;font-size:12px;font-weight:800;color:#b91c1c;margin:2px 2px 3px;
+  font-family:'Segoe UI','Noto Naskh Arabic',Tahoma,sans-serif;}
+.ps-sel{width:100%;min-width:66px;border:1.5px solid var(--border);border-radius:8px;padding:8px 2px;
+  background:var(--card);color:var(--muted);font-weight:800;font-size:12px;text-align:center;text-align-last:center;
+  -webkit-appearance:none;appearance:none;cursor:pointer;
+  font-family:'Segoe UI','Noto Naskh Arabic',Tahoma,sans-serif;letter-spacing:0;}
+td.ps-in  .ps-sel{background:#16a34a;border-color:#16a34a;color:#fff;}
+td.ps-sb  .ps-sel{background:#d97706;border-color:#d97706;color:#fff;}
+td.ps-out .ps-sel{background:#dc2626;border-color:#dc2626;color:#fff;}
+.ps-why{display:block;width:100%;box-sizing:border-box;margin-top:0;border-radius:8px;
+  border:1.5px solid rgba(220,38,38,.6);background:rgba(220,38,38,.05);padding:5px;font-size:12px;
+  font-family:'Segoe UI','Noto Naskh Arabic',Tahoma,sans-serif;resize:vertical;}
+.ps-copy{display:block;margin:3px auto 0;border:1px solid var(--border);background:var(--surface);color:var(--accent2);
+  border-radius:6px;padding:2px 6px;font-weight:800;font-size:10.5px;cursor:pointer;white-space:nowrap;
+  font-family:'Segoe UI','Noto Naskh Arabic',Tahoma,sans-serif;}
+.tb-psum{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 12px;}
+.tb-psum .ptot{display:flex;flex-wrap:wrap;gap:6px 14px;font-weight:800;font-size:13px;
+  padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:4px;}
+.tb-psum .ptot .in{color:#16a34a;} .tb-psum .ptot .sb{color:#d97706;}
+.tb-psum .ptot .out{color:#dc2626;} .tb-psum .ptot .none{color:var(--muted);}
+.tb-psum .prow{display:grid;grid-template-columns:70px 1fr;gap:4px 10px;padding:8px 0;
+  border-bottom:1px solid var(--border);align-items:center;}
+.tb-psum .prow:last-child{border-bottom:0;}
+.tb-psum .prow.alarm .pb{color:#dc2626;}
+.tb-psum .pb{font-weight:800;font-size:13px;}
+.tb-psum .pc{display:flex;flex-wrap:wrap;gap:5px;}
+.tb-psum .pn{grid-column:2;font-size:11.5px;color:var(--muted);}
+.tb-psum .pn b{font-weight:800;} .tb-psum .pn b.in{color:#16a34a;}
+.tb-psum .pn b.sb{color:#d97706;} .tb-psum .pn b.out{color:#dc2626;}
+.pchip{display:inline-block;border-radius:999px;padding:3px 9px;font-size:11.5px;font-weight:800;
+  border:1.5px solid transparent;white-space:nowrap;}
+.pchip.in{background:rgba(22,163,74,.14);color:#15803d;border-color:rgba(22,163,74,.45);}
+.pchip.sb{background:rgba(217,119,6,.14);color:#b45309;border-color:rgba(217,119,6,.45);}
+.pchip.out{background:rgba(220,38,38,.14);color:#b91c1c;border-color:rgba(220,38,38,.5);}
+.pchip.none{background:transparent;color:var(--muted);border-color:var(--border);border-style:dashed;}
+.tb-preg td,.tb-plog td{vertical-align:middle;}
+.tb-preg td.b,.tb-plog td.b{font-weight:800;white-space:nowrap;} .tb-preg td.p{font-weight:700;white-space:nowrap;}
+.tb-preg td .sub{font-size:10.5px;color:var(--muted);margin-top:3px;white-space:nowrap;}
+.tb-preg th.in,.tb-preg td.in{color:#15803d;} .tb-preg th.sb,.tb-preg td.sb{color:#b45309;}
+.tb-preg th.out,.tb-preg td.out{color:#b91c1c;}
+.tb-preg td.n.in,.tb-preg td.n.sb,.tb-preg td.n.out{font-weight:800;}
+.tb-preg tr.alarm td.b,.tb-preg tr.alarm td.p,.tb-plog tr.alarm td.b{color:#dc2626;}
+.tb-preg .pmdone{margin-top:5px;font-size:11px;font-weight:800;border:1px solid var(--border);
+  background:var(--surface);color:var(--text);border-radius:7px;padding:3px 8px;cursor:pointer;}
+.tb-preg .pmdone.undo{color:#b91c1c;border-color:rgba(220,38,38,.5);}
+.tb-plog td.why{font-size:12.5px;max-width:320px;white-space:normal;}
+.tb-plog td.why .none{color:var(--muted);font-style:italic;}
 .tb-mini.tb-mini-g{border-color:var(--accent2);box-shadow:0 2px 10px var(--ring);}
 .tb-mini.tb-mini-g .cap h4{color:var(--accent2);}
 .tb-mini{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:9px 11px 6px;}
@@ -905,6 +966,22 @@ document.addEventListener('click', function(e){
          clock. Kept separate rather than added as more columns to the
          temperature grid, because the two are read at different cadences and
          one grid would be half empty. -->
+    <!-- Pumps: the rotating-equipment report, counted from the operators'
+         three-hour pump readings. English only: this is the office's page. -->
+    <div id="tb-page-pumps" style="display:none;">
+      <div class="rg-bar">
+        <label class="rg-lbl" for="tbPumpDate">As of</label>
+        <input type="date" id="tbPumpDate" class="rg-date">
+      </div>
+      <div class="chips rg-range" id="tbPumpRange" style="margin-bottom:8px;"></div>
+      <div class="rg-sec-title">Pumps situation</div>
+      <div id="tbPumpSummary"></div>
+      <div class="rg-sec-title">Hours by state</div>
+      <div id="tbPumpRegister"></div>
+      <div class="rg-sec-title">Out of service</div>
+      <div id="tbPumpOOS"></div>
+    </div>
+
     <div id="tb-page-chem" style="display:none;">
       <div class="rg-bar">
         <label class="rg-lbl" for="tbChemDate">Shift day</label>
@@ -3223,6 +3300,39 @@ document.addEventListener('DOMContentLoaded', function(){
     // batteries, so the two units never meet in one figure.
     { id:'tb10_1', name:'T.B. 10/1', start:6, wUnit:'bar' }
   ];
+  // ►►►► THE PUMP STATION of each battery. The index of a pump in its list is
+  // its key in the database, so ADD new pumps at the END of a list and never
+  // reorder one — that would hand every recorded reading to the wrong pump.
+  const TB_PUMPS = {
+    tb6_1:  [ { name:'Booster A', kind:'Booster' }, { name:'Booster B', kind:'Booster' } ],
+    tb6_2:  [ { name:'Booster A', kind:'Booster' }, { name:'Booster B', kind:'Booster' },
+              { name:'Borets A',  kind:'Borets'  }, { name:'Borets B',  kind:'Borets'  } ],
+    tb8_1:  [ { name:'Powerhouse A', kind:'Booster' }, { name:'Pump B', kind:'Booster' },
+              { name:'Pump C',       kind:'Booster' } ],
+    tb8_2:  [ { name:'Booster A', kind:'Booster' }, { name:'Booster B', kind:'Booster' },
+              { name:'Booster C', kind:'Booster' } ],
+    tb10_1: [ { name:'Transfer 1', kind:'Transfer' }, { name:'Transfer 2', kind:'Transfer' },
+              { name:'Transfer 3', kind:'Transfer' }, { name:'Transfer 4', kind:'Transfer' },
+              { name:'Transfer 5', kind:'Transfer' }, { name:'Transfer 6', kind:'Transfer' } ]
+  };
+  const TB_PUMP_MAX = 6;
+  // ►►►► PREVENTIVE MAINTENANCE interval in RUNNING hours, by kind of pump.
+  //      PLACEHOLDERS until maintenance gives the real figures. "Due" at 90%.
+  const TB_PUMP_PM_HOURS = { Booster:4000, Borets:4000, Transfer:4000 };
+  // The operator sees ONLY the Arabic; the admin report only the English.
+  const TB_PUMP_STATES = [
+    { k:'in',  en:'In service',     ar:'في الخدمة',   cls:'in'  },
+    { k:'sb',  en:'Standby',        ar:'احتياطي',     cls:'sb'  },
+    { k:'out', en:'Out of service', ar:'خارج الخدمة', cls:'out' }
+  ];
+  function tbPumps(id){ return TB_PUMPS[id] || []; }
+  function tbPumpState(k){
+    for(let i = 0; i < TB_PUMP_STATES.length; i++) if(TB_PUMP_STATES[i].k === k) return TB_PUMP_STATES[i];
+    return null;
+  }
+  // A pump reading lives at (pump, scanner row). Packed into one number for the
+  // save queue's "battery|kind+index" key: pump 2, row 5 → 205.
+  function tbPumpKey(i, r){ return i * 100 + r; }
   // ►►►► THE TWO GROUPS. This is a fact about the FIELD, not a display choice.
   //
   // 6/1, 6/2, 8/1 and 8/2 sit at Belayim and send their gross to PETRECO down
@@ -3387,17 +3497,25 @@ document.addEventListener('DOMContentLoaded', function(){
   function tbMayWrite(id, kind){
     if(_tbAdmin()) return true;
     if(!_tbOper() || id !== tbMine()) return false;   // an operator: his battery only
-    return kind !== 'd';                              // corrections are admin's
+    return kind !== 'd' && kind !== 'm';              // corrections and PM are admin's
   }
   function tbOverlayPending(days){
     _tbPend.each(function(dt, key, val){
       const bar = key.indexOf('|');
       const id = key.slice(0, bar), kind = key.charAt(bar + 1);
       const i = parseInt(key.slice(bar + 2), 10);
-      if(!tbById(id) || 'swdcxr'.indexOf(kind) === -1) return;
+      if(!tbById(id) || 'swdcxrqym'.indexOf(kind) === -1) return;
       if(!days[dt]) days[dt] = tbBlankDay(dt);
       const cell = tbCellIn(days[dt], id);
       if(kind === 'r'){ cell.note = val || ''; return; }
+      if(kind === 'm'){ if(i >= 0 && i < TB_PUMP_MAX) cell.pmd[i] = !!val; return; }
+      if(kind === 'q' || kind === 'y'){
+        const pi = Math.floor(i / 100), r = i % 100;
+        if(pi < TB_PUMP_MAX && r < TB_READS){
+          if(kind === 'q') cell.ps[pi][r] = val || null; else cell.py[pi][r] = val || '';
+        }
+        return;
+      }
       if(isNaN(i)) return;
       if(kind === 'c' || kind === 'x'){ if(i >= 0 && i <= TB_SPAN) cell[kind][i] = val; }
       else if(i >= 0 && i < TB_READS) cell[kind][i] = val;
@@ -3505,7 +3623,17 @@ document.addEventListener('DOMContentLoaded', function(){
     // note = whatever the operator wants the next reader to know about this
     // battery on this day. One per battery per day, in that battery's own
     // document, so an operator writes his own and nobody else's.
-    return { s:s, w:w, d:d, c:c, x:x, note:'', t:null, src:'' };
+    // ps[i][r] = state of pump i at scanner row r ('in'|'sb'|'out'|null);
+    // py[i][r] = the reason it stopped, written where it went out of service.
+    const ps = [], py = [];
+    for(let i = 0; i < TB_PUMP_MAX; i++){
+      const a = [], z = [];
+      for(let r = 0; r < TB_READS; r++){ a.push(null); z.push(''); }
+      ps.push(a); py.push(z);
+    }
+    const pmd = [];
+    for(let i = 0; i < TB_PUMP_MAX; i++) pmd.push(false);
+    return { s:s, w:w, d:d, c:c, x:x, ps:ps, py:py, pmd:pmd, note:'', t:null, src:'' };
   }
   function tbBlankDay(dateStr){
     const tbs = {};
@@ -3579,6 +3707,11 @@ document.addEventListener('DOMContentLoaded', function(){
       out.tbs[b.id].t    = (src.t == null) ? null : src.t;
       out.tbs[b.id].src  = src.src || '';
       out.tbs[b.id].note = src.note || '';
+      for(let i = 0; i < TB_PUMP_MAX; i++) for(let r = 0; r < TB_READS; r++){
+        out.tbs[b.id].ps[i][r] = (src.ps && src.ps[i] && src.ps[i][r]) || null;
+        out.tbs[b.id].py[i][r] = (src.py && src.py[i] && src.py[i][r]) || '';
+      }
+      for(let i = 0; i < TB_PUMP_MAX; i++) out.tbs[b.id].pmd[i] = !!(src.pmd && src.pmd[i]);
       for(let i = 0; i < TB_READS; i++){
         out.tbs[b.id].s[i] = (src.s && src.s[i] != null) ? src.s[i] : null;
         out.tbs[b.id].w[i] = (src.w && src.w[i] != null) ? src.w[i] : null;
@@ -3728,13 +3861,46 @@ document.addEventListener('DOMContentLoaded', function(){
           'value="' + (cell.x[o] == null ? '' : cell.x[o]) + '"' + (ed ? '' : ' disabled') + '></td>'
         : '<td class="tb-off"></td>';
 
+      // The pumps, one column each, read with the scanner every three hours.
+      // A pump that went out of service at this reading opens its reason on a
+      // line of its own under the row.
+      const pumps = tbPumps(b.id);
+      let pumpCells = '', anyPrev = false, allEmpty = true;
+      const whyRows = [];
+      pumps.forEach(function(pm, i){
+        if(si < 0){ pumpCells += '<td class="tb-off"></td>'; return; }
+        const v = cell.ps[i][si];
+        const prev = si > 0 ? cell.ps[i][si - 1] : null;
+        if(prev) anyPrev = true;
+        if(v) allEmpty = false;
+        const st = tbPumpState(v);
+        pumpCells += '<td class="ps' + (st ? ' ps-' + st.cls : '') + '">' +
+          '<select class="ps-sel" data-tb="' + escAttr(b.id) + '" data-k="q" data-i="' + tbPumpKey(i, si) + '"' +
+          (ed ? '' : ' disabled') + ' dir="rtl" lang="ar">' +
+          '<option value=""' + (v ? '' : ' selected') + '>—</option>' +
+          TB_PUMP_STATES.map(function(s){
+            return '<option value="' + s.k + '"' + (v === s.k ? ' selected' : '') + '>' + s.ar + '</option>';
+          }).join('') + '</select></td>';
+        if(v === 'out' && prev !== 'out') whyRows.push({ i:i, pm:pm });
+      });
+      // "Nothing changed in three hours": one tap fills the row's pumps from
+      // the reading before. Shown only on a row still empty.
+      const copy = (ed && si > 0 && anyPrev && allEmpty)
+        ? '<button type="button" class="ps-copy" data-pcopy="' + escAttr(b.id) + '" data-r="' + si + '" lang="ar">كما هو</button>' : '';
       rows +=
         '<tr' + (edge ? ' class="tb-edge"' : (si < 0 ? ' class="tb-hour"' : '')) + '>' +
           '<td class="rg-time">' + tbOffsetLabel(o, b) +
             arSpan(arHour(tbStart(b) + o)) +
-            (tag ? '<span class="tb-tag">' + tag + '</span>' : '') + '</td>' +
-          scanCell + prodCell + whpCell + tempCell + chemCell +
+            (tag ? '<span class="tb-tag">' + tag + '</span>' : '') + copy + '</td>' +
+          scanCell + prodCell + whpCell + tempCell + chemCell + pumpCells +
         '</tr>';
+      whyRows.forEach(function(w){
+        rows += '<tr class="why-row"><td colspan="' + (6 + pumps.length) + '" dir="rtl" lang="ar">' +
+          '<label>سبب التوقف — <b dir="ltr">' + escHtml(w.pm.name) + '</b></label>' +
+          '<textarea class="ps-why" rows="2" data-tb="' + escAttr(b.id) + '" data-k="y" data-i="' + tbPumpKey(w.i, si) + '"' +
+          ' dir="auto" placeholder="اكتب سبب التوقف"' + (ed ? '' : ' disabled') + '>' +
+          escHtml(cell.py[w.i][si] || '') + '</textarea></td></tr>';
+      });
     });
 
     let notes = '';
@@ -3760,7 +3926,8 @@ document.addEventListener('DOMContentLoaded', function(){
       '<div class="hd"><h3>' + escHtml(b.name) + '</h3>' +
         '<div class="tot">' + totTxt + ' <i>m³/d</i></div></div>' +
       notes +
-      '<div class="bd"><div class="rg-tbl-wrap"><table class="rg-tbl tb-tbl">' +
+      '<div class="bd"><div class="rg-tbl-wrap"><table class="rg-tbl tb-tbl" style="min-width:' +
+        (430 + 78 * tbPumps(b.id).length) + 'px">' +
         '<thead><tr>' +
           '<th>Time</th>' +
           '<th class="rg-grp">Scanner<br>m³' + arSpan('سكانر') + '</th>' +
@@ -3769,6 +3936,9 @@ document.addEventListener('DOMContentLoaded', function(){
           '<th class="tb-grp4">Temp<br>°C' + arSpan('الحرارة') + '</th>' +
           '<th class="tb-grp5">Chem. inj.<br>' + escHtml(tbChemUnit(b)) +
             arSpan('حقن الكيمكال') + '</th>' +
+          tbPumps(b.id).map(function(pm){
+            return '<th class="tb-grp6">' + escHtml(pm.name) + '</th>';
+          }).join('') +
         '</tr></thead><tbody>' + rows + '</tbody></table></div>' + noteBox + '</div>' +
     '</div>';
   }
@@ -3794,6 +3964,7 @@ document.addEventListener('DOMContentLoaded', function(){
           if(inp.value !== note) inp.value = note;
           return;
         }
+        if(k === 'y' || k === 'q') return;               // pump station: redrawn on change
         const cell = day.tbs[inp.getAttribute('data-tb')];
         const v = cell ? cell[k][parseInt(inp.getAttribute('data-i'), 10)] : null;
         const s = (v == null) ? '' : String(v);
@@ -4006,7 +4177,8 @@ document.addEventListener('DOMContentLoaded', function(){
                      { k:'old',   label:'Report card',      icon:'print' },
                      { k:'view',  label:'Scanner analysis', icon:'trend' },
                      { k:'temp',  label:'Temperature',       icon:'trend' },
-                     { k:'chem',  label:'Chemical injection', icon:'trend' } ];
+                     { k:'chem',  label:'Chemical injection', icon:'trend' },
+                     { k:'pumps', label:'Pumps',              icon:'tank'  } ];
   function tbShowSub(k){
     if(!_tbAdmin()) k = 'entry';
     _tbSub = k;
@@ -4017,6 +4189,8 @@ document.addEventListener('DOMContentLoaded', function(){
     if(tp) tp.style.display = (k === 'temp') ? '' : 'none';
     const cp = document.getElementById('tb-page-chem');
     if(cp) cp.style.display = (k === 'chem') ? '' : 'none';
+    const pp = document.getElementById('tb-page-pumps');
+    if(pp) pp.style.display = (k === 'pumps') ? '' : 'none';
     if(e) e.style.display = (k === 'entry') ? '' : 'none';
     if(v) v.style.display = (k === 'view')  ? '' : 'none';
     if(o) o.style.display = (k === 'old')   ? '' : 'none';
@@ -4046,6 +4220,7 @@ document.addEventListener('DOMContentLoaded', function(){
     if(k === 'old')  tbRenderOld();
     if(k === 'temp') tbRenderTemp();
     if(k === 'chem') tbRenderChem();
+    if(k === 'pumps') tbRenderPumps();
   }
   function tbRenderSubTabs(){
     const bar = document.getElementById('tbSubTabs');
@@ -5913,6 +6088,135 @@ document.addEventListener('DOMContentLoaded', function(){
     if(k === 'graphs'){ tbRenderIntervals(); tbRenderHist(); pfaRenderAll(); }
   }
 
+  let _tbPumpRange = '30';
+  const TB_PUMP_RANGES = [ { k:'1', label:'This day' }, { k:'7', label:'7 days' }, { k:'30', label:'30 days' },
+                           { k:'90', label:'90 days' }, { k:'all', label:'All' } ];
+  function tbShortDay(d){ return new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { day:'2-digit', month:'short' }); }
+  function tbSlotWhen(s, b){ return tbShortDay(s.dt) + ' ' + tbOffsetLabel(s.r * TB_STEP, b); }
+  function tbRenderPumps(){
+    const dv = document.getElementById('tbPumpDate');
+    if(dv){
+      if(dv.value !== _tbDate) dv.value = _tbDate;
+      if(!dv._wired){ dv._wired = true; dv.addEventListener('change', function(){ _tbDate = this.value || tbToday(); tbRenderAll(); }); }
+    }
+    const rg = document.getElementById('tbPumpRange');
+    if(rg){
+      rg.innerHTML = TB_PUMP_RANGES.map(function(r){
+        return '<button type="button" data-r="' + r.k + '"' + (r.k === _tbPumpRange ? ' class="on"' : '') + '>' + r.label + '</button>';
+      }).join('');
+      Array.prototype.forEach.call(rg.querySelectorAll('button'), function(bt){
+        bt.addEventListener('click', function(){ _tbPumpRange = bt.getAttribute('data-r'); tbRenderPumps(); });
+      });
+    }
+    const asOf = _tbDate;
+    const fromDt = _tbPumpRange === 'all' ? null :
+      _isoDate(new Date(new Date(asOf + 'T00:00:00').getTime() - (Number(_tbPumpRange) - 1) * 86400000));
+    const per = TB_PUMP_RANGES.filter(function(r){ return r.k === _tbPumpRange; })[0].label;
+
+    // ── situation: every pump's latest reading ──
+    const sm = document.getElementById('tbPumpSummary');
+    if(sm){
+      let rows = '', tot = { in:0, sb:0, out:0, none:0 };
+      TB_LIST.forEach(function(b){
+        const pumps = tbPumps(b.id);
+        if(!pumps.length) return;
+        const n = { in:0, sb:0, out:0, none:0 };
+        const chips = pumps.map(function(pm, i){
+          const st = tbPumpState(tbPumpLatest(b.id, i, asOf).st);
+          if(st){ n[st.k]++; tot[st.k]++; } else { n.none++; tot.none++; }
+          return '<span class="pchip ' + (st ? st.cls : 'none') + '">' + escHtml(pm.name) + '</span>';
+        }).join('');
+        const counts = [
+          n.in  ? '<b class="in">'  + n.in  + ' in service</b>' : '', n.sb ? '<b class="sb">' + n.sb + ' standby</b>' : '',
+          n.out ? '<b class="out">' + n.out + ' out</b>' : '', n.none ? '<b class="none">' + n.none + ' not reported</b>' : ''
+        ].filter(Boolean).join(' · ');
+        rows += '<div class="prow' + (n.out ? ' alarm' : '') + '"><div class="pb">' + escHtml(b.name) +
+                '</div><div class="pc">' + chips + '</div><div class="pn">' + counts + '</div></div>';
+      });
+      sm.innerHTML = '<div class="tb-psum"><div class="ptot">' +
+        '<span class="in">' + tot.in + ' in service</span><span class="sb">' + tot.sb + ' standby</span>' +
+        '<span class="out">' + tot.out + ' out of service</span>' +
+        (tot.none ? '<span class="none">' + tot.none + ' not reported</span>' : '') + '</div>' + rows + '</div>';
+    }
+
+    // ── hours by state, per pump ──
+    const reg = document.getElementById('tbPumpRegister');
+    if(reg){
+      let body = '';
+      TB_LIST.forEach(function(b){
+        tbPumps(b.id).forEach(function(pm, i){
+          const now = tbPumpLatest(b.id, i, asOf), st = tbPumpState(now.st);
+          const h = tbPumpHours(b.id, i, fromDt, asOf), all = tbPumpHours(b.id, i, null, asOf);
+          const pmx = tbPumpPM(b.id, i, asOf);
+          const pmCls = pmx.status === 'overdue' ? 'out' : pmx.status === 'due' ? 'sb' : 'in';
+          const eps = tbPumpOOS(b.id, i, fromDt, asOf);
+          body += '<tr' + (now.st === 'out' ? ' class="alarm"' : '') + '>' +
+            '<td class="b">' + escHtml(b.name) + '</td><td class="p">' + escHtml(pm.name) + '</td>' +
+            '<td>' + (st ? '<span class="pchip ' + st.cls + '">' + st.en + '</span>' : '<span class="pchip none">Not reported</span>') + '</td>' +
+            '<td class="n in">' + tbFmt(h.in, 0) + '</td><td class="n sb">' + tbFmt(h.sb, 0) + '</td>' +
+            '<td class="n out">' + tbFmt(h.out, 0) + '</td>' +
+            '<td class="n">' + tbFmt(all.in, 0) + '</td>' +
+            '<td class="n"><span class="pchip ' + pmCls + '">' + tbFmt(pmx.run, 0) + ' / ' + tbFmt(pmx.every, 0) + '</span>' +
+              '<div class="sub">' + (pmx.status === 'overdue' ? 'PM overdue' : pmx.status === 'due' ? 'PM due soon'
+                                     : 'PM in ' + tbFmt(Math.max(0, pmx.every - pmx.run), 0) + ' h') +
+              (pmx.last ? ' · last ' + tbShortDay(pmx.last) : '') + '</div>' +
+              // Recorded on this day already: the button takes it back instead,
+              // so a PM pressed on the wrong pump or the wrong day can be undone.
+              (((TB_DAYS[asOf] && TB_DAYS[asOf].tbs && TB_DAYS[asOf].tbs[b.id] && TB_DAYS[asOf].tbs[b.id].pmd) || [])[i]
+                ? '<button type="button" class="pmdone undo" data-pb="' + escAttr(b.id) + '" data-pi="' + i + '" data-undo="1">Undo PM</button>'
+                : '<button type="button" class="pmdone" data-pb="' + escAttr(b.id) + '" data-pi="' + i + '">PM done</button>') +
+              '</td>' +
+            '<td class="n">' + eps.length + '</td></tr>';
+        });
+      });
+      reg.innerHTML = '<div class="tb-days tb-preg"><table><thead><tr>' +
+        '<th>Battery</th><th>Pump</th><th>Now</th><th class="in">In service<br>h · ' + per + '</th>' +
+        '<th class="sb">Standby<br>h · ' + per + '</th><th class="out">Out<br>h · ' + per + '</th>' +
+        '<th>Running h<br>total</th><th>Since PM (h)</th><th>Times out<br>' + per + '</th>' +
+        '</tr></thead><tbody>' + body + '</tbody></table></div>';
+      Array.prototype.forEach.call(reg.querySelectorAll('button.pmdone'), function(bt){
+        bt.addEventListener('click', function(){
+          const id = bt.getAttribute('data-pb'), i = parseInt(bt.getAttribute('data-pi'), 10);
+          const undo = bt.getAttribute('data-undo') === '1';
+          const nm = tbById(id).name + ' ' + tbPumps(id)[i].name;
+          if(!confirm(undo ? 'Remove the PM recorded on ' + nm + ' on ' + asOf + '?'
+                           : 'Record preventive maintenance done on ' + nm + ' on ' + asOf +
+                             '? Its running-hours count to the next PM restarts.')) return;
+          // The PM belongs to the day being looked at, not to whatever day the
+          // Entry page last had open.
+          const keep = _tbDate; _tbDate = asOf;
+          tbApplyInput(id, 'm', i, !undo);
+          _tbDate = keep;
+          tbQueueSave(); tbRenderPumps();
+        });
+      });
+    }
+
+    // ── every time a pump went out of service, why, and for how long ──
+    const oo = document.getElementById('tbPumpOOS');
+    if(oo){
+      const all = [];
+      TB_LIST.forEach(function(b){
+        tbPumps(b.id).forEach(function(pm, i){
+          tbPumpOOS(b.id, i, fromDt, asOf).forEach(function(e){ all.push(Object.assign({ b:b, pm:pm }, e)); });
+        });
+      });
+      all.sort(function(a, z){ return (a.from.dt + a.from.r) < (z.from.dt + z.from.r) ? 1 : -1; });
+      oo.innerHTML = !all.length ? '<div class="rg-empty">No pump went out of service in this period.</div>' :
+        '<div class="tb-days tb-plog"><table><thead><tr><th>Battery</th><th>Pump</th><th>Went out</th>' +
+        '<th>Back</th><th>Hours out</th><th>Reason for stopping</th></tr></thead><tbody>' +
+        all.map(function(e){
+          const back = e.back ? tbPumpState(e.back) : null;
+          return '<tr' + (e.to ? '' : ' class="alarm"') + '><td class="b">' + escHtml(e.b.name) + '</td><td>' + escHtml(e.pm.name) + '</td>' +
+            '<td>' + tbSlotWhen(e.from, e.b) + '</td>' +
+            '<td>' + (e.to ? tbSlotWhen(e.to, e.b) + ' <span class="pchip ' + back.cls + '">' + back.en + '</span>'
+                           : '<span class="pchip out">Still out</span>') + '</td>' +
+            '<td class="n">' + tbFmt(e.hours, 0) + '</td>' +
+            '<td class="why">' + (e.why ? '<bdi dir="auto">' + escHtml(e.why) + '</bdi>' : '<span class="none">no reason written</span>') + '</td></tr>';
+        }).join('') + '</tbody></table></div>';
+    }
+  }
+
   function tbRenderView(){
     _tbZoom = {};
     const dv = document.getElementById('tbViewDate');
@@ -6535,6 +6839,7 @@ tbRemarksHTML(day.date, true) +
     if(_tbAdmin() && _tbSub === 'old')  tbRenderOld();
     if(_tbAdmin() && _tbSub === 'temp') tbRenderTemp();
     if(_tbAdmin() && _tbSub === 'chem') tbRenderChem();
+    if(_tbAdmin() && _tbSub === 'pumps') tbRenderPumps();
     const sv = document.getElementById('tbSaved');
     const day = tbGetDay(_tbDate);
     if(sv) sv.textContent = day.updatedAt
@@ -6557,6 +6862,70 @@ tbRemarksHTML(day.date, true) +
   // (The record of what was typed is _tbPend, declared with the state above.
   // It holds FIELDS, not rows: sending a whole row let an operator's stale copy
   // of the admin's correction overwrite it when he only changed the WHP.)
+  // ── Pump station, derived from the three-hour readings ────────────────
+  // Every reading is a pump's state at that moment, and the three hours that
+  // FOLLOW it are counted to that state: in service → running hours, standby →
+  // standby hours, out of service → hours out. The closing reading of a day
+  // starts nothing (it is the next day's opening), so a day is eight intervals.
+  function tbPumpSlots(id, i, fromDt, toDt){
+    const out = [];
+    Object.keys(TB_DAYS).sort().forEach(function(dt){
+      if((fromDt && dt < fromDt) || (toDt && dt > toDt)) return;
+      const c = TB_DAYS[dt] && TB_DAYS[dt].tbs && TB_DAYS[dt].tbs[id];
+      if(!c || !c.ps || !c.ps[i]) return;
+      for(let r = 0; r < TB_READS - 1; r++){
+        const st = c.ps[i][r];
+        if(st) out.push({ dt:dt, r:r, st:st, why:(c.py && c.py[i] && c.py[i][r]) || '' });
+      }
+    });
+    return out;
+  }
+  function tbPumpHours(id, i, fromDt, toDt){
+    const h = { in:0, sb:0, out:0 };
+    tbPumpSlots(id, i, fromDt, toDt).forEach(function(s){ h[s.st] += TB_STEP; });
+    return h;
+  }
+  // The latest reading on or before a day — the pump's state "now".
+  function tbPumpLatest(id, i, asOf){
+    const days = Object.keys(TB_DAYS).filter(function(d){ return d <= asOf; }).sort().reverse();
+    for(let k = 0; k < days.length; k++){
+      const c = TB_DAYS[days[k]].tbs && TB_DAYS[days[k]].tbs[id];
+      if(!c || !c.ps) continue;
+      for(let r = TB_READS - 1; r >= 0; r--) if(c.ps[i][r]) return { st:c.ps[i][r], dt:days[k], r:r };
+    }
+    return { st:null, dt:null, r:null };
+  }
+  // Out-of-service episodes: runs of consecutive readings "out", each with the
+  // reason written where it went out, and its length in hours.
+  function tbPumpOOS(id, i, fromDt, toDt){
+    const out = [];
+    let cur = null;
+    tbPumpSlots(id, i, null, toDt).forEach(function(s){
+      if(s.st === 'out'){
+        if(!cur) cur = { from:s, to:null, back:null, hours:0, why:'' };
+        cur.hours += TB_STEP;
+        if(s.why && !cur.why) cur.why = s.why;
+      } else if(cur){ cur.to = s; cur.back = s.st; out.push(cur); cur = null; }
+    });
+    if(cur) out.push(cur);
+    return out.filter(function(e){ return !fromDt || (e.to ? e.to.dt : '9999') >= fromDt; });
+  }
+  // Preventive maintenance: the last day it was recorded done, and the RUNNING
+  // hours since — the day of the PM itself counts as the fresh start.
+  function tbPumpPM(id, i, asOf){
+    const pm = tbPumps(id)[i], every = TB_PUMP_PM_HOURS[pm && pm.kind] || 0;
+    let last = null;
+    Object.keys(TB_DAYS).sort().forEach(function(dt){
+      if(asOf && dt > asOf) return;
+      const c = TB_DAYS[dt].tbs && TB_DAYS[dt].tbs[id];
+      if(c && c.pmd && c.pmd[i]) last = dt;
+    });
+    let run = 0;
+    tbPumpSlots(id, i, null, asOf).forEach(function(s){ if(s.st === 'in' && (!last || s.dt > last)) run += TB_STEP; });
+    const pct = every ? run / every : 0;
+    return { every:every, last:last, run:run, status: !every ? 'n/a' : pct >= 1 ? 'overdue' : pct >= 0.9 ? 'due' : 'ok' };
+  }
+
   function tbCellIn(day, id){
     if(!day.tbs) day.tbs = {};
     if(!day.tbs[id]) day.tbs[id] = tbBlankCell();
@@ -6572,6 +6941,9 @@ tbRemarksHTML(day.date, true) +
         cell[k] = (cell[k] || []).concat(tbBlankCell()[k]).slice(0, TB_SPAN + 1);
       }
     });
+    if(!cell.ps || !cell.py || !cell.pmd){
+      const bl = tbBlankCell(); cell.ps = cell.ps || bl.ps; cell.py = cell.py || bl.py; cell.pmd = cell.pmd || bl.pmd;
+    }
     return cell;
   }
   function tbCellOn(date, id){
@@ -6610,6 +6982,35 @@ tbRemarksHTML(day.date, true) +
   function tbApplyInput(id, kind, i, raw){
     if(!tbMayWrite(id, kind)) return;
     const cell = tbCellOn(_tbDate, id);
+    if(kind === 'm'){
+      if(!(i >= 0 && i < tbPumps(id).length)) return;
+      cell.pmd[i] = !!raw;
+      _tbPend.mark(_tbDate, tbPendKey(id, 'm', i), cell.pmd[i]);
+      tbSaveLocal();
+      return;
+    }
+    if(kind === 'q' || kind === 'y'){
+      const pi = Math.floor(i / 100), r = i % 100;
+      if(!(pi >= 0 && pi < tbPumps(id).length && r >= 0 && r < TB_READS)) return;
+      if(kind === 'q'){
+        const v = tbPumpState(raw) ? raw : null;
+        cell.ps[pi][r] = v;
+        _tbPend.mark(_tbDate, tbPendKey(id, 'q', i), v);
+        // The closing reading and the next day's opening are the same moment,
+        // exactly as for the scanner: one entry, both days.
+        const twin = tbBoundaryTwin(id, r);
+        if(twin){
+          const other = tbCellOn(twin.date, id);
+          other.ps[pi][twin.i] = v;
+          _tbPend.mark(twin.date, tbPendKey(id, 'q', tbPumpKey(pi, twin.i)), v);
+        }
+      } else {
+        cell.py[pi][r] = raw || '';
+        _tbPend.mark(_tbDate, tbPendKey(id, 'y', i), cell.py[pi][r]);
+      }
+      tbSaveLocal();
+      return;
+    }
     if(kind === 'r'){
       // A remark is text, not a reading: one per battery per day, no index.
       cell.note = raw || '';
@@ -6686,7 +7087,14 @@ tbRemarksHTML(day.date, true) +
           const doc = docs[docId] = docs[docId] || { date:dt, battery:id, startHour:tbStart(id),
             updatedBy:who, updatedAt:firebase.firestore.FieldValue.serverTimestamp() };
           const val = snap[dt][key];
-          if(kind === 'r') doc.remarks = val || '';
+          if(kind === 'm') (doc.pumpPM = doc.pumpPM || {})[i] = !!val;
+          else if(kind === 'q' || kind === 'y'){
+            const n = Number(i), pi = String(Math.floor(n / 100)), r = String(n % 100);
+            const f = kind === 'q' ? 'pumps' : 'pumpWhy';
+            doc[f] = doc[f] || {};
+            (doc[f][pi] = doc[f][pi] || {})[r] = val;
+          }
+          else if(kind === 'r') doc.remarks = val || '';
           else if(kind === 'c') (doc.temp = doc.temp || {})[i] = val;
           else if(kind === 'x') (doc.chem = doc.chem || {})[i] = val;
           else {
@@ -6811,6 +7219,29 @@ tbRemarksHTML(day.date, true) +
           obj[date].tbs[bid] = tbChemToArray(dd.chem,
                                  tbTempToArray(dd.temp, tbRowsToArrays(dd.rows)));
           obj[date].tbs[bid].note = dd.remarks || '';
+          if(dd.pumps && typeof dd.pumps === 'object'){
+            Object.keys(dd.pumps).forEach(function(pi){
+              const row = dd.pumps[pi] || {};
+              Object.keys(row).forEach(function(r){
+                const i = Number(pi), k = Number(r);
+                if(i < TB_PUMP_MAX && k < TB_READS) obj[date].tbs[bid].ps[i][k] = row[r] || null;
+              });
+            });
+          }
+          if(dd.pumpPM && typeof dd.pumpPM === 'object'){
+            Object.keys(dd.pumpPM).forEach(function(pi){
+              if(Number(pi) < TB_PUMP_MAX) obj[date].tbs[bid].pmd[Number(pi)] = !!dd.pumpPM[pi];
+            });
+          }
+          if(dd.pumpWhy && typeof dd.pumpWhy === 'object'){
+            Object.keys(dd.pumpWhy).forEach(function(pi){
+              const row = dd.pumpWhy[pi] || {};
+              Object.keys(row).forEach(function(r){
+                const i = Number(pi), k = Number(r);
+                if(i < TB_PUMP_MAX && k < TB_READS) obj[date].tbs[bid].py[i][k] = row[r] || '';
+              });
+            });
+          }
           if(dd.dayTotal != null){
             obj[date].tbs[bid].t   = Number(dd.dayTotal);
             obj[date].tbs[bid].src = dd.source || 'imported';
@@ -6936,6 +7367,7 @@ tbRemarksHTML(day.date, true) +
       area.addEventListener('input', function(e){
         const t = e.target;
         if(!t || !t.getAttribute || !t.getAttribute('data-tb')) return;
+        if(t.tagName === 'SELECT') return;                // handled on change
         tbApplyInput(t.getAttribute('data-tb'), t.getAttribute('data-k'),
                      parseInt(t.getAttribute('data-i'), 10), t.value);
         t.classList.add('rg-dirty');
@@ -6945,7 +7377,35 @@ tbRemarksHTML(day.date, true) +
         tbRepaintDerived();
         tbQueueSave();
       });
-      area.addEventListener('change', function(){ tbQueueSave(); });
+      area.addEventListener('change', function(e){
+        tbQueueSave();
+        // A pump state changed: redraw, so the reason box opens or closes and
+        // the cell takes its colour.
+        const t = e.target;
+        if(t && t.classList && t.classList.contains('ps-sel')){
+          tbApplyInput(t.getAttribute('data-tb'), 'q', parseInt(t.getAttribute('data-i'), 10), t.value);
+          t.blur();
+          tbRenderArea();
+          // Straight into the reason, if one just opened.
+          if(t.value === 'out'){
+            const why = document.querySelector('#tbArea textarea.ps-why[data-tb="' + t.getAttribute('data-tb') + '"]' +
+                                               '[data-i="' + t.getAttribute('data-i') + '"]');
+            if(why && !why.value) why.focus();
+          }
+        }
+      });
+      area.addEventListener('click', function(e){
+        const t = e.target.closest ? e.target.closest('button[data-pcopy]') : null;
+        if(!t) return;
+        const id = t.getAttribute('data-pcopy'), r = parseInt(t.getAttribute('data-r'), 10);
+        const c0 = tbGetDay(_tbDate).tbs[id];
+        tbPumps(id).forEach(function(p, i){
+          const prev = c0.ps[i][r - 1];
+          if(prev) tbApplyInput(id, 'q', tbPumpKey(i, r), prev);
+        });
+        tbQueueSave();
+        tbRenderArea();
+      });
     }
     tbRenderAll();
   });

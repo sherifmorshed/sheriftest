@@ -1,5 +1,345 @@
 # Sinai Field — Changelog
 
+## v28 — pump station
+
+Service-worker cache `sinai-field-v28`. Only `index.html` and `sw.js` change.
+**`firestore.rules` needs no change** — the pump readings are fields on each
+battery's own daily document, which that battery's account already writes.
+
+### For the operator
+
+Every battery's entry table now has **one column per pump**, after Chem. inj.,
+read with the scanner every three hours:
+
+| Battery | Pumps |
+|---|---|
+| T.B. 6/1 | Booster A, Booster B |
+| T.B. 6/2 | Booster A, Booster B, Borets A, Borets B |
+| T.B. 8/1 | Powerhouse A, Pump B, Pump C |
+| T.B. 8/2 | Booster A, Booster B, Booster C |
+| T.B. 10/1 | Transfer 1 – 6 |
+
+Each box is a picker in Arabic: **في الخدمة**, **احتياطي**, **خارج الخدمة** —
+green, amber and red once chosen.
+
+- Choosing **خارج الخدمة** opens a **سبب التوقف** line under that reading,
+  named for the pump, with the cursor already in it. It opens only at the
+  reading where the pump went out, not again while it stays out.
+- **كما هو** under the time fills an empty row's pumps from the reading before —
+  the whole update when nothing changed in three hours.
+- The closing reading is the next day's opening, exactly as for the scanner.
+- With six pumps the table is wider than a phone: it scrolls sideways and the
+  time column stays fixed.
+
+### For admin — the new **Pumps** tab (English)
+
+Every reading counts the THREE HOURS AFTER IT to the state it records:
+in service → running hours, standby → standby hours, out of service → hours
+out. So a pump left in service keeps counting running hours; the reading it
+goes out, it starts counting out-of-service hours instead; standby likewise.
+
+Pick an "As of" day and a period (This day / 7 / 30 / 90 days / All):
+
+1. **Pumps situation** — every pump's latest state as a coloured chip, counts
+   per battery and for the field.
+2. **Hours by state** — per pump: state now, hours in service / standby / out
+   in the period, total running hours, running hours since the last PM against
+   the PM interval, and how many times it went out.
+3. **Out of service** — every stoppage: when it went out, when it came back (or
+   still out), hours out, and the reason the operator wrote.
+
+**PM** is recorded by admin: set "As of" to the day it was done and press
+**PM done** on the pump's row; its count to the next PM restarts after that
+day. Pressed by mistake, the same button reads **Undo PM** on that day and takes
+it back.
+
+**The PM interval is a PLACEHOLDER — 4,000 running hours for every pump** —
+until the real figures are known. Change `TB_PUMP_PM_HOURS` in `index.html`.
+A pump shows "PM due soon" at 90% and "PM overdue" past 100%.
+
+Stored on the battery's document: `pumps.{pump}.{reading}` = `in` | `sb` |
+`out`, `pumpWhy.{pump}.{reading}` = the reason, `pumpPM.{pump}` = true on a PM
+day. Running hours start from the day this is first used; nothing before it is
+estimated.
+
+## v27 — one less note on the entry table
+
+Service-worker cache `sinai-field-v27`. Only `index.html` and `sw.js` change.
+
+The "3 of 8 intervals complete — the total below covers those only" line is
+gone from the battery panels. A man filling the table in can see which boxes
+are still empty.
+
+The two notes that remain are things he cannot see by looking: a reading LOWER
+than the one before it (a meter reset, rollover or misread), and a day that
+holds an imported daily figure with no three-hour readings behind it.
+
+## v26 — the fitted card stops jumping
+
+Service-worker cache `sinai-field-v26`. Only `index.html` and `sw.js` change.
+
+Fit to screen shrank and grew the card while you scrolled on a phone, and
+stuttered doing it. Three causes, all fixed:
+
+- **The address bar.** A phone browser hides its address bar as you scroll and
+  shows it again as you scroll back, and `window.innerHeight` changes by 60–100
+  px each time — which the card was honestly re-fitting to. It now fits to the
+  TALLEST height seen at this width, so the size it settles on is the size it
+  keeps. A rotation starts the measurement again; a height-only change is
+  ignored, because it is not a new screen.
+- **The re-measuring.** Fitting tries several layout widths, and each one costs
+  a reflow of the whole card. That ran again on every one of those resizes,
+  which is where the stutter came from. The answer is now kept and reused until
+  the day, the period or the width actually changes.
+- **The scroll-up.** Fitting scrolls the card under the header once when it
+  opens. It was smooth-scrolling, and could land while a finger was still
+  moving, so the page appeared to fight back. It is now instant, only once per
+  card, and never while the reader is mid-scroll.
+
+## v25 — Remarks in Arabic too
+
+Service-worker cache `sinai-field-v25`. Only `index.html` and `sw.js` change.
+
+The Remarks heading now reads **Remarks ملاحظات اليوم** on every entry screen —
+each tank battery's box, the PETRECO scanners' box, and all five boxes on
+admin's Entry page. A heading has a whole line to itself, so the Arabic sits
+beside the English rather than under it.
+
+## v24 — Scanner analysis split in two
+
+Service-worker cache `sinai-field-v24`. Only `index.html` and `sw.js` change.
+
+**Scanner analysis now has two tabs of its own: Figures and Graphs analysis.**
+Checking a shift against yesterday is reading numbers; looking for a drift is
+reading shapes. They were one long scroll, so the numbers sat above five charts
+and the charts below the numbers, and neither was quick to reach.
+
+| Figures | Graphs analysis |
+|---|---|
+| Today at a glance, both groups | Three-hour production, field and per battery |
+| Monitoring Production real-time | PETRECO three-hour production |
+| PETRECO at a glance | Tank battery record — all batteries, each battery |
+| PETRECO twenty-four hours | PETRECO daily production |
+| PETRECO daily production table | |
+| Import daily history | |
+| Tank battery record — daily totals | |
+
+Figures opens first. The range chips (30 days / 90 days / All) are drawn in both
+places and share one setting, so the range chosen on one tab is the range on the
+other. Charts are drawn when their tab is opened, not while it is hidden — a
+chart measures itself against the width it is drawn in, and a hidden one has
+none.
+
+**The two on-screen comparison tables are gone** — "Twelve-hour halves — today
+vs yesterday" and "Twenty-four hours — today vs yesterday". The printed day
+report still carries both, and that is where a shift is signed off.
+
+## v23 — Arabic on the entry screens
+
+Service-worker cache `sinai-field-v23`. Only `index.html` and `sw.js` change.
+
+The men entering readings read Arabic more easily than English. Arabic is added
+UNDER the English, never instead of it: the same tables are read in the office
+and go into the reports.
+
+**Tank batteries** — headings and times:
+
+| Column | Arabic |
+|---|---|
+| Scanner m³ | سكانر |
+| Temp °C | الحرارة |
+| Chem. inj. | حقن الكيمكال |
+| Production, WHP | left in English |
+
+and the hour under each time: 05:00 → **5 صباحاً**, 17:00 → **5 مساءً**, noon
+→ **12 ظهراً**, midnight → **12 ليلاً**.
+
+**PETRECO scanners** — the period column only, on both the drains and the crude
+oil: 06:00 → 09:00 carries **من 6 ص إلى 9 ص**, and the twelve-hour subtotals
+carry theirs. The scanner names stay as they are.
+
+**R/G Production** — the time column only, the same wording as the batteries.
+The headings stay English: that table is PETRECO against Ras Gara and is read
+by both sides and by the office.
+
+Three details that decide whether this reads properly rather than merely
+appearing:
+
+- `letter-spacing` is forced to 0 on Arabic. The headings and time columns are
+  letter-spaced, and spacing between Arabic letters breaks the joins — سكانر
+  comes out as سكا نر.
+- A period is written **من … إلى …**, not with an arrow. An arrow between two
+  Arabic runs is a neutral character whose side depends on the line's
+  direction, and a period that reads backwards is worse than a longer label.
+- Noon and midnight get their own words. "12 مساءً" for midday is wrong to an
+  Arabic ear and "12 صباحاً" for midnight is worse.
+
+The battery table is a little wider for it, so on a narrow phone it scrolls
+sideways rather than clipping a reading: the WHP and scanner boxes keep their
+digits.
+
+## v22 — remarks on the printed report, and a card that fits the phone
+
+Service-worker cache `sinai-field-v22`. Only `index.html` and `sw.js` change.
+
+**The printed day report now carries the remarks too**, in a Remarks section at
+the end — each battery that wrote something, headed and underlined with whose
+it is, then PETRECO's. It is the same collection the report card shows
+(`tbRemarksList`), so the two cannot drift apart. A day with no remarks gets no
+section rather than an empty one.
+
+**The report card fits a phone screen.** Opening it now scales the whole card
+down as one block so the entire day stands on the screen at once, with no
+scrolling: 0.74 on a 412px phone (≈10px figures), 0.64 on a 360px one (≈8px).
+Two things make that possible — the card is measured against the whole screen
+below the header rather than the space left under the date bar, and it is laid
+out at the width that scales best rather than at the phone's own width, since a
+narrow layout wraps tall and wastes the screen. A **Full size** button turns it
+off; on a desktop screen it is off to begin with, because the card already
+fits.
+
+The card is scaled as a block, not reflowed, so what is on the screen is the
+report people read on paper — same columns, same order, same shape.
+
+## v21 — remarks from every battery
+
+Service-worker cache `sinai-field-v21`. Only `index.html` and `sw.js` change;
+`firestore.rules` needs no change — a battery's account already writes its own
+document, and the remark is a field on it.
+
+**Every tank battery now has a Remarks box**, under its table on the entry
+screen. An operator sees one — his own battery's — and admin sees all five on
+the Entry page. It is one remark per battery per day, saved like any other
+cell: on the date it was typed, only that field, and it survives a sync
+landing while it is being written.
+
+**The report card collects them.** The Remarks box at the bottom now carries
+each battery that wrote something, headed and underlined with whose it is —
+T.B. 6/1, T.B. 6/2 and so on — then PETRECO's remark last, in the same box. A
+battery with nothing to say is left out rather than given an empty heading, and
+a day with no remarks at all still shows the box saying so.
+
+The card stays one A4 page even with all five batteries and PETRECO writing a
+long note: past two remarks the block tightens instead of pushing the day onto
+a second sheet.
+
+**The note under the Daily totals table is gone** — the table speaks for
+itself.
+
+Stored as `remarks` on the battery's own document, beside its readings.
+
+## v20 — PETRECO on the Daily totals table
+
+Service-worker cache `sinai-field-v20`. Only `index.html` and `sw.js` change.
+
+The **Daily totals** table at the bottom of Scanner analysis now carries
+PETRECO's own scanners beside the batteries, as day totals for the same shift
+day:
+
+- **29 BIS, GB #1, GB #3, then a Drains column** adding the three. They are
+  three readings of one job, so their total means something.
+- **L.O.T.F, M.O.T.F and Sicies, with no total.** They are separate
+  streams into PETRECO, and a column adding them would only invite a comparison
+  nobody asked for.
+
+A day with no PETRECO readings shows dashes rather than zeros, and a figure
+from a day short of readings is in italics — the same mark the rest of the app
+uses. The battery columns, the red tint on a losing day and the Change columns
+are untouched.
+
+The printed record (Print record) is unchanged and still covers the batteries
+only.
+
+Also: **the Sicies scanner is now called just "Sicies"** everywhere — entry
+table, analysis, report card, daily totals — because the full name cost a
+column's width on every one of them. Only the label changed; the meter id
+(`psicies`) and its data are untouched.
+
+## v19 — the Sicies scanner
+
+Service-worker cache `sinai-field-v19`. Only `index.html` and `sw.js` change;
+`firestore.rules` needs no change (PETRECO's operators already write every
+meter in their own collection).
+
+**A third crude oil scanner, Sicies**, treated exactly as L.O.T.F and
+M.O.T.F are:
+
+- its own column in PETRECO Crude Oil on the entry table, typed every three
+  hours, counted in the section's twelve-hour subtotals and day total;
+- its own chart, its own line in the today/yesterday table, its own row in the
+  monitoring grid and the daily table on Scanner analysis;
+- its own line in PTB Production on the report card, counted in that TOTAL.
+
+Stored as `pfReadings/{date}__psicies`, like any other meter. Nothing existing
+moved or changed shape.
+
+While adding it, the report card's PTB Production block stopped naming its
+crude lines and now takes them from PF_LIST's `crude` group, so the next
+scanner added there appears on the card without another edit.
+
+## v18 — chemical injection
+
+Service-worker cache `sinai-field-v18`. Only `index.html` and `sw.js` change.
+**`firestore.rules` needs no change** — the tank battery rules allow a battery's
+own account to write its own document, whatever fields are in it, so the new
+field is covered by what is already published. Nothing to republish.
+
+**Every battery now records chemical injection, every six hours**, in a new
+column after Temp on the operator's table — T.B. 6/1, 6/2, 8/1, 8/2 and 10/1
+alike. Six hours means four doses plus the closing reading: 05:00, 11:00,
+17:00, 23:00 and 05:00 for the Belayim four, an hour later for T.B. 10/1, each
+on its own shift clock. The rows in between have no box, the same way the
+scanner columns are closed off on a temperature-only row.
+
+Units are litres by default. If a battery doses in something else, set
+`chemUnit` on it in `TB_LIST` — the column heading, the cards and the grid all
+follow it.
+
+**Admin gets a Chemical injection page** beside Temperature, built the same way
+— cards per battery, a chart through the day, and a grid every six hours. Two
+things differ, because a dose is not a temperature: the headline figure is the
+day's TOTAL rather than the average, and the grid's last column totals the
+doses. The grid carries one header per clock, so T.B. 10/1's doses are not
+labelled an hour early.
+
+Stored as `chem` on the same document, keyed by hour offset exactly as `temp`
+is. A dose saves like every other cell: only that field is sent, on the date it
+was typed, and it survives a sync landing mid-entry.
+
+## v17 — no explanatory notes on the entry screen
+
+Service-worker cache `sinai-field-v17`. Only `index.html` and `sw.js` change.
+
+The PETRECO entry table no longer tells the operator "the comparison with
+yesterday appears once all eight periods are entered". He is there to enter
+readings; the app explaining its own derived cells to him is noise.
+
+The other note — which halves of an old day are still twelve-hour figures — is
+now shown to admin only, for the same reason. Nothing about the figures
+themselves changed.
+
+## v16 — report card: "Not yet" instead of a part figure
+
+Service-worker cache `sinai-field-v16`. Only `index.html` and `sw.js` change.
+
+**The report card no longer shows part figures.** A line whose window is not
+fully read now reads **Not yet** in the Today column — not the readings taken
+so far added up. v14 showed that running figure marked "so far"; on paper it
+still read as a day's production, and a reader comparing it with yesterday's
+finished figure reached the wrong conclusion whatever the mark said.
+
+**A total is never part-added either.** Until every line in it is read, the
+TOTAL row reads "Not yet" as well. A Belayim total of the two batteries that
+happen to be in is not the group's production.
+
+Lines that ARE fully read still show their figures and their difference
+normally, on the same card — the rule is per line, not per card. Yesterday's
+column is unchanged where yesterday is complete, and shows a dash where it is
+not. The heading still says IN PROGRESS while anything is outstanding.
+
+The entry screens and Scanner analysis are unchanged: there a running day total
+is what an operator filling in the shift needs to see.
+
 ## v15 — PETRECO scanners every three hours
 
 Service-worker cache `sinai-field-v15`. Only `index.html` and `sw.js` change;
