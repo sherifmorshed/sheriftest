@@ -1,6 +1,6 @@
 # Sinai Field — start here
 
-**Attach `sinai-field-v28.zip` to the new chat and paste the block below as your
+**Attach `sinai-field-v41.zip` to the new chat and paste the block below as your
 first message.** Everything Claude needs is in the zip; nothing from any other
 conversation is required.
 
@@ -16,7 +16,7 @@ conversation is required.
 > The attached zip is the whole project. Read `README.md`, then
 > `DEVELOPER_REFERENCE.md`, then `CHANGELOG.md` before changing anything.
 >
-> Current release: **v28**, service-worker cache `sinai-field-v28`.
+> Current release: **v41**, service-worker cache `sinai-field-v41`.
 >
 > How I work: show me the change, test it before you say it is done, and tell me
 > plainly when something I asked for is a bad idea.
@@ -71,7 +71,30 @@ tank battery total to a Ras Gara total.
 
 ## Where things stand
 
-v28 added the pump station: one column per pump in every battery's entry table,
+v41 made ALL of T.B. 10/1's pumps daily (Transfer 1–6 and HPS 1–2, with كما أمس);
+earlier three-hourly transfer readings still count via `legacy3h`. The other
+batteries stay three-hourly. v40 added PM monitoring to the Pumps tab: per-pump interval (editable), running
+hours since PM, hours left, projected due date, standby/out since PM, and a PM
+log admin records into (tbReadingsMeta/pm). Real PM intervals are still to be
+set — admin can now enter them per pump. v39 added T.B. 10/1's HP Pump 1 and 2 to وضع المحطة, recorded once a day
+(transfer pumps stay three-hourly). v38 reordered T.B. 10/1's tabs: القراءات, مقاسات المحطة, وضع المحطة. v37
+widened the skimmer to 4–13 stairs and added OIL ROOM (On/Off) after it.
+v36 gave each Sigma heater On/Off (off clears its readings) and split high
+pressure into Pump No.1 and No.2 — only the pump ON goes in the message. v35 made
+the station-measurement form English-only and added Sigma heaters 1, 2
+and 4 (temperature and flow rate) after the scanner. v34 added T.B. 10/1's third
+tab, مقاسات المحطة: nine rounds 05:00→05:00 with
+levels, samples, temperatures, pressures, scanner, skimmer and HP pump, and a
+WhatsApp message in the group's format (copy / open WhatsApp). v33 moved
+T.B. 10/1's pumps to their own tab, وضع المحطة (`pumpTab:true` in
+TB_LIST); the other batteries keep pump columns. v32 set Today and Yesterday as two identical English lines in each battery
+header. v31 renamed the WHP column Line pressure / ضغط الخط. v30 made the PETRECO
+drain scanners totalizer readings (difference worked out
+and shown under each; crude oil still entered as quantities) and labelled the
+yesterday line أمس for operators. v29 put "Yesterday" under each battery's day
+total — yesterday over the same
+intervals today has read, so it is always like for like. v28 added the pump
+station: one column per pump in every battery's entry table,
 updated every three hours (في الخدمة / احتياطي / خارج الخدمة, with سبب التوقف
 when one goes out), and a Pumps tab for admin counting hours by state, PM and
 every stoppage with its reason. PM intervals are PLACEHOLDERS (4,000 h) — ask
