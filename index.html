@@ -12,26 +12,26 @@
    accounts and its own release cycle, and it shares nothing with any other
    PETROBEL app. Nothing here should ever need to reach outside this folder.
 
-   WHAT IS WHERE                                        (line numbers, v30)
+   WHAT IS WHERE                                        (line numbers, v33)
    ─────────────────────────────────────────────────────────────────────────
      CSS
        Design tokens — every colour lives here, light + dark ...... line 74
        Header, login, toast, footer .............................. line 107
        Pages: readings, tank batteries, scanners, PETRECO ........ line 239
      MARKUP
-       Icon sprite — every icon, drawn inline .................... line 756
-       Login screen .............................................. line 776
-       Header bar ................................................ line 834
-       Pages: R/G, A/R, PETRECO, no-access ....................... line 846
+       Icon sprite — every icon, drawn inline .................... line 767
+       Login screen .............................................. line 787
+       Header bar ................................................ line 845
+       Pages: R/G, A/R, PETRECO, no-access ....................... line 857
      SCRIPT — the shell
-       ►► CONFIGURATION — Firebase config + role lists ........... line 1170
-       Boot, helpers, unsaved-edits queue, footer status ......... line 1244
-       Sign in / sign out, roles, tabs ........................... line 1567
-     SCRIPT — R/G Production (hourly PETRECO vs Ras Gara) ........ line 1806
+       ►► CONFIGURATION — Firebase config + role lists ........... line 1181
+       Boot, helpers, unsaved-edits queue, footer status ......... line 1255
+       Sign in / sign out, roles, tabs ........................... line 1578
+     SCRIPT — R/G Production (hourly PETRECO vs Ras Gara) ........ line 1817
      SCRIPT — A/R Production (tank batteries, report card,
-              scanner analysis, temperature, chemical, pumps) ..... line 3275
-     SCRIPT — day / night theme, service worker .................. line 7514
-     SCRIPT — PETRECO scanners ................................... line 7579
+              scanner analysis, temperature, chemical, pumps) ..... line 3286
+     SCRIPT — day / night theme, service worker .................. line 7581
+     SCRIPT — PETRECO scanners ................................... line 7646
 
    THE ROLES
      admin     both R/G sides, A/R Production, every report
@@ -376,19 +376,21 @@ body.light-mode .tabs button.on{color:#fff;}
 .tb-panel .bar{height:3px;background:linear-gradient(90deg,var(--accent) 0%,var(--gold) 100%);}
 .tb-panel .hd{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:11px 14px 2px;}
 .tb-panel .hd h3{font-size:15px;font-weight:800;color:var(--text);letter-spacing:-.01em;}
-.tb-panel .hd .tots{margin-left:auto;text-align:right;}
-.tb-panel .hd .tot{font-family:var(--font-num);font-size:14px;font-weight:800;color:var(--s3);}
-.tb-panel .hd .ytot{font-family:var(--font-num);font-size:12px;font-weight:700;color:var(--muted);margin-top:1px;}
-.tb-panel .hd .ytot:empty{display:none;}
-.tb-panel .hd .ytot i{font-style:normal;font-size:10px;font-weight:600;}
-.tb-panel .hd .ytot .ar-in{font-family:'Segoe UI','Noto Naskh Arabic',Tahoma,sans-serif;font-size:13px;letter-spacing:0;}
-.tb-panel .hd .tot i{font-style:normal;font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.5px;}
+/* Today and Yesterday: two identical lines, one under the other. A grid of
+   label · value · unit, so the labels line up on the left, the figures line up
+   digit under digit on the right, and both read at the same size and weight. */
+.tb-panel .hd .tots{margin-left:auto;display:grid;grid-template-columns:auto auto auto;
+  column-gap:6px;row-gap:2px;align-items:baseline;font-family:var(--font-num);font-size:14px;font-weight:800;}
+.tb-panel .hd .tot,.tb-panel .hd .ytot{display:contents;}
+.tb-panel .hd .tots .lb{font-size:10.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);}
+.tb-panel .hd .tots .v{text-align:right;color:var(--text);font-variant-numeric:tabular-nums;}
+.tb-panel .hd .tots .u{font-size:10px;font-weight:600;color:var(--muted);}
 .tb-panel .note{font-size:11px;color:var(--muted);font-family:var(--font-num);padding:3px 14px 0;line-height:1.5;}
 .tb-panel .note.warn{color:var(--red);font-weight:700;}
 .tb-panel .bd{padding:9px 11px 12px;}
 /* Four short columns — no 520px floor, so nothing scrolls sideways. */
 /* Six columns, and two of the headings now carry Arabic under them. Below this
-   width the WHP box starts clipping its own digits, so the table scrolls a
+   width the line-pressure box starts clipping its own digits, so the table scrolls a
    little on a narrow phone rather than squeezing a reading out of sight. */
 table.tb-tbl{min-width:430px;}
 /* Four columns on a 360px screen: let the two inputs share what is left after
@@ -448,6 +450,15 @@ table.tb-tbl .tb-din{max-width:88px;}
    Green in service, amber standby, red out of service — the same three
    colours on the operator's grid, admin's chips and the report. */
 table.tb-tbl th.tb-grp6{color:var(--accent2);border-bottom:2px solid var(--accent2);white-space:nowrap;}
+/* T.B. 10/1: readings and pump station on two tabs inside the panel. */
+.tb-panel .ptabs{display:flex;gap:6px;margin:0 0 10px;background:var(--surface);border:1px solid var(--border);
+  border-radius:11px;padding:4px;}
+.tb-panel .ptabs button{flex:1;background:transparent;border:0;border-radius:8px;cursor:pointer;color:var(--muted);
+  padding:9px 8px;font-size:14px;font-weight:800;letter-spacing:0;
+  font-family:'Segoe UI','Noto Naskh Arabic',Tahoma,sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:7px;}
+.tb-panel .ptabs button.on{background:var(--card);color:var(--accent2);box-shadow:0 1px 4px rgba(15,23,42,.10);}
+.tb-panel .ptabs .pdot{min-width:18px;height:18px;border-radius:9px;background:#dc2626;color:#fff;font-size:11px;
+  font-weight:800;display:inline-flex;align-items:center;justify-content:center;padding:0 5px;}
 table.tb-tbl td.ps{padding:3px 2px;}
 /* The time stays on screen while the pump columns scroll sideways. */
 table.tb-tbl td.rg-time,table.tb-tbl thead th:first-child{position:sticky;left:0;z-index:1;background:var(--card);}
@@ -457,8 +468,8 @@ table.tb-tbl tr.why-row td{background:rgba(220,38,38,.05);text-align:left;border
    screen. Its contents are pinned to the visible part and sized to it, so the
    box he types in is never half off the edge. */
 table.tb-tbl tr.why-row td > *{position:sticky;left:4px;display:block;box-sizing:border-box;
-  width:min(100%, calc(100vw - 64px));text-align:right;}
-table.tb-tbl tr.why-row label{display:block;font-size:12px;font-weight:800;color:#b91c1c;margin:2px 2px 3px;
+  width:min(100%, calc(100vw - 64px));text-align:right;margin-left:0;margin-right:auto;}
+table.tb-tbl tr.why-row label{display:block;font-size:12px;font-weight:800;color:#b91c1c;margin:2px auto 3px 0;
   font-family:'Segoe UI','Noto Naskh Arabic',Tahoma,sans-serif;}
 .ps-sel{width:100%;min-width:66px;border:1.5px solid var(--border);border-radius:8px;padding:8px 2px;
   background:var(--card);color:var(--muted);font-weight:800;font-size:12px;text-align:center;text-align-last:center;
@@ -3310,8 +3321,12 @@ document.addEventListener('DOMContentLoaded', function(){
     // `wUnit` — 10/1's operators read wellhead pressure in bar; the Belayim
     // four read psi. Display only: WHP is never summed or compared across
     // batteries, so the two units never meet in one figure.
-    { id:'tb10_1', name:'T.B. 10/1', start:6, wUnit:'bar' }
+    // `pumpTab` — six transfer pumps make one table too wide to work in, so
+    // 10/1's pumps get a tab of their own (وضع المحطة) instead of columns.
+    { id:'tb10_1', name:'T.B. 10/1', start:6, wUnit:'bar', pumpTab:true }
   ];
+  // Which tab of a pumpTab battery is open, per battery. Readings first.
+  const _tbPanelTab = {};
   // ►►►► THE PUMP STATION of each battery. The index of a pump in its list is
   // its key in the database, so ADD new pumps at the END of a list and never
   // reorder one — that would hand every recorded reading to the wrong pump.
@@ -3828,6 +3843,13 @@ document.addEventListener('DOMContentLoaded', function(){
   // part day against a whole one. An interval yesterday did not read is left
   // out of both. A day that was imported as one daily figure has no intervals
   // to match, so it is only shown once today is complete.
+  // A line of the header figures: label, value, unit — the same three parts on
+  // the Today line and the Yesterday line so the two set exactly under each
+  // other, digits under digits.
+  function tbHdLine(label, v){
+    return '<span class="lb">' + label + '</span><span class="v">' + (v == null ? '—' : tbFmt(v, 1)) +
+           '</span><span class="u">m³</span>';
+  }
   function tbYesterdayLike(id, dateStr, cToday){
     const ty = tbCalcOne(tbGetDay(dateStr).tbs[id]);
     const t  = cToday || ty;
@@ -3843,12 +3865,11 @@ document.addEventListener('DOMContentLoaded', function(){
       }
     }
     if(v == null) return '';
-    // Arabic for the man at the battery; the office reads English.
-    const lbl = _tbAdmin() ? 'Yesterday' : '<span dir="rtl" lang="ar" class="ar-in">أمس</span>';
-    return lbl + ' ' + tbFmt(v, 1) + ' <i>m³</i>';
+    return tbHdLine('Yesterday', v);
   }
 
   function tbPanel(b, day, calc){
+    let prows = '';
     const cell = day.tbs[b.id];
     const c    = calc.per[b.id];
     const ed   = tbCanEdit();
@@ -3925,20 +3946,28 @@ document.addEventListener('DOMContentLoaded', function(){
       // the reading before. Shown only on a row still empty.
       const copy = (ed && si > 0 && anyPrev && allEmpty)
         ? '<button type="button" class="ps-copy" data-pcopy="' + escAttr(b.id) + '" data-r="' + si + '" lang="ar">كما هو</button>' : '';
-      rows +=
-        '<tr' + (edge ? ' class="tb-edge"' : (si < 0 ? ' class="tb-hour"' : '')) + '>' +
-          '<td class="rg-time">' + tbOffsetLabel(o, b) +
-            arSpan(arHour(tbStart(b) + o)) +
-            (tag ? '<span class="tb-tag">' + tag + '</span>' : '') + copy + '</td>' +
-          scanCell + prodCell + whpCell + tempCell + chemCell + pumpCells +
-        '</tr>';
-      whyRows.forEach(function(w){
-        rows += '<tr class="why-row"><td colspan="' + (6 + pumps.length) + '" dir="rtl" lang="ar">' +
-          '<label>سبب التوقف — <b dir="ltr">' + escHtml(w.pm.name) + '</b></label>' +
-          '<textarea class="ps-why" rows="2" data-tb="' + escAttr(b.id) + '" data-k="y" data-i="' + tbPumpKey(w.i, si) + '"' +
-          ' dir="auto" placeholder="اكتب سبب التوقف"' + (ed ? '' : ' disabled') + '>' +
-          escHtml(cell.py[w.i][si] || '') + '</textarea></td></tr>';
-      });
+      const timeCell = function(withCopy){
+        return '<td class="rg-time">' + tbOffsetLabel(o, b) + arSpan(arHour(tbStart(b) + o)) +
+          (tag ? '<span class="tb-tag">' + tag + '</span>' : '') + (withCopy ? copy : '') + '</td>';
+      };
+      const rowCls = edge ? ' class="tb-edge"' : (si < 0 ? ' class="tb-hour"' : '');
+      const whyHTML = function(span){
+        return whyRows.map(function(w){
+          return '<tr class="why-row"><td colspan="' + span + '" dir="rtl" lang="ar">' +
+            '<label>سبب التوقف — <b dir="ltr">' + escHtml(w.pm.name) + '</b></label>' +
+            '<textarea class="ps-why" rows="2" data-tb="' + escAttr(b.id) + '" data-k="y" data-i="' + tbPumpKey(w.i, si) + '"' +
+            ' dir="auto" placeholder="اكتب سبب التوقف"' + (ed ? '' : ' disabled') + '>' +
+            escHtml(cell.py[w.i][si] || '') + '</textarea></td></tr>';
+        }).join('');
+      };
+      if(b.pumpTab){
+        // Readings in one table, the pump station in another, same times.
+        rows  += '<tr' + rowCls + '>' + timeCell(false) + scanCell + prodCell + whpCell + tempCell + chemCell + '</tr>';
+        prows += '<tr' + rowCls + '>' + timeCell(true) + pumpCells + '</tr>' + whyHTML(1 + pumps.length);
+      } else {
+        rows += '<tr' + rowCls + '>' + timeCell(true) +
+          scanCell + prodCell + whpCell + tempCell + chemCell + pumpCells + '</tr>' + whyHTML(6 + pumps.length);
+      }
     });
 
     let notes = '';
@@ -3952,7 +3981,6 @@ document.addEventListener('DOMContentLoaded', function(){
     // has entered is the app explaining arithmetic he already understands.
     // The two notes above stay: both are things he cannot see by looking.
 
-    const totTxt = (c.total == null) ? '—' : tbFmt(c.total, 1);
     const yTxt = tbYesterdayLike(b.id, _tbDate, c);
     // Remarks for this battery, under its table. An operator sees one box —
     // his own — and what he writes reaches the admin's report card.
@@ -3963,24 +3991,51 @@ document.addEventListener('DOMContentLoaded', function(){
     return '<div class="tb-panel">' +
       '<div class="bar"></div>' +
       '<div class="hd"><h3>' + escHtml(b.name) + '</h3>' +
-        '<div class="tots"><div class="tot">' + totTxt + ' <i>m³/d</i></div>' +
+        '<div class="tots"><div class="tot">' + tbHdLine('Today', c.total) + '</div>' +
         '<div class="ytot">' + yTxt + '</div></div></div>' +
       notes +
-      '<div class="bd"><div class="rg-tbl-wrap"><table class="rg-tbl tb-tbl" style="min-width:' +
-        (430 + 78 * tbPumps(b.id).length) + 'px">' +
+      '<div class="bd">' +
+      (b.pumpTab
+        ? '<div class="ptabs" data-ptabs="' + escAttr(b.id) + '">' +
+            '<button type="button" data-ptab="read"' + (_tbPanelTab[b.id] !== 'pumps' ? ' class="on"' : '') + ' lang="ar">القراءات</button>' +
+            '<button type="button" data-ptab="pumps"' + (_tbPanelTab[b.id] === 'pumps' ? ' class="on"' : '') + ' lang="ar">وضع المحطة' +
+              (tbPumpsOutNow(b.id, cell) ? '<span class="pdot">' + tbPumpsOutNow(b.id, cell) + '</span>' : '') + '</button></div>'
+        : '') +
+      '<div class="ptab-read"' + (b.pumpTab && _tbPanelTab[b.id] === 'pumps' ? ' style="display:none"' : '') + '>' +
+      '<div class="rg-tbl-wrap"><table class="rg-tbl tb-tbl" style="min-width:' +
+        (430 + (b.pumpTab ? 0 : 78 * tbPumps(b.id).length)) + 'px">' +
         '<thead><tr>' +
           '<th>Time</th>' +
           '<th class="rg-grp">Scanner<br>m³' + arSpan('سكانر') + '</th>' +
           '<th class="tb-grp3">Production<br>m³/3h</th>' +
-          '<th class="rg-grp2">WHP<br>' + escHtml(tbWUnit(b)) + '</th>' +
+          '<th class="rg-grp2">Line pressure<br>' + escHtml(tbWUnit(b)) + arSpan('ضغط الخط') + '</th>' +
           '<th class="tb-grp4">Temp<br>°C' + arSpan('الحرارة') + '</th>' +
           '<th class="tb-grp5">Chem. inj.<br>' + escHtml(tbChemUnit(b)) +
             arSpan('حقن الكيمكال') + '</th>' +
-          tbPumps(b.id).map(function(pm){
+          (b.pumpTab ? '' : tbPumps(b.id).map(function(pm){
             return '<th class="tb-grp6">' + escHtml(pm.name) + '</th>';
-          }).join('') +
-        '</tr></thead><tbody>' + rows + '</tbody></table></div>' + noteBox + '</div>' +
+          }).join('')) +
+        '</tr></thead><tbody>' + rows + '</tbody></table></div></div>' +
+      (b.pumpTab
+        ? '<div class="ptab-pumps"' + (_tbPanelTab[b.id] === 'pumps' ? '' : ' style="display:none"') + '>' +
+            '<div class="rg-tbl-wrap"><table class="rg-tbl tb-tbl tb-ptbl" style="min-width:' +
+            (70 + 78 * tbPumps(b.id).length) + 'px"><thead><tr><th>Time</th>' +
+            tbPumps(b.id).map(function(pm){ return '<th class="tb-grp6">' + escHtml(pm.name) + '</th>'; }).join('') +
+            '</tr></thead><tbody>' + prows + '</tbody></table></div></div>'
+        : '') +
+      noteBox + '</div>' +
     '</div>';
+  }
+  // How many pumps stand OUT OF SERVICE at the day's latest reading — the
+  // number on the وضع المحطة tab, so a breakdown is not hidden behind it.
+  function tbPumpsOutNow(id, cell){
+    let n = 0;
+    tbPumps(id).forEach(function(pm, i){
+      let last = null;
+      for(let r = 0; r < TB_READS; r++) if(cell.ps[i][r]) last = cell.ps[i][r];
+      if(last === 'out') n++;
+    });
+    return n;
   }
 
   function tbRenderArea(){
@@ -7435,6 +7490,18 @@ tbRemarksHTML(day.date, true) +
         }
       });
       area.addEventListener('click', function(e){
+        const tab = e.target.closest ? e.target.closest('button[data-ptab]') : null;
+        if(tab){
+          const box = tab.closest('.ptabs'), id = box.getAttribute('data-ptabs'), k = tab.getAttribute('data-ptab');
+          _tbPanelTab[id] = k;
+          Array.prototype.forEach.call(box.querySelectorAll('button'), function(bb){ bb.classList.toggle('on', bb === tab); });
+          const panel = box.closest('.tb-panel');
+          panel.querySelector('.ptab-read').style.display  = k === 'pumps' ? 'none' : '';
+          panel.querySelector('.ptab-pumps').style.display = k === 'pumps' ? '' : 'none';
+          return;
+        }
+      });
+      area.addEventListener('click', function(e){
         const t = e.target.closest ? e.target.closest('button[data-pcopy]') : null;
         if(!t) return;
         const id = t.getAttribute('data-pcopy'), r = parseInt(t.getAttribute('data-r'), 10);
@@ -7486,7 +7553,7 @@ tbRemarksHTML(day.date, true) +
         }
       }
       const tot = panel.querySelector('.hd .tot');
-      if(tot) tot.innerHTML = (c.total == null ? '—' : tbFmt(c.total, 1)) + ' <i>m³/d</i>';
+      if(tot) tot.innerHTML = tbHdLine('Today', c.total);
       const yt = panel.querySelector('.hd .ytot');
       if(yt) yt.innerHTML = tbYesterdayLike(b.id, _tbDate, c);
     });
