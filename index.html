@@ -12,26 +12,26 @@
    accounts and its own release cycle, and it shares nothing with any other
    PETROBEL app. Nothing here should ever need to reach outside this folder.
 
-   WHAT IS WHERE                                        (line numbers, v33)
+   WHAT IS WHERE                                        (line numbers, v35)
    ─────────────────────────────────────────────────────────────────────────
      CSS
        Design tokens — every colour lives here, light + dark ...... line 74
        Header, login, toast, footer .............................. line 107
        Pages: readings, tank batteries, scanners, PETRECO ........ line 239
      MARKUP
-       Icon sprite — every icon, drawn inline .................... line 767
-       Login screen .............................................. line 787
-       Header bar ................................................ line 845
-       Pages: R/G, A/R, PETRECO, no-access ....................... line 857
+       Icon sprite — every icon, drawn inline .................... line 821
+       Login screen .............................................. line 841
+       Header bar ................................................ line 899
+       Pages: R/G, A/R, PETRECO, no-access ....................... line 911
      SCRIPT — the shell
-       ►► CONFIGURATION — Firebase config + role lists ........... line 1181
-       Boot, helpers, unsaved-edits queue, footer status ......... line 1255
-       Sign in / sign out, roles, tabs ........................... line 1578
-     SCRIPT — R/G Production (hourly PETRECO vs Ras Gara) ........ line 1817
+       ►► CONFIGURATION — Firebase config + role lists ........... line 1235
+       Boot, helpers, unsaved-edits queue, footer status ......... line 1309
+       Sign in / sign out, roles, tabs ........................... line 1632
+     SCRIPT — R/G Production (hourly PETRECO vs Ras Gara) ........ line 1871
      SCRIPT — A/R Production (tank batteries, report card,
-              scanner analysis, temperature, chemical, pumps) ..... line 3286
-     SCRIPT — day / night theme, service worker .................. line 7581
-     SCRIPT — PETRECO scanners ................................... line 7646
+              scanner analysis, temperature, chemical, pumps) ..... line 3340
+     SCRIPT — day / night theme, service worker .................. line 7944
+     SCRIPT — PETRECO scanners ................................... line 8009
 
    THE ROLES
      admin     both R/G sides, A/R Production, every report
@@ -450,6 +450,60 @@ table.tb-tbl .tb-din{max-width:88px;}
    Green in service, amber standby, red out of service — the same three
    colours on the operator's grid, admin's chips and the report. */
 table.tb-tbl th.tb-grp6{color:var(--accent2);border-bottom:2px solid var(--accent2);white-space:nowrap;}
+/* ── مقاسات المحطة ── one round at a time: the times along the top, the
+   round's form below them in its sections, the WhatsApp message last. */
+.ms-times{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 8px;-webkit-overflow-scrolling:touch;}
+.ms-t{flex:0 0 auto;min-width:62px;border:1.5px solid var(--border);background:var(--card);border-radius:10px;
+  padding:6px 6px 5px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:1px;position:relative;
+  font-family:var(--font-num);color:var(--text);}
+.ms-t b{font-size:13px;} .ms-t .ar{font-size:10.5px;color:var(--muted);font-weight:700;}
+.ms-t i{font-style:normal;font-size:9px;color:var(--muted);}
+.ms-t::after{content:'';position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:var(--border);}
+.ms-t.part::after{background:#d97706;} .ms-t.done::after{background:#16a34a;}
+.ms-t.on{border-color:var(--accent2);background:var(--accent2);color:#fff;}
+.ms-t.on .ar,.ms-t.on i{color:rgba(255,255,255,.85);}
+.ms-card{border:1px solid var(--border);border-radius:14px;padding:10px 12px;background:var(--card);}
+.ms-title{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-bottom:8px;border-bottom:2px solid var(--accent2);}
+.ms-title b{font-family:var(--font-num);font-size:18px;}
+.ms-title .ar{display:inline;font-size:14px;color:var(--text);}
+.ms-copy{margin-left:auto;border:1px solid var(--border);background:var(--surface);color:var(--accent2);border-radius:8px;
+  padding:5px 9px;font-weight:800;font-size:12px;cursor:pointer;font-family:'Segoe UI','Noto Naskh Arabic',Tahoma,sans-serif;}
+.ms-sec{padding:8px 0 4px;border-bottom:1px solid var(--border);}
+.ms-sec:last-child{border-bottom:0;}
+.ms-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:4px;}
+.ms-h .ar{display:inline;font-size:14px;font-weight:800;color:var(--accent2);}
+.ms-h .en{font-size:10.5px;font-weight:800;letter-spacing:.8px;color:var(--muted);font-family:var(--font-num);}
+.ms-row{display:flex;align-items:center;gap:10px;padding:4px 0;}
+.ms-lbl{flex:1;display:flex;flex-direction:column;}
+.ms-lbl .nm{font-size:14px;font-weight:800;color:var(--text);}
+.ms-h .sec{font-size:12.5px;font-weight:800;letter-spacing:.9px;color:var(--accent2);font-family:var(--font-num);}
+.ms-heater{align-items:flex-start;}
+.ms-heater .ms-lbl{padding-top:16px;}
+.ms-hcs{display:flex;gap:8px;flex:0 0 auto;}
+.ms-hc{display:flex;flex-direction:column;align-items:flex-start;gap:2px;}
+.ms-hc .en{font-size:10.5px;font-weight:700;color:var(--muted);font-family:var(--font-num);}
+.ms-hc .ms-in input{width:70px;}
+.ms-in{display:flex;align-items:center;gap:6px;flex:0 0 auto;}
+.ms-in input{width:96px;text-align:center;font-weight:800;}
+.ms-in .u{min-width:26px;font-size:12px;font-weight:700;color:var(--muted);}
+.ms-pick{display:flex;gap:5px;flex:0 0 auto;flex-wrap:wrap;justify-content:flex-end;align-items:center;max-width:66%;}
+.ms-pick.num{flex-wrap:nowrap;max-width:none;}
+.ms-pick.num button{min-width:38px;padding:8px 0;font-family:var(--font-num);font-size:15px;}
+.ms-pick .u{font-size:12px;font-weight:700;color:var(--muted);font-family:'Segoe UI','Noto Naskh Arabic',Tahoma,sans-serif;}
+.ms-pick button{border:1.5px solid var(--border);background:var(--card);color:var(--muted);border-radius:9px;
+  padding:8px 10px;font-weight:800;font-size:13px;cursor:pointer;letter-spacing:0;
+  font-family:'Segoe UI','Noto Naskh Arabic',Tahoma,sans-serif;}
+.ms-pick button.on{background:var(--accent2);border-color:var(--accent2);color:#fff;}
+.ms-wa{margin-top:12px;border:1px solid rgba(37,211,102,.45);background:rgba(37,211,102,.06);border-radius:14px;padding:10px 12px;}
+.ms-wa .ms-h .ar{color:#128c4b;}
+.ms-artog{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;margin:2px 0 6px;
+  font-family:'Segoe UI','Noto Naskh Arabic',Tahoma,sans-serif;}
+.ms-msg{white-space:pre-wrap;font-family:'Segoe UI','Noto Naskh Arabic',Tahoma,sans-serif;font-size:12.5px;line-height:1.45;
+  background:var(--card);border:1px solid var(--border);border-radius:10px;padding:9px;margin:0;max-height:260px;overflow:auto;}
+.ms-btns{display:flex;gap:8px;margin-top:8px;}
+.ms-btns button{flex:1;border-radius:10px;padding:11px;font-weight:800;font-size:14px;cursor:pointer;border:0;
+  font-family:'Segoe UI','Noto Naskh Arabic',Tahoma,sans-serif;}
+.ms-cp{background:#128c4b;color:#fff;} .ms-open{background:#25d366;color:#073b1f;}
 /* T.B. 10/1: readings and pump station on two tabs inside the panel. */
 .tb-panel .ptabs{display:flex;gap:6px;margin:0 0 10px;background:var(--surface);border:1px solid var(--border);
   border-radius:11px;padding:4px;}
@@ -3327,6 +3381,61 @@ document.addEventListener('DOMContentLoaded', function(){
   ];
   // Which tab of a pumpTab battery is open, per battery. Readings first.
   const _tbPanelTab = {};
+
+  // ►►►► T.B. 10/1 STATION MEASUREMENTS (مقاسات المحطة). Nine rounds a day on
+  // the station's own clock — 05:00 to the next 05:00, NOT the scanner's
+  // three-hour grid — and the fields of each round, in the order they are
+  // reported. A field's position in TB_MEAS_FIELDS is its key in the save
+  // queue, so new fields go at the END.
+  const TB_MEAS_HOURS = [5, 9, 12, 15, 18, 21, 0, 3, 5];
+  const TB_MEAS_SAMPLE = [ { k:'water', en:'Water', ar:'مياه' },
+                           { k:'emulsion', en:'Emulsion', ar:'مستحلب' },
+                           { k:'oil', en:'Oil', ar:'زيت' } ];
+  const TB_MEAS_SECTIONS = [
+    { k:'level', en:'LEVEL',         ar:'المستويات' },
+    { k:'tank1', en:'TANK 01',       ar:'خزان 01' },
+    { k:'tank2', en:'TANK 02',       ar:'خزان 02' },
+    { k:'temp',  en:'TEMPERATURE',   ar:'درجات الحرارة' },
+    { k:'press', en:'PRESSURES',     ar:'الضغوط' },
+    { k:'scan',  en:'SCANNER 3 hr',  ar:'السكانر — 3 ساعات' },
+    { k:'sigma', en:'SIGMA HEATERS', ar:'سخانات سيجما' },
+    { k:'skim',  en:'SKIMMER',       ar:'السكيمر API' },
+    { k:'hp',    en:'HIGH PRESSURE', ar:'طلمبة الضغط العالي' }
+  ];
+  const TB_MEAS_FIELDS = [
+    { k:'t7',   sec:'level', en:'TK_7',         ar:'خزان 7',        unit:'m', dp:2 },
+    { k:'t9',   sec:'level', en:'BIS_9',        ar:'خزان 9 Bis',    unit:'m', dp:2 },
+    { k:'s1n',  sec:'tank1', en:'Sample No.',   ar:'رقم العينة',    int:true },
+    { k:'s1',   sec:'tank1', en:'Sample',       ar:'نتيجة العينة',  pick:TB_MEAS_SAMPLE },
+    { k:'s2n',  sec:'tank2', en:'Sample No.',   ar:'رقم العينة',    int:true },
+    { k:'s2',   sec:'tank2', en:'Sample',       ar:'نتيجة العينة',  pick:TB_MEAS_SAMPLE },
+    { k:'tT2',  sec:'temp',  en:'Tank_02',      ar:'خزان 02',       unit:'°C' },
+    { k:'tSL',  sec:'temp',  en:'Ship.Line',    ar:'خط الشحن',      unit:'°C' },
+    { k:'pS1',  sec:'press', en:'Sep_1',        ar:'فاصل 1',        unit:'bar' },
+    { k:'pS2',  sec:'press', en:'Sep_2',        ar:'فاصل 2',        unit:'bar' },
+    { k:'pSL',  sec:'press', en:'Ship.Line',    ar:'خط الشحن',      unit:'bar' },
+    { k:'qOil', sec:'scan',  en:'Oil quantity', ar:'كمية الزيت',    unit:'m³' },
+    { k:'qDr',  sec:'scan',  en:'Drain Tk_02',  ar:'صرف خزان 02',   unit:'m³' },
+    { k:'skim', sec:'skim',  en:'Level',        ar:'المستوى',
+      // five numbers in one row; "درجات" is said once, in the unit beside them
+      pick:[5,6,7,8,9].map(function(n){ return { k:String(n), en:n + ' Stairs', ar:String(n) }; }), unit:'درجات' },
+    { k:'hpN',  sec:'hp',    en:'Pump No.',     ar:'رقم الطلمبة',   int:true },
+    { k:'hp',   sec:'hp',    en:'Pump',         ar:'الحالة',
+      pick:[ { k:'on', en:'On', ar:'تشغيل' }, { k:'off', en:'Off', ar:'إيقاف' } ] },
+    // Sigma heaters 1, 2 and 4 (there is no 3 in service): outlet temperature
+    // and flow rate each. `heater` groups the pair on one line of the form and
+    // of the message.
+    { k:'h1T', sec:'sigma', en:'Temp',      unit:'°C',   heater:'Heater 1' },
+    { k:'h1F', sec:'sigma', en:'Flow rate', unit:'m³/h', heater:'Heater 1' },
+    { k:'h2T', sec:'sigma', en:'Temp',      unit:'°C',   heater:'Heater 2' },
+    { k:'h2F', sec:'sigma', en:'Flow rate', unit:'m³/h', heater:'Heater 2' },
+    { k:'h4T', sec:'sigma', en:'Temp',      unit:'°C',   heater:'Heater 4' },
+    { k:'h4F', sec:'sigma', en:'Flow rate', unit:'m³/h', heater:'Heater 4' }
+  ];
+  const TB_MEAS_N = TB_MEAS_HOURS.length;
+  function tbMeasKey(slot, fi){ return slot * 100 + fi; }
+  // Which round each 10/1 panel has open.
+  const _tbMeasSlot = {};
   // ►►►► THE PUMP STATION of each battery. The index of a pump in its list is
   // its key in the database, so ADD new pumps at the END of a list and never
   // reorder one — that would hand every recorded reading to the wrong pump.
@@ -3531,11 +3640,16 @@ document.addEventListener('DOMContentLoaded', function(){
       const bar = key.indexOf('|');
       const id = key.slice(0, bar), kind = key.charAt(bar + 1);
       const i = parseInt(key.slice(bar + 2), 10);
-      if(!tbById(id) || 'swdcxrqym'.indexOf(kind) === -1) return;
+      if(!tbById(id) || 'swdcxrqymg'.indexOf(kind) === -1) return;
       if(!days[dt]) days[dt] = tbBlankDay(dt);
       const cell = tbCellIn(days[dt], id);
       if(kind === 'r'){ cell.note = val || ''; return; }
       if(kind === 'm'){ if(i >= 0 && i < TB_PUMP_MAX) cell.pmd[i] = !!val; return; }
+      if(kind === 'g'){
+        const sl = Math.floor(i / 100), f = TB_MEAS_FIELDS[i % 100];
+        if(f && sl < TB_MEAS_N){ if(val == null || val === '') delete cell.meas[sl][f.k]; else cell.meas[sl][f.k] = val; }
+        return;
+      }
       if(kind === 'q' || kind === 'y'){
         const pi = Math.floor(i / 100), r = i % 100;
         if(pi < TB_PUMP_MAX && r < TB_READS){
@@ -3660,7 +3774,10 @@ document.addEventListener('DOMContentLoaded', function(){
     }
     const pmd = [];
     for(let i = 0; i < TB_PUMP_MAX; i++) pmd.push(false);
-    return { s:s, w:w, d:d, c:c, x:x, ps:ps, py:py, pmd:pmd, note:'', t:null, src:'' };
+    // meas[slot] = one station-measurement round: { t7:…, s1:'emulsion', … }
+    const meas = [];
+    for(let k = 0; k < TB_MEAS_N; k++) meas.push({});
+    return { s:s, w:w, d:d, c:c, x:x, ps:ps, py:py, pmd:pmd, meas:meas, note:'', t:null, src:'' };
   }
   function tbBlankDay(dateStr){
     const tbs = {};
@@ -3739,6 +3856,7 @@ document.addEventListener('DOMContentLoaded', function(){
         out.tbs[b.id].py[i][r] = (src.py && src.py[i] && src.py[i][r]) || '';
       }
       for(let i = 0; i < TB_PUMP_MAX; i++) out.tbs[b.id].pmd[i] = !!(src.pmd && src.pmd[i]);
+      for(let k = 0; k < TB_MEAS_N; k++) out.tbs[b.id].meas[k] = Object.assign({}, (src.meas && src.meas[k]) || {});
       for(let i = 0; i < TB_READS; i++){
         out.tbs[b.id].s[i] = (src.s && src.s[i] != null) ? src.s[i] : null;
         out.tbs[b.id].w[i] = (src.w && src.w[i] != null) ? src.w[i] : null;
@@ -3999,9 +4117,10 @@ document.addEventListener('DOMContentLoaded', function(){
         ? '<div class="ptabs" data-ptabs="' + escAttr(b.id) + '">' +
             '<button type="button" data-ptab="read"' + (_tbPanelTab[b.id] !== 'pumps' ? ' class="on"' : '') + ' lang="ar">القراءات</button>' +
             '<button type="button" data-ptab="pumps"' + (_tbPanelTab[b.id] === 'pumps' ? ' class="on"' : '') + ' lang="ar">وضع المحطة' +
-              (tbPumpsOutNow(b.id, cell) ? '<span class="pdot">' + tbPumpsOutNow(b.id, cell) + '</span>' : '') + '</button></div>'
+              (tbPumpsOutNow(b.id, cell) ? '<span class="pdot">' + tbPumpsOutNow(b.id, cell) + '</span>' : '') + '</button>' +
+            '<button type="button" data-ptab="meas"' + (_tbPanelTab[b.id] === 'meas' ? ' class="on"' : '') + ' lang="ar">مقاسات المحطة</button></div>'
         : '') +
-      '<div class="ptab-read"' + (b.pumpTab && _tbPanelTab[b.id] === 'pumps' ? ' style="display:none"' : '') + '>' +
+      '<div class="ptab-read"' + (b.pumpTab && _tbPanelTab[b.id] && _tbPanelTab[b.id] !== 'read' ? ' style="display:none"' : '') + '>' +
       '<div class="rg-tbl-wrap"><table class="rg-tbl tb-tbl" style="min-width:' +
         (430 + (b.pumpTab ? 0 : 78 * tbPumps(b.id).length)) + 'px">' +
         '<thead><tr>' +
@@ -4021,11 +4140,173 @@ document.addEventListener('DOMContentLoaded', function(){
             '<div class="rg-tbl-wrap"><table class="rg-tbl tb-tbl tb-ptbl" style="min-width:' +
             (70 + 78 * tbPumps(b.id).length) + 'px"><thead><tr><th>Time</th>' +
             tbPumps(b.id).map(function(pm){ return '<th class="tb-grp6">' + escHtml(pm.name) + '</th>'; }).join('') +
-            '</tr></thead><tbody>' + prows + '</tbody></table></div></div>'
+            '</tr></thead><tbody>' + prows + '</tbody></table></div></div>' +
+          '<div class="ptab-meas"' + (_tbPanelTab[b.id] === 'meas' ? '' : ' style="display:none"') + '>' +
+            tbMeasHTML(b, cell, ed) + '</div>'
         : '') +
       noteBox + '</div>' +
     '</div>';
   }
+  // ── مقاسات المحطة ───────────────────────────────────────────────────────
+  // The round on the clock now, when looking at today: the last round whose
+  // time has come. Any other day opens on the first round.
+  function tbMeasDefaultSlot(b){
+    if(_tbDate !== tbToday()) return 0;
+    const now = new Date(), mins = now.getHours() * 60 + now.getMinutes();
+    const start = 5 * 60;
+    const since = ((mins - start) + 1440) % 1440;          // minutes since 05:00
+    let pick = 0;
+    TB_MEAS_HOURS.forEach(function(h, k){
+      const off = k === TB_MEAS_N - 1 ? 1440 : ((h * 60 - start) + 1440) % 1440;
+      if(off <= since) pick = k;
+    });
+    return pick;
+  }
+  function tbMeasClock(k){ const h = TB_MEAS_HOURS[k]; return (h < 10 ? '0' : '') + h + ':00'; }
+  function tbMeasFilled(m){ return TB_MEAS_FIELDS.filter(function(f){ return m[f.k] != null && m[f.k] !== ''; }).length; }
+  function tbMeasHTML(b, cell, ed){
+    if(_tbMeasSlot[b.id] == null) _tbMeasSlot[b.id] = tbMeasDefaultSlot(b);
+    const sl = _tbMeasSlot[b.id], m = cell.meas[sl] || {};
+    // The nine rounds: a dot says empty, part-filled or done at a glance.
+    let chips = '<div class="ms-times">';
+    for(let k = 0; k < TB_MEAS_N; k++){
+      const n = tbMeasFilled(cell.meas[k] || {});
+      const st = !n ? '' : n >= TB_MEAS_FIELDS.length ? ' done' : ' part';
+      chips += '<button type="button" class="ms-t' + (k === sl ? ' on' : '') + st + '" data-mslot="' + k + '">' +
+        '<b>' + tbMeasClock(k) + '</b><span class="ar" dir="rtl" lang="ar">' + arHour(TB_MEAS_HOURS[k]) + '</span>' +
+        (k === TB_MEAS_N - 1 ? '<i>next day</i>' : '') + '</button>';
+    }
+    chips += '</div>';
+    let form = '';
+    TB_MEAS_SECTIONS.forEach(function(sec){
+      let rows = '';
+      if(sec.k === 'sigma'){
+        // one line per heater: its name, then temperature and flow side by side
+        const heaters = [];
+        TB_MEAS_FIELDS.forEach(function(f, fi){
+          if(f.sec !== 'sigma') return;
+          let h = heaters.filter(function(x){ return x.name === f.heater; })[0];
+          if(!h){ h = { name:f.heater, cells:[] }; heaters.push(h); }
+          const idx = tbMeasKey(sl, fi), v = m[f.k];
+          h.cells.push('<label class="ms-hc"><span class="en">' + escHtml(f.en) + '</span>' +
+            '<span class="ms-in"><input class="rg-in" type="number" inputmode="decimal" step="any"' +
+            ' data-tb="' + escAttr(b.id) + '" data-k="g" data-i="' + idx + '" value="' + (v == null ? '' : v) + '"' +
+            (ed ? '' : ' disabled') + '><span class="u">' + f.unit + '</span></span></label>');
+        });
+        heaters.forEach(function(h){
+          rows += '<div class="ms-row ms-heater"><div class="ms-lbl"><span class="nm">' + escHtml(h.name) + '</span></div>' +
+                  '<div class="ms-hcs">' + h.cells.join('') + '</div></div>';
+        });
+        form += '<div class="ms-sec"><div class="ms-h"><span class="sec">' + escHtml(sec.en) + '</span></div>' + rows + '</div>';
+        return;
+      }
+      TB_MEAS_FIELDS.forEach(function(f, fi){
+        if(f.sec !== sec.k) return;
+        const idx = tbMeasKey(sl, fi), v = m[f.k];
+        let ctl;
+        if(f.pick){
+          ctl = '<div class="ms-pick' + (f.k === 'skim' ? ' num' : '') + '">' + f.pick.map(function(o){
+            return '<button type="button" data-mg="' + idx + '" data-v="' + o.k + '"' +
+              (v === o.k ? ' class="on"' : '') + (ed ? '' : ' disabled') + '>' +
+              (f.k === 'skim' ? o.k : escHtml(o.en)) + '</button>';
+          }).join('') + (f.k === 'skim' ? '<span class="u">Stairs</span>' : '') + '</div>';
+        } else {
+          ctl = '<div class="ms-in"><input class="rg-in" type="number" inputmode="decimal" step="any"' +
+            ' data-tb="' + escAttr(b.id) + '" data-k="g" data-i="' + idx + '" value="' + (v == null ? '' : v) + '"' +
+            (ed ? '' : ' disabled') + '>' + (f.unit ? '<span class="u">' + f.unit + '</span>' : '') + '</div>';
+        }
+        rows += '<div class="ms-row"><div class="ms-lbl"><span class="nm">' + escHtml(f.en) + '</span></div>' + ctl + '</div>';
+      });
+      form += '<div class="ms-sec"><div class="ms-h"><span class="sec">' + escHtml(sec.en) + '</span></div>' + rows + '</div>';
+    });
+    const prevBtn = (ed && sl > 0 && tbMeasFilled(cell.meas[sl - 1] || {}) && !tbMeasFilled(m))
+      ? '<button type="button" class="ms-copy" data-mcopy="' + sl + '" lang="ar">نفس قراءات ' + tbMeasClock(sl - 1) + '</button>' : '';
+    return '<div class="ms" data-mbat="' + escAttr(b.id) + '">' + chips +
+      '<div class="ms-card"><div class="ms-title"><b>' + tbMeasClock(sl) + '</b>' +
+        '<span class="ar" dir="rtl" lang="ar">قراءات ' + arHour(TB_MEAS_HOURS[sl]) + '</span>' + prevBtn + '</div>' +
+        form + '</div>' +
+      '<div class="ms-wa"><div class="ms-h"><span class="sec">WhatsApp message — ' + tbMeasClock(sl) + '</span></div>' +
+        '<pre class="ms-msg" dir="auto">' + escHtml(tbMeasMsg(b, cell, sl)) + '</pre>' +
+        '<div class="ms-btns"><button type="button" class="ms-cp" data-mcp="1" lang="ar">نسخ الرسالة</button>' +
+        '<button type="button" class="ms-open" data-mopen="1" lang="ar">فتح واتساب</button></div></div>' +
+    '</div>';
+  }
+  // The message in the group's own format — bold lines, the section names as
+  // code, the ruled lines top and bottom — cleaned up: real times and units,
+  // and only what was actually read. Arabic beside the English on request.
+  function tbMeasMsg(b, cell, sl){
+    const m = cell.meas[sl] || {};
+    const h = TB_MEAS_HOURS[sl], h12 = (h % 12) === 0 ? 12 : h % 12;
+    const L = [];
+    L.push('*`Tank Battery 10/01`*', '');
+    L.push('*Time : ' + h12 + ':00 ' + (h < 12 ? 'AM' : 'PM') + '*');
+    L.push('*Date : ' + _tbDate.split('-').reverse().join('/') + '*');
+    L.push('~ـــــــــــــــــــــــــــــــــــــــــــــ~');
+    TB_MEAS_SECTIONS.forEach(function(sec){
+      const lines = [];
+      if(sec.k === 'tank1' || sec.k === 'tank2'){
+        const n = sec.k === 'tank1' ? 's1' : 's2';
+        const res = TB_MEAS_SAMPLE.filter(function(o){ return o.k === m[n]; })[0];
+        if(m[n + 'n'] != null || res){
+          const no = m[n + 'n'] != null ? String(m[n + 'n']).padStart(2, '0') : '—';
+          lines.push('*Sample ' + no + ' : ' + (res ? res.en : '—') + '*');
+        }
+      } else if(sec.k === 'hp'){
+        const st = m.hp === 'on' ? 'On' : m.hp === 'off' ? 'Off' : null;
+        if(m.hpN != null || st)
+          lines.push('*Pump No.' + (m.hpN != null ? m.hpN : '—') + ' : ' + (st || '—') + '*');
+      } else if(sec.k === 'sigma'){
+        // *Heater 1 : 85 °C · 12 m³/h* — a heater with neither read is left out
+        ['Heater 1','Heater 2','Heater 4'].forEach(function(hn){
+          const fs = TB_MEAS_FIELDS.filter(function(f){ return f.heater === hn; });
+          const parts = fs.filter(function(f){ return m[f.k] != null; })
+                          .map(function(f){ return m[f.k] + ' ' + f.unit; });
+          if(parts.length) lines.push('*' + hn + ' : ' + parts.join(' · ') + '*');
+        });
+      } else {
+        TB_MEAS_FIELDS.forEach(function(f){
+          if(f.sec !== sec.k || m[f.k] == null) return;
+          let val;
+          if(f.pick){ const o = f.pick.filter(function(x){ return x.k === m[f.k]; })[0]; val = o ? o.en : m[f.k]; }
+          else val = (f.dp != null ? Number(m[f.k]).toFixed(f.dp) : m[f.k]) + (f.unit ? ' ' + f.unit : '');
+          lines.push('*' + f.en + ' : ' + val + '*');
+        });
+      }
+      if(!lines.length) return;
+      L.push('', '*`' + sec.en + '`*', '');
+      lines.forEach(function(x){ L.push(x); });
+    });
+    L.push('', '~ـــــــــــ *Work Shift* ـــــــــــ~');
+    return L.join('\n');
+  }
+  // After any change on the tab: the dots on the times, the copy-previous
+  // button and the message are brought up to date in place — the box being
+  // typed in is never rebuilt under the finger.
+  function tbMeasRefresh(wrap){
+    const id = wrap.getAttribute('data-mbat'), b = tbById(id);
+    const cell = tbGetDay(_tbDate).tbs[id];
+    Array.prototype.forEach.call(wrap.querySelectorAll('.ms-t'), function(t){
+      const n = tbMeasFilled(cell.meas[Number(t.getAttribute('data-mslot'))] || {});
+      t.classList.toggle('part', n > 0 && n < TB_MEAS_FIELDS.length);
+      t.classList.toggle('done', n >= TB_MEAS_FIELDS.length);
+    });
+    const pre = wrap.querySelector('.ms-msg');
+    if(pre) pre.textContent = tbMeasMsg(b, cell, _tbMeasSlot[id]);
+  }
+  function tbCopyText(txt){
+    function done(){ showToast('تم نسخ الرسالة — الصقها في الواتساب'); }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(done, fallback);
+    } else fallback();
+    function fallback(){
+      const ta = document.createElement('textarea');
+      ta.value = txt; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); done(); } catch(e){ showToast('Could not copy', true); }
+      ta.remove();
+    }
+  }
+
   // How many pumps stand OUT OF SERVICE at the day's latest reading — the
   // number on the وضع المحطة tab, so a breakdown is not hidden behind it.
   function tbPumpsOutNow(id, cell){
@@ -4060,6 +4341,13 @@ document.addEventListener('DOMContentLoaded', function(){
           return;
         }
         if(k === 'y' || k === 'q') return;               // pump station: redrawn on change
+        if(k === 'g'){
+          const n = parseInt(inp.getAttribute('data-i'), 10), f = TB_MEAS_FIELDS[n % 100];
+          const m = (((tbGetDay(_tbDate).tbs[inp.getAttribute('data-tb')] || {}).meas) || [])[Math.floor(n / 100)] || {};
+          const v2 = (f && m[f.k] != null) ? String(m[f.k]) : '';
+          if(inp.value !== v2) inp.value = v2;
+          return;
+        }
         const cell = day.tbs[inp.getAttribute('data-tb')];
         const v = cell ? cell[k][parseInt(inp.getAttribute('data-i'), 10)] : null;
         const s = (v == null) ? '' : String(v);
@@ -7036,6 +7324,11 @@ tbRemarksHTML(day.date, true) +
         cell[k] = (cell[k] || []).concat(tbBlankCell()[k]).slice(0, TB_SPAN + 1);
       }
     });
+    if(!cell.meas || cell.meas.length !== TB_MEAS_N){
+      const m0 = cell.meas || [];
+      cell.meas = [];
+      for(let k = 0; k < TB_MEAS_N; k++) cell.meas.push(m0[k] || {});
+    }
     if(!cell.ps || !cell.py || !cell.pmd){
       const bl = tbBlankCell(); cell.ps = cell.ps || bl.ps; cell.py = cell.py || bl.py; cell.pmd = cell.pmd || bl.pmd;
     }
@@ -7077,6 +7370,25 @@ tbRemarksHTML(day.date, true) +
   function tbApplyInput(id, kind, i, raw){
     if(!tbMayWrite(id, kind)) return;
     const cell = tbCellOn(_tbDate, id);
+    if(kind === 'g'){
+      const sl = Math.floor(i / 100), f = TB_MEAS_FIELDS[i % 100];
+      if(!f || !(sl >= 0 && sl < TB_MEAS_N)) return;
+      let v = null;
+      if(f.pick) v = f.pick.some(function(o){ return o.k === raw; }) ? raw : null;
+      else { v = tbNum(raw); if(v != null && f.int) v = Math.round(v); }
+      function put(dt, s2){
+        const c2 = tbCellOn(dt, id);
+        if(v == null) delete c2.meas[s2][f.k]; else c2.meas[s2][f.k] = v;
+        _tbPend.mark(dt, tbPendKey(id, 'g', tbMeasKey(s2, i % 100)), v);
+      }
+      put(_tbDate, sl);
+      // The closing 05:00 round and the next day's opening 05:00 are the same
+      // moment: one entry, both days.
+      if(sl === TB_MEAS_N - 1) put(tbNextDate(_tbDate), 0);
+      if(sl === 0)             put(tbPrevDate(_tbDate), TB_MEAS_N - 1);
+      tbSaveLocal();
+      return;
+    }
     if(kind === 'm'){
       if(!(i >= 0 && i < tbPumps(id).length)) return;
       cell.pmd[i] = !!raw;
@@ -7182,7 +7494,11 @@ tbRemarksHTML(day.date, true) +
           const doc = docs[docId] = docs[docId] || { date:dt, battery:id, startHour:tbStart(id),
             updatedBy:who, updatedAt:firebase.firestore.FieldValue.serverTimestamp() };
           const val = snap[dt][key];
-          if(kind === 'm') (doc.pumpPM = doc.pumpPM || {})[i] = !!val;
+          if(kind === 'g'){
+            const n = Number(i), f = TB_MEAS_FIELDS[n % 100], sl = String(Math.floor(n / 100));
+            if(f){ doc.meas = doc.meas || {}; (doc.meas[sl] = doc.meas[sl] || {})[f.k] = (val === undefined ? null : val); }
+          }
+          else if(kind === 'm') (doc.pumpPM = doc.pumpPM || {})[i] = !!val;
           else if(kind === 'q' || kind === 'y'){
             const n = Number(i), pi = String(Math.floor(n / 100)), r = String(n % 100);
             const f = kind === 'q' ? 'pumps' : 'pumpWhy';
@@ -7321,6 +7637,12 @@ tbRemarksHTML(day.date, true) +
                 const i = Number(pi), k = Number(r);
                 if(i < TB_PUMP_MAX && k < TB_READS) obj[date].tbs[bid].ps[i][k] = row[r] || null;
               });
+            });
+          }
+          if(dd.meas && typeof dd.meas === 'object'){
+            Object.keys(dd.meas).forEach(function(sl){
+              const k = Number(sl);
+              if(k >= 0 && k < TB_MEAS_N) obj[date].tbs[bid].meas[k] = Object.assign({}, dd.meas[sl]);
             });
           }
           if(dd.pumpPM && typeof dd.pumpPM === 'object'){
@@ -7490,14 +7812,55 @@ tbRemarksHTML(day.date, true) +
         }
       });
       area.addEventListener('click', function(e){
+        if(!e.target.closest) return;
+        const ms = e.target.closest('.ms');
+        if(!ms) return;
+        const id = ms.getAttribute('data-mbat');
+        const slotBtn = e.target.closest('button[data-mslot]');
+        if(slotBtn){ _tbMeasSlot[id] = Number(slotBtn.getAttribute('data-mslot')); tbRenderArea(); return; }
+        const pick = e.target.closest('button[data-mg]');
+        if(pick && !pick.disabled){
+          const idx = parseInt(pick.getAttribute('data-mg'), 10), v = pick.getAttribute('data-v');
+          const f = TB_MEAS_FIELDS[idx % 100], cur = (tbGetDay(_tbDate).tbs[id].meas[Math.floor(idx / 100)] || {})[f.k];
+          const nv = cur === v ? '' : v;                         // tapping the chosen one clears it
+          tbApplyInput(id, 'g', idx, nv);
+          Array.prototype.forEach.call(pick.parentNode.querySelectorAll('button'), function(bb){
+            bb.classList.toggle('on', nv !== '' && bb === pick);
+          });
+          tbQueueSave(); tbMeasRefresh(ms);
+          return;
+        }
+        const cp = e.target.closest('button[data-mcopy]');
+        if(cp){
+          const sl = Number(cp.getAttribute('data-mcopy')), prev = tbGetDay(_tbDate).tbs[id].meas[sl - 1] || {};
+          TB_MEAS_FIELDS.forEach(function(f, fi){ if(prev[f.k] != null) tbApplyInput(id, 'g', tbMeasKey(sl, fi), String(prev[f.k])); });
+          tbQueueSave(); tbRenderArea();
+          return;
+        }
+        const msg = function(){ return tbMeasMsg(tbById(id), tbGetDay(_tbDate).tbs[id], _tbMeasSlot[id]); };
+        if(e.target.closest('button[data-mcp]')){ tbCopyText(msg()); return; }
+        if(e.target.closest('button[data-mopen]')){
+          // WhatsApp opens with the message written; they choose the group.
+          window.open('https://wa.me/?text=' + encodeURIComponent(msg()), '_blank');
+          return;
+        }
+      });
+      area.addEventListener('input', function(e){
+        const t = e.target;
+        if(t && t.getAttribute && t.getAttribute('data-k') === 'g'){
+          const ms = t.closest('.ms'); if(ms) setTimeout(function(){ tbMeasRefresh(ms); }, 0);
+        }
+      });
+      area.addEventListener('click', function(e){
         const tab = e.target.closest ? e.target.closest('button[data-ptab]') : null;
         if(tab){
           const box = tab.closest('.ptabs'), id = box.getAttribute('data-ptabs'), k = tab.getAttribute('data-ptab');
           _tbPanelTab[id] = k;
           Array.prototype.forEach.call(box.querySelectorAll('button'), function(bb){ bb.classList.toggle('on', bb === tab); });
           const panel = box.closest('.tb-panel');
-          panel.querySelector('.ptab-read').style.display  = k === 'pumps' ? 'none' : '';
+          panel.querySelector('.ptab-read').style.display  = k === 'read'  ? '' : 'none';
           panel.querySelector('.ptab-pumps').style.display = k === 'pumps' ? '' : 'none';
+          panel.querySelector('.ptab-meas').style.display  = k === 'meas'  ? '' : 'none';
           return;
         }
       });
