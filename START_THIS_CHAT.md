@@ -1,6 +1,6 @@
 # Sinai Field — start here
 
-**Attach `sinai-field-v41.zip` to the new chat and paste the block below as your
+**Attach `sinai-field-v42.zip` to the new chat and paste the block below as your
 first message.** Everything Claude needs is in the zip; nothing from any other
 conversation is required.
 
@@ -16,7 +16,7 @@ conversation is required.
 > The attached zip is the whole project. Read `README.md`, then
 > `DEVELOPER_REFERENCE.md`, then `CHANGELOG.md` before changing anything.
 >
-> Current release: **v41**, service-worker cache `sinai-field-v41`.
+> Current release: **v42**, service-worker cache `sinai-field-v42`.
 >
 > How I work: show me the change, test it before you say it is done, and tell me
 > plainly when something I asked for is a bad idea.
@@ -71,7 +71,10 @@ tank battery total to a Ras Gara total.
 
 ## Where things stand
 
-v41 made ALL of T.B. 10/1's pumps daily (Transfer 1–6 and HPS 1–2, with كما أمس);
+v42 extended 10/1's daily STATION STATUS to heaters (Sigma 1, 2, 4, Heater
+Treater), compressors (A, B, Chemical) and fire fighting (Jockey 1–2, Diesel 1–2,
+counts assumed), with a copy-only WhatsApp message. v41 made ALL of T.B. 10/1's
+pumps daily (Transfer 1–6 and HPS 1–2, with كما أمس);
 earlier three-hourly transfer readings still count via `legacy3h`. The other
 batteries stay three-hourly. v40 added PM monitoring to the Pumps tab: per-pump interval (editable), running
 hours since PM, hours left, projected due date, standby/out since PM, and a PM

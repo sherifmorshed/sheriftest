@@ -12,26 +12,26 @@
    accounts and its own release cycle, and it shares nothing with any other
    PETROBEL app. Nothing here should ever need to reach outside this folder.
 
-   WHAT IS WHERE                                        (line numbers, v41)
+   WHAT IS WHERE                                        (line numbers, v42)
    ─────────────────────────────────────────────────────────────────────────
      CSS
        Design tokens — every colour lives here, light + dark ...... line 74
        Header, login, toast, footer .............................. line 107
        Pages: readings, tank batteries, scanners, PETRECO ........ line 239
      MARKUP
-       Icon sprite — every icon, drawn inline .................... line 875
-       Login screen .............................................. line 895
-       Header bar ................................................ line 953
-       Pages: R/G, A/R, PETRECO, no-access ....................... line 965
+       Icon sprite — every icon, drawn inline .................... line 876
+       Login screen .............................................. line 896
+       Header bar ................................................ line 954
+       Pages: R/G, A/R, PETRECO, no-access ....................... line 966
      SCRIPT — the shell
-       ►► CONFIGURATION — Firebase config + role lists ........... line 1291
-       Boot, helpers, unsaved-edits queue, footer status ......... line 1365
-       Sign in / sign out, roles, tabs ........................... line 1688
-     SCRIPT — R/G Production (hourly PETRECO vs Ras Gara) ........ line 1927
+       ►► CONFIGURATION — Firebase config + role lists ........... line 1292
+       Boot, helpers, unsaved-edits queue, footer status ......... line 1366
+       Sign in / sign out, roles, tabs ........................... line 1689
+     SCRIPT — R/G Production (hourly PETRECO vs Ras Gara) ........ line 1928
      SCRIPT — A/R Production (tank batteries, report card,
-              scanner analysis, temperature, chemical, pumps) ..... line 3396
-     SCRIPT — day / night theme, service worker .................. line 8427
-     SCRIPT — PETRECO scanners ................................... line 8492
+              scanner analysis, temperature, chemical, pumps) ..... line 3397
+     SCRIPT — day / night theme, service worker .................. line 8505
+     SCRIPT — PETRECO scanners ................................... line 8570
 
    THE ROLES
      admin     both R/G sides, A/R Production, every report
@@ -515,6 +515,7 @@ table.tb-tbl th.tb-grp6{color:var(--accent2);border-bottom:2px solid var(--accen
 .pd-h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;}
 .pd-h .sec{font-size:12.5px;font-weight:800;letter-spacing:.9px;color:var(--accent2);font-family:var(--font-num);}
 .pd-h .ar{display:inline;font-size:13px;font-weight:800;color:var(--muted);}
+.pd-wa{margin-top:0;margin-bottom:12px;}
 .pd-copy{margin-left:auto;margin-right:10px;border:1px solid var(--border);background:var(--surface);color:var(--accent2);
   border-radius:8px;padding:5px 12px;font-weight:800;font-size:13px;cursor:pointer;letter-spacing:0;
   font-family:'Segoe UI','Noto Naskh Arabic',Tahoma,sans-serif;}
@@ -3550,9 +3551,37 @@ document.addEventListener('DOMContentLoaded', function(){
               { name:'Transfer 3', kind:'Transfer', group:'TRANSFER PUMPS', ord:2, legacy3h:2 },
               { name:'Transfer 4', kind:'Transfer', group:'TRANSFER PUMPS', ord:3, legacy3h:3 },
               { name:'Transfer 5', kind:'Transfer', group:'TRANSFER PUMPS', ord:4, legacy3h:4 },
-              { name:'Transfer 6', kind:'Transfer', group:'TRANSFER PUMPS', ord:5, legacy3h:5 } ]
+              { name:'Transfer 6', kind:'Transfer', group:'TRANSFER PUMPS', ord:5, legacy3h:5 },
+              // v42 — the rest of the station. Heaters and compressors read
+              // تشغيل / إيقاف / خارج الخدمة (on / off / out of service); the
+              // fire-fighting pumps read like pumps.
+              { name:'Sigma Heater 1', kind:'Heater', group:'HEATERS', ord:8,  labels:'onoff' },
+              { name:'Sigma Heater 2', kind:'Heater', group:'HEATERS', ord:9,  labels:'onoff' },
+              { name:'Sigma Heater 4', kind:'Heater', group:'HEATERS', ord:10, labels:'onoff' },
+              { name:'Heater Treater', kind:'Heater', group:'HEATERS', ord:11, labels:'onoff' },
+              { name:'Compressor A',        kind:'Compressor', group:'COMPRESSORS', ord:12, labels:'onoff' },
+              { name:'Compressor B',        kind:'Compressor', group:'COMPRESSORS', ord:13, labels:'onoff' },
+              { name:'Chemical Compressor', kind:'Compressor', group:'COMPRESSORS', ord:14, labels:'onoff' },
+              { name:'Jockey Pump 1', kind:'Fire pump', group:'FIRE FIGHTING', ord:15 },
+              { name:'Jockey Pump 2', kind:'Fire pump', group:'FIRE FIGHTING', ord:16 },
+              { name:'Diesel Pump 1', kind:'Fire pump', group:'FIRE FIGHTING', ord:17 },
+              { name:'Diesel Pump 2', kind:'Fire pump', group:'FIRE FIGHTING', ord:18 } ]
   };
-  const TB_PUMPD_MAX = 8;
+  const TB_PUMPD_MAX = 20;
+  // The words for a state depend on the equipment: a pump is in service or on
+  // standby; a heater or compressor is on or off. Stored the same (in / sb /
+  // out), so hours and stoppages count the same way for all of them.
+  const TB_ONOFF_STATES = [
+    { k:'in',  en:'On',             ar:'تشغيل',       cls:'in'  },
+    { k:'sb',  en:'Off',            ar:'إيقاف',       cls:'sb'  },
+    { k:'out', en:'Out of service', ar:'خارج الخدمة', cls:'out' }
+  ];
+  function tbStatesFor(def){ return (def && def.labels === 'onoff') ? TB_ONOFF_STATES : TB_PUMP_STATES; }
+  function tbStateOf(def, k){
+    const l = tbStatesFor(def);
+    for(let i = 0; i < l.length; i++) if(l[i].k === k) return l[i];
+    return null;
+  }
   // In the report, a daily pump is addressed as index 10 + its own index, so
   // one set of functions serves both kinds.
   const TB_DAILY_BASE = 10;
@@ -3565,7 +3594,8 @@ document.addEventListener('DOMContentLoaded', function(){
   }
   // ►►►► PREVENTIVE MAINTENANCE interval in RUNNING hours, by kind of pump.
   //      PLACEHOLDERS until maintenance gives the real figures. "Due" at 90%.
-  const TB_PUMP_PM_HOURS = { Booster:4000, Borets:4000, Transfer:4000, 'High pressure':4000 };
+  const TB_PUMP_PM_HOURS = { Booster:4000, Borets:4000, Transfer:4000, 'High pressure':4000,
+                             Heater:4000, Compressor:4000, 'Fire pump':4000 };
   // The operator sees ONLY the Arabic; the admin report only the English.
   const TB_PUMP_STATES = [
     { k:'in',  en:'In service',     ar:'في الخدمة',   cls:'in'  },
@@ -4499,16 +4529,50 @@ document.addEventListener('DOMContentLoaded', function(){
     const anyPrev = list.some(function(pm, k){ return !!tbPumpLatest(b.id, TB_DAILY_BASE + k, tbPrevDate(_tbDate)).st; });
     const copy = (ed && emptyToday && anyPrev)
       ? '<button type="button" class="pd-copy" data-pdcopy="' + escAttr(b.id) + '" lang="ar">كما أمس</button>' : '';
-    return '<div class="pd-card"><div class="pd-h"><span class="sec">PUMP STATION</span>' + copy +
-      '<span class="ar" dir="rtl" lang="ar">يومياً</span></div>' + rows + '</div>';
+    return '<div class="pd-card"><div class="pd-h"><span class="sec">STATION STATUS</span>' + copy +
+      '<span class="ar" dir="rtl" lang="ar">يومياً</span></div>' + rows + '</div>' +
+      // The day's status as a WhatsApp message, in the measurements' format,
+      // to copy into the group. Copy only — no "open WhatsApp".
+      '<div class="ms-wa pd-wa" data-pdwa="' + escAttr(b.id) + '"><div class="ms-h"><span class="sec">WhatsApp message — station status</span></div>' +
+        '<pre class="ms-msg" dir="auto">' + escHtml(tbStationMsg(b, cell)) + '</pre>' +
+        '<div class="ms-btns"><button type="button" class="ms-cp" data-pdcp="' + escAttr(b.id) + '" lang="ar">نسخ الرسالة</button></div></div>';
+  }
+  // The daily station status for the group: every group as a section, every
+  // item with its state in English; out of service with since-when and why.
+  // Items nobody has recorded today are left out.
+  function tbStationMsg(b, cell){
+    const list = tbPumpsDaily(b.id);
+    const order = list.map(function(pm, k){ return { pm:pm, k:k }; })
+      .sort(function(a, z){ return (a.pm.ord || 0) - (z.pm.ord || 0); });
+    const L = [ '*`Tank Battery 10/01`*', '', '*Station Status*',
+                '*Date : ' + _tbDate.split('-').reverse().join('/') + '*', '~ـــــــــــــــــــــــــــــــــــــــــــــ~' ];
+    let group = null, any = false;
+    order.forEach(function(o){
+      const v = cell.dps[o.k];
+      if(!v) return;
+      if(o.pm.group !== group){ group = o.pm.group; L.push('', '*`' + group + '`*', ''); }
+      const st = tbStateOf(o.pm, v);
+      let line = '*' + o.pm.name + ' : ' + st.en;
+      if(v === 'out'){
+        const ep = tbPumpOOS(b.id, TB_DAILY_BASE + o.k, null, _tbDate).slice(-1)[0];
+        if(ep && ep.from.dt !== _tbDate) line += ' since ' + ep.from.dt.slice(8) + '/' + ep.from.dt.slice(5, 7);
+        const why = (cell.dpy[o.k] || (ep && ep.why) || '').trim();
+        if(why) line += ' — ' + why;
+      }
+      L.push(line + '*');
+      any = true;
+    });
+    if(!any) L.push('', '(nothing recorded for this day yet)');
+    L.push('', '~ـــــــــــ *Work Shift* ـــــــــــ~');
+    return L.join('\n');
   }
   function tbDailyPumpRow(b, cell, ed, yd, pm, k){
     return (function(){
       // "Yesterday" is the pump's last recorded state before today — which for
       // a transfer pump in its first daily days is its last three-hour reading.
-      const v = cell.dps[k], st = tbPumpState(v);
+      const v = cell.dps[k], st = tbStateOf(pm, v);
       const prev = tbPumpLatest(b.id, TB_DAILY_BASE + k, tbPrevDate(_tbDate)).st;
-      const pst = tbPumpState(prev);
+      const pst = tbStateOf(pm, prev);
       let extra = '';
       if(v === 'out' && prev !== 'out'){
         extra = '<textarea class="ps-why pd-why" rows="2" data-tb="' + escAttr(b.id) + '" data-k="v" data-i="' + k + '"' +
@@ -4523,7 +4587,7 @@ document.addEventListener('DOMContentLoaded', function(){
         '<div class="ps' + (st ? ' ps-' + st.cls : '') + '"><select class="ps-sel" data-tb="' + escAttr(b.id) + '" data-k="u" data-i="' + k + '"' +
         (ed ? '' : ' disabled') + ' dir="rtl" lang="ar">' +
         '<option value=""' + (v ? '' : ' selected') + '>—</option>' +
-        TB_PUMP_STATES.map(function(s){ return '<option value="' + s.k + '"' + (v === s.k ? ' selected' : '') + '>' + s.ar + '</option>'; }).join('') +
+        tbStatesFor(pm).map(function(s){ return '<option value="' + s.k + '"' + (v === s.k ? ' selected' : '') + '>' + s.ar + '</option>'; }).join('') +
         '</select></div></div>' +
         (!v && pst ? '<div class="pd-y" dir="rtl" lang="ar">أمس: ' + pst.ar + '</div>' : '') + extra + '</div>';
     })();
@@ -6740,7 +6804,7 @@ document.addEventListener('DOMContentLoaded', function(){
         const n = { in:0, sb:0, out:0, none:0 };
         const chips = pumps.map(function(x){
           const pm = x.pm, i = x.i;
-          const st = tbPumpState(tbPumpLatest(b.id, i, asOf).st);
+          const st = tbStateOf(pm, tbPumpLatest(b.id, i, asOf).st);
           if(st){ n[st.k]++; tot[st.k]++; } else { n.none++; tot.none++; }
           return '<span class="pchip ' + (st ? st.cls : 'none') + '">' + escHtml(pm.name) + '</span>';
         }).join('');
@@ -6765,7 +6829,7 @@ document.addEventListener('DOMContentLoaded', function(){
       TB_LIST.forEach(function(b){
         tbAllPumpsOf(b.id).forEach(function(x){
           const pm = x.pm, i = x.i;
-          const now = tbPumpLatest(b.id, i, asOf), st = tbPumpState(now.st);
+          const now = tbPumpLatest(b.id, i, asOf), st = tbStateOf(pm, now.st);
           const h = tbPumpHours(b.id, i, fromDt, asOf), all = tbPumpHours(b.id, i, null, asOf);
           const eps = tbPumpOOS(b.id, i, fromDt, asOf);
           body += '<tr' + (now.st === 'out' ? ' class="alarm"' : '') + '>' +
@@ -6798,7 +6862,7 @@ document.addEventListener('DOMContentLoaded', function(){
         '<div class="tb-days tb-plog"><table><thead><tr><th>Battery</th><th>Pump</th><th>Went out</th>' +
         '<th>Back</th><th>Hours out</th><th>Reason for stopping</th></tr></thead><tbody>' +
         all.map(function(e){
-          const back = e.back ? tbPumpState(e.back) : null;
+          const back = e.back ? tbStateOf(e.pm, e.back) : null;
           return '<tr' + (e.to ? '' : ' class="alarm"') + '><td class="b">' + escHtml(e.b.name) + '</td><td>' + escHtml(e.pm.name) + '</td>' +
             '<td>' + tbSlotWhen(e.from, e.b) + '</td>' +
             '<td>' + (e.to ? tbSlotWhen(e.to, e.b) + ' <span class="pchip ' + back.cls + '">' + back.en + '</span>'
@@ -8336,6 +8400,20 @@ tbRemarksHTML(day.date, true) +
           panel.querySelector('.ptab-meas').style.display  = k === 'meas'  ? '' : 'none';
           return;
         }
+      });
+      area.addEventListener('click', function(e){
+        const t = e.target.closest ? e.target.closest('button[data-pdcp]') : null;
+        if(!t) return;
+        const id = t.getAttribute('data-pdcp');
+        tbCopyText(tbStationMsg(tbById(id), tbGetDay(_tbDate).tbs[id]));
+      });
+      area.addEventListener('input', function(e){
+        const t = e.target;
+        if(!t || !t.getAttribute || t.getAttribute('data-k') !== 'v') return;
+        setTimeout(function(){
+          const id = t.getAttribute('data-tb'), box = document.querySelector('#tbArea .pd-wa[data-pdwa="' + id + '"] .ms-msg');
+          if(box) box.textContent = tbStationMsg(tbById(id), tbGetDay(_tbDate).tbs[id]);
+        }, 0);
       });
       area.addEventListener('click', function(e){
         const t = e.target.closest ? e.target.closest('button[data-pdcopy]') : null;
