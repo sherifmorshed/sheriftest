@@ -17,7 +17,7 @@ service cloud.firestore {
     //  then closed) applies, which is either wide open or completely broken.
     //
     //  Keep the addresses below in step with ADMIN_EMAILS / PLANT_EMAILS /
-    //  PETRECO_EMAILS / TB_EMAILS in index.html. They are two halves of the
+    //  PETRECO_EMAILS / TB_EMAILS / MECH_EMAILS in index.html. They are two halves of the
     //  same decision, and drift shows up as "the button is there but saving
     //  fails".
 
@@ -38,6 +38,14 @@ service cloud.firestore {
     function isPetreco() {
       return request.auth != null
           && request.auth.token.email in ['petreco@petrobel.org'];
+    }
+
+    // The mechanical (maintenance) department. READS every battery's readings
+    // — the running hours a PM is due on are counted from them — and writes
+    // ONE thing: the PM record, tbReadingsMeta/pm. It cannot change a reading.
+    function isMech() {
+      return request.auth != null
+          && request.auth.token.email in ['mechanical@petrobel.org'];
     }
 
     // ── Tank batteries ────────────────────────────────────────────
@@ -139,8 +147,9 @@ service cloud.firestore {
     //  An operator's client MUST query with .where('battery','==', his own).
     //  An unfiltered query is rejected outright rather than trimmed — that is
     //  how Firestore evaluates queries, and it is the behaviour we want.
+    //  Mechanical read ALL batteries (no filter needed) and write none.
     match /tbReadings/{docId} {
-      allow read:   if isAdmin() || tbOwnsExisting();
+      allow read:   if isAdmin() || isMech() || tbOwnsExisting();
       allow create: if isAdmin() || tbOwnsIncoming();
       allow update: if isAdmin() || (tbOwnsExisting() && tbOwnsIncoming());
       allow delete: if isAdmin();
@@ -149,9 +158,17 @@ service cloud.firestore {
     // Version stamp, watched the way rasGaraMeta is. Readable by every tank
     // battery operator: it carries the list of dates that have readings and no
     // readings themselves, so it leaks nothing an operator should not see.
+    //
+    // ONE document in here is different: `pm`, the preventive-maintenance
+    // record (every PM done, and each pump's interval). Only admin and the
+    // mechanical department read or write it — a tank battery operator cannot
+    // mark a PM done or change an interval. Mechanical may write NO other
+    // document in this collection.
     match /tbReadingsMeta/{docId} {
-      allow read:  if isAdmin() || isTankBattery();
-      allow write: if isAdmin() || isTankBattery();
+      allow read:  if isAdmin() || isMech() || (isTankBattery() && docId != 'pm');
+      allow write: if isAdmin()
+                   || (isMech() && docId == 'pm')
+                   || (isTankBattery() && docId != 'pm');
     }
 
     // ── PETRECO scanners: one document per meter per day ──────────

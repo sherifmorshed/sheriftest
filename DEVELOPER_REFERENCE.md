@@ -435,6 +435,81 @@ can both match on.
 safe rather than trimming the result, so an unfiltered read is denied outright
 even though some documents are his. `firebase-stub.js` simulates this.
 
+**Drain scanners are totalizers.** For the `drain` group a meter-day carries
+`r[0..8]`, nine readings from 06:00. `pfDeriveDrains` (called from `pfGetDay`)
+fills a missing opening from the previous day's closing and, if any reading
+exists, OVERWRITES `q[k]` with `r[k+1] − r[k]` — so every consumer of `q`
+(totals, card, analysis) needs no change. A day with no readings keeps its
+typed `q` / `v`. `pfApplyReading` writes the closing reading to tomorrow's
+opening and the opening to yesterday's closing. Crude oil meters are untouched.
+
+**Station measurements (T.B. 10/1).** `TB_MEAS_HOURS` (nine rounds, 05:00 to
+05:00 — its own clock, not `TB_STEP`), `TB_MEAS_SECTIONS` and `TB_MEAS_FIELDS`
+define the tab; a field's position in `TB_MEAS_FIELDS` is its save key, so new
+fields go at the end. A round is `cell.meas[round]` = `{ t7:…, s1:'emulsion', … }`,
+stored as `meas.{round}.{field}`; queue kind `g`, index `round*100+field`. Round
+8 and the next day's round 0 are written together. A field marked `retired`
+(the v34 single HP pump, `hpN`/`hp`) stays in the array for its key but is off
+the form, the message and the done count; `tbMeasHP` reads old rounds through
+it. `tbMeasNeeded` decides what "done" means — a heater that is OFF needs no
+temperature or flow. `tbMeasMsg` builds the
+WhatsApp text; edits refresh it in place (`tbMeasRefresh`), never by redrawing.
+
+**PM monitoring.** Intervals and PM records live on ONE admin document,
+`tbReadingsMeta/pm` = `{ pumps:{ "tb6_1:0":{ every, hist:{ <id>:{ at, note, by, tech, wo, chk:[…] } } } } }`,
+watched LIVE by `tbPMLoad` (onSnapshot, admin and mechanical only; stopped in
+`tbStopListener` via `tbPMStop`) and written with merge by `tbPMWrite`.
+`hist` is a map so one PM is added or removed alone (removed = null). `tbPumpPM`
+counts slots whose START (`tbSlotStart`) is at or after the last PM, by state;
+the due date divides hours left by the last 14 days' running hours per day.
+Pre-v40 day-flags (`pmd`, `dpm`) still count as a PM at the end of that day.
+
+**Mechanical account (v46).** `MECH_EMAILS` / `isMech` ↔ `isMech()` in the
+rules. `_tabsFor()` gives it `['tb']`; inside the module `_tbMech()` forces the
+`pm` sub-page (`tbShowSub`), the sub-tab bar stays hidden, and `tbMine()` is
+null so the readings query is unfiltered (rules allow mechanical to read every
+battery). It is never an editor: `tbCanEdit` / `tbMayWrite` are false, so the
+pending queue never holds anything of theirs. `_tbPMUser()` = admin or
+mechanical gates the PM listener. Page pieces: `tbRenderPMDash` (KPI strip
+`#tbPMKpi`, red-flag work list `#tbPMWork` from `tbPMAll`/`tbPMWorkList`),
+`tbPMWorkMsg` (Copy work list), `tbPMExport` (two-sheet xlsx via
+`tbLoadXLSX`), checklist `TB_PM_CHECK` by kind (`tbPMCheckOf`). Cards carry
+`id="pmc-<key>"` so the work list can scroll to them.
+
+**Every battery is tabbed (v43).** All five have `pumpTab:true`; only 10/1 has
+`measTab:true`. `TB_PUMPS` is empty for all of them — every item lives in
+`TB_PUMPS_DAILY`, the Belayim pumps with `legacy3h` so their three-hourly past
+still counts. `b.wa` is the name written at the top of a battery's WhatsApp text.
+
+**Theme.** Three modes, `light` / `dark` / `auto`, kept in localStorage under
+`rasgara_theme`; `auto` is dark from 18:00 to 06:00, re-checked every minute and
+on returning to the app. `window.__THEME__` exposes it to the harness. Night-mode
+colour overrides for v28+ components are one block of `body:not(.light-mode)`
+rules beside `.ms-wa-ar`.
+
+**Station status words.** An item with `labels:'onoff'` (heaters, compressors)
+shows تشغيل / إيقاف / خارج الخدمة and On / Off / Out of service; everything else
+the pump words. Both store `in` / `sb` / `out`, so hours count alike — use
+`tbStateOf(def, k)`, not `tbPumpState`, wherever a daily item is labelled.
+`tbStationMsg` builds 10/1's daily WhatsApp text.
+
+**Daily pumps.** Since v41 ALL of T.B. 10/1's pumps are daily — `TB_PUMPS.tb10_1`
+is empty, and `TB_PUMPS_DAILY.tb10_1` holds HPS 1, HPS 2 (keys 0, 1) then
+Transfer 1–6 (keys 2–7), shown in `ord` order under `group` headings. A transfer
+pump's `legacy3h` is its old three-hourly index: `tbPumpSlots` and
+`tbPumpLatest` fall back to `ps[legacy3h]` on days with no daily record, and
+`tbPMKey` keeps its PM under the old key. `TB_PUMPS_DAILY`
+pumps recorded once per day: `cell.dps[k]` state, `cell.dpy[k]` reason,
+`cell.dpm[k]` PM; queue kinds `u`, `v`, `n`; stored as `pumpsDaily`,
+`pumpsDailyWhy`, `pumpsDailyPM`. In the report a daily pump is index
+`TB_DAILY_BASE + k` (10+), so `tbPumpSlots` and everything built on it serve
+both kinds — a daily slot counts 24 hours.
+
+**Pump station on a tab.** A battery with `pumpTab:true` in `TB_LIST` (only
+T.B. 10/1) builds its pump cells into a second table, `.ptab-pumps`, instead of
+columns in the readings table; `_tbPanelTab[id]` remembers which is open, and
+switching only toggles `display` so nothing is redrawn.
+
 **Pump station.** `TB_PUMPS` lists each battery's pumps; a pump's INDEX in
 its list is its key in the database, so new pumps go at the END and a list is
 never reordered. Each scanner row holds every pump's state (`cell.ps[pump][row]`)

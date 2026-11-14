@@ -74,7 +74,8 @@ The rules grant:
 | `sherifmorshed@gmail.com` (admin) | read + write | all batteries | read + write | read + write |
 | `petreco@petrobel.org` (PETRECO) | read + write | denied | denied | read + write |
 | `rasgara@petrobel.org` (Ras Gara) | read + write | denied | denied | denied |
-| `tb…@petrobel.org` (one battery) | denied | **own battery only** | read + write | denied |
+| `tb…@petrobel.org` (one battery) | denied | **own battery only** | read + write (not `pm`) | denied |
+| `mechanical@petrobel.org` | denied | **read** all batteries | read; write **`pm` only** | denied |
 | anyone else | denied | denied | denied | denied |
 
 Everything else in the database is denied by default.
@@ -102,6 +103,7 @@ Then **Users → Add user**, three times:
 | `sherifmorshed@gmail.com` | you — both columns, chart, print, e-mail |
 | `petreco@petrobel.org` | the PETRECO operators — their M³/hr column only |
 | `rasgara@petrobel.org` | the Ras Gara operators — their two columns only |
+| `mechanical@petrobel.org` | the maintenance department — PM page only |
 
 Set fresh passwords and hand the operators theirs directly.
 

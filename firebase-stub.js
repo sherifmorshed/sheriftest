@@ -60,7 +60,8 @@
               'tb6-2@petrobel.org':'tb6_2','tb8-1@petrobel.org':'tb8_1',
               'tb8-2@petrobel.org':'tb8_2'};
   var ADMINS=['sherifmorshed@gmail.com'], PLANT=['rasgara@petrobel.org'],
-      PETRECO=['petreco@petrobel.org'];
+      PETRECO=['petreco@petrobel.org'], MECH=['mechanical@petrobel.org'];
+  function isMech(){ return MECH.indexOf(who())!==-1; }
   function who(){ return String((SEED.user&&SEED.user.email)||'').toLowerCase(); }
   function isAdmin(){ return ADMINS.indexOf(who())!==-1; }
   function isOperator(){ return isAdmin()||PLANT.indexOf(who())!==-1||PETRECO.indexOf(who())!==-1; }
@@ -75,9 +76,15 @@
     var c=path.split('/')[0];
     if(c==='rasGara'||c==='rasGaraMeta') return isOperator();
     if(c==='pfReadings'||c==='pfReadingsMeta') return isAdmin()||isPetreco();
-    if(c==='tbReadingsMeta') return isAdmin()||!!mine();
+    if(c==='tbReadingsMeta'){
+      var isPm=path.split('/')[1]==='pm';
+      if(isAdmin()) return true;
+      if(isMech()) return op==='read' || isPm;
+      return !!mine() && !isPm;
+    }
     if(c==='tbReadings'){
       if(isAdmin()) return true;
+      if(isMech()) return op==='read';
       if(!mine()) return false;
       if(op==='read') return !existing || existing.battery===mine();
       var ok=(incoming&&incoming.battery===mine());
@@ -87,7 +94,7 @@
   }
   function denyReason(n,filters){
     if(n!=='tbReadings') return docAllowed(n+'/x','read',null,null) ? null : 'permission-denied';
-    if(isAdmin()) return null;                            // admin reads all
+    if(isAdmin()||isMech()) return null;                  // admin & mechanical read all
     if(!mine()) return 'permission-denied';               // not a battery account
     var f=null; filters.forEach(function(x){ if(x.field==='battery') f=x; });
     if(!f) return 'permission-denied';                    // unfiltered: refused

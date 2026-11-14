@@ -12,26 +12,26 @@
    accounts and its own release cycle, and it shares nothing with any other
    PETROBEL app. Nothing here should ever need to reach outside this folder.
 
-   WHAT IS WHERE                                        (line numbers, v43)
+   WHAT IS WHERE                                        (line numbers, v45)
    ─────────────────────────────────────────────────────────────────────────
      CSS
        Design tokens — every colour lives here, light + dark ...... line 74
        Header, login, toast, footer .............................. line 107
        Pages: readings, tank batteries, scanners, PETRECO ........ line 239
      MARKUP
-       Icon sprite — every icon, drawn inline .................... line 901
-       Login screen .............................................. line 922
-       Header bar ................................................ line 980
-       Pages: R/G, A/R, PETRECO, no-access ....................... line 992
+       Icon sprite — every icon, drawn inline .................... line 910
+       Login screen .............................................. line 931
+       Header bar ................................................ line 989
+       Pages: R/G, A/R, PETRECO, no-access ....................... line 1001
      SCRIPT — the shell
-       ►► CONFIGURATION — Firebase config + role lists ........... line 1318
-       Boot, helpers, unsaved-edits queue, footer status ......... line 1392
-       Sign in / sign out, roles, tabs ........................... line 1715
-     SCRIPT — R/G Production (hourly PETRECO vs Ras Gara) ........ line 1954
+       ►► CONFIGURATION — Firebase config + role lists ........... line 1337
+       Boot, helpers, unsaved-edits queue, footer status ......... line 1411
+       Sign in / sign out, roles, tabs ........................... line 1734
+     SCRIPT — R/G Production (hourly PETRECO vs Ras Gara) ........ line 1973
      SCRIPT — A/R Production (tank batteries, report card,
-              scanner analysis, temperature, chemical, pumps) ..... line 3423
-     SCRIPT — day / night theme, service worker .................. line 8581
-     SCRIPT — PETRECO scanners ................................... line 8674
+              scanner analysis, temperature, chemical, pumps) ..... line 3442
+     SCRIPT — day / night theme, service worker .................. line 8668
+     SCRIPT — PETRECO scanners ................................... line 8761
 
    THE ROLES
      admin     both R/G sides, A/R Production, every report
@@ -616,6 +616,35 @@ td.ps-out .ps-sel,.pd-top .ps-out .ps-sel{background:#dc2626;border-color:#dc262
 .tb-preg td.n.in,.tb-preg td.n.sb,.tb-preg td.n.out{font-weight:800;}
 .tb-preg tr.alarm td.b,.tb-preg tr.alarm td.p,.tb-plog tr.alarm td.b{color:#dc2626;}
 .pm-sum{display:flex;gap:14px;font-weight:800;font-size:13px;margin:0 0 8px;}
+.pm-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:6px 0 10px;}
+.pm-kpis .k{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:9px 11px;border-top:4px solid var(--border);}
+.pm-kpis .k b{display:block;font-family:var(--font-num);font-size:22px;line-height:1.1;}
+.pm-kpis .k span{font-size:11px;font-weight:700;color:var(--muted);}
+.pm-kpis .k.in{border-top-color:#16a34a;} .pm-kpis .k.sb{border-top-color:#d97706;} .pm-kpis .k.out{border-top-color:#dc2626;}
+.pm-kpis .k.out b{color:#dc2626;} .pm-kpis .k.sb b{color:#d97706;}
+.pm-work{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px 10px;margin-bottom:12px;}
+.pm-wh{font-weight:800;font-size:13px;color:#dc2626;margin:2px 0 6px;display:flex;align-items:center;gap:8px;}
+.pm-wh span{background:#dc2626;color:#fff;border-radius:9px;font-size:11px;padding:1px 7px;}
+.pm-wr{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:transparent;color:var(--text);
+  border:0;border-top:1px solid var(--border);padding:8px 2px;cursor:pointer;font:inherit;}
+.pm-wr .f{font-size:16px;width:18px;text-align:center;} .pm-wr.out .f{color:#dc2626;} .pm-wr.sb .f{color:#d97706;}
+.pm-wr .n{flex:1;min-width:0;} .pm-wr .n b{display:block;font-size:13.5px;} .pm-wr .n i,.pm-wr .h i{font-style:normal;font-size:11px;color:var(--muted);font-weight:700;display:block;}
+.pm-wr .h{text-align:right;font-family:var(--font-num);font-weight:800;font-size:13.5px;white-space:nowrap;}
+.pm-wr.out .h{color:#dc2626;} .pm-wr.sb .h{color:#d97706;}
+.pm-wr .go{font-size:11.5px;font-weight:800;color:var(--accent2);white-space:nowrap;}
+.pm-ok{font-size:12.5px;color:#16a34a;font-weight:700;padding:6px 2px;}
+.pm-chk{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:4px 10px;}
+.pm-chk label{font-size:12px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:6px;}
+.pm-lc{display:block;font-size:11px;color:var(--muted);margin-top:2px;}
+.pm-bats{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 12px;}
+.pm-bats button{border:1.5px solid var(--border);background:var(--card);color:var(--text);border-radius:10px;
+  padding:9px 14px;font-weight:800;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;}
+.pm-bats button.on{background:var(--accent2);border-color:var(--accent2);color:#fff;}
+body:not(.light-mode) .pm-bats button.on{color:#1a1405;}
+.pm-bats .pdot{min-width:18px;height:18px;border-radius:9px;background:#dc2626;color:#fff;font-size:11px;
+  display:inline-flex;align-items:center;justify-content:center;padding:0 5px;}
+.pm-bats .pdot.due{background:#d97706;}
+.pm-gh{font-size:11.5px;font-weight:800;letter-spacing:.9px;color:var(--muted);font-family:var(--font-num);margin:12px 0 6px;}
 .pm-sum .out{color:#dc2626;} .pm-sum .sb{color:#d97706;} .pm-sum .in{color:#16a34a;}
 .pm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;}
 .pm-card{background:var(--card);border:1px solid var(--border);border-left:4px solid #16a34a;border-radius:12px;padding:10px 12px;}
@@ -1134,12 +1163,26 @@ document.addEventListener('click', function(e){
       <div class="chips rg-range" id="tbPumpRange" style="margin-bottom:8px;"></div>
       <div class="rg-sec-title">Pumps situation</div>
       <div id="tbPumpSummary"></div>
-      <div class="rg-sec-title">PM monitoring</div>
-      <div id="tbPumpPMMon"></div>
       <div class="rg-sec-title">Hours by state</div>
       <div id="tbPumpRegister"></div>
       <div class="rg-sec-title">Out of service</div>
       <div id="tbPumpOOS"></div>
+    </div>
+
+    <!-- PM: preventive maintenance, one tank battery at a time — pick the
+         battery, then every pump, heater and compressor on it with its hours
+         since PM, what is left, and where to record one. -->
+    <div id="tb-page-pm" style="display:none;">
+      <div class="rg-bar">
+        <label class="rg-lbl" for="tbPMDate">As of</label>
+        <input type="date" id="tbPMDate" class="rg-date">
+        <button class="rg-btn" id="tbPMCopy" type="button">Copy work list</button>
+        <button class="rg-btn" id="tbPMXlsx" type="button">Export Excel</button>
+      </div>
+      <div class="pm-kpis" id="tbPMKpi"></div>
+      <div class="pm-work" id="tbPMWork"></div>
+      <div class="pm-bats" id="tbPMBats"></div>
+      <div id="tbPumpPMMon"></div>
     </div>
 
     <div id="tb-page-chem" style="display:none;">
@@ -1387,6 +1430,12 @@ const TB_ACCOUNTS = {
   'tb8-2@petrobel.org':  'tb8_2'
 };
 const TB_EMAILS = Object.keys(TB_ACCOUNTS);
+// MECHANICAL — the maintenance department. The PM page and NOTHING else: every
+// battery's pumps, what is overdue and what is due, and the place to record a
+// PM. They READ the tank battery readings (the running hours come from them)
+// and never write one; the only thing they write is the PM record,
+// tbReadingsMeta/pm. Must match isMech() in firestore.rules.
+const MECH_EMAILS    = ['mechanical@petrobel.org'];
 
 // ══════════════════════════════════════════════════════════════════════
 //  BOOT
@@ -1398,6 +1447,7 @@ let isAdmin = false;
 let isRasGara = false;   // the Ras Gara plant operators
 let isPetreco = false;   // the PETRECO operators
 let isTankBat = false;   // the tank battery operators
+let isMech    = false;   // the mechanical (maintenance) department — PM only
 // The ONE battery this session may see and write, or null for admin and for
 // everyone else. Set at sign-in from TB_ACCOUNTS; the rules enforce the same
 // thing server-side, so this only decides what the screen offers.
@@ -1719,7 +1769,8 @@ function _roleOf(email){
   return { admin:   ADMIN_EMAILS.indexOf(e)   !== -1,
            plant:   PLANT_EMAILS.indexOf(e)   !== -1,
            petreco: PETRECO_EMAILS.indexOf(e) !== -1,
-           tb:      TB_EMAILS.indexOf(e)      !== -1 };
+           tb:      TB_EMAILS.indexOf(e)      !== -1,
+           mech:    MECH_EMAILS.indexOf(e)    !== -1 };
 }
 
 // ── Tabs ───────────────────────────────────────────────────────────────
@@ -1735,6 +1786,9 @@ function _roleOf(email){
 // listener for a collection the signed-in role cannot read.
 function _tabsFor(){
   if(isTankBat && !isAdmin) return ['tb'];
+  // Mechanical open the tank battery module too, but it shows them the PM page
+  // only (see tbShowSub). One tab, so no tab bar.
+  if(isMech && !isAdmin)    return ['tb'];
   // PETRECO run the central processing facility, so they also record its own
   // scanners — the tank batteries feed them, and what arrives is not what any
   // one battery sent.
@@ -1804,6 +1858,7 @@ function showApp(user){
   isRasGara  = r.plant;
   isPetreco  = r.petreco;
   isTankBat  = r.tb;
+  isMech     = r.mech && !r.admin && !r.tb;
   tbBattery  = r.tb ? (TB_ACCOUNTS[String(user.email).toLowerCase().trim()] || null) : null;
 
   document.getElementById('login-page').classList.add('hidden');
@@ -1815,6 +1870,7 @@ function showApp(user){
   const label = isAdmin ? 'ADMIN' : isRasGara ? 'RAS GARA' : isPetreco ? 'PETRECO'
               : isTankBat ? (tbBattery ? 'T.B. ' + tbBattery.replace('tb','').replace('_','/')
                                        : 'TANK BATT.')
+              : isMech ? 'MECHANICAL'
               : 'VIEWER';
   document.getElementById('ubRole').textContent = label;
 
@@ -1858,7 +1914,7 @@ function showApp(user){
 
 function showLogin(){
   currentUser = null; isAdmin = false; isRasGara = false; isPetreco = false;
-  isTankBat = false; tbBattery = null;
+  isTankBat = false; isMech = false; tbBattery = null;
   if(typeof window.stopRasGaraListener       === 'function') window.stopRasGaraListener();
   if(typeof window.stopTankBatteriesListener === 'function') window.stopTankBatteriesListener();
   if(typeof window.stopPetrecoListener       === 'function') window.stopPetrecoListener();
@@ -3630,9 +3686,16 @@ document.addEventListener('DOMContentLoaded', function(){
               { name:'Jockey Pump 1', kind:'Fire pump', group:'FIRE FIGHTING', ord:15 },
               { name:'Jockey Pump 2', kind:'Fire pump', group:'FIRE FIGHTING', ord:16 },
               { name:'Diesel Pump 1', kind:'Fire pump', group:'FIRE FIGHTING', ord:17 },
-              { name:'Diesel Pump 2', kind:'Fire pump', group:'FIRE FIGHTING', ord:18 } ]
+              { name:'Diesel Pump 2', kind:'Fire pump', group:'FIRE FIGHTING', ord:18 },
+              // v44 — appended (index = key); `ord` places them after the
+              // high-pressure pumps on screen and in the message.
+              { name:'Waste Water Pump A', kind:'Waste water', group:'WASTE WATER PUMPS', ord:7.1 },
+              { name:'Waste Water Pump B', kind:'Waste water', group:'WASTE WATER PUMPS', ord:7.2 },
+              { name:'Waste Water Pump C', kind:'Waste water', group:'WASTE WATER PUMPS', ord:7.3 },
+              { name:'Oil Room Pump A',    kind:'Oil room',    group:'OIL ROOM PUMPS',    ord:7.6 },
+              { name:'Oil Room Pump B',    kind:'Oil room',    group:'OIL ROOM PUMPS',    ord:7.7 } ]
   };
-  const TB_PUMPD_MAX = 20;
+  const TB_PUMPD_MAX = 24;
   // The words for a state depend on the equipment: a pump is in service or on
   // standby; a heater or compressor is on or off. Stored the same (in / sb /
   // out), so hours and stoppages count the same way for all of them.
@@ -3660,7 +3723,22 @@ document.addEventListener('DOMContentLoaded', function(){
   // ►►►► PREVENTIVE MAINTENANCE interval in RUNNING hours, by kind of pump.
   //      PLACEHOLDERS until maintenance gives the real figures. "Due" at 90%.
   const TB_PUMP_PM_HOURS = { Booster:4000, Borets:4000, Transfer:4000, 'High pressure':4000,
-                             Heater:4000, Compressor:4000, 'Fire pump':4000 };
+                             Heater:4000, Compressor:4000, 'Fire pump':4000,
+                             'Waste water':4000, 'Oil room':4000 };
+  // The standard PM checklist offered when a PM is recorded, by kind. Ticked
+  // items are stored with the PM, so the log says WHAT was done, not just that
+  // something was. Edit freely — old records keep the wording they were saved with.
+  const TB_PM_CHECK_PUMP = ['Greasing / lubrication', 'Oil level / oil change', 'Mechanical seal / gland — no leak',
+                            'Coupling & alignment', 'Vibration & noise normal', 'Foundation bolts tight'];
+  const TB_PM_CHECK = {
+    Compressor:  ['Oil level / oil change', 'Air filter cleaned / changed', 'Belts / coupling', 'Drain valves',
+                  'Safety valve & pressure switch', 'Leak check'],
+    Heater:      ['Burner & nozzle cleaned', 'Ignition / flame check', 'Fuel line — no leak', 'Controls & thermostat',
+                  'Insulation / casing'],
+    'Fire pump': ['Engine oil & coolant', 'Battery & charger', 'Fuel level', 'Test run', 'Discharge pressure',
+                  'Jockey cut-in / cut-out']
+  };
+  function tbPMCheckOf(kind){ return TB_PM_CHECK[kind] || TB_PM_CHECK_PUMP; }
   // The operator sees ONLY the Arabic; the admin report only the English.
   const TB_PUMP_STATES = [
     { k:'in',  en:'In service',     ar:'في الخدمة',   cls:'in'  },
@@ -3886,6 +3964,11 @@ document.addEventListener('DOMContentLoaded', function(){
   function _tbAdmin(){ return typeof isAdmin   !== 'undefined' && isAdmin; }
   function _tbOper(){  return typeof isTankBat !== 'undefined' && isTankBat; }
   function tbCanEdit(){ return _tbAdmin() || _tbOper(); }
+  // Mechanical: read every battery, write PM records only. Never an editor of
+  // readings — tbMayWrite refuses them because they are neither admin nor the
+  // battery's operator.
+  function _tbMech(){ return typeof isMech !== 'undefined' && isMech && !_tbAdmin(); }
+  function _tbPMUser(){ return _tbAdmin() || _tbMech(); }
   // The batteries this session may see. Admin gets all five; an operator gets
   // exactly his own. Reports are admin-only and deliberately still walk the
   // full TB_LIST.
@@ -4926,9 +5009,11 @@ document.addEventListener('DOMContentLoaded', function(){
                      { k:'view',  label:'Scanner analysis', icon:'trend' },
                      { k:'temp',  label:'Temperature',       icon:'trend' },
                      { k:'chem',  label:'Chemical injection', icon:'trend' },
-                     { k:'pumps', label:'Pumps',              icon:'tank'  } ];
+                     { k:'pumps', label:'Pumps',              icon:'tank'  },
+                     { k:'pm',    label:'PM',                 icon:'edit'  } ];
   function tbShowSub(k){
-    if(!_tbAdmin()) k = 'entry';
+    if(_tbMech()) k = 'pm';
+    else if(!_tbAdmin()) k = 'entry';
     _tbSub = k;
     const e = document.getElementById('tb-page-entry');
     const v = document.getElementById('tb-page-view');
@@ -4939,6 +5024,8 @@ document.addEventListener('DOMContentLoaded', function(){
     if(cp) cp.style.display = (k === 'chem') ? '' : 'none';
     const pp = document.getElementById('tb-page-pumps');
     if(pp) pp.style.display = (k === 'pumps') ? '' : 'none';
+    const pmp = document.getElementById('tb-page-pm');
+    if(pmp) pmp.style.display = (k === 'pm') ? '' : 'none';
     if(e) e.style.display = (k === 'entry') ? '' : 'none';
     if(v) v.style.display = (k === 'view')  ? '' : 'none';
     if(o) o.style.display = (k === 'old')   ? '' : 'none';
@@ -4969,6 +5056,7 @@ document.addEventListener('DOMContentLoaded', function(){
     if(k === 'temp') tbRenderTemp();
     if(k === 'chem') tbRenderChem();
     if(k === 'pumps') tbRenderPumps();
+    if(k === 'pm'){ tbPMLoad(); tbRenderPMPage(); }
   }
   function tbRenderSubTabs(){
     const bar = document.getElementById('tbSubTabs');
@@ -6889,7 +6977,6 @@ document.addEventListener('DOMContentLoaded', function(){
     }
 
     // ── hours by state, per pump ──
-    tbRenderPMMonitor(asOf);
     const reg = document.getElementById('tbPumpRegister');
     if(reg){
       let body = '';
@@ -7534,7 +7621,7 @@ tbRemarksHTML(day.date, true) +
       sub.style.display = txt ? '' : 'none';
     }
     tbRenderSubTabs();
-    tbShowSub(_tbAdmin() ? _tbSub : 'entry');
+    tbShowSub(_tbAdmin() ? _tbSub : _tbMech() ? 'pm' : 'entry');
     tbRenderTotals();
     tbRenderArea();
     // Admin only, and only once the day has something on it — offering to print
@@ -7554,6 +7641,9 @@ tbRemarksHTML(day.date, true) +
       } else if(_tbAdmin()){
         sub2.innerHTML = '<svg class="ico ico-h" aria-hidden="true"><use href="#i-tank"/></svg> ' +
                          'A/R Production';
+      } else if(_tbMech()){
+        sub2.innerHTML = '<svg class="ico ico-h" aria-hidden="true"><use href="#i-edit"/></svg> ' +
+                         'PM Management — Tank Batteries';
       }
     }
     // Only when it is on screen: five charts redrawn on every keystroke of the
@@ -7563,6 +7653,7 @@ tbRemarksHTML(day.date, true) +
     if(_tbAdmin() && _tbSub === 'temp') tbRenderTemp();
     if(_tbAdmin() && _tbSub === 'chem') tbRenderChem();
     if(_tbAdmin() && _tbSub === 'pumps') tbRenderPumps();
+    if(_tbPMUser() && _tbSub === 'pm') tbRenderPMPage();
     const sv = document.getElementById('tbSaved');
     const day = tbGetDay(_tbDate);
     if(sv) sv.textContent = day.updatedAt
@@ -7669,7 +7760,7 @@ tbRemarksHTML(day.date, true) +
   // keyed by id so one PM is added or removed without rewriting the others
   // (a removed one is written as null). The older "PM done" flags on daily
   // documents still count, as a PM at the end of that day.
-  let _tbPMDoc = null, _tbPMLoading = false;
+  let _tbPMDoc = null, _tbPMLoading = false, _tbPMUnsub = null;
   function tbPMKey(id, i){
     if(i >= TB_DAILY_BASE){
       const def = tbPumpsDaily(id)[i - TB_DAILY_BASE];
@@ -7677,21 +7768,28 @@ tbRemarksHTML(day.date, true) +
     }
     return id + ':' + i;
   }
+  // LIVE, not read once: the mechanical department and the admin both record
+  // PMs, and each must see the other's the moment it is saved — or a pump is
+  // done twice, or shown overdue after it was done.
   function tbPMLoad(force){
-    if(_tbPMLoading || (_tbPMDoc && !force)) return;
-    if(typeof db === 'undefined' || !FIREBASE_OK){ _tbPMDoc = { pumps:{} }; return; }
+    if(_tbPMUnsub || _tbPMLoading) return;
+    if(typeof db === 'undefined' || !FIREBASE_OK){ if(!_tbPMDoc) _tbPMDoc = { pumps:{} }; return; }
+    if(!_tbPMUser()) return;            // operators never read the PM record
     _tbPMLoading = true;
-    db.collection('tbReadingsMeta').doc('pm').get().then(function(snap){
+    _tbPMUnsub = db.collection('tbReadingsMeta').doc('pm').onSnapshot(function(snap){
+      _tbPMLoading = false;
       _tbPMDoc = (snap.exists && snap.data()) || { pumps:{} };
       if(!_tbPMDoc.pumps) _tbPMDoc.pumps = {};
-    }).catch(function(e){
+      if(_tbSub === 'pm') tbRenderPMPage();
+    }, function(e){
       console.warn('[PM] could not read', e);
+      _tbPMLoading = false; _tbPMUnsub = null;
       _tbPMDoc = _tbPMDoc || { pumps:{} };
-    }).then(function(){
-      _tbPMLoading = false;
-      if(_tbSub === 'pumps') tbRenderPumps();
+      if(e && e.code === 'permission-denied') showToast('PM records refused — publish firestore.rules', true);
+      if(_tbSub === 'pm') tbRenderPMPage();
     });
   }
+  function tbPMStop(){ if(_tbPMUnsub){ _tbPMUnsub(); _tbPMUnsub = null; } _tbPMDoc = null; _tbPMLoading = false; }
   function tbPMEntry(id, i){ return (_tbPMDoc && _tbPMDoc.pumps && _tbPMDoc.pumps[tbPMKey(id, i)]) || {}; }
   function tbPMEvery(id, i){
     const e = tbPMEntry(id, i);
@@ -7704,7 +7802,8 @@ tbRemarksHTML(day.date, true) +
   function tbPMHistory(id, i){
     const out = [];
     const h = tbPMEntry(id, i).hist || {};
-    Object.keys(h).forEach(function(k){ if(h[k] && h[k].at) out.push({ id:k, at:h[k].at, note:h[k].note || '', by:h[k].by || '' }); });
+    Object.keys(h).forEach(function(k){ if(h[k] && h[k].at) out.push({ id:k, at:h[k].at, note:h[k].note || '', by:h[k].by || '',
+      tech:h[k].tech || '', wo:h[k].wo || '', chk:Array.isArray(h[k].chk) ? h[k].chk : [] }); });
     Object.keys(TB_DAYS).forEach(function(dt){
       const c = TB_DAYS[dt].tbs && TB_DAYS[dt].tbs[id];
       if(!c) return;
@@ -7763,20 +7862,169 @@ tbRemarksHTML(day.date, true) +
   // standby and out-of-service time since its last PM, its PM log — and the
   // place to record a PM or change the interval.
   let _tbPMOpen = {};                      // which pump's form / log is open
-  function tbRenderPMMonitor(asOf){
+  // Which battery the PM tab shows. First visit: the one most in need — the
+  // most overdue, then the most due soon — so the tab opens where the work is.
+  let _tbPMBat = null;
+  function tbPMCounts(id, asOf){
+    const n = { overdue:0, due:0, ok:0 };
+    tbAllPumpsOf(id).forEach(function(x){ const s = tbPumpPM(id, x.i, asOf).status; if(n[s] != null) n[s]++; });
+    return n;
+  }
+  function tbRenderPMPage(){
+    const dv = document.getElementById('tbPMDate');
+    if(dv){
+      if(dv.value !== _tbDate) dv.value = _tbDate;
+      if(!dv._wired){ dv._wired = true; dv.addEventListener('change', function(){ _tbDate = this.value || tbToday(); tbRenderAll(); }); }
+    }
+    const asOf = _tbDate;
+    if(!_tbPMDoc){ tbRenderPMMonitor(asOf); return; }
+    const counts = {};
+    TB_LIST.forEach(function(b){ counts[b.id] = tbPMCounts(b.id, asOf); });
+    if(!_tbPMBat || !tbById(_tbPMBat)){
+      let best = TB_LIST[0].id, bs = -1;
+      TB_LIST.forEach(function(b){ const c = counts[b.id], sc = c.overdue * 1000 + c.due;
+        if(sc > bs){ bs = sc; best = b.id; } });
+      _tbPMBat = best;
+    }
+    const bar = document.getElementById('tbPMBats');
+    if(bar){
+      bar.innerHTML = TB_LIST.map(function(b){
+        const c = counts[b.id], need = c.overdue + c.due;
+        return '<button type="button" data-pmbat="' + escAttr(b.id) + '"' + (b.id === _tbPMBat ? ' class="on"' : '') + '>' +
+          escHtml(b.name) + (need ? '<span class="pdot' + (c.overdue ? '' : ' due') + '">' + need + '</span>' : '') + '</button>';
+      }).join('');
+      if(!bar._wired){
+        bar._wired = true;
+        bar.addEventListener('click', function(e){
+          const t = e.target.closest ? e.target.closest('button[data-pmbat]') : null;
+          if(!t) return;
+          _tbPMBat = t.getAttribute('data-pmbat'); tbRenderPMPage();
+        });
+      }
+    }
+    tbRenderPMMonitor(asOf, _tbPMBat);
+    tbRenderPMDash(asOf);
+  }
+
+  // ── field-wide view: what a maintenance planner opens the page for ──────
+  // KPIs (compliance, overdue, due, done in 30 days) and ONE red-flag work
+  // list across every battery — overdue first, the most hours over at the
+  // top, then due soon — each line a button straight to that pump's form.
+  function tbPMAll(asOf){
+    const all = [];
+    TB_LIST.forEach(function(b){
+      tbAllPumpsOf(b.id).forEach(function(x){ all.push({ b:b, pm:x.pm, i:x.i, key:tbPMKey(b.id, x.i), s:tbPumpPM(b.id, x.i, asOf) }); });
+    });
+    return all;
+  }
+  function tbPMWorkList(all){
+    return all.filter(function(x){ return x.s.status === 'overdue' || x.s.status === 'due'; })
+      .sort(function(a, b){
+        const oa = a.s.status === 'overdue' ? 1 : 0, ob = b.s.status === 'overdue' ? 1 : 0;
+        return (ob - oa) || (b.s.pct - a.s.pct);
+      });
+  }
+  function tbRenderPMDash(asOf){
+    const kp = document.getElementById('tbPMKpi'), wk = document.getElementById('tbPMWork');
+    if(!kp || !wk) return;
+    if(!_tbPMDoc){ kp.innerHTML = ''; wk.innerHTML = ''; return; }
+    const all = tbPMAll(asOf);
+    const tracked = all.filter(function(x){ return x.s.status !== 'n/a'; });
+    const over = tracked.filter(function(x){ return x.s.status === 'overdue'; }).length;
+    const due  = tracked.filter(function(x){ return x.s.status === 'due'; }).length;
+    const never = tracked.filter(function(x){ return !x.s.last; }).length;
+    const end = new Date(asOf + 'T23:59:59').getTime(), from = end - 30 * 86400000;
+    let done30 = 0;
+    tracked.forEach(function(x){ x.s.hist.forEach(function(p){ if(p.at > from && p.at <= end) done30++; }); });
+    const comp = tracked.length ? Math.round(100 * (tracked.length - over) / tracked.length) : 100;
+    kp.innerHTML =
+      '<div class="k ' + (comp >= 95 ? 'in' : comp >= 85 ? 'sb' : 'out') + '"><b>' + comp + '%</b><span>PM compliance</span></div>' +
+      '<div class="k ' + (over ? 'out' : 'in') + '"><b>' + (over ? '⚑ ' : '') + over + '</b><span>overdue</span></div>' +
+      '<div class="k ' + (due ? 'sb' : 'in') + '"><b>' + due + '</b><span>due soon (≥90%)</span></div>' +
+      '<div class="k"><b>' + done30 + '</b><span>PMs done, last 30 days</span></div>' +
+      '<div class="k' + (never ? ' sb' : '') + '"><b>' + never + '</b><span>no PM on record</span></div>';
+    const list = tbPMWorkList(all);
+    wk.innerHTML = '<div class="pm-wh">⚑ Work list — all tank batteries <span>' + list.length + '</span></div>' +
+      (list.length ? list.map(function(x){
+        const s = x.s, o = s.status === 'overdue';
+        return '<button type="button" class="pm-wr ' + (o ? 'out' : 'sb') + '" data-pmgo="' + escAttr(x.b.id + '|' + x.key) + '">' +
+          '<span class="f">' + (o ? '⚑' : '●') + '</span>' +
+          '<span class="n"><b>' + escHtml(x.pm.name) + '</b><i>' + escHtml(x.b.name) + '</i></span>' +
+          '<span class="h">' + (o ? tbFmt(-s.left, 0) + ' h over' : tbFmt(s.left, 0) + ' h left') +
+            '<i>' + tbFmt(s.run, 0) + ' / ' + tbFmt(s.every, 0) + ' h</i></span>' +
+          '<span class="go">Record ›</span></button>';
+      }).join('') : '<div class="pm-ok">Nothing overdue or due — every pump is inside its interval.</div>');
+    if(!wk._wired){
+      wk._wired = true;
+      wk.addEventListener('click', function(e){
+        const t = e.target.closest ? e.target.closest('[data-pmgo]') : null;
+        if(!t) return;
+        const p = t.getAttribute('data-pmgo').split('|');
+        _tbPMBat = p[0]; _tbPMOpen[p[1]] = 'rec';
+        tbRenderPMPage();
+        const c = document.getElementById('pmc-' + p[1].replace(/[^a-z0-9]/gi, '_'));
+        if(c && c.scrollIntoView) c.scrollIntoView({ behavior:'smooth', block:'center' });
+      });
+    }
+    const cp = document.getElementById('tbPMCopy');
+    if(cp && !cp._wired){ cp._wired = true; cp.addEventListener('click', function(){ tbCopyText(tbPMWorkMsg(_tbDate)); }); }
+    const xb = document.getElementById('tbPMXlsx');
+    if(xb && !xb._wired){ xb._wired = true; xb.addEventListener('click', function(){ tbPMExport(_tbDate); }); }
+  }
+  function tbPMWorkMsg(asOf){
+    const list = tbPMWorkList(tbPMAll(asOf));
+    const L = ['*PM work list — Tank Batteries*', 'As of ' + asOf, ''];
+    const o = list.filter(function(x){ return x.s.status === 'overdue'; }), d = list.filter(function(x){ return x.s.status === 'due'; });
+    if(!list.length) L.push('All pumps are inside their PM interval ✅');
+    if(o.length){ L.push('🔴 *OVERDUE*'); o.forEach(function(x){ L.push('• ' + x.b.name + ' — ' + x.pm.name + ': ' + tbFmt(-x.s.left, 0) + ' h over'); }); L.push(''); }
+    if(d.length){ L.push('🟠 *DUE SOON*'); d.forEach(function(x){ L.push('• ' + x.b.name + ' — ' + x.pm.name + ': ' + tbFmt(x.s.left, 0) + ' h left' +
+      (x.s.dueDate ? ' (≈ ' + x.s.dueDate + ')' : '')); }); }
+    return L.join('\n').trim();
+  }
+  function tbPMExport(asOf){
+    tbLoadXLSX().then(function(){
+      const all = tbPMAll(asOf);
+      const st = [['Battery', 'Group', 'Equipment', 'Kind', 'Status', 'Running h since PM', 'Interval h',
+                   'Hours left (− = over)', 'Expected due date', 'Last PM', 'Standby h', 'Out of service h']];
+      const hi = [['Date', 'Time', 'Battery', 'Equipment', 'Checklist done', 'Remarks / parts', 'Technician', 'Work order', 'Recorded by']];
+      all.forEach(function(x){
+        const s = x.s;
+        st.push([x.b.name, x.pm.group || '', x.pm.name, x.pm.kind || '',
+                 s.status === 'overdue' ? 'OVERDUE' : s.status === 'due' ? 'Due soon' : s.status === 'ok' ? 'OK' : '—',
+                 Math.round(s.run), s.every || null, s.left == null ? null : Math.round(s.left), s.dueDate || '',
+                 s.last ? _isoDate(new Date(s.last.at)) : 'none', Math.round(s.sb), Math.round(s.out)]);
+        s.hist.forEach(function(p){
+          const dt = new Date(p.at);
+          hi.push([_isoDate(dt), p.legacy ? '' : dt.toTimeString().slice(0, 5), x.b.name, x.pm.name,
+                   (p.chk || []).join('; '), p.note || (p.legacy ? 'PM (flag on daily sheet)' : ''), p.tech || '', p.wo || '',
+                   (p.by || '').split('@')[0]]);
+        });
+      });
+      const hd = hi.slice(1).sort(function(a, b){ return (b[0] + b[1]).localeCompare(a[0] + a[1]); });
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(st), 'PM status');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([hi[0]].concat(hd)), 'PM history');
+      XLSX.writeFile(wb, 'PM_TankBatteries_' + asOf + '.xlsx');
+    }).catch(function(e){ showToast(e.message || 'Could not export', true); });
+  }
+
+  function tbRenderPMMonitor(asOf, onlyBat){
     const el = document.getElementById('tbPumpPMMon');
     if(!el) return;
     if(!_tbPMDoc){ el.innerHTML = '<div class="rg-empty">Loading PM records…</div>'; tbPMLoad(); return; }
     const list = [];
     TB_LIST.forEach(function(b){
+      if(onlyBat && b.id !== onlyBat) return;
       tbAllPumpsOf(b.id).forEach(function(x){ list.push({ b:b, pm:x.pm, i:x.i, s:tbPumpPM(b.id, x.i, asOf) }); });
     });
-    const rank = { overdue:0, due:1, ok:2, 'n/a':3 };
-    list.sort(function(a, z){ return (rank[a.s.status] - rank[z.s.status]) || (z.s.pct - a.s.pct); });
+    // In the station's own order, under its own group headings — so a pump is
+    // found where the operator lists it; the colour and the count on top say
+    // what needs attention.
     const n = { overdue:0, due:0, ok:0 };
     list.forEach(function(x){ if(n[x.s.status] != null) n[x.s.status]++; });
     const today = asOf;
-    const cards = list.map(function(x){
+    const cards = list.map(function(x){ return tbPMCardHTML(x, today); });
+    function tbPMCardHTML(x, today){
       const s = x.s, key = tbPMKey(x.b.id, x.i), open = _tbPMOpen[key];
       const cls = s.status === 'overdue' ? 'out' : s.status === 'due' ? 'sb' : 'in';
       const pctW = Math.min(100, Math.round(s.pct * 100));
@@ -7790,7 +8038,13 @@ tbRemarksHTML(day.date, true) +
       if(open === 'rec'){
         form = '<div class="pm-form"><div class="pm-f"><label>Done on</label><input type="date" class="rg-date" data-pmd value="' + today + '"></div>' +
           '<div class="pm-f"><label>Time</label><input type="time" class="rg-date" data-pmt value="08:00"></div>' +
-          '<div class="pm-f pm-wide"><label>What was done</label><input type="text" class="rg-date" data-pmn placeholder="e.g. bearings greased, oil changed, alignment checked"></div>' +
+          '<div class="pm-f pm-wide"><label>Checklist</label><div class="pm-chk">' +
+            tbPMCheckOf(x.pm.kind).map(function(c, ci){
+              return '<label><input type="checkbox" data-pmc value="' + escAttr(c) + '"> ' + escHtml(c) + '</label>';
+            }).join('') + '</div></div>' +
+          '<div class="pm-f"><label>Technician</label><input type="text" class="rg-date" data-pmtech placeholder="name"></div>' +
+          '<div class="pm-f"><label>Work order no.</label><input type="text" class="rg-date" data-pmwo placeholder="optional"></div>' +
+          '<div class="pm-f pm-wide"><label>Remarks / parts used</label><input type="text" class="rg-date" data-pmn placeholder="e.g. bearing replaced, 2 L oil"></div>' +
           '<div class="pm-btns"><button type="button" class="pm-save" data-pmsave="' + key + '">Save PM</button>' +
           '<button type="button" class="pm-cancel" data-pmx="' + key + '">Cancel</button></div></div>';
       } else if(open === 'every'){
@@ -7801,14 +8055,17 @@ tbRemarksHTML(day.date, true) +
       } else if(open === 'log'){
         form = '<div class="pm-log">' + (s.hist.length ? s.hist.slice().reverse().map(function(p){
             return '<div class="pm-lg"><b>' + tbShortDay(_isoDate(new Date(p.at))) + (p.legacy ? '' : ' ' + new Date(p.at).toTimeString().slice(0,5)) + '</b>' +
-              '<span>' + escHtml(p.note || (p.legacy ? 'PM (recorded as done that day)' : 'PM')) + '</span>' +
+              '<span>' + escHtml(p.note || (p.legacy ? 'PM (recorded as done that day)' : (p.chk && p.chk.length ? '' : 'PM'))) +
+                (p.chk && p.chk.length ? '<small class="pm-lc">✓ ' + p.chk.map(escHtml).join(' · ✓ ') + '</small>' : '') +
+                (p.tech || p.wo ? '<small class="pm-lc">' + (p.tech ? 'Tech: ' + escHtml(p.tech) : '') +
+                   (p.tech && p.wo ? ' · ' : '') + (p.wo ? 'WO ' + escHtml(p.wo) : '') + '</small>' : '') + '</span>' +
               (p.by ? '<i>' + escHtml(p.by.split('@')[0]) + '</i>' : '') +
               (p.legacy ? '' : '<button type="button" class="pm-del" data-pmdel="' + key + '|' + p.id + '">Remove</button>') + '</div>';
           }).join('') : '<div class="rg-empty">No PM on record yet.</div>') + '</div>';
       }
-      return '<div class="pm-card ' + cls + '">' +
-        '<div class="pm-top"><div class="pm-nm"><b>' + escHtml(x.pm.name) + '</b><span>' + escHtml(x.b.name) + '</span></div>' +
-          '<span class="pchip ' + cls + '">' + (s.status === 'overdue' ? 'Overdue' : s.status === 'due' ? 'Due soon' : 'OK') + '</span></div>' +
+      return '<div class="pm-card ' + cls + '" id="pmc-' + key.replace(/[^a-z0-9]/gi, '_') + '">' +
+        '<div class="pm-top"><div class="pm-nm"><b>' + escHtml(x.pm.name) + '</b>' + (onlyBat ? '' : '<span>' + escHtml(x.b.name) + '</span>') + '</div>' +
+          '<span class="pchip ' + cls + '">' + (s.status === 'overdue' ? '⚑ Overdue' : s.status === 'due' ? 'Due soon' : 'OK') + '</span></div>' +
         '<div class="pm-bar"><i class="' + cls + '" style="width:' + pctW + '%"></i></div>' +
         '<div class="pm-nums">' +
           '<div><b>' + tbFmt(s.run, 0) + '</b><span>running h since PM</span></div>' +
@@ -7821,10 +8078,20 @@ tbRemarksHTML(day.date, true) +
           '<button type="button" data-pmopen="' + key + '|every"' + (open === 'every' ? ' class="on"' : '') + '>Interval</button>' +
           '<button type="button" data-pmopen="' + key + '|log"' + (open === 'log' ? ' class="on"' : '') + '>PM log (' + s.hist.length + ')</button></div>' +
         form + '</div>';
-    }).join('');
+    }
+    let body = '', grp = null, inGrid = false;
+    list.forEach(function(x, k){
+      const g = x.pm.group || 'PUMPS';
+      if(g !== grp){
+        if(inGrid) body += '</div>';
+        body += '<div class="pm-gh">' + escHtml(g) + '</div><div class="pm-grid">';
+        grp = g; inGrid = true;
+      }
+      body += cards[k];
+    });
+    if(inGrid) body += '</div>';
     el.innerHTML = '<div class="pm-sum"><span class="out">' + n.overdue + ' overdue</span>' +
-      '<span class="sb">' + n.due + ' due soon</span><span class="in">' + n.ok + ' OK</span></div>' +
-      '<div class="pm-grid">' + cards + '</div>';
+      '<span class="sb">' + n.due + ' due soon</span><span class="in">' + n.ok + ' OK</span></div>' + body;
     if(!el._wired){
       el._wired = true;
       el.addEventListener('click', function(e){
@@ -7834,18 +8101,23 @@ tbRemarksHTML(day.date, true) +
         if(t.hasAttribute('data-pmopen')){
           const p = t.getAttribute('data-pmopen').split('|');
           _tbPMOpen[p[0]] = _tbPMOpen[p[0]] === p[1] ? null : p[1];
-          tbRenderPumps(); return;
+          tbRenderPMPage(); return;
         }
-        if(t.hasAttribute('data-pmx')){ _tbPMOpen[t.getAttribute('data-pmx')] = null; tbRenderPumps(); return; }
+        if(t.hasAttribute('data-pmx')){ _tbPMOpen[t.getAttribute('data-pmx')] = null; tbRenderPMPage(); return; }
         if(t.hasAttribute('data-pmsave')){
           const key = t.getAttribute('data-pmsave'), card = t.closest('.pm-card');
           const d = card.querySelector('[data-pmd]').value, tm = card.querySelector('[data-pmt]').value || '00:00';
           const note = card.querySelector('[data-pmn]').value.trim();
+          const tech = (card.querySelector('[data-pmtech]') || {}).value || '';
+          const wo   = (card.querySelector('[data-pmwo]') || {}).value || '';
+          const chk  = Array.prototype.map.call(card.querySelectorAll('[data-pmc]:checked'), function(c){ return c.value; });
           const at = new Date(d + 'T' + tm + ':00').getTime();
           if(!(at > 0)){ showToast('Choose the date the PM was done', true); return; }
           if(at > Date.now()){ showToast('A PM cannot be recorded in the future', true); return; }
+          if(!chk.length && !note){ showToast('Tick what was done, or write it in the remarks', true); return; }
           const id = String(at) + String(100 + Math.floor(Math.random() * 900));
-          const patch = {}; patch[key] = { hist:{} }; patch[key].hist[id] = { at:at, note:note, by:who };
+          const patch = {}; patch[key] = { hist:{} };
+          patch[key].hist[id] = { at:at, note:note, by:who, tech:tech.trim(), wo:wo.trim(), chk:chk };
           _tbPMOpen[key] = 'log';
           tbPMWrite(patch, function(){ showToast('PM recorded'); });
           return;
@@ -8271,6 +8543,7 @@ tbRemarksHTML(day.date, true) +
   function tbStopListener(){
     if(_tbMetaUnsub){ _tbMetaUnsub(); _tbMetaUnsub = null; }
     _tbFirstSnap = true; _tbLastTs = 0;
+    tbPMStop();
   }
   window.startTankBatteriesListener = tbStartListener;
   window.stopTankBatteriesListener  = tbStopListener;

@@ -1,6 +1,6 @@
 # Sinai Field — start here
 
-**Attach `sinai-field-v42.zip` to the new chat and paste the block below as your
+**Attach `sinai-field-v46.zip` to the new chat and paste the block below as your
 first message.** Everything Claude needs is in the zip; nothing from any other
 conversation is required.
 
@@ -16,7 +16,7 @@ conversation is required.
 > The attached zip is the whole project. Read `README.md`, then
 > `DEVELOPER_REFERENCE.md`, then `CHANGELOG.md` before changing anything.
 >
-> Current release: **v42**, service-worker cache `sinai-field-v42`.
+> Current release: **v46**, service-worker cache `sinai-field-v46`.
 >
 > How I work: show me the change, test it before you say it is done, and tell me
 > plainly when something I asked for is a bad idea.
@@ -65,13 +65,24 @@ firestore.rules, not hidden on screen: the shift day is five documents, one per
 battery (`2026-08-14__tb6_2`), so a rule can allow or deny a single battery.
 Admin gets a breakdown across days and two reports: a one-page day report and a
 record over the selected range. Operators get one tab and no tab bar.
+The mechanical account (`mechanical@petrobel.org`) gets the PM page only.
 
 The two shifts are an hour apart and are NOT the same 24 hours. Do not add a
 tank battery total to a Ras Gara total.
 
 ## Where things stand
 
-v42 extended 10/1's daily STATION STATUS to heaters (Sigma 1, 2, 4, Heater
+v46 added the `mechanical@petrobel.org` account: PM page only (KPIs, red-flag
+work list across all batteries, checklist/technician/WO on Record PM, copy work
+list, Excel export); rules `isMech()` — reads all readings, writes only
+`tbReadingsMeta/pm`. v45 moved PM monitoring to its own PM tab, chosen per tank battery. v44 added
+Waste Water Pump A–C and Oil Room Pump A–B to T.B. 10/1's station
+status. v43 gave every battery the two-tab layout and a daily STATION STATUS (Belayim:
+their pumps + Vertical/Horizontal/Diesel compressors + 2 jockey and 2 diesel fire
+pumps), Arabic "copy and send to the work group" over every WhatsApp box, TODAY
+green / YESTERDAY grey, and a Day / Night / Auto theme (Auto = dark 18:00–06:00).
+No battery has three-hourly pump columns any more. v42 extended 10/1's daily
+STATION STATUS to heaters (Sigma 1, 2, 4, Heater
 Treater), compressors (A, B, Chemical) and fire fighting (Jockey 1–2, Diesel 1–2,
 counts assumed), with a copy-only WhatsApp message. v41 made ALL of T.B. 10/1's
 pumps daily (Transfer 1–6 and HPS 1–2, with كما أمس);

@@ -1,5 +1,425 @@
 # Sinai Field — Changelog
 
+## v46 — Mechanical account: PM management for the maintenance department
+
+Service-worker cache `sinai-field-v46`. `index.html`, `sw.js` **and
+`firestore.rules`** change — publish the rules, and create the user
+`mechanical@petrobel.org` in Firebase Authentication.
+
+**New account `mechanical@petrobel.org`** (header: MECHANICAL). One page and
+nothing else — *PM Management — Tank Batteries*: no readings entry, no reports,
+no R/G or PETRECO. It reads every battery's readings (the running hours come
+from them) and writes only the PM record, `tbReadingsMeta/pm`.
+
+The PM page (admin's PM tab gets all of this too), laid out the way CMMS
+preventive-maintenance tools do — meter-based (running-hours) triggers, an
+overdue-first work list, completion records with a checklist:
+
+- **KPI strip** — PM compliance %, overdue (⚑ red flag), due soon (≥ 90 % of
+  interval), PMs done in the last 30 days, pumps with no PM on record.
+- **⚑ Work list — all tank batteries** — every overdue item first (most hours
+  over at the top), then due soon; tap a line and it opens that pump's Record
+  PM form on its battery.
+- **Battery chips** as in v45, with red/amber counts.
+- **Record PM** now has a checklist by equipment kind (pumps, compressors,
+  heaters, fire pumps), Technician and Work-order no., plus remarks / parts.
+  A PM with nothing ticked and no remark is refused. The log shows all of it.
+- **Copy work list** — a WhatsApp-ready list of overdue and due items.
+- **Export Excel** — two sheets: PM status of every item, and the full PM
+  history.
+- The PM record is now **live** (listener, not a one-off read), so admin and
+  mechanical see each other's PMs at once.
+
+**Rules:** `isMech()` added. Mechanical: read all `tbReadings`, write none;
+read `tbReadingsMeta`, write only `tbReadingsMeta/pm`. Tank battery operators
+can no longer read or write `tbReadingsMeta/pm` (they never used it).
+
+PM intervals are still the 4,000 h placeholder until maintenance gives the
+real figures; mechanical can set them per pump with **Interval**.
+
+## v45 — PM on its own tab, one battery at a time
+
+Service-worker cache `sinai-field-v45`. Only `index.html` and `sw.js` change.
+
+PM monitoring moves off the Pumps tab to a tab of its own, **PM**, beside it.
+Pick the tank battery from the chips along the top; that battery's equipment
+shows in its own groups and order (BOOSTER PUMPS, COMPRESSORS, FIRE FIGHTING,
+and so on), each card as before — running hours since PM, interval, hours left,
+due date, standby and out since PM, Record PM, Interval, PM log.
+
+Each battery chip carries a count of what is overdue (red) or due soon (amber),
+and the tab opens on the battery most in need. The Pumps tab keeps the
+situation, hours by state and stoppages.
+
+## v44 — T.B. 10/1: waste water and oil room pumps
+
+Service-worker cache `sinai-field-v44`. Only `index.html` and `sw.js` change;
+no rules change.
+
+T.B. 10/1's **وضع المحطة** gains two groups, after the high-pressure pumps:
+
+- **WASTE WATER PUMPS** — Waste Water Pump A, B, C;
+- **OIL ROOM PUMPS** — Oil Room Pump A, B.
+
+Recorded once a day like the rest (في الخدمة / احتياطي / خارج الخدمة, كما أمس,
+سبب التوقف), in the station WhatsApp message in the same order, and in admin's
+Pumps report with hours by state, PM cards (placeholder 4,000 h) and stoppages.
+
+## v43 — station status on every battery; night mode
+
+Service-worker cache `sinai-field-v43`. Only `index.html` and `sw.js` change;
+no rules change.
+
+### Every tank battery has وضع المحطة, recorded once a day
+
+T.B. 6/1, 6/2, 8/1 and 8/2 now work as T.B. 10/1 does: two tabs — **القراءات**
+(scanner, production, line pressure, temperature, chemical injection; no pump
+columns any more) and **وضع المحطة**, the station status, once a day, with
+كما أمس, yesterday's state as a hint, سبب التوقف on the day something goes out,
+and a red count on the tab. T.B. 10/1 keeps its third tab, مقاسات المحطة.
+
+| Battery | Station status |
+|---|---|
+| T.B. 6/1 | Booster A, B |
+| T.B. 6/2 | Booster A, B · Borets A, B |
+| T.B. 8/1 | Powerhouse A, Pump B, Pump C |
+| T.B. 8/2 | Booster A, B, C |
+| all four | COMPRESSORS: Vertical, Horizontal, Diesel (تشغيل / إيقاف / خارج الخدمة) · FIRE FIGHTING: Jockey Pump 1, 2, Diesel Pump 1, 2 |
+
+Each battery has its own **WhatsApp message**, headed with its name
+(`Tank Battery 6/02`), copy only. Above every WhatsApp box, station status and
+10/1's measurements alike: **انسخ الرسالة وابعتها على جروب الشغل في الواتساب**;
+the button reads **نسخ الرسالة للجروب**.
+
+**Nothing is lost:** each Belayim pump's three-hourly readings so far still count
+in admin's report — hours, stoppages, reasons — and its PM record carries over.
+On the first daily day, "yesterday" is its last three-hour reading.
+
+### Today and Yesterday
+
+In each battery's header **TODAY** is now green and **YESTERDAY** grey — same
+size, still digit under digit.
+
+### Night mode: Day, Night or Auto
+
+The button in the header now cycles **Day → Night → Auto**. **Auto** turns the
+app dark from 18:00 to 06:00 and light in the day by the phone's clock, checking
+every minute — a night shift never has to remember to switch. The choice is kept
+on the phone. Every screen added since v28 was checked in night mode: status
+chips, totals and reasons now take the light end of their colours on the dark
+background, and the gold selected buttons take dark text.
+
+Also fixed: the station-status WhatsApp text could lag one change behind when
+a state was picked while the cursor was still in a reason box.
+
+## v42 — T.B. 10/1 station status: heaters, compressors, fire fighting, WhatsApp
+
+Service-worker cache `sinai-field-v42`. Only `index.html` and `sw.js` change;
+no rules change.
+
+T.B. 10/1's **وضع المحطة** card — now headed **STATION STATUS**, still once a
+day — covers the whole station, in groups:
+
+| Group | Items | States |
+|---|---|---|
+| TRANSFER PUMPS | Transfer 1 – 6 | في الخدمة / احتياطي / خارج الخدمة |
+| HIGH PRESSURE PUMPS | HPS 1, HPS 2 | في الخدمة / احتياطي / خارج الخدمة |
+| HEATERS | Sigma Heater 1, 2, 4 · Heater Treater | تشغيل / إيقاف / خارج الخدمة |
+| COMPRESSORS | Compressor A, B · Chemical Compressor | تشغيل / إيقاف / خارج الخدمة |
+| FIRE FIGHTING | Jockey Pump 1, 2 · Diesel Pump 1, 2 | في الخدمة / احتياطي / خارج الخدمة |
+
+Everything behaves as the pumps do: كما أمس fills the day, yesterday's state
+shows as a hint, سبب التوقف opens on the day an item goes out, and the red count
+on the tab includes it.
+
+**WhatsApp message** for the day's station status under the card, in the
+measurements' format — groups as sections, each item with its state in English
+(On / Off for heaters and compressors), anything out of service with since-when
+and its reason. **نسخ الرسالة** copies it; there is no "open WhatsApp" button.
+Items not recorded that day are left out.
+
+**Admin's Pumps report** carries all of it — hours by state, PM cards (placeholder
+interval 4,000 h for the new kinds), stoppages with their reasons — with heaters
+and compressors shown as On / Off.
+
+## v41 — T.B. 10/1's pump station: all daily, HPS 1 and HPS 2
+
+Service-worker cache `sinai-field-v41`. Only `index.html` and `sw.js` change;
+no rules change.
+
+**On T.B. 10/1, every pump is now recorded once a day** — the three-hourly grid
+is gone from its وضع المحطة tab. One **PUMP STATION** card, يومياً:
+
+- **TRANSFER PUMPS** — Transfer 1 to 6;
+- **HIGH PRESSURE PUMPS** — **HPS 1** and **HPS 2** (the "HP Pump 1/2" of v39,
+  renamed; same records).
+
+Each pump: في الخدمة / احتياطي / خارج الخدمة. **كما أمس** on an empty day fills
+every pump from its last state in one tap. A pump not yet recorded shows
+yesterday's state as a hint. **سبب التوقف** opens only on the day a pump goes
+out; after that it reads "خارج الخدمة منذ 18/8 — reason". The red count on the
+tab counts pumps out by their last known state, so a pump out since yesterday
+is counted before today is filled in.
+
+**Nothing is lost in the change.** A transfer pump's three-hourly readings from
+before v41 still count in the admin report — its running, standby and out hours,
+its stoppages and their reasons — and its PM record and interval carry over. Its
+last three-hour reading is what "yesterday" shows on the first daily day.
+
+The other four batteries are unchanged — their pumps stay three-hourly columns.
+
+## v40 — PM monitoring
+
+Service-worker cache `sinai-field-v40`. Only `index.html` and `sw.js` change.
+**No rules change**: PM records live on `tbReadingsMeta/pm`, a document in a
+collection the rules already open to admin.
+
+Admin's **Pumps** tab has a new **PM monitoring** section, above the register,
+with a card for every pump — the ones that need attention first (overdue, then
+due soon, then by how far into their interval):
+
+- **running hours since the last PM**, a bar showing how far into the interval;
+- the **required interval** — editable per pump (**Interval**), with "Back to
+  default"; until set, the default for its kind (placeholder 4,000 h);
+- **hours left** to the next PM, or hours OVER; and the **date it falls due at
+  the pump's current pace** (its running hours over the last 14 days), with
+  the year when it is next year — or "not running" when it has no pace;
+- **standby and out-of-service hours since the last PM**, and the date of it;
+- **Record PM**: date, time and what was done; saved with who recorded it. The
+  count restarts from that moment — readings after it count, readings before it
+  do not.
+- **PM log**: every PM for the pump, newest first, each removable if recorded
+  by mistake.
+
+A summary line on top counts overdue, due soon and OK. "Due soon" is 90% of the
+interval. PM is no longer a column of the register.
+
+PMs recorded the old way (the v28 "PM done" button) still count, as a PM at the
+end of that day.
+
+## v39 — T.B. 10/1: high-pressure pumps, recorded daily
+
+Service-worker cache `sinai-field-v39`. Only `index.html` and `sw.js` change;
+no rules change.
+
+T.B. 10/1's **وضع المحطة** tab gains a **HIGH PRESSURE PUMPS** card, above the
+transfer pumps: **HP Pump 1** and **HP Pump 2**, each recorded **once a day**
+(يومياً) — في الخدمة / احتياطي / خارج الخدمة — rather than at every three-hour
+reading. The transfer pumps stay three-hourly underneath.
+
+- A day not yet recorded shows yesterday's state as a hint (أمس: في الخدمة).
+- Going out of service opens **سبب التوقف** with the cursor in it — on the day it
+  went out only; the days after show "خارج الخدمة منذ 16/8 — reason".
+- The red count on the tab includes an HP pump that is out.
+
+**Admin's Pumps report** lists both, with each recorded day counted as 24 hours
+of its state — running hours, standby, out, PM, and every stoppage with its
+reason. PM placeholder 4,000 h, as for the others.
+
+Only T.B. 10/1 has daily pumps (`TB_PUMPS_DAILY`). Stored as `pumpsDaily`,
+`pumpsDailyWhy` and `pumpsDailyPM` on its daily document.
+
+## v38 — T.B. 10/1 tab order
+
+Service-worker cache `sinai-field-v38`. Only `index.html` and `sw.js` change.
+
+T.B. 10/1's tabs now follow the shift: **القراءات** (scanner readings), then
+**مقاسات المحطة**, then **وضع المحطة**. Nothing inside them changed.
+
+## v37 — skimmer 4–13 stairs, Oil Room
+
+Service-worker cache `sinai-field-v37`. Only `index.html` and `sw.js` change.
+
+- **API skimmer** now runs **4 to 13 stairs** — ten buttons in two rows of five.
+  Rounds saved at 5–9 keep their value.
+- **OIL ROOM**, after the skimmer: On / Off, nothing else. In the message:
+
+      *`OIL ROOM`*
+
+      *Oil Room : On*
+
+Stored as `oilR` in the round.
+
+## v36 — heaters on/off, two high-pressure pumps
+
+Service-worker cache `sinai-field-v36`. Only `index.html` and `sw.js` change.
+
+**Each Sigma heater has On / Off.** Off takes its temperature and flow away —
+the boxes go and anything already typed in them is cleared, since a heater not
+running has nothing to report — and the message reads `*Heater 4 : Off*`. A
+round with a heater off still counts as done without that heater's readings.
+
+**High pressure is two pumps**, Pump No.1 and Pump No.2, each On / Off. Only the
+pump that is ON goes in the WhatsApp message (`*Pump No.2 : On*`), the way the
+group writes it; both on gives both lines, and both off gives one line,
+`*Pumps No.1 & 2 : Off*`. The old single "pump number + on/off" is retired; a
+round saved that way still reads correctly as that pump on or off.
+
+Stored as `h1S`, `h2S`, `h4S` and `hp1`, `hp2` in the round.
+
+## v35 — station measurements: English labels, Sigma heaters
+
+Service-worker cache `sinai-field-v35`. Only `index.html` and `sw.js` change.
+
+**The مقاسات المحطة form is now in English** — section names, field names and
+choices (Water / Emulsion / Oil, On / Off, 5–9 Stairs). The operators know
+these by name; the Arabic was only in the way. The round times keep their
+Arabic hour, and the WhatsApp message is English only (the Arabic option is
+gone).
+
+**SIGMA HEATERS**, after the scanner: Heater 1, Heater 2 and Heater 4, each with
+its temperature (°C) and flow rate (m³/h), side by side on one line. In the
+message each heater is one line:
+
+    *`SIGMA HEATERS`*
+
+    *Heater 1 : 84 °C · 11.5 m³/h*
+    *Heater 2 : 82 °C · 12 m³/h*
+    *Heater 4 : 84 °C · 10.5 m³/h*
+
+A heater with nothing read is left out. Stored as `h1T`, `h1F`, `h2T`, `h2F`,
+`h4T`, `h4F` in the round.
+
+## v34 — T.B. 10/1 station measurements (مقاسات المحطة)
+
+Service-worker cache `sinai-field-v34`. Only `index.html` and `sw.js` change;
+no rules change — the rounds are stored on 10/1's own daily document.
+
+T.B. 10/1 gets a third tab, **مقاسات المحطة**, for the station rounds.
+
+**Nine rounds a day**, on the station's own clock rather than the scanner's:
+05:00, 09:00, 12:00, 15:00, 18:00, 21:00, 00:00, 03:00 and 05:00 the next day,
+each with its Arabic hour under it (5 صباحاً … 12 ظهراً … 12 ليلاً). They sit
+along the top; a dot on each says empty, part-filled (amber) or done (green).
+The closing 05:00 is the next day's opening 05:00 — one entry, both days.
+
+**One round at a time**, its form in the order it is reported, every label in
+Arabic with the English under it:
+
+| Section | Fields |
+|---|---|
+| المستويات · LEVEL | Tank 7, Tank 9 Bis (m) |
+| خزان 01 · TANK 01 | sample number; مياه / مستحلب / زيت |
+| خزان 02 · TANK 02 | sample number; مياه / مستحلب / زيت |
+| درجات الحرارة · TEMPERATURE | Tank 02, Shipping line (°C) |
+| الضغوط · PRESSURES | Sep 1, Sep 2, Shipping line (bar) |
+| السكانر — 3 ساعات · SCANNER 3 hr | Oil quantity, Drain Tank 02 (m³) |
+| السكيمر API · SKIMMER | level 5 – 9 stairs |
+| طلمبة الضغط العالي · HIGH PRESSURE | pump number; تشغيل / إيقاف |
+
+Choices are buttons — tap again to clear. **نفس قراءات** on an empty round
+fills it from the round before, so only what changed needs typing.
+
+**The WhatsApp message** for the chosen round is built under the form, in the
+group's own format — the section names as code, bold lines, the ruled lines,
+"Work Shift" at the foot — cleaned up: a real time (12:00 PM) and the date,
+proper units, levels to two decimals, and only what was actually read.
+**نسخ الرسالة** copies it; **فتح واتساب** opens WhatsApp with it written, to
+choose the group. **العربي مع الإنجليزي** adds the Arabic beside each line.
+
+Admin sees the same tab on 10/1's panel on the Entry page. Stored as
+`meas.{round}.{field}` on 10/1's document.
+
+## v33 — T.B. 10/1: the pump station on its own tab
+
+Service-worker cache `sinai-field-v33`. Only `index.html` and `sw.js` change.
+
+Six transfer pumps as columns made T.B. 10/1's table too wide to work in. Its
+panel now has two tabs:
+
+- **القراءات** — the readings: scanner, production, line pressure, temperature,
+  chemical injection. No pump columns.
+- **وضع المحطة** — the pump station: the same nine reading times, one column
+  per transfer pump, the same pickers, **سبب التوقف** where one goes out, and
+  **كما هو** to copy the reading before.
+
+The وضع المحطة tab carries a red count of the pumps out of service at the day's
+latest reading, so a breakdown is not hidden behind the tab. Switching tabs
+shows and hides them in place — nothing typed is lost — and the open tab is
+kept when the day changes. The same tabs appear on 10/1's panel on admin's
+Entry page.
+
+**The other four batteries are unchanged** — their pumps stay as columns in
+the one table.
+
+Also fixed: a reason box opened in a table wider than the phone could sit off
+the right edge of the screen, label first. It is now pinned to the visible part.
+
+To give another battery the same tabs, set `pumpTab:true` on it in `TB_LIST`.
+
+## v32 — Today and Yesterday, one under the other
+
+Service-worker cache `sinai-field-v32`. Only `index.html` and `sw.js` change.
+
+The figures in each battery's header are now two identical lines:
+
+    TODAY        186 m³
+    YESTERDAY   -478 m³
+
+Same size, same weight, labels lined up on the left and figures digit under
+digit on the right. Both in English for everyone — the أمس label from v30 is
+gone. Yesterday is still taken over the same intervals today has read, and the
+line is still left out when there is nothing to compare.
+
+## v31 — Line pressure
+
+Service-worker cache `sinai-field-v31`. Only `index.html` and `sw.js` change.
+
+The tank battery entry column headed "WHP" now reads **Line pressure** with
+**ضغط الخط** under it — on the operators' screens and on admin's Entry page,
+which share the table. Same field, same units (psi; bar for T.B. 10/1); only
+the heading changed, so every reading already entered stays where it was.
+
+## v30 — drain scanners read as totalizers; أمس
+
+Service-worker cache `sinai-field-v30`. Only `index.html` and `sw.js` change;
+no rules change.
+
+**The drain scanners (29 BIS, GB #1, GB #3) are now entered as the scanner's
+TOTALIZER reading**, like the tank battery scanners. The table has nine reading
+rows, 06:00 to the next 06:00, and under every reading the app shows the drain
+since the reading before — the difference, worked out, never typed:
+
+- green for a normal difference; **red when a reading is lower than the one
+  before it** (a reset or a misread), so it is checked rather than passed off as
+  production;
+- the opening reading is the day before's closing when it was not typed, and a
+  closing reading is saved as tomorrow's opening too — one moment, one reading,
+  as with the battery scanners;
+- the twelve-hour subtotals sit under 18:00 and under the closing 06:00, and the
+  day total is the closing reading minus the opening.
+
+Everything downstream — totals, yesterday and difference, the report card, the
+analysis, the daily totals — works from those differences unchanged.
+
+**The crude oil scanners (L.O.T.F, M.O.T.F, Sicies) are unchanged** — still the
+quantity for each three hours. Days entered before this release keep the
+quantities they were typed with; nothing is converted.
+
+Stored as `r.{0..8}` on the meter's document beside the old `q` and `v`.
+
+**The "Yesterday" line under each battery's day total reads أمس for the
+operators.** Admin still reads "Yesterday".
+
+## v29 — yesterday under the day total
+
+Service-worker cache `sinai-field-v29`. Only `index.html` and `sw.js` change.
+
+Each battery's header now carries a second line under the day's total:
+**Yesterday** and a figure — for the operator's own battery and for all five on
+admin's Entry page.
+
+That figure is yesterday over the **same intervals today has read so far**: at
+08:00 yesterday's first three hours, at 11:00 its first six, and so on to the
+whole day. It moves as each reading is typed, without redrawing the table. So
+the two numbers stacked in the header always compare like for like — never a
+day still being read against a finished one.
+
+An interval yesterday did not read is left out. A yesterday imported as a
+single daily figure has no intervals to match, so it shows only once today is
+complete. With no yesterday on record, or nothing read yet today, the line is
+not shown.
+
 ## v28 — pump station
 
 Service-worker cache `sinai-field-v28`. Only `index.html` and `sw.js` change.
