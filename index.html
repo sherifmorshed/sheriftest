@@ -12,26 +12,26 @@
    accounts and its own release cycle, and it shares nothing with any other
    PETROBEL app. Nothing here should ever need to reach outside this folder.
 
-   WHAT IS WHERE                                        (line numbers, v42)
+   WHAT IS WHERE                                        (line numbers, v43)
    ─────────────────────────────────────────────────────────────────────────
      CSS
        Design tokens — every colour lives here, light + dark ...... line 74
        Header, login, toast, footer .............................. line 107
        Pages: readings, tank batteries, scanners, PETRECO ........ line 239
      MARKUP
-       Icon sprite — every icon, drawn inline .................... line 876
-       Login screen .............................................. line 896
-       Header bar ................................................ line 954
-       Pages: R/G, A/R, PETRECO, no-access ....................... line 966
+       Icon sprite — every icon, drawn inline .................... line 901
+       Login screen .............................................. line 922
+       Header bar ................................................ line 980
+       Pages: R/G, A/R, PETRECO, no-access ....................... line 992
      SCRIPT — the shell
-       ►► CONFIGURATION — Firebase config + role lists ........... line 1292
-       Boot, helpers, unsaved-edits queue, footer status ......... line 1366
-       Sign in / sign out, roles, tabs ........................... line 1689
-     SCRIPT — R/G Production (hourly PETRECO vs Ras Gara) ........ line 1928
+       ►► CONFIGURATION — Firebase config + role lists ........... line 1318
+       Boot, helpers, unsaved-edits queue, footer status ......... line 1392
+       Sign in / sign out, roles, tabs ........................... line 1715
+     SCRIPT — R/G Production (hourly PETRECO vs Ras Gara) ........ line 1954
      SCRIPT — A/R Production (tank batteries, report card,
-              scanner analysis, temperature, chemical, pumps) ..... line 3397
-     SCRIPT — day / night theme, service worker .................. line 8505
-     SCRIPT — PETRECO scanners ................................... line 8570
+              scanner analysis, temperature, chemical, pumps) ..... line 3423
+     SCRIPT — day / night theme, service worker .................. line 8581
+     SCRIPT — PETRECO scanners ................................... line 8674
 
    THE ROLES
      admin     both R/G sides, A/R Production, every report
@@ -384,6 +384,10 @@ body.light-mode .tabs button.on{color:#fff;}
 .tb-panel .hd .tot,.tb-panel .hd .ytot{display:contents;}
 .tb-panel .hd .tots .lb{font-size:10.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);}
 .tb-panel .hd .tots .v{text-align:right;color:var(--text);font-variant-numeric:tabular-nums;}
+/* Today stands out in the app's green (it is the figure being built now);
+   yesterday steps back in grey — still the same size, so they read as a pair. */
+.tb-panel .hd .tot .lb,.tb-panel .hd .tot .v{color:var(--green);}
+.tb-panel .hd .ytot .v{color:var(--muted);}
 .tb-panel .hd .tots .u{font-size:10px;font-weight:600;color:var(--muted);}
 .tb-panel .note{font-size:11px;color:var(--muted);font-family:var(--font-num);padding:3px 14px 0;line-height:1.5;}
 .tb-panel .note.warn{color:var(--red);font-weight:700;}
@@ -503,12 +507,33 @@ table.tb-tbl th.tb-grp6{color:var(--accent2);border-bottom:2px solid var(--accen
   font-family:'Segoe UI','Noto Naskh Arabic',Tahoma,sans-serif;}
 .ms-msg{white-space:pre-wrap;font-family:'Segoe UI','Noto Naskh Arabic',Tahoma,sans-serif;font-size:12.5px;line-height:1.45;
   background:var(--card);border:1px solid var(--border);border-radius:10px;padding:9px;margin:0;max-height:260px;overflow:auto;}
+/* ── Night mode for everything added since v28 ──────────────────────────
+   The state colours were chosen on white. On the dark navy the same greens,
+   ambers and reds as TEXT go muddy, so in night mode the text takes the light
+   end of each colour; filled buttons keep theirs. Gold buttons, light in night
+   mode, take dark text instead of white. */
+body:not(.light-mode) .pchip.in {color:#4ade80;border-color:rgba(74,222,128,.45);background:rgba(74,222,128,.10);}
+body:not(.light-mode) .pchip.sb {color:#fbbf24;border-color:rgba(251,191,36,.45);background:rgba(251,191,36,.10);}
+body:not(.light-mode) .pchip.out{color:#f87171;border-color:rgba(248,113,113,.5);background:rgba(248,113,113,.12);}
+body:not(.light-mode) .tb-psum .ptot .in,body:not(.light-mode) .tb-psum .pn b.in,body:not(.light-mode) .pm-sum .in{color:#4ade80;}
+body:not(.light-mode) .tb-psum .ptot .sb,body:not(.light-mode) .tb-psum .pn b.sb,body:not(.light-mode) .pm-sum .sb{color:#fbbf24;}
+body:not(.light-mode) .tb-psum .ptot .out,body:not(.light-mode) .tb-psum .pn b.out,body:not(.light-mode) .pm-sum .out,
+body:not(.light-mode) .tb-psum .prow.alarm .pb,body:not(.light-mode) .pm-nums .neg b{color:#f87171;}
+body:not(.light-mode) .pd-since,body:not(.light-mode) .tb-pump .oos .h,
+body:not(.light-mode) table.tb-tbl tr.why-row label{color:#fca5a5;}
+body:not(.light-mode) .ms-pick button.on:not(.off),body:not(.light-mode) .ms-t.on{color:#1a1405;}
+body:not(.light-mode) .ms-t.on .ar,body:not(.light-mode) .ms-t.on i{color:rgba(26,20,5,.75);}
+body:not(.light-mode) .ms-wa-ar,body:not(.light-mode) .ms-wa .ms-h .ar{color:#4ade80;}
+body:not(.light-mode) .ms-wa{border-color:rgba(74,222,128,.35);background:rgba(74,222,128,.05);}
+.ms-wa-ar{font-family:'Segoe UI','Noto Naskh Arabic',Tahoma,sans-serif;font-size:14px;font-weight:800;color:#128c4b;
+  margin:0 0 7px;letter-spacing:0;}
 .ms-btns{display:flex;gap:8px;margin-top:8px;}
 .ms-btns button{flex:1;border-radius:10px;padding:11px;font-weight:800;font-size:14px;cursor:pointer;border:0;
   font-family:'Segoe UI','Noto Naskh Arabic',Tahoma,sans-serif;}
 .ms-cp{background:#128c4b;color:#fff;} .ms-open{background:#25d366;color:#073b1f;}
 /* Daily pumps (10/1's high-pressure pumps), above the three-hour grid. */
 .pd-card{border:1px solid var(--border);border-radius:12px;padding:8px 10px;margin-bottom:12px;background:var(--card);}
+.pd-row .nm{font-weight:800;}
 .pd-g{font-size:11px;font-weight:800;letter-spacing:.9px;color:var(--muted);font-family:var(--font-num);
   margin:10px 0 2px;padding-top:6px;border-top:2px solid var(--border);}
 .pd-h + .pd-g{border-top:0;margin-top:4px;padding-top:0;}
@@ -890,6 +915,7 @@ td.rg-time .ar,th.row .ar{color:var(--muted);font-weight:600;}
 <symbol id="i-close" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6 18 18"/><path d="M18 6 6 18"/></g></symbol>
 <symbol id="i-upload" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/><path d="m7.5 8.5 4.5-4.5 4.5 4.5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></g></symbol>
 <symbol id="i-tank" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><rect x="4" y="7" width="7.5" height="13" rx="1.2"/><rect x="14" y="11" width="6" height="9" rx="1.2"/><path d="M4 11h7.5"/><path d="M14 14.5h6"/><path d="M7.75 7V4.5"/><path d="M6 4.5h3.5"/></g></symbol>
+<symbol id="i-auto" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.2"/><path d="M12 3.8v16.4"/><path d="M12 3.8a8.2 8.2 0 0 1 0 16.4z" fill="currentColor"/></g></symbol>
 <symbol id="i-moon" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.2A8.4 8.4 0 0 1 9.8 4 8.5 8.5 0 1 0 20 14.2z"/></g></symbol>
 </defs></svg>
 
@@ -959,7 +985,7 @@ document.addEventListener('click', function(e){
   </span>
   <span class="ub-email" id="ubEmail"></span>
   <span class="ub-role" id="ubRole"></span>
-  <button class="theme-toggle" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle day / night mode" aria-label="Toggle theme"><svg class="ico ico-lg" aria-hidden="true"><use href="#i-moon"/></svg></button>
+  <button class="theme-toggle" id="themeToggleBtn" onclick="toggleTheme()" title="Day / Night / Auto" aria-label="Day, night or automatic theme"><svg class="ico ico-lg" aria-hidden="true"><use href="#i-moon"/></svg></button>
   <button class="ub-logout" onclick="handleLogout()">LOGOUT</button>
 </div>
 
@@ -3425,16 +3451,19 @@ document.addEventListener('DOMContentLoaded', function(){
   // property of the BATTERY, not of this module — every label, row date and
   // shift window takes the battery, and nothing may assume 05:00.
   const TB_LIST = [
-    { id:'tb6_1',  name:'T.B. 6/1',  start:5 },
-    { id:'tb6_2',  name:'T.B. 6/2',  start:5 },
-    { id:'tb8_1',  name:'T.B. 8/1',  start:5 },
-    { id:'tb8_2',  name:'T.B. 8/2',  start:5 },
+    // v43: every battery has the station-status tab (`pumpTab`);
+    // only 10/1 has the station-measurements tab (`measTab`). `wa` is how the
+    // battery is written at the top of its WhatsApp message.
+    { id:'tb6_1',  name:'T.B. 6/1',  start:5, pumpTab:true, wa:'Tank Battery 6/01' },
+    { id:'tb6_2',  name:'T.B. 6/2',  start:5, pumpTab:true, wa:'Tank Battery 6/02' },
+    { id:'tb8_1',  name:'T.B. 8/1',  start:5, pumpTab:true, wa:'Tank Battery 8/01' },
+    { id:'tb8_2',  name:'T.B. 8/2',  start:5, pumpTab:true, wa:'Tank Battery 8/02' },
     // `wUnit` — 10/1's operators read wellhead pressure in bar; the Belayim
     // four read psi. Display only: WHP is never summed or compared across
     // batteries, so the two units never meet in one figure.
     // `pumpTab` — six transfer pumps make one table too wide to work in, so
     // 10/1's pumps get a tab of their own (وضع المحطة) instead of columns.
-    { id:'tb10_1', name:'T.B. 10/1', start:6, wUnit:'bar', pumpTab:true }
+    { id:'tb10_1', name:'T.B. 10/1', start:6, wUnit:'bar', pumpTab:true, measTab:true, wa:'Tank Battery 10/01' }
   ];
   // Which tab of a pumpTab battery is open, per battery. Readings first.
   const _tbPanelTab = {};
@@ -3524,13 +3553,9 @@ document.addEventListener('DOMContentLoaded', function(){
   // its key in the database, so ADD new pumps at the END of a list and never
   // reorder one — that would hand every recorded reading to the wrong pump.
   const TB_PUMPS = {
-    tb6_1:  [ { name:'Booster A', kind:'Booster' }, { name:'Booster B', kind:'Booster' } ],
-    tb6_2:  [ { name:'Booster A', kind:'Booster' }, { name:'Booster B', kind:'Booster' },
-              { name:'Borets A',  kind:'Borets'  }, { name:'Borets B',  kind:'Borets'  } ],
-    tb8_1:  [ { name:'Powerhouse A', kind:'Booster' }, { name:'Pump B', kind:'Booster' },
-              { name:'Pump C',       kind:'Booster' } ],
-    tb8_2:  [ { name:'Booster A', kind:'Booster' }, { name:'Booster B', kind:'Booster' },
-              { name:'Booster C', kind:'Booster' } ],
+    // v43: no battery keeps three-hourly pumps — all moved to the
+    // daily list below, each with `legacy3h` so its earlier readings still count.
+    tb6_1: [], tb6_2: [], tb8_1: [], tb8_2: [],
     // T.B. 10/1 keeps NO three-hourly pumps since v41 — its whole pump station
     // is recorded once a day, in TB_PUMPS_DAILY below.
     tb10_1: []
@@ -3539,6 +3564,46 @@ document.addEventListener('DOMContentLoaded', function(){
   // ►►►► DAILY PUMPS — recorded once a day, not every three hours. Only
   //      T.B. 10/1's two high-pressure pumps. Index = key, as above.
   const TB_PUMPS_DAILY = {
+    tb6_1: [ { name:'Booster A', kind:'Booster', group:'BOOSTER PUMPS', ord:0, legacy3h:0 },
+             { name:'Booster B', kind:'Booster', group:'BOOSTER PUMPS', ord:1, legacy3h:1 },
+             { name:'Vertical Compressor',   kind:'Compressor', group:'COMPRESSORS',   ord:10, labels:'onoff' },
+             { name:'Horizontal Compressor', kind:'Compressor', group:'COMPRESSORS',   ord:11, labels:'onoff' },
+             { name:'Diesel Compressor',     kind:'Compressor', group:'COMPRESSORS',   ord:12, labels:'onoff' },
+             { name:'Jockey Pump 1', kind:'Fire pump', group:'FIRE FIGHTING', ord:13 },
+             { name:'Jockey Pump 2', kind:'Fire pump', group:'FIRE FIGHTING', ord:14 },
+             { name:'Diesel Pump 1', kind:'Fire pump', group:'FIRE FIGHTING', ord:15 },
+             { name:'Diesel Pump 2', kind:'Fire pump', group:'FIRE FIGHTING', ord:16 } ],
+    tb6_2: [ { name:'Booster A', kind:'Booster', group:'BOOSTER PUMPS', ord:0, legacy3h:0 },
+             { name:'Booster B', kind:'Booster', group:'BOOSTER PUMPS', ord:1, legacy3h:1 },
+             { name:'Borets A',  kind:'Borets',  group:'BORETS PUMPS',  ord:2, legacy3h:2 },
+             { name:'Borets B',  kind:'Borets',  group:'BORETS PUMPS',  ord:3, legacy3h:3 },
+             { name:'Vertical Compressor',   kind:'Compressor', group:'COMPRESSORS',   ord:10, labels:'onoff' },
+             { name:'Horizontal Compressor', kind:'Compressor', group:'COMPRESSORS',   ord:11, labels:'onoff' },
+             { name:'Diesel Compressor',     kind:'Compressor', group:'COMPRESSORS',   ord:12, labels:'onoff' },
+             { name:'Jockey Pump 1', kind:'Fire pump', group:'FIRE FIGHTING', ord:13 },
+             { name:'Jockey Pump 2', kind:'Fire pump', group:'FIRE FIGHTING', ord:14 },
+             { name:'Diesel Pump 1', kind:'Fire pump', group:'FIRE FIGHTING', ord:15 },
+             { name:'Diesel Pump 2', kind:'Fire pump', group:'FIRE FIGHTING', ord:16 } ],
+    tb8_1: [ { name:'Powerhouse A', kind:'Booster', group:'BOOSTER PUMPS', ord:0, legacy3h:0 },
+             { name:'Pump B',       kind:'Booster', group:'BOOSTER PUMPS', ord:1, legacy3h:1 },
+             { name:'Pump C',       kind:'Booster', group:'BOOSTER PUMPS', ord:2, legacy3h:2 },
+             { name:'Vertical Compressor',   kind:'Compressor', group:'COMPRESSORS',   ord:10, labels:'onoff' },
+             { name:'Horizontal Compressor', kind:'Compressor', group:'COMPRESSORS',   ord:11, labels:'onoff' },
+             { name:'Diesel Compressor',     kind:'Compressor', group:'COMPRESSORS',   ord:12, labels:'onoff' },
+             { name:'Jockey Pump 1', kind:'Fire pump', group:'FIRE FIGHTING', ord:13 },
+             { name:'Jockey Pump 2', kind:'Fire pump', group:'FIRE FIGHTING', ord:14 },
+             { name:'Diesel Pump 1', kind:'Fire pump', group:'FIRE FIGHTING', ord:15 },
+             { name:'Diesel Pump 2', kind:'Fire pump', group:'FIRE FIGHTING', ord:16 } ],
+    tb8_2: [ { name:'Booster A', kind:'Booster', group:'BOOSTER PUMPS', ord:0, legacy3h:0 },
+             { name:'Booster B', kind:'Booster', group:'BOOSTER PUMPS', ord:1, legacy3h:1 },
+             { name:'Booster C', kind:'Booster', group:'BOOSTER PUMPS', ord:2, legacy3h:2 },
+             { name:'Vertical Compressor',   kind:'Compressor', group:'COMPRESSORS',   ord:10, labels:'onoff' },
+             { name:'Horizontal Compressor', kind:'Compressor', group:'COMPRESSORS',   ord:11, labels:'onoff' },
+             { name:'Diesel Compressor',     kind:'Compressor', group:'COMPRESSORS',   ord:12, labels:'onoff' },
+             { name:'Jockey Pump 1', kind:'Fire pump', group:'FIRE FIGHTING', ord:13 },
+             { name:'Jockey Pump 2', kind:'Fire pump', group:'FIRE FIGHTING', ord:14 },
+             { name:'Diesel Pump 1', kind:'Fire pump', group:'FIRE FIGHTING', ord:15 },
+             { name:'Diesel Pump 2', kind:'Fire pump', group:'FIRE FIGHTING', ord:16 } ],
     // Index = key, so the two high-pressure pumps keep 0 and 1 (recorded since
     // v39) and the transfer pumps follow. `legacy3h` is the transfer pump's
     // index when it was three-hourly (v28–v40): its readings from then still
@@ -4276,7 +4341,7 @@ document.addEventListener('DOMContentLoaded', function(){
             '<button type="button" data-ptab="read"' + (_tbPanelTab[b.id] !== 'pumps' ? ' class="on"' : '') + ' lang="ar">القراءات</button>' +
             // Order as the shift works: the scanner readings, the station
             // measurements, then the pump station.
-            '<button type="button" data-ptab="meas"' + (_tbPanelTab[b.id] === 'meas' ? ' class="on"' : '') + ' lang="ar">مقاسات المحطة</button>' +
+            (b.measTab ? '<button type="button" data-ptab="meas"' + (_tbPanelTab[b.id] === 'meas' ? ' class="on"' : '') + ' lang="ar">مقاسات المحطة</button>' : '') +
             '<button type="button" data-ptab="pumps"' + (_tbPanelTab[b.id] === 'pumps' ? ' class="on"' : '') + ' lang="ar">وضع المحطة' +
               (tbPumpsOutNow(b.id, cell) ? '<span class="pdot">' + tbPumpsOutNow(b.id, cell) + '</span>' : '') + '</button></div>'
         : '') +
@@ -4304,8 +4369,8 @@ document.addEventListener('DOMContentLoaded', function(){
                 tbPumps(b.id).map(function(pm){ return '<th class="tb-grp6">' + escHtml(pm.name) + '</th>'; }).join('') +
                 '</tr></thead><tbody>' + prows + '</tbody></table></div>'
               : '') + '</div>' +
-          '<div class="ptab-meas"' + (_tbPanelTab[b.id] === 'meas' ? '' : ' style="display:none"') + '>' +
-            tbMeasHTML(b, cell, ed) + '</div>'
+          (b.measTab ? '<div class="ptab-meas"' + (_tbPanelTab[b.id] === 'meas' ? '' : ' style="display:none"') + '>' +
+            tbMeasHTML(b, cell, ed) + '</div>' : '')
         : '') +
       noteBox + '</div>' +
     '</div>';
@@ -4418,6 +4483,7 @@ document.addEventListener('DOMContentLoaded', function(){
         '<span class="ar" dir="rtl" lang="ar">قراءات ' + arHour(TB_MEAS_HOURS[sl]) + '</span>' + prevBtn + '</div>' +
         form + '</div>' +
       '<div class="ms-wa"><div class="ms-h"><span class="sec">WhatsApp message — ' + tbMeasClock(sl) + '</span></div>' +
+        '<div class="ms-wa-ar" dir="rtl" lang="ar">انسخ الرسالة وابعتها على جروب الشغل في الواتساب</div>' +
         '<pre class="ms-msg" dir="auto">' + escHtml(tbMeasMsg(b, cell, sl)) + '</pre>' +
         '<div class="ms-btns"><button type="button" class="ms-cp" data-mcp="1" lang="ar">نسخ الرسالة</button>' +
         '<button type="button" class="ms-open" data-mopen="1" lang="ar">فتح واتساب</button></div></div>' +
@@ -4534,8 +4600,9 @@ document.addEventListener('DOMContentLoaded', function(){
       // The day's status as a WhatsApp message, in the measurements' format,
       // to copy into the group. Copy only — no "open WhatsApp".
       '<div class="ms-wa pd-wa" data-pdwa="' + escAttr(b.id) + '"><div class="ms-h"><span class="sec">WhatsApp message — station status</span></div>' +
+        '<div class="ms-wa-ar" dir="rtl" lang="ar">انسخ الرسالة وابعتها على جروب الشغل في الواتساب</div>' +
         '<pre class="ms-msg" dir="auto">' + escHtml(tbStationMsg(b, cell)) + '</pre>' +
-        '<div class="ms-btns"><button type="button" class="ms-cp" data-pdcp="' + escAttr(b.id) + '" lang="ar">نسخ الرسالة</button></div></div>';
+        '<div class="ms-btns"><button type="button" class="ms-cp" data-pdcp="' + escAttr(b.id) + '" lang="ar">نسخ الرسالة للجروب</button></div></div>';
   }
   // The daily station status for the group: every group as a section, every
   // item with its state in English; out of service with since-when and why.
@@ -4544,7 +4611,7 @@ document.addEventListener('DOMContentLoaded', function(){
     const list = tbPumpsDaily(b.id);
     const order = list.map(function(pm, k){ return { pm:pm, k:k }; })
       .sort(function(a, z){ return (a.pm.ord || 0) - (z.pm.ord || 0); });
-    const L = [ '*`Tank Battery 10/01`*', '', '*Station Status*',
+    const L = [ '*`' + (b.wa || b.name) + '`*', '', '*Station Status*',
                 '*Date : ' + _tbDate.split('-').reverse().join('/') + '*', '~ـــــــــــــــــــــــــــــــــــــــــــــ~' ];
     let group = null, any = false;
     order.forEach(function(o){
@@ -8325,7 +8392,15 @@ tbRemarksHTML(day.date, true) +
           const kind = t.getAttribute('data-k') === 'u' ? 'u' : 'q';
           tbApplyInput(t.getAttribute('data-tb'), kind, parseInt(t.getAttribute('data-i'), 10), t.value);
           t.blur();
+          // A reason box still holding the cursor would keep the panel from
+          // redrawing; let go of it too — what was typed is already saved.
+          const fa = document.activeElement;
+          if(fa && fa !== document.body && area.contains(fa)) fa.blur();
           tbRenderArea();
+          // And the day's WhatsApp text, whatever the redraw did.
+          const bid = t.getAttribute('data-tb');
+          const box = document.querySelector('#tbArea .pd-wa[data-pdwa="' + bid + '"] .ms-msg');
+          if(box) box.textContent = tbStationMsg(tbById(bid), tbGetDay(_tbDate).tbs[bid]);
           // Straight into the reason, if one just opened.
           if(t.value === 'out'){
             const why = document.querySelector('#tbArea textarea.ps-why[data-k="' + (kind === 'u' ? 'v' : 'y') + '"]' +
@@ -8397,7 +8472,8 @@ tbRemarksHTML(day.date, true) +
           const panel = box.closest('.tb-panel');
           panel.querySelector('.ptab-read').style.display  = k === 'read'  ? '' : 'none';
           panel.querySelector('.ptab-pumps').style.display = k === 'pumps' ? '' : 'none';
-          panel.querySelector('.ptab-meas').style.display  = k === 'meas'  ? '' : 'none';
+          const pm2 = panel.querySelector('.ptab-meas');
+          if(pm2) pm2.style.display = k === 'meas' ? '' : 'none';
           return;
         }
       });
@@ -8505,27 +8581,55 @@ tbRemarksHTML(day.date, true) +
 //  DAY / NIGHT THEME
 // ══════════════════════════════════════════════════════════════════════
 (function(){
+  // Three settings, cycled by the button in the header:
+  //   Day   — always light;
+  //   Night — always dark;
+  //   Auto  — dark from 18:00 to 06:00 and light in the day, by the clock on
+  //           the phone, checked every minute so a shift that runs past six
+  //           turns over by itself.
+  // The battery men work nights; the screen should not be a white light in the
+  // control room at 3 in the morning, and nobody should have to remember to
+  // switch it. The choice is kept on this device.
   const KEY = 'rasgara_theme';
-  function applyTheme(mode, persist){
-    const light = (mode === 'light');
+  const NIGHT_FROM = 18, NIGHT_TO = 6;
+  let mode = 'light';
+  function isNight(){ const h = new Date().getHours(); return h >= NIGHT_FROM || h < NIGHT_TO; }
+  function effective(){ return mode === 'auto' ? (isNight() ? 'dark' : 'light') : mode; }
+  function paint(){
+    const light = effective() === 'light';
+    const was = document.body.classList.contains('light-mode');
     document.body.classList.toggle('light-mode', light);
     const btn = document.getElementById('themeToggleBtn');
     // innerHTML, not textContent: the button holds an SVG <use>, and assigning
     // text would delete the sprite reference and leave it blank.
-    if(btn) btn.innerHTML = '<svg class="ico ico-lg" aria-hidden="true"><use href="#i-' +
-                            (light ? 'sun' : 'moon') + '"/></svg>';
+    if(btn){
+      btn.innerHTML = '<svg class="ico ico-lg" aria-hidden="true"><use href="#i-' +
+        (mode === 'auto' ? 'auto' : light ? 'sun' : 'moon') + '"/></svg>';
+      btn.title = mode === 'auto' ? 'Auto — night from 18:00 to 06:00 (tap for Day)'
+                : light ? 'Day (tap for Night)' : 'Night (tap for Auto)';
+    }
     const meta = document.querySelector('meta[name="theme-color"]');
     if(meta) meta.setAttribute('content', light ? '#0b3d68' : '#0a1420');
-    if(persist){ try{ localStorage.setItem(KEY, mode); }catch(e){} }
     // The chart hard-codes nothing, but it is already drawn — repaint it so the
     // series colours pick up the new tokens immediately rather than at next render.
-    if(typeof window.refreshRasGaraPage === 'function') window.refreshRasGaraPage();
+    if(was !== light && typeof window.refreshRasGaraPage === 'function') window.refreshRasGaraPage();
+  }
+  function setMode(m, persist){
+    mode = (m === 'dark' || m === 'auto') ? m : 'light';
+    if(persist){ try{ localStorage.setItem(KEY, mode); }catch(e){} }
+    paint();
   }
   window.toggleTheme = function(){
-    applyTheme(document.body.classList.contains('light-mode') ? 'dark' : 'light', true);
+    const next = mode === 'light' ? 'dark' : mode === 'dark' ? 'auto' : 'light';
+    setMode(next, true);
+    if(typeof showToast === 'function')
+      showToast(next === 'light' ? 'Day mode' : next === 'dark' ? 'Night mode' : 'Auto — night from 18:00 to 06:00');
   };
+  window.__THEME__ = { mode:function(){ return mode; }, effective:effective, set:function(m){ setMode(m, false); } };
   let saved; try{ saved = localStorage.getItem(KEY); }catch(e){}
-  applyTheme((saved === 'light' || saved === 'dark') ? saved : 'light', false);
+  setMode((saved === 'light' || saved === 'dark' || saved === 'auto') ? saved : 'light', false);
+  setInterval(function(){ if(mode === 'auto') paint(); }, 60000);
+  document.addEventListener('visibilitychange', function(){ if(!document.hidden && mode === 'auto') paint(); });
 })();
 
 // ══════════════════════════════════════════════════════════════════════
