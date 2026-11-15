@@ -464,6 +464,16 @@ counts slots whose START (`tbSlotStart`) is at or after the last PM, by state;
 the due date divides hours left by the last 14 days' running hours per day.
 Pre-v40 day-flags (`pmd`, `dpm`) still count as a PM at the end of that day.
 
+**Machinery update (v48, admin).** Sub-page `mach` / `#tb-page-mach`.
+`tbMachData(date)` builds everything once: totals, `outs` (current out-of-service
+episode from `tbPumpOOS`: since, days, reason), `changes` (latest state vs the day
+before, only where today was reported), per-battery groups split in/sb/out/none
+with `stale` = oldest report date when not reported today, and the PM work list
+when `_tbPMDoc` has loaded. `tbMachCardHTML(date, forPrint)` mirrors
+`tbOldCardHTML` (C/Z palettes, one-A4 print sizes); `tbMachMsg` is the WhatsApp
+text; `tbMachDoc` the print/PDF document. Admin has no `pm` sub-page any more
+(`tbShowSub` sends it to Entry); the Pumps page is the situation only.
+
 **Mechanical account (v46).** `MECH_EMAILS` / `isMech` ↔ `isMech()` in the
 rules. `_tabsFor()` gives it `['tb']`; inside the module `_tbMech()` forces the
 `pm` sub-page (`tbShowSub`), the sub-tab bar stays hidden, and `tbMine()` is
@@ -473,7 +483,9 @@ pending queue never holds anything of theirs. `_tbPMUser()` = admin or
 mechanical gates the PM listener. Page pieces: `tbRenderPMDash` (KPI strip
 `#tbPMKpi`, red-flag work list `#tbPMWork` from `tbPMAll`/`tbPMWorkList`),
 `tbPMWorkMsg` (Copy work list), `tbPMExport` (two-sheet xlsx via
-`tbLoadXLSX`), checklist `TB_PM_CHECK` by kind (`tbPMCheckOf`). Cards carry
+`tbLoadXLSX`), checklist by equipment `tbPMCheckOf(pm)` (v47: pump / compressor /
+engine / jockey lists; diesel by name). PM covers `tbPMItemsOf(id)` — every
+item except kind `Heater`. Cards carry
 `id="pmc-<key>"` so the work list can scroll to them.
 
 **Every battery is tabbed (v43).** All five have `pumpTab:true`; only 10/1 has

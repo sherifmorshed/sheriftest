@@ -1,6 +1,6 @@
 # Sinai Field — start here
 
-**Attach `sinai-field-v46.zip` to the new chat and paste the block below as your
+**Attach `sinai-field-v48.zip` to the new chat and paste the block below as your
 first message.** Everything Claude needs is in the zip; nothing from any other
 conversation is required.
 
@@ -16,7 +16,7 @@ conversation is required.
 > The attached zip is the whole project. Read `README.md`, then
 > `DEVELOPER_REFERENCE.md`, then `CHANGELOG.md` before changing anything.
 >
-> Current release: **v46**, service-worker cache `sinai-field-v46`.
+> Current release: **v48**, service-worker cache `sinai-field-v48`.
 >
 > How I work: show me the change, test it before you say it is done, and tell me
 > plainly when something I asked for is a bad idea.
@@ -72,7 +72,10 @@ tank battery total to a Ras Gara total.
 
 ## Where things stand
 
-v46 added the `mechanical@petrobel.org` account: PM page only (KPIs, red-flag
+v48 removed admin's PM tab (mechanical only), cut Pumps to the situation, and
+added the admin **Machinery update** tab (field-wide daily status card, WhatsApp
+copy, PDF — `tbMachData`, `tbMachCardHTML`, `tbMachMsg`). v47 took heaters out of PM and gave pumps, compressors, diesel units and jockey
+pumps their own PM checklists (`tbPMCheckOf(pm)`). v46 added the `mechanical@petrobel.org` account: PM page only (KPIs, red-flag
 work list across all batteries, checklist/technician/WO on Record PM, copy work
 list, Excel export); rules `isMech()` — reads all readings, writes only
 `tbReadingsMeta/pm`. v45 moved PM monitoring to its own PM tab, chosen per tank battery. v44 added

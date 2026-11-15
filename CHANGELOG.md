@@ -1,5 +1,54 @@
 # Sinai Field — Changelog
 
+## v48 — Admin: Machinery daily update; PM left to mechanical
+
+Service-worker cache `sinai-field-v48`. Only `index.html` and `sw.js` change;
+**no rules change**.
+
+- **Admin's PM tab removed.** PM is recorded by `mechanical@petrobel.org` only;
+  the admin still sees the PM picture in the Machinery update.
+- **Pumps tab: the situation only** — every battery's equipment by its latest
+  status. The hours-by-state and stoppage tables are gone (stoppages, with
+  their reasons, are now in the Machinery update).
+- **New tab: Machinery update** — the whole field for one shift day, in the
+  report card's style, laid out like a daily rotating-equipment status report:
+  - KPIs: equipment, in service, standby / off, out of service, availability
+    % (in service + standby over everything reported);
+  - **Out of service** — battery, equipment, since, days out, reason;
+  - **Changes since yesterday** — Yesterday → Today;
+  - each battery: group by group in three columns (In service / On, Standby /
+    Off, Out of service); a battery that has not reported for the day is
+    flagged with the date its status comes from; unreported items are listed;
+  - **PM (mechanical)** — overdue / due-soon counts and the overdue items.
+  Buttons: **Copy for WhatsApp** (✅ 🟡 🔴 per group), **PDF** (one A4 page),
+  **Print**.
+
+## v47 — PM: heaters out, proper pump and compressor checklists
+
+Service-worker cache `sinai-field-v47`. Only `index.html` and `sw.js` change;
+**no rules change**.
+
+- **Heaters removed from PM** — Sigma Heater 1, 2, 4 and the Heater Treater
+  are not rotating equipment, so they no longer appear on the PM page, in the
+  work list, the counts, the KPIs or the Excel export (`tbPMItemsOf`). They keep
+  their daily status and stay in the Pumps report. T.B. 10/1's PM list is 20 items.
+- **Checklists by equipment**, built from standard centrifugal-pump and
+  air-compressor PM checklists:
+  - **Pumps** (booster, Borets, transfer, HPS, waste water, oil room): bearings
+    temperature & vibration, bearing lubrication, mechanical seal / packing,
+    coupling & shaft alignment, foundation bolts, suction / discharge pressure,
+    suction strainer, motor bearings & amps, guard / gauges / valves.
+  - **Compressors**: oil level / change, oil filter, air intake filter, belts,
+    condensate drains, safety valve, pressure switch & load/unload, cooler,
+    leak check, air/oil separator, motor amps / noise / vibration.
+  - **Diesel compressor**: the compressor list with the engine instead of the
+    motor (engine oil & filter, fuel filter, coolant, engine air filter,
+    battery & charger, fan belt & exhaust).
+  - **Diesel fire pumps**: pump list + engine + weekly test run, fuel tank
+    level, controller / alarms. **Jockey pumps**: pump list + pressure switch
+    cut-in / cut-out.
+  PMs already recorded keep the wording they were saved with.
+
 ## v46 — Mechanical account: PM management for the maintenance department
 
 Service-worker cache `sinai-field-v46`. `index.html`, `sw.js` **and

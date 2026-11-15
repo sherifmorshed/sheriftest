@@ -633,7 +633,7 @@ td.ps-out .ps-sel,.pd-top .ps-out .ps-sel{background:#dc2626;border-color:#dc262
 .pm-wr.out .h{color:#dc2626;} .pm-wr.sb .h{color:#d97706;}
 .pm-wr .go{font-size:11.5px;font-weight:800;color:var(--accent2);white-space:nowrap;}
 .pm-ok{font-size:12.5px;color:#16a34a;font-weight:700;padding:6px 2px;}
-.pm-chk{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:4px 10px;}
+.pm-chk{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:4px 12px;}
 .pm-chk label{font-size:12px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:6px;}
 .pm-lc{display:block;font-size:11px;color:var(--muted);margin-top:2px;}
 .pm-bats{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 12px;}
@@ -933,6 +933,7 @@ td.rg-time .ar,th.row .ar{color:var(--muted);font-weight:600;}
 <symbol id="i-edit" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10-10a2.1 2.1 0 0 0-3-3L5 17v3z"/><path d="M14.5 6.5 17.5 9.5"/></g></symbol>
 <symbol id="i-trend" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v16h16"/><path d="m7 15 3.5-4 3 2.6L19 7.5"/><path d="M15.4 7.5H19v3.6"/></g></symbol>
 <symbol id="i-print" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8V3.5h10V8"/><rect x="3.5" y="8" width="17" height="8" rx="1.8"/><rect x="7" y="14" width="10" height="6.5" rx="1"/><path d="M17 11h.01"/></g></symbol>
+<symbol id="i-copy" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></g></symbol>
 <symbol id="i-mail" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.8 6.5 8.2 6 8.2-6"/></g></symbol>
 <symbol id="i-cloud" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18.5a4 4 0 0 1-.4-8A5.5 5.5 0 0 1 17.2 10a3.8 3.8 0 0 1 .3 7.6z"/></g></symbol>
 <symbol id="i-refresh" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v4.5h-4.5"/></g></symbol>
@@ -1160,18 +1161,30 @@ document.addEventListener('click', function(e){
         <label class="rg-lbl" for="tbPumpDate">As of</label>
         <input type="date" id="tbPumpDate" class="rg-date">
       </div>
-      <div class="chips rg-range" id="tbPumpRange" style="margin-bottom:8px;"></div>
       <div class="rg-sec-title">Pumps situation</div>
       <div id="tbPumpSummary"></div>
-      <div class="rg-sec-title">Hours by state</div>
-      <div id="tbPumpRegister"></div>
-      <div class="rg-sec-title">Out of service</div>
-      <div id="tbPumpOOS"></div>
     </div>
 
-    <!-- PM: preventive maintenance, one tank battery at a time — pick the
-         battery, then every pump, heater and compressor on it with its hours
-         since PM, what is left, and where to record one. -->
+    <!-- Machinery daily update: the whole field's rotating equipment and
+         station status for one day, in the report card's style — copied to
+         WhatsApp or sent as a PDF. -->
+    <div id="tb-page-mach" style="display:none;">
+      <div class="rg-bar">
+        <label class="rg-lbl" for="tbMachDate">Shift day</label>
+        <input type="date" id="tbMachDate" class="rg-date">
+        <button class="rg-btn" id="tbMachToday" type="button">Today</button>
+      </div>
+      <div id="tbMachCard"></div>
+      <div class="rg-actions">
+        <button class="rg-btn rg-btn-primary" id="tbMachWa" type="button"><svg class="ico" aria-hidden="true"><use href="#i-copy"/></svg> Copy for WhatsApp</button>
+        <button class="rg-btn rg-btn-primary" id="tbMachPdf" type="button"><svg class="ico" aria-hidden="true"><use href="#i-mail"/></svg> PDF</button>
+        <button class="rg-btn" id="tbMachPrint" type="button"><svg class="ico" aria-hidden="true"><use href="#i-print"/></svg> Print</button>
+      </div>
+    </div>
+
+    <!-- PM: the mechanical department's page (mechanical@petrobel.org only
+         since v48) — every pump and compressor with its hours since PM, the
+         red-flag work list, and where to record one. -->
     <div id="tb-page-pm" style="display:none;">
       <div class="rg-bar">
         <label class="rg-lbl" for="tbPMDate">As of</label>
@@ -3722,23 +3735,71 @@ document.addEventListener('DOMContentLoaded', function(){
   }
   // ►►►► PREVENTIVE MAINTENANCE interval in RUNNING hours, by kind of pump.
   //      PLACEHOLDERS until maintenance gives the real figures. "Due" at 90%.
+  //      Heaters are NOT here: PM covers rotating equipment — pumps and
+  //      compressors — and that is the mechanical department's list (v47).
   const TB_PUMP_PM_HOURS = { Booster:4000, Borets:4000, Transfer:4000, 'High pressure':4000,
-                             Heater:4000, Compressor:4000, 'Fire pump':4000,
+                             Compressor:4000, 'Fire pump':4000,
                              'Waste water':4000, 'Oil room':4000 };
-  // The standard PM checklist offered when a PM is recorded, by kind. Ticked
-  // items are stored with the PM, so the log says WHAT was done, not just that
-  // something was. Edit freely — old records keep the wording they were saved with.
-  const TB_PM_CHECK_PUMP = ['Greasing / lubrication', 'Oil level / oil change', 'Mechanical seal / gland — no leak',
-                            'Coupling & alignment', 'Vibration & noise normal', 'Foundation bolts tight'];
-  const TB_PM_CHECK = {
-    Compressor:  ['Oil level / oil change', 'Air filter cleaned / changed', 'Belts / coupling', 'Drain valves',
-                  'Safety valve & pressure switch', 'Leak check'],
-    Heater:      ['Burner & nozzle cleaned', 'Ignition / flame check', 'Fuel line — no leak', 'Controls & thermostat',
-                  'Insulation / casing'],
-    'Fire pump': ['Engine oil & coolant', 'Battery & charger', 'Fuel level', 'Test run', 'Discharge pressure',
-                  'Jockey cut-in / cut-out']
-  };
-  function tbPMCheckOf(kind){ return TB_PM_CHECK[kind] || TB_PM_CHECK_PUMP; }
+  // What PM covers: everything on the station list except heaters (Sigma
+  // heaters, Heater Treater). Heaters keep their daily status and stay in the
+  // Pumps report; they just carry no PM.
+  function tbPMItemsOf(id){
+    return tbAllPumpsOf(id).filter(function(x){ return x.pm.kind !== 'Heater'; });
+  }
+  // The standard PM checklist offered when a PM is recorded. Ticked items are
+  // stored with the PM, so the log says WHAT was done. Old records keep the
+  // wording they were saved with, so these can be edited freely.
+  //
+  // Built from the usual centrifugal-pump and air-compressor PM checklists:
+  // pumps — bearings, lubrication, seal, alignment, foundation, head, motor;
+  // compressors — oil & oil filter, intake filter, belts, condensate drains,
+  // safety valve, pressure switch, cooler, leaks, separator. A DIESEL-driven
+  // machine adds its engine; a jockey pump adds its pressure switch.
+  const TB_PM_CHECK_PUMP = [
+    'Bearings — temperature & vibration normal',
+    'Bearing lubrication — oil changed / greased',
+    'Mechanical seal / packing — no leak',
+    'Coupling & shaft alignment checked',
+    'Foundation & hold-down bolts tight',
+    'Suction / discharge pressure normal',
+    'Suction strainer cleaned',
+    'Motor — bearings greased, amps normal',
+    'Coupling guard, gauges & valves OK'
+  ];
+  const TB_PM_CHECK_COMP = [
+    'Oil level checked / oil changed',
+    'Oil filter replaced',
+    'Air intake filter cleaned / replaced',
+    'Belts — wear & tension / coupling',
+    'Condensate drains & auto-drain working',
+    'Safety (relief) valve tested',
+    'Pressure switch & load / unload controls',
+    'Cooler / fins cleaned',
+    'Leak check — hoses & connections',
+    'Air / oil separator checked',
+    'Motor amps, noise & vibration normal'
+  ];
+  const TB_PM_CHECK_ENGINE = [
+    'Engine oil & oil filter changed',
+    'Fuel filter / water separator',
+    'Coolant level & radiator hoses',
+    'Engine air filter',
+    'Battery & charger',
+    'Fan belt & exhaust'
+  ];
+  const TB_PM_CHECK_JOCKEY = ['Pressure switch cut-in / cut-out checked'];
+  const TB_PM_CHECK_FIREDIESEL = ['Weekly test run done', 'Fuel tank level', 'Controller / alarms tested'];
+  function tbPMCheckOf(pm){
+    const kind = pm && pm.kind, name = String((pm && pm.name) || '');
+    const diesel = /diesel/i.test(name);
+    if(kind === 'Compressor')
+      return diesel ? TB_PM_CHECK_COMP.filter(function(c){ return !/^Motor/.test(c); }).concat(TB_PM_CHECK_ENGINE)
+                    : TB_PM_CHECK_COMP;
+    if(kind === 'Fire pump')
+      return diesel ? TB_PM_CHECK_PUMP.filter(function(c){ return !/^Motor/.test(c); }).concat(TB_PM_CHECK_ENGINE, TB_PM_CHECK_FIREDIESEL)
+                    : TB_PM_CHECK_PUMP.concat(TB_PM_CHECK_JOCKEY);
+    return TB_PM_CHECK_PUMP;
+  }
   // The operator sees ONLY the Arabic; the admin report only the English.
   const TB_PUMP_STATES = [
     { k:'in',  en:'In service',     ar:'في الخدمة',   cls:'in'  },
@@ -5010,10 +5071,11 @@ document.addEventListener('DOMContentLoaded', function(){
                      { k:'temp',  label:'Temperature',       icon:'trend' },
                      { k:'chem',  label:'Chemical injection', icon:'trend' },
                      { k:'pumps', label:'Pumps',              icon:'tank'  },
-                     { k:'pm',    label:'PM',                 icon:'edit'  } ];
+                     { k:'mach',  label:'Machinery update',   icon:'print' } ];
   function tbShowSub(k){
     if(_tbMech()) k = 'pm';
     else if(!_tbAdmin()) k = 'entry';
+    else if(k === 'pm') k = 'entry';           // PM is the mechanical department's page now
     _tbSub = k;
     const e = document.getElementById('tb-page-entry');
     const v = document.getElementById('tb-page-view');
@@ -5026,6 +5088,8 @@ document.addEventListener('DOMContentLoaded', function(){
     if(pp) pp.style.display = (k === 'pumps') ? '' : 'none';
     const pmp = document.getElementById('tb-page-pm');
     if(pmp) pmp.style.display = (k === 'pm') ? '' : 'none';
+    const mcp = document.getElementById('tb-page-mach');
+    if(mcp) mcp.style.display = (k === 'mach') ? '' : 'none';
     if(e) e.style.display = (k === 'entry') ? '' : 'none';
     if(v) v.style.display = (k === 'view')  ? '' : 'none';
     if(o) o.style.display = (k === 'old')   ? '' : 'none';
@@ -5057,6 +5121,7 @@ document.addEventListener('DOMContentLoaded', function(){
     if(k === 'chem') tbRenderChem();
     if(k === 'pumps') tbRenderPumps();
     if(k === 'pm'){ tbPMLoad(); tbRenderPMPage(); }
+    if(k === 'mach'){ tbPMLoad(); tbRenderMach(); }
   }
   function tbRenderSubTabs(){
     const bar = document.getElementById('tbSubTabs');
@@ -6935,19 +7000,7 @@ document.addEventListener('DOMContentLoaded', function(){
       if(dv.value !== _tbDate) dv.value = _tbDate;
       if(!dv._wired){ dv._wired = true; dv.addEventListener('change', function(){ _tbDate = this.value || tbToday(); tbRenderAll(); }); }
     }
-    const rg = document.getElementById('tbPumpRange');
-    if(rg){
-      rg.innerHTML = TB_PUMP_RANGES.map(function(r){
-        return '<button type="button" data-r="' + r.k + '"' + (r.k === _tbPumpRange ? ' class="on"' : '') + '>' + r.label + '</button>';
-      }).join('');
-      Array.prototype.forEach.call(rg.querySelectorAll('button'), function(bt){
-        bt.addEventListener('click', function(){ _tbPumpRange = bt.getAttribute('data-r'); tbRenderPumps(); });
-      });
-    }
     const asOf = _tbDate;
-    const fromDt = _tbPumpRange === 'all' ? null :
-      _isoDate(new Date(new Date(asOf + 'T00:00:00').getTime() - (Number(_tbPumpRange) - 1) * 86400000));
-    const per = TB_PUMP_RANGES.filter(function(r){ return r.k === _tbPumpRange; })[0].label;
 
     // ── situation: every pump's latest reading ──
     const sm = document.getElementById('tbPumpSummary');
@@ -6976,56 +7029,235 @@ document.addEventListener('DOMContentLoaded', function(){
         (tot.none ? '<span class="none">' + tot.none + ' not reported</span>' : '') + '</div>' + rows + '</div>';
     }
 
-    // ── hours by state, per pump ──
-    const reg = document.getElementById('tbPumpRegister');
-    if(reg){
-      let body = '';
-      TB_LIST.forEach(function(b){
-        tbAllPumpsOf(b.id).forEach(function(x){
-          const pm = x.pm, i = x.i;
-          const now = tbPumpLatest(b.id, i, asOf), st = tbStateOf(pm, now.st);
-          const h = tbPumpHours(b.id, i, fromDt, asOf), all = tbPumpHours(b.id, i, null, asOf);
-          const eps = tbPumpOOS(b.id, i, fromDt, asOf);
-          body += '<tr' + (now.st === 'out' ? ' class="alarm"' : '') + '>' +
-            '<td class="b">' + escHtml(b.name) + '</td><td class="p">' + escHtml(pm.name) + '</td>' +
-            '<td>' + (st ? '<span class="pchip ' + st.cls + '">' + st.en + '</span>' : '<span class="pchip none">Not reported</span>') + '</td>' +
-            '<td class="n in">' + tbFmt(h.in, 0) + '</td><td class="n sb">' + tbFmt(h.sb, 0) + '</td>' +
-            '<td class="n out">' + tbFmt(h.out, 0) + '</td>' +
-            '<td class="n">' + tbFmt(all.in, 0) + '</td>' +
-            '<td class="n">' + eps.length + '</td></tr>';
-        });
-      });
-      reg.innerHTML = '<div class="tb-days tb-preg"><table><thead><tr>' +
-        '<th>Battery</th><th>Pump</th><th>Now</th><th class="in">In service<br>h · ' + per + '</th>' +
-        '<th class="sb">Standby<br>h · ' + per + '</th><th class="out">Out<br>h · ' + per + '</th>' +
-        '<th>Running h<br>total</th><th>Times out<br>' + per + '</th>' +
-        '</tr></thead><tbody>' + body + '</tbody></table></div>';
-    }
-
-    // ── every time a pump went out of service, why, and for how long ──
-    const oo = document.getElementById('tbPumpOOS');
-    if(oo){
-      const all = [];
-      TB_LIST.forEach(function(b){
-        tbAllPumpsOf(b.id).forEach(function(x){
-          tbPumpOOS(b.id, x.i, fromDt, asOf).forEach(function(e){ all.push(Object.assign({ b:b, pm:x.pm }, e)); });
-        });
-      });
-      all.sort(function(a, z){ return (a.from.dt + a.from.r) < (z.from.dt + z.from.r) ? 1 : -1; });
-      oo.innerHTML = !all.length ? '<div class="rg-empty">No pump went out of service in this period.</div>' :
-        '<div class="tb-days tb-plog"><table><thead><tr><th>Battery</th><th>Pump</th><th>Went out</th>' +
-        '<th>Back</th><th>Hours out</th><th>Reason for stopping</th></tr></thead><tbody>' +
-        all.map(function(e){
-          const back = e.back ? tbStateOf(e.pm, e.back) : null;
-          return '<tr' + (e.to ? '' : ' class="alarm"') + '><td class="b">' + escHtml(e.b.name) + '</td><td>' + escHtml(e.pm.name) + '</td>' +
-            '<td>' + tbSlotWhen(e.from, e.b) + '</td>' +
-            '<td>' + (e.to ? tbSlotWhen(e.to, e.b) + ' <span class="pchip ' + back.cls + '">' + back.en + '</span>'
-                           : '<span class="pchip out">Still out</span>') + '</td>' +
-            '<td class="n">' + tbFmt(e.hours, 0) + '</td>' +
-            '<td class="why">' + (e.why ? '<bdi dir="auto">' + escHtml(e.why) + '</bdi>' : '<span class="none">no reason written</span>') + '</td></tr>';
-        }).join('') + '</tbody></table></div>';
-    }
   }
+
+  // ── MACHINERY DAILY UPDATE ─────────────────────────────────────────────
+  // The whole field's equipment for one shift day, laid out the way a daily
+  // rotating-equipment status report is: availability up top, then what is
+  // OUT (since when, how long, why), what CHANGED since yesterday, every
+  // battery's equipment by group in three columns, and the PM picture from
+  // the mechanical department. Same card style as the scanner report card;
+  // copied to WhatsApp or sent as a PDF.
+  function tbMachData(dateStr){
+    const y = tbPrevDate(dateStr);
+    const tot = { n:0, in:0, sb:0, out:0, none:0 };
+    const outs = [], changes = [], bats = [];
+    TB_LIST.forEach(function(b){
+      const items = tbAllPumpsOf(b.id);
+      if(!items.length) return;
+      let stale = null;
+      const groups = [];
+      items.forEach(function(x){
+        const now = tbPumpLatest(b.id, x.i, dateStr), was = tbPumpLatest(b.id, x.i, y);
+        const st = tbStateOf(x.pm, now.st), ys = tbStateOf(x.pm, was.st);
+        if(now.dt && now.dt < dateStr && (!stale || now.dt < stale)) stale = now.dt;
+        tot.n++;
+        if(st) tot[st.k]++; else tot.none++;
+        const g0 = x.pm.group || 'EQUIPMENT';
+        let g = groups.filter(function(q){ return q.name === g0; })[0];
+        if(!g){ g = { name:g0, in:[], sb:[], out:[], none:[], onoff:x.pm.labels === 'onoff' }; groups.push(g); }
+        g[st ? st.k : 'none'].push(x.pm.name);
+        if(st && st.k === 'out'){
+          const eps = tbPumpOOS(b.id, x.i, null, dateStr), e = eps.length ? eps[eps.length - 1] : null;
+          const since = e && !e.to ? e.from.dt : now.dt;
+          const days = Math.round((new Date(dateStr + 'T00:00:00') - new Date(since + 'T00:00:00')) / 86400000) + 1;
+          outs.push({ b:b, pm:x.pm, since:since, days:days, why:(e && e.why) || '' });
+        }
+        if(st && ys && st.k !== ys.k && now.dt === dateStr) changes.push({ b:b, pm:x.pm, from:ys, to:st });
+      });
+      bats.push({ b:b, groups:groups, stale:stale });
+    });
+    outs.sort(function(a, z){ return z.days - a.days; });
+    const avail = (tot.n - tot.none) ? Math.round(100 * (tot.in + tot.sb) / (tot.n - tot.none)) : null;
+    // PM from the mechanical department's record, when it has loaded.
+    let pm = null;
+    if(_tbPMDoc){
+      const list = tbPMWorkList(tbPMAll(dateStr));
+      pm = { over:list.filter(function(x){ return x.s.status === 'overdue'; }),
+             due:list.filter(function(x){ return x.s.status === 'due'; }) };
+    }
+    return { date:dateStr, tot:tot, avail:avail, outs:outs, changes:changes, bats:bats, pm:pm };
+  }
+  // "BOOSTER PUMPS" → "Booster", "FIRE FIGHTING" → "Fire fighting": the
+  // column is narrow on a phone and the word "pumps" says nothing there.
+  function tbMachGroup(g){
+    const t = String(g || '').replace(/\s+PUMPS$/i, '').toLowerCase();
+    return t.charAt(0).toUpperCase() + t.slice(1);
+  }
+  function tbMachDateTxt(d){
+    const dt = new Date(d + 'T00:00:00');
+    return ('0' + dt.getDate()).slice(-2) + '/' + ('0' + (dt.getMonth() + 1)).slice(-2) + '/' + dt.getFullYear();
+  }
+  function tbMachCardHTML(dateStr, forPrint){
+    const D = tbMachData(dateStr), T = D.tot;
+    const C = forPrint
+      ? { ink:'#16232f', mute:'#5d7286', line:'#dbe4ee', head:'#123a5a', headInk:'#ffffff',
+          band:'#eef3f8', in:'#15803d', sb:'#b45309', out:'#b91c1c', totalBg:'#fbf6e9', card:'#ffffff',
+          inBg:'rgba(22,163,74,.10)', sbBg:'rgba(217,119,6,.10)', outBg:'rgba(220,38,38,.10)' }
+      : { ink:'var(--text)', mute:'var(--muted)', line:'var(--border)', head:'var(--accent)',
+          headInk:'var(--on-accent)', band:'var(--surface)', in:'var(--green)', sb:'#d97706', out:'var(--red)',
+          totalBg:'rgba(202,138,4,.12)', card:'var(--card)',
+          inBg:'rgba(22,163,74,.12)', sbBg:'rgba(217,119,6,.12)', outBg:'rgba(220,38,38,.12)' };
+    const Z = forPrint
+      ? { hdP:'8px 14px', h2:16, sub:8.5, date:11.5, bdP:'8px 12px 10px', gap:6, blkH:9, th:8, thP:'3px 6px',
+          td:9.5, tdP:'2.5px 6px', kpi:15, kpiL:8 }
+      : { hdP:'13px 17px', h2:20, sub:10.5, date:14, bdP:'11px 13px 13px', gap:11, blkH:10, th:10, thP:'6px 8px',
+          td:13, tdP:'6px 8px', kpi:22, kpiL:10 };
+    const css =
+      '.mdcard{background:' + C.card + ';border:1px solid ' + C.line + ';border-radius:16px;overflow:hidden;max-width:820px;margin:0 auto;color:' + C.ink + ';}' +
+      '.mdcard .hd{background:' + C.head + ';color:' + C.headInk + ';padding:' + Z.hdP + ';display:flex;align-items:center;gap:14px;flex-wrap:wrap;}' +
+      '.mdcard .hd h2{font-size:' + Z.h2 + 'px;font-weight:800;letter-spacing:-.02em;margin:0;}' +
+      '.mdcard .hd .sub{font-size:' + Z.sub + 'px;letter-spacing:1.4px;font-weight:700;opacity:.88;text-transform:uppercase;margin-top:3px;}' +
+      '.mdcard .hd .date{margin-left:auto;background:rgba(255,255,255,.16);border-radius:10px;padding:6px 11px;font-size:' + Z.date + 'px;font-weight:800;font-family:ui-monospace,monospace;}' +
+      '.mdcard .bd{padding:' + Z.bdP + ';}' +
+      '.mdcard .blk + .blk{margin-top:' + Z.gap + 'px;}' +
+      '.mdcard .blk-h{font-size:' + Z.blkH + 'px;letter-spacing:1.2px;text-transform:uppercase;color:' + C.mute + ';font-weight:800;margin-bottom:3px;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;}' +
+      '.mdcard .blk-h .warn{color:' + C.sb + ';letter-spacing:.3px;text-transform:none;}' +
+      '.mdcard .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}' +
+      '.mdcard .kp{border:1px solid ' + C.line + ';border-radius:10px;padding:6px 8px;text-align:center;}' +
+      '.mdcard .kp b{display:block;font-family:ui-monospace,monospace;font-size:' + Z.kpi + 'px;line-height:1.15;}' +
+      '.mdcard .kp span{font-size:' + Z.kpiL + 'px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:' + C.mute + ';}' +
+      '.mdcard .kp.in{background:' + C.inBg + ';} .mdcard .kp.in b{color:' + C.in + ';}' +
+      '.mdcard .kp.sb{background:' + C.sbBg + ';} .mdcard .kp.sb b{color:' + C.sb + ';}' +
+      '.mdcard .kp.out{background:' + C.outBg + ';} .mdcard .kp.out b{color:' + C.out + ';}' +
+      '.mdcard .kp.av{background:' + C.totalBg + ';}' +
+      '.mdcard table{width:100%;border-collapse:collapse;table-layout:fixed;}' +
+      '.mdcard th{background:' + C.band + ';color:' + C.mute + ';font-size:' + Z.th + 'px;letter-spacing:.8px;text-transform:uppercase;padding:' + Z.thP + ';text-align:left;border-bottom:2px solid ' + C.line + ';}' +
+      '.mdcard th.in{color:' + C.in + ';} .mdcard th.sb{color:' + C.sb + ';} .mdcard th.out{color:' + C.out + ';}' +
+      '.mdcard td{padding:' + Z.tdP + ';border-bottom:1px solid ' + C.line + ';font-size:' + Z.td + 'px;font-weight:600;vertical-align:top;line-height:1.35;overflow-wrap:anywhere;}' +
+      '.mdcard td.g{font-weight:800;color:' + C.mute + ';overflow-wrap:normal;word-break:normal;}' +
+      '.mdcard td.in{color:' + C.in + ';} .mdcard td.sb{color:' + C.sb + ';} .mdcard td.out{color:' + C.out + ';font-weight:800;}' +
+      '.mdcard td.nr{color:' + C.mute + ';font-style:italic;}' +
+      '.mdcard td.b{font-weight:800;} .mdcard td.n{font-family:ui-monospace,monospace;text-align:center;}' +
+      '.mdcard td.why{font-weight:500;}' +
+      '.mdcard tr.alarm td{background:' + C.outBg + ';}' +
+      '.mdcard .pill{display:inline-block;border-radius:7px;padding:1px 7px;font-size:' + (Z.td - 1.5) + 'px;font-weight:800;color:#fff;white-space:nowrap;}' +
+      '.mdcard .pill.in{background:' + C.in + ';} .mdcard .pill.sb{background:' + C.sb + ';} .mdcard .pill.out{background:' + C.out + ';}' +
+      '.mdcard .none{color:' + C.mute + ';font-style:italic;font-size:' + Z.td + 'px;padding:3px 2px;}' +
+      '.mdcard .pmrow{font-size:' + Z.td + 'px;line-height:1.5;border:1px solid ' + C.line + ';border-radius:10px;padding:6px 9px;background:' + C.totalBg + ';}' +
+      '.mdcard .pmrow b.out{color:' + C.out + ';} .mdcard .pmrow b.sb{color:' + C.sb + ';}' +
+      '@media (max-width:560px){.mdcard .kpis{gap:4px;} .mdcard .kp{padding:6px 2px;} .mdcard .kp b{font-size:18px;} .mdcard .kp span{font-size:7.5px;letter-spacing:.2px;}' +
+        '.mdcard td{font-size:12px;padding:5px 4px;} .mdcard th{font-size:8.5px;padding:5px 4px;letter-spacing:.2px;} .mdcard .hd h2{font-size:18px;} .mdcard .bd{padding:10px 9px 12px;}}';
+    function lbl(onoff, k){ return onoff ? (k === 'in' ? 'On' : k === 'sb' ? 'Off' : 'Out') : (k === 'in' ? 'In service' : k === 'sb' ? 'Standby' : 'Out'); }
+    const kpis = '<div class="blk"><div class="kpis">' +
+      '<div class="kp"><b>' + T.n + '</b><span>Equipment</span></div>' +
+      '<div class="kp in"><b>' + T.in + '</b><span>In service</span></div>' +
+      '<div class="kp sb"><b>' + T.sb + '</b><span>Standby / off</span></div>' +
+      '<div class="kp out"><b>' + T.out + '</b><span>Out of service</span></div>' +
+      '<div class="kp av"><b>' + (D.avail == null ? '—' : D.avail + '%') + '</b><span>Availability</span></div>' +
+      '</div>' + (T.none ? '<div class="none">' + T.none + ' item(s) not reported yet</div>' : '') + '</div>';
+    const outs = '<div class="blk"><div class="blk-h">Out of service</div>' + (D.outs.length
+      ? '<table><thead><tr><th style="width:15%">Battery</th><th style="width:25%">Equipment</th><th style="width:13%">Since</th>' +
+        '<th style="width:9%">Days</th><th>Reason</th></tr></thead><tbody>' +
+        D.outs.map(function(o){
+          return '<tr class="alarm"><td class="b">' + escHtml(o.b.name) + '</td><td class="out">' + escHtml(o.pm.name) + '</td>' +
+            '<td class="n">' + tbShortDay(o.since) + '</td><td class="n">' + o.days + '</td>' +
+            '<td class="why">' + (o.why ? '<bdi dir="auto">' + escHtml(o.why) + '</bdi>' : '—') + '</td></tr>';
+        }).join('') + '</tbody></table>'
+      : '<div class="none">— All equipment available —</div>') + '</div>';
+    const chg = '<div class="blk"><div class="blk-h">Changes since yesterday</div>' + (D.changes.length
+      ? '<table><thead><tr><th style="width:15%">Battery</th><th style="width:30%">Equipment</th><th>Yesterday → Today</th></tr></thead><tbody>' +
+        D.changes.map(function(c){
+          return '<tr><td class="b">' + escHtml(c.b.name) + '</td><td>' + escHtml(c.pm.name) + '</td>' +
+            '<td><span class="pill ' + c.from.k + '">' + c.from.en + '</span> → <span class="pill ' + c.to.k + '">' + c.to.en + '</span></td></tr>';
+        }).join('') + '</tbody></table>'
+      : '<div class="none">— No changes —</div>') + '</div>';
+    const bats = D.bats.map(function(B){
+      return '<div class="blk"><div class="blk-h">' + escHtml(B.b.name) +
+        (B.stale ? '<span class="warn">⚠ not reported today — status as of ' + tbShortDay(B.stale) + '</span>' : '') + '</div>' +
+        '<table><thead><tr><th style="width:24%">Group</th><th class="in">In service / On</th><th class="sb">Standby / Off</th><th class="out">Out of service</th></tr></thead><tbody>' +
+        B.groups.map(function(g){
+          function cell(k){ return '<td class="' + (g[k].length ? k : '') + '">' + (g[k].length ? g[k].map(escHtml).join(', ') : '—') + '</td>'; }
+          const head = '<tr' + (g.out.length ? ' class="alarm"' : '') + '><td class="g">' + escHtml(tbMachGroup(g.name)) + '</td>';
+          // A whole group with no report is ONE line, not three empty columns
+          // and the names again underneath.
+          if(!g.in.length && !g.sb.length && !g.out.length)
+            return head + '<td class="nr" colspan="3">Not reported (' + g.none.length + ')</td></tr>';
+          return head + cell('in') + cell('sb') + cell('out') + '</tr>' +
+            (g.none.length ? '<tr><td></td><td class="nr" colspan="3">Not reported: ' + g.none.map(escHtml).join(', ') + '</td></tr>' : '');
+        }).join('') + '</tbody></table></div>';
+    }).join('');
+    const pm = '<div class="blk"><div class="blk-h">Preventive maintenance (mechanical)</div><div class="pmrow">' + (!D.pm ? 'Loading PM records…'
+      : '<b class="' + (D.pm.over.length ? 'out' : '') + '">' + D.pm.over.length + ' overdue</b> · <b class="' + (D.pm.due.length ? 'sb' : '') + '">' + D.pm.due.length + ' due soon</b>' +
+        (D.pm.over.length ? '<br>Overdue: ' + D.pm.over.map(function(x){ return escHtml(x.pm.name) + ' (' + escHtml(x.b.name) + ', ' + tbFmt(-x.s.left, 0) + ' h over)'; }).join(' · ') : '')) +
+      '</div></div>';
+    return '<style>' + css + '</style><div class="mdcard"><div class="hd"><div><h2>Machinery Daily Update</h2>' +
+      '<div class="sub">PETROBEL · Sinai Field · Rotating equipment &amp; station status</div></div>' +
+      '<div class="date">' + tbMachDateTxt(dateStr) + '</div></div><div class="bd">' +
+      kpis + outs + chg + bats + pm + '</div></div>';
+  }
+  function tbMachMsg(dateStr){
+    const D = tbMachData(dateStr), T = D.tot;
+    const L = ['*Sinai Field — Machinery Daily Update*', '📅 ' + tbMachDateTxt(dateStr), '',
+      'Equipment ' + T.n + ' · ✅ In service ' + T.in + ' · 🟡 Standby/off ' + T.sb + ' · 🔴 Out ' + T.out +
+      (D.avail == null ? '' : ' · Availability ' + D.avail + '%'), ''];
+    L.push('🔴 *Out of service*');
+    if(!D.outs.length) L.push('All equipment available ✅');
+    D.outs.forEach(function(o){ L.push('• ' + o.b.name + ' — ' + o.pm.name + ': since ' + tbShortDay(o.since) + ' (' + o.days + ' d)' + (o.why ? ' — ' + o.why : '')); });
+    L.push('');
+    if(D.changes.length){
+      L.push('🔄 *Changes since yesterday*');
+      D.changes.forEach(function(c){ L.push('• ' + c.b.name + ' — ' + c.pm.name + ': ' + c.from.en + ' → ' + c.to.en); });
+      L.push('');
+    }
+    D.bats.forEach(function(B){
+      L.push('*' + B.b.name + '*' + (B.stale ? ' ⚠ (status as of ' + tbShortDay(B.stale) + ')' : ''));
+      B.groups.forEach(function(g){
+        const p = [];
+        if(g.in.length)  p.push('✅ ' + g.in.join(', '));
+        if(g.sb.length)  p.push('🟡 ' + g.sb.join(', '));
+        if(g.out.length) p.push('🔴 ' + g.out.join(', '));
+        if(g.none.length) p.push('❔ ' + g.none.join(', '));
+        if(!g.in.length && !g.sb.length && !g.out.length){ L.push(tbMachGroup(g.name) + ': ❔ not reported'); return; }
+        L.push(tbMachGroup(g.name) + ': ' + p.join(' · '));
+      });
+      L.push('');
+    });
+    if(D.pm){
+      L.push('🛠 *PM*: ' + D.pm.over.length + ' overdue · ' + D.pm.due.length + ' due soon');
+      D.pm.over.forEach(function(x){ L.push('• ' + x.b.name + ' — ' + x.pm.name + ': ' + tbFmt(-x.s.left, 0) + ' h over'); });
+    }
+    return L.join('\n').trim();
+  }
+  function tbMachDoc(){
+    return '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Machinery Daily Update ' + escHtml(_tbDate) + '</title><style>' +
+      '*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Arial,Helvetica,sans-serif;background:#fff;}' +
+      '@page{size:A4 portrait;margin:10mm;}@media print{tr{break-inside:avoid;} .blk{break-inside:avoid;}}' +
+      '.foot{margin-top:9px;text-align:center;font-size:8.5px;color:#5d7286;}</style></head><body>' +
+      tbMachCardHTML(_tbDate, true) +
+      '<div class="foot">Generated by PETROBEL Sinai Field on ' + new Date().toLocaleString('en-GB') +
+      '<br>Powered by Sherif Morshed</div></body></html>';
+  }
+  function tbRenderMach(){
+    const dv = document.getElementById('tbMachDate');
+    if(dv){
+      if(dv.value !== _tbDate) dv.value = _tbDate;
+      if(!dv._wired){ dv._wired = true; dv.addEventListener('change', function(){ _tbDate = this.value || tbToday(); tbRenderAll(); }); }
+    }
+    const tb = document.getElementById('tbMachToday');
+    if(tb && !tb._wired){ tb._wired = true; tb.addEventListener('click', function(){ _tbDate = tbToday(); tbRenderAll(); }); }
+    const el = document.getElementById('tbMachCard');
+    if(el) el.innerHTML = tbMachCardHTML(_tbDate, false);
+    const wa = document.getElementById('tbMachWa');
+    if(wa && !wa._wired){ wa._wired = true; wa.addEventListener('click', function(){ tbCopyText(tbMachMsg(_tbDate)); }); }
+    const pr = document.getElementById('tbMachPrint');
+    if(pr && !pr._wired){ pr._wired = true; pr.addEventListener('click', function(){
+      const R = window.__REPORT__; if(!R){ showToast('Report tools unavailable', true); return; } R.printHTML(tbMachDoc()); }); }
+    const pd = document.getElementById('tbMachPdf');
+    if(pd && !pd._wired){ pd._wired = true; pd.addEventListener('click', async function(){
+      const R = window.__REPORT__;
+      if(!R){ showToast('Report tools unavailable', true); return; }
+      showToast('Building PDF…');
+      let blob;
+      try { blob = await R.pdfFromHTML(tbMachDoc()); }
+      catch(err){ showToast('Could not build the PDF: ' + ((err && err.message) || 'unknown'), true); return; }
+      if(!blob || !blob.size){ showToast('The PDF came out empty', true); return; }
+      R.offerPdf(blob, 'Machinery_Daily_Update_' + _tbDate + '.pdf',
+        'Sinai Field — Machinery Daily Update — ' + _tbDate,
+        'Machinery daily update for ' + _tbDate + '.\n(The report is in the attached PDF.)');
+    }); }
+  }
+  window.__MACH__ = { data:tbMachData, msg:tbMachMsg, doc:tbMachDoc };
 
   function tbRenderView(){
     _tbZoom = {};
@@ -7654,6 +7886,7 @@ tbRemarksHTML(day.date, true) +
     if(_tbAdmin() && _tbSub === 'chem') tbRenderChem();
     if(_tbAdmin() && _tbSub === 'pumps') tbRenderPumps();
     if(_tbPMUser() && _tbSub === 'pm') tbRenderPMPage();
+    if(_tbAdmin() && _tbSub === 'mach') tbRenderMach();
     const sv = document.getElementById('tbSaved');
     const day = tbGetDay(_tbDate);
     if(sv) sv.textContent = day.updatedAt
@@ -7781,6 +8014,7 @@ tbRemarksHTML(day.date, true) +
       _tbPMDoc = (snap.exists && snap.data()) || { pumps:{} };
       if(!_tbPMDoc.pumps) _tbPMDoc.pumps = {};
       if(_tbSub === 'pm') tbRenderPMPage();
+      if(_tbSub === 'mach') tbRenderMach();
     }, function(e){
       console.warn('[PM] could not read', e);
       _tbPMLoading = false; _tbPMUnsub = null;
@@ -7867,7 +8101,7 @@ tbRemarksHTML(day.date, true) +
   let _tbPMBat = null;
   function tbPMCounts(id, asOf){
     const n = { overdue:0, due:0, ok:0 };
-    tbAllPumpsOf(id).forEach(function(x){ const s = tbPumpPM(id, x.i, asOf).status; if(n[s] != null) n[s]++; });
+    tbPMItemsOf(id).forEach(function(x){ const s = tbPumpPM(id, x.i, asOf).status; if(n[s] != null) n[s]++; });
     return n;
   }
   function tbRenderPMPage(){
@@ -7913,7 +8147,7 @@ tbRemarksHTML(day.date, true) +
   function tbPMAll(asOf){
     const all = [];
     TB_LIST.forEach(function(b){
-      tbAllPumpsOf(b.id).forEach(function(x){ all.push({ b:b, pm:x.pm, i:x.i, key:tbPMKey(b.id, x.i), s:tbPumpPM(b.id, x.i, asOf) }); });
+      tbPMItemsOf(b.id).forEach(function(x){ all.push({ b:b, pm:x.pm, i:x.i, key:tbPMKey(b.id, x.i), s:tbPumpPM(b.id, x.i, asOf) }); });
     });
     return all;
   }
@@ -8015,7 +8249,7 @@ tbRemarksHTML(day.date, true) +
     const list = [];
     TB_LIST.forEach(function(b){
       if(onlyBat && b.id !== onlyBat) return;
-      tbAllPumpsOf(b.id).forEach(function(x){ list.push({ b:b, pm:x.pm, i:x.i, s:tbPumpPM(b.id, x.i, asOf) }); });
+      tbPMItemsOf(b.id).forEach(function(x){ list.push({ b:b, pm:x.pm, i:x.i, s:tbPumpPM(b.id, x.i, asOf) }); });
     });
     // In the station's own order, under its own group headings — so a pump is
     // found where the operator lists it; the colour and the count on top say
@@ -8039,7 +8273,7 @@ tbRemarksHTML(day.date, true) +
         form = '<div class="pm-form"><div class="pm-f"><label>Done on</label><input type="date" class="rg-date" data-pmd value="' + today + '"></div>' +
           '<div class="pm-f"><label>Time</label><input type="time" class="rg-date" data-pmt value="08:00"></div>' +
           '<div class="pm-f pm-wide"><label>Checklist</label><div class="pm-chk">' +
-            tbPMCheckOf(x.pm.kind).map(function(c, ci){
+            tbPMCheckOf(x.pm).map(function(c, ci){
               return '<label><input type="checkbox" data-pmc value="' + escAttr(c) + '"> ' + escHtml(c) + '</label>';
             }).join('') + '</div></div>' +
           '<div class="pm-f"><label>Technician</label><input type="text" class="rg-date" data-pmtech placeholder="name"></div>' +
