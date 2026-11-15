@@ -464,6 +464,18 @@ counts slots whose START (`tbSlotStart`) is at or after the last PM, by state;
 the due date divides hours left by the last 14 days' running hours per day.
 Pre-v40 day-flags (`pmd`, `dpm`) still count as a PM at the end of that day.
 
+**Hosted stations (v51).** A station with `host:'<site id>'` (T.B. 2020 →
+`tb10_1`) has no panel of its own: `tbPanel` adds a tab `h:<id>` for it and
+`tbHostedHTML` renders its measurements + status behind a `.h2tabs` switch
+(`_tbHostTab`). `TB_ALL` puts hosted stations right after their host.
+Ownership: `tbOwnsId(id)` (operator: own site or one it hosts) in `tbMayWrite`;
+the loader runs one `where('battery','==',id)` per owned id (the rules prove each);
+rules `tbOwnsBattery(b)` must list every host → hosted pair. Measurements:
+`tbMF(id)` gives the field list a site saves against (`TB_MEAS_FIELDS` for 10/1,
+`TB_MEAS2[b.meas2].fields` otherwise); a `meas2` site renders with `tbMeas2Form`
+and writes `tbMeas2Msg`; a field's `when` hides it (and drops it from the count
+and message) while the named field is 'off'.
+
 **Stations (v49).** `TB_STATIONS` (Water Disposal Plant, `wdp`, `station:true`)
 and `TB_ALL = TB_LIST.concat(TB_STATIONS)`. Rule of thumb: production code walks
 `TB_LIST` / `tbVisible()`; station status, Pumps, Machinery update, PM and
@@ -471,7 +483,9 @@ and `TB_ALL = TB_LIST.concat(TB_STATIONS)`. Rule of thumb: production code walks
 `tbStationPanel` (rendered AFTER the battery panels, so `tbRepaintDerived`'s
 index-by-order still lines up). Pump readings: `TB_PUMP_MEAS` (p psi, q BWPD,
 hz), cell `dpx[k]`, queue kind `h` with i = k*10 + f, document field
-`pumpsDailyMeas`. `tbPumpMeasTxt`, `tbStationFlow` (sum of q over running pumps).
+`pumpsDailyMeas`. `tbPumpMeasTxt`; `tbStationFlow` returns `{vert, inj}` — sums of q
+over running pumps by the pump's `flow` field (never added together);
+`tbFlowLines` adds `day` = q × 24 (the Average m³/day). Flow unit m³/hr (v50).
 Account in `TB_ACCOUNTS` and rules `tbBattery()`.
 
 **Machinery update (v48, admin).** Sub-page `mach` / `#tb-page-mach`.

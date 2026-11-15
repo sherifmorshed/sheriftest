@@ -1,5 +1,57 @@
 # Sinai Field — Changelog
 
+## v51 — T.B. 2020, run from T.B. 10/1
+
+Service-worker cache `sinai-field-v51`. `index.html`, `sw.js` **and
+`firestore.rules`** change — publish the rules. No new account: T.B. 2020 is
+operated with **tb10-1@petrobel.org**.
+
+**T.B. 2020** sends its oil to T.B. 10/1, so it sits inside the 10/1 panel as
+a fourth tab, **T.B. 2020**, with its own switch:
+- **مقاسات المحطة** — the same nine rounds as 10/1 (05:00 … 05:00 next day;
+  the 05:00 round is shared with the day before). PRODUCTION.SEP (Level %,
+  Pressure bar), PUMP (On/Off; Bi, Bd bar and HZ only while On — Off clears
+  them), LINE 10" (Pressure bar), HEATER (On/Off). WhatsApp message in the
+  station's own format (*Station : T.B 2020*, ◼️ sections, ▫️ lines, closing rule).
+- **وضع المحطة** — daily status: Transfer Pump, Air Compressor, Diesel
+  Compressor, Jockey Pump 1 & 2, Sigma Heater, with reasons and its WhatsApp
+  message; the out-of-service count shows on the T.B. 2020 tab.
+
+Stored as its own documents (`{date}__tb2020`, battery `tb2020`) — not mixed into
+10/1's — and kept out of all production figures. New `host` on a station
+(`TB_STATIONS`), `tbHosted()`, `tbOwnsId()`; the 10/1 account loads its own
+documents and 2020's with one query each. Station measurements now take a
+per-site field list (`TB_MEAS2`, `tbMF(id)`, `tbMeas2Form`, `tbMeas2Msg`).
+
+**Admin:** T.B. 2020 appears right after T.B. 10/1 in Pumps and the Machinery
+update (status, out of service, changes, WhatsApp/PDF), and admin can enter it
+from the 10/1 panel. **Mechanical:** its pump, compressors and jockey pumps are
+on the PM page (the Sigma heater is not — no heaters in PM).
+
+**Rules:** `tbOwnsBattery()` — the tb10-1 account owns battery `tb2020` as well
+as `tb10_1`; every other account is unchanged.
+
+## v50 — Water Disposal Plant flows; Machinery update headers
+
+Service-worker cache `sinai-field-v50`. Only `index.html` and `sw.js` change;
+**no rules change**.
+
+**Water Disposal Plant**
+- The flow box is labelled **Flow rate** (English — the operators' word);
+  الضغط and التردد stay. Flow rate is in **m³/hr**.
+- Two flows, never added together (the same water passes both stages):
+  - **Vertical pumps flow rate** — the vertical pumps (pits → injection pumps);
+  - **Injected flow rate** — horizontal + Borets pumps (→ wells).
+  Each is the sum of its RUNNING pumps (pump field `flow:'vert'|'inj'`), with
+  an **Average m³/day** (= m³/hr × 24). Shown as two tiles on the plant panel,
+  in the WhatsApp message, and on the admin Pumps row.
+
+**Machinery update**
+- No pump readings or flows (the running-pumps table is gone, card and WhatsApp).
+- Each battery / the plant is a framed block with a dark name bar, clearly
+  separated from the next; WhatsApp sections are separated by a rule line.
+  Still one A4 page.
+
 ## v49 — Water Disposal Plant station + account
 
 Service-worker cache `sinai-field-v49`. `index.html`, `sw.js` **and

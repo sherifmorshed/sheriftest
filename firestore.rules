@@ -76,11 +76,18 @@ service cloud.firestore {
     // BOTH the stored data and the incoming write, so an operator can neither
     // read someone else's readings nor create a document claiming to be
     // another battery's.
+    // v51: a site may HOST a station that its own operators run — T.B. 2020
+    // is operated from T.B. 10/1 with the tb10-1 account. The host owns the
+    // hosted station's documents too. Must match `host` in TB_STATIONS.
+    function tbOwnsBattery(b) {
+      return isTankBattery()
+          && (b == tbBattery() || (tbBattery() == 'tb10_1' && b == 'tb2020'));
+    }
     function tbOwnsExisting() {
-      return isTankBattery() && resource.data.battery == tbBattery();
+      return tbOwnsBattery(resource.data.battery);
     }
     function tbOwnsIncoming() {
-      return isTankBattery() && request.resource.data.battery == tbBattery();
+      return tbOwnsBattery(request.resource.data.battery);
     }
 
     // Anyone allowed to record PETRECO / Ras Gara readings.

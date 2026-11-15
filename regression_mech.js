@@ -17,7 +17,7 @@ const sleep = ms => new Promise(r=>setTimeout(r,ms));
   check('Mechanical: header MECHANICAL, no tab bar, no sub-tabs'+tag, r.role === 'MECHANICAL' && r.tabs === 'none' && r.sub === 'none', JSON.stringify([r.role,r.tabs,r.sub]));
   check('Mechanical: PM page only (entry, R/G, PETRECO hidden)'+tag, r.pm === '' && r.entry === 'none' && r.rg === 'none' && r.pf === 'none', JSON.stringify(r));
   check('Mechanical: heading says PM Management'+tag, /PM Management/.test(r.head), r.head);
-  check('Mechanical: nothing refused, 5 batteries + W.D. Plant, KPI strip'+tag, !r.denied.length && r.bats === 6 && r.kpi === 5, JSON.stringify(r.denied)+' / '+r.foot);
+  check('Mechanical: nothing refused, 5 batteries + T.B. 2020 + W.D. Plant, KPI strip'+tag, !r.denied.length && r.bats === 7 && r.kpi === 5, JSON.stringify(r.denied)+' / '+r.foot);
   // set a short interval on 6/1 Booster A → overdue appears in the red-flag work list
   await p.click('#tbPMBats button[data-pmbat="tb6_1"]'); await sleep(300);
   await p.evaluate(() => { const c = [...document.querySelectorAll('.pm-card')].find(x => /Booster A/.test(x.innerText)); c.querySelector('[data-pmopen$="|every"]').click(); }); await sleep(200);

@@ -67,6 +67,8 @@
   function isOperator(){ return isAdmin()||PLANT.indexOf(who())!==-1||PETRECO.indexOf(who())!==-1; }
   function isPetreco(){ return PETRECO.indexOf(who())!==-1; }
   function mine(){ return TB_MAP[who()]||''; }
+  var HOSTED={tb10_1:['tb2020']};
+  function owns(b){ return !!mine() && (b===mine() || (HOSTED[mine()]||[]).indexOf(b)!==-1); }
   function deny(coll,what){
     window.__IO__.denied.push({coll:coll,what:what,code:'permission-denied'});
     var e=new Error('Missing or insufficient permissions.'); e.code='permission-denied'; return e;
@@ -86,9 +88,9 @@
       if(isAdmin()) return true;
       if(isMech()) return op==='read';
       if(!mine()) return false;
-      if(op==='read') return !existing || existing.battery===mine();
-      var ok=(incoming&&incoming.battery===mine());
-      return existing ? (existing.battery===mine() && ok) : ok;
+      if(op==='read') return !existing || owns(existing.battery);
+      var ok=(incoming&&owns(incoming.battery));
+      return existing ? (owns(existing.battery) && ok) : ok;
     }
     return false;
   }
@@ -98,7 +100,7 @@
     if(!mine()) return 'permission-denied';               // not a battery account
     var f=null; filters.forEach(function(x){ if(x.field==='battery') f=x; });
     if(!f) return 'permission-denied';                    // unfiltered: refused
-    if(f.value!==mine()) return 'permission-denied';      // someone else's battery
+    if(!owns(f.value)) return 'permission-denied';        // someone else's battery
     return null;
   }
   function collRef(n){
