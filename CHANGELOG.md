@@ -1,5 +1,34 @@
 # Sinai Field — Changelog
 
+## v49 — Water Disposal Plant station + account
+
+Service-worker cache `sinai-field-v49`. `index.html`, `sw.js` **and
+`firestore.rules`** change — publish the rules and create the user
+`waterdisposal@petrobel.org` in Firebase Authentication.
+
+**New station: Water Disposal Plant** (id `wdp`). A pump station with no
+production readings, so it is NOT in `TB_LIST` (production totals, report card,
+scanner, charts and imports never see it). It lives in `TB_STATIONS`, and
+`TB_ALL = TB_LIST + TB_STATIONS` drives station status, Pumps, Machinery update
+and PM.
+
+- Pumps (daily status, same states as the batteries): Old pit vertical A, B, C;
+  New pit vertical D, E; Horizontal C, D; Borets A–G (14).
+- Each RUNNING pump records **pressure (psi), flow rate (BWPD) and frequency
+  (Hz)** — the boxes open when the pump is set to في الخدمة and are cleared when
+  it leaves service. Stored as `pumpsDailyMeas.{k}.{p,q,hz}` (queue kind `h`).
+- WhatsApp station message: the readings under each running pump and the
+  plant's **total flow rate**.
+
+**Account `waterdisposal@petrobel.org`** (header W.D. PLANT): one panel, the
+station status; no scanner table, no totals. Same rules as a battery operator —
+its own documents only (`tbBattery()` → `wdp`), no PM record.
+
+**Admin:** Pumps situation and Machinery update include the plant (chips carry
+the readings; the update has a running-pump table with total flow; out of
+service and changes as for the batteries). **Mechanical:** the plant's 14 pumps
+are on the PM page (Vertical / Horizontal kinds added, 4,000 h placeholder).
+
 ## v48 — Admin: Machinery daily update; PM left to mechanical
 
 Service-worker cache `sinai-field-v48`. Only `index.html` and `sw.js` change;

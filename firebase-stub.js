@@ -56,7 +56,7 @@
      result, so an operator asking for all of tbReadings is refused outright even
      though some documents are his. Keep these maps matching TB_ACCOUNTS and the
      role lists in index.html and the functions in firestore.rules. */
-  var TB_MAP={'tb10-1@petrobel.org':'tb10_1','tb6-1@petrobel.org':'tb6_1',
+  var TB_MAP={'waterdisposal@petrobel.org':'wdp','tb10-1@petrobel.org':'tb10_1','tb6-1@petrobel.org':'tb6_1',
               'tb6-2@petrobel.org':'tb6_2','tb8-1@petrobel.org':'tb8_1',
               'tb8-2@petrobel.org':'tb8_2'};
   var ADMINS=['sherifmorshed@gmail.com'], PLANT=['rasgara@petrobel.org'],

@@ -61,7 +61,10 @@ service cloud.firestore {
           'tb6-1@petrobel.org':  'tb6_1',
           'tb6-2@petrobel.org':  'tb6_2',
           'tb8-1@petrobel.org':  'tb8_1',
-          'tb8-2@petrobel.org':  'tb8_2'
+          'tb8-2@petrobel.org':  'tb8_2',
+          // v49: the Water Disposal Plant — a station (pump status only),
+          // stored and guarded exactly like a battery: its own documents only.
+          'waterdisposal@petrobel.org': 'wdp'
         }.get(request.auth.token.email, '');
     }
 

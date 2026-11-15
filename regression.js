@@ -85,12 +85,12 @@ const U = f => 'http://localhost:8801/' + f;
   { const p = await open('test.html', { width:1100, height:900 });
     await p.evaluate(() => { document.querySelector('#appTabs button[data-tab="tb"]').click(); window.__TB__.setDate('2026-08-20'); }); await sleep(300);
     const tabs = await p.evaluate(() => [...document.querySelectorAll('#tbArea .tb-panel')].map(pn => pn.querySelectorAll('.ptabs button').length).join(','));
-    check('Admin Entry: tabs on every battery (2,2,2,2,3)', tabs === '2,2,2,2,3', tabs);
+    check('Admin Entry: tabs on every battery (2,2,2,2,3), W.D. Plant panel without tabs', tabs === '2,2,2,2,3,0', tabs);
     await p.evaluate(() => document.querySelector('#tbSubTabs button[data-sub="pumps"]').click()); await sleep(700);
     const r = await p.evaluate(() => ({ sum:document.querySelectorAll('#tbPumpSummary .prow').length, reg:!!document.getElementById('tbPumpRegister'),
       oos:!!document.getElementById('tbPumpOOS'), cards:document.querySelectorAll('#tb-page-pumps .pm-card').length,
       subs:[...document.querySelectorAll('#tbSubTabs button')].map(b => b.getAttribute('data-sub')).join(',') }));
-    check('Pumps tab: the situation only (5 batteries), no hours / stoppage / PM', r.sum === 5 && !r.reg && !r.oos && r.cards === 0, JSON.stringify(r));
+    check('Pumps tab: the situation only (5 batteries + W.D. Plant), no hours / stoppage / PM', r.sum === 6 && !r.reg && !r.oos && r.cards === 0, JSON.stringify(r));
     check('Admin has no PM tab; Machinery update is there', r.subs === 'entry,old,view,temp,chem,pumps,mach', r.subs);
     // Machinery daily update
     await p.evaluate(() => { window.__TB__.setDate('2026-08-21'); document.querySelector('#tbSubTabs button[data-sub="mach"]').click(); }); await sleep(700);
@@ -99,9 +99,9 @@ const U = f => 'http://localhost:8801/' + f;
       outs:[...document.querySelectorAll('#tbMachCard tr.alarm')].map(t => t.innerText.replace(/\s+/g,' ')).join(' / '),
       bats:[...document.querySelectorAll('#tbMachCard .blk-h')].map(h => h.childNodes[0].textContent).join('|'),
       msg:window.__MACH__.msg('2026-08-21') }));
-    check('Machinery update: card with KPIs (64 items, availability)', m.vis === '' && m.card && /^64\|/.test(m.kp) && /%$/.test(m.kp), m.kp);
+    check('Machinery update: card with KPIs (78 items, availability)', m.vis === '' && m.card && /^78\|/.test(m.kp) && /%$/.test(m.kp), m.kp);
     check('Machinery update: out of service with since, days and reason', /Borets B 14 Aug 8 Motor tripped/.test(m.outs) && /Transfer 6/.test(m.outs), m.outs.slice(0, 160));
-    check('Machinery update: every battery in its own block', ['T.B. 6/1','T.B. 6/2','T.B. 8/1','T.B. 8/2','T.B. 10/1'].every(n => m.bats.includes(n)), m.bats);
+    check('Machinery update: every battery in its own block', ['T.B. 6/1','T.B. 6/2','T.B. 8/1','T.B. 8/2','T.B. 10/1','Water Disposal Plant'].every(n => m.bats.includes(n)), m.bats);
     check('Machinery update: WhatsApp text', /\*Sinai Field — Machinery Daily Update\*/.test(m.msg) && /🔴 \*Out of service\*/.test(m.msg) && /T\.B\. 6\/2 — Borets B: since 14 Aug \(8 d\)/.test(m.msg) && /Booster: ✅/.test(m.msg) && /🛠 \*PM\*/.test(m.msg), m.msg.split('\n').slice(0,6).join(' ⏎ '));
     const ch = await p.evaluate(() => { const out = []; ['2026-08-15','2026-08-16','2026-08-17','2026-08-18','2026-08-19','2026-08-20'].forEach(d => { const D = window.__MACH__.data(d); D.changes.forEach(c => out.push(d + ' ' + c.b.name + ' ' + c.pm.name + ' ' + c.from.k + '>' + c.to.k)); }); return out; });
     check('Machinery update: changes since yesterday are picked up', ch.length > 0, ch.slice(0,3).join(' | '));

@@ -464,6 +464,16 @@ counts slots whose START (`tbSlotStart`) is at or after the last PM, by state;
 the due date divides hours left by the last 14 days' running hours per day.
 Pre-v40 day-flags (`pmd`, `dpm`) still count as a PM at the end of that day.
 
+**Stations (v49).** `TB_STATIONS` (Water Disposal Plant, `wdp`, `station:true`)
+and `TB_ALL = TB_LIST.concat(TB_STATIONS)`. Rule of thumb: production code walks
+`TB_LIST` / `tbVisible()`; station status, Pumps, Machinery update, PM and
+`tbById` walk `TB_ALL` / `tbVisibleAll()`. A station's Entry panel is
+`tbStationPanel` (rendered AFTER the battery panels, so `tbRepaintDerived`'s
+index-by-order still lines up). Pump readings: `TB_PUMP_MEAS` (p psi, q BWPD,
+hz), cell `dpx[k]`, queue kind `h` with i = k*10 + f, document field
+`pumpsDailyMeas`. `tbPumpMeasTxt`, `tbStationFlow` (sum of q over running pumps).
+Account in `TB_ACCOUNTS` and rules `tbBattery()`.
+
 **Machinery update (v48, admin).** Sub-page `mach` / `#tb-page-mach`.
 `tbMachData(date)` builds everything once: totals, `outs` (current out-of-service
 episode from `tbPumpOOS`: since, days, reason), `changes` (latest state vs the day
