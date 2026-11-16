@@ -1,6 +1,6 @@
 # Sinai Field — start here
 
-**Attach `sinai-field-v51.zip` to the new chat and paste the block below as your
+**Attach `sinai-field-v53.zip` to the new chat and paste the block below as your
 first message.** Everything Claude needs is in the zip; nothing from any other
 conversation is required.
 
@@ -16,7 +16,7 @@ conversation is required.
 > The attached zip is the whole project. Read `README.md`, then
 > `DEVELOPER_REFERENCE.md`, then `CHANGELOG.md` before changing anything.
 >
-> Current release: **v51**, service-worker cache `sinai-field-v51`.
+> Current release: **v53**, service-worker cache `sinai-field-v53`.
 >
 > How I work: show me the change, test it before you say it is done, and tell me
 > plainly when something I asked for is a bad idea.
@@ -72,7 +72,8 @@ tank battery total to a Ras Gara total.
 
 ## Where things stand
 
-v51: **T.B. 2020** — a hosted station (`host:'tb10_1'`) shown as a tab in the 10/1
+v53: readings WhatsApp message follows the latest scanner reading and lists all the
+day's readings + total (`tbReadMsg`, `tbReadLatest`); copy button only. v52 added it. v51: **T.B. 2020** — a hosted station (`host:'tb10_1'`) shown as a tab in the 10/1
 panel, run with the tb10-1 account; own measurements (`TB_MEAS2`) and daily status;
 rules `tbOwnsBattery()`. v50: plant flows split into Vertical pumps flow rate and Injected flow rate (m³/hr,
 with Average m³/day = ×24), "Flow rate" label; Machinery update has no pump

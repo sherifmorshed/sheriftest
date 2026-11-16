@@ -1,5 +1,38 @@
 # Sinai Field — Changelog
 
+## v53 — Readings WhatsApp message, simplified
+
+Service-worker cache `sinai-field-v53`. Only `index.html` and `sw.js` change.
+
+- No time buttons: entering is exactly as before; the message follows the
+  LATEST scanner reading entered.
+- The message carries every scanner reading of the day up to that one, each
+  with its interval's production, the rate of the last interval, the latest
+  round's line pressure / temperature / chemical injection, and the **total
+  production** so far.
+- "Readings — القراءات" in the header (the only Arabic); no icons.
+- Only **نسخ الرسالة**; the open-WhatsApp button is gone.
+
+## v52 — WhatsApp message on القراءات
+
+Service-worker cache `sinai-field-v52`. Only `index.html` and `sw.js` change;
+**no rules change**.
+
+Under every tank battery's readings table: **WhatsApp message — readings**.
+- The day's nine scanner rounds as chips (a dot once the scanner is in). Today
+  it opens on the round whose time has come; another day, on its last round
+  with a scanner reading.
+- The message for the round picked:
+  🛢️ Tank Battery x/0y · 📋 Readings · 📅 Date · ⏰ Time, then
+  📟 Scanner, 🛢️ Production since the round before with its rate (m³/hr),
+  🔧 Line pressure (the battery's unit), 🌡️ Temperature, 💉 Chemical
+  injection (only on its six-hourly rounds), and 📊 Production so far today.
+  Only what was recorded is written.
+- Rewritten as the table is typed in; **نسخ الرسالة** copies it,
+  **فتح واتساب** opens WhatsApp with it written.
+Functions: `tbReadWAHTML`, `tbReadMsg`, `tbReadRefresh` (also called from
+`tbRepaintDerived`), `tbReadWire`.
+
 ## v51 — T.B. 2020, run from T.B. 10/1
 
 Service-worker cache `sinai-field-v51`. `index.html`, `sw.js` **and

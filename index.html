@@ -561,6 +561,8 @@ body:not(.light-mode) .ms-wa{border-color:rgba(74,222,128,.35);background:rgba(7
 .pd-mx label span + i{margin-top:-2px;}
 .pd-mx .rg-in{width:100%;}
 .tb-station .st-out{color:var(--red);font-weight:800;}
+.rd-wa{margin-top:12px;}
+.rd-wa .ms-btns button{flex:1;}
 .h2tabs{display:flex;gap:4px;margin:0 0 10px;border-bottom:2px solid var(--border);}
 .h2tabs button{flex:1;background:transparent;border:0;border-bottom:3px solid transparent;margin-bottom:-2px;padding:7px 4px;
   font-weight:800;font-size:13.5px;color:var(--muted);cursor:pointer;font-family:'Segoe UI','Noto Naskh Arabic',Tahoma,sans-serif;}
@@ -4624,7 +4626,7 @@ document.addEventListener('DOMContentLoaded', function(){
           (b.pumpTab ? '' : tbPumps(b.id).map(function(pm){
             return '<th class="tb-grp6">' + escHtml(pm.name) + '</th>';
           }).join('')) +
-        '</tr></thead><tbody>' + rows + '</tbody></table></div></div>' +
+        '</tr></thead><tbody>' + rows + '</tbody></table></div>' + tbReadWAHTML(b, cell, c) + '</div>' +
       (b.pumpTab
         ? '<div class="ptab-pumps"' + (_tbPanelTab[b.id] === 'pumps' ? '' : ' style="display:none"') + '>' +
             tbDailyPumpsHTML(b, cell, ed) +
@@ -4640,6 +4642,90 @@ document.addEventListener('DOMContentLoaded', function(){
         : '') +
       noteBox + '</div>' +
     '</div>';
+  }
+  // ── القراءات: WhatsApp message (v52, reworked v53) ───────────────────────
+  // Under the readings table, nothing to pick and nothing new to learn: the
+  // message follows the LATEST scanner reading entered, and carries every
+  // scanner reading of the day up to it with the production of each interval,
+  // the line pressure / temperature / chemical of that latest round, and the
+  // day's total so far. Rewritten in place as the table is typed in.
+  function tbReadHour(b, o){ return (tbStart(b) + o) % 24; }
+  function tbClock12(h){
+    const h12 = (h % 12) === 0 ? 12 : h % 12;
+    return (h12 < 10 ? '0' : '') + h12 + ':00 ' + (h < 12 ? 'AM' : 'PM');
+  }
+  // The latest round with a scanner reading (offset in hours), or null.
+  function tbReadLatest(b, cell){
+    let pick = null;
+    tbOffsets(b).forEach(function(o){ const si = tbScanIndex(o); if(si >= 0 && cell.s[si] != null) pick = o; });
+    return pick;
+  }
+  function tbReadMsg(b, cell, c){
+    const o = tbReadLatest(b, cell);
+    const L = [ '*' + (b.wa || b.name) + '*', '*Readings — القراءات*', '',
+                '*Date : ' + _tbDate.split('-').reverse().join('/') + '*' ];
+    if(o == null){
+      L.push('~ـــــــــــــــــــــــــــــــــــــــــــــ~', '', '_(no scanner reading yet)_');
+      return L.join('\n');
+    }
+    const si = tbScanIndex(o), h = tbReadHour(b, o);
+    const has = function(v){ return v != null && v !== ''; };
+    L.push('*Time : ' + tbClock12(h) + '*' + (o === TB_SPAN ? ' _(next day)_' : ''),
+           '~ـــــــــــــــــــــــــــــــــــــــــــــ~', '', '*Scanner · Production*');
+    // every scanner round up to this one
+    for(let k = 0; k <= si; k++){
+      if(cell.s[k] == null) continue;
+      const p = k > 0 ? c.prod[k] : null;
+      L.push('*' + tbClock12(tbReadHour(b, k * TB_STEP)) + ' :* ' + tbFmt(cell.s[k], 1) + ' m³' +
+             (p != null ? ' · ' + tbFmt(p, 1) + ' m³' : ''));
+    }
+    const p = si > 0 ? c.prod[si] : null;
+    if(p != null) L.push('_Rate : ' + tbFmt(p / TB_STEP, 1) + ' m³/hr_');
+    const more = [];
+    if(has(cell.w[si])) more.push('*Line pressure :* ' + cell.w[si] + ' ' + tbWUnit(b));
+    if(has(cell.c[o]))  more.push('*Temperature :* ' + cell.c[o] + ' °C');
+    if(tbIsChemHour(o) && has(cell.x[o])) more.push('*Chemical injection :* ' + cell.x[o] + ' ' + tbChemUnit(b));
+    if(more.length){ L.push(''); more.forEach(function(x){ L.push(x); }); }
+    let tot = 0, n = 0;
+    for(let k = 1; k <= si; k++) if(c.prod[k] != null){ tot += c.prod[k]; n++; }
+    if(n) L.push('', '~ـــــــــــــــــــــــــــــــــــــــــــــ~',
+                 '*Total production (' + tbClock12(tbStart(b)) + ' – ' + tbClock12(h) + (o === TB_SPAN ? ' next day' : '') + ') : ' + tbFmt(tot, 1) + ' m³*');
+    L.push('', '~ـــــــــــ *Work Shift* ـــــــــــ~');
+    return L.join('\n');
+  }
+  function tbReadWAHTML(b, cell, c){
+    return '<div class="ms-wa rd-wa" data-rbat="' + escAttr(b.id) + '">' +
+      '<div class="ms-h"><span class="sec">WhatsApp message — readings</span></div>' +
+      '<div class="ms-wa-ar" dir="rtl" lang="ar">انسخ الرسالة وابعتها على جروب الشغل في الواتساب</div>' +
+      '<pre class="ms-msg" dir="auto">' + escHtml(tbReadMsg(b, cell, c)) + '</pre>' +
+      '<div class="ms-btns"><button type="button" class="ms-cp" data-rcp="1" lang="ar">نسخ الرسالة</button></div></div>';
+  }
+  // Bring every readings message on the page up to date.
+  function tbReadRefresh(){
+    const day = tbGetDay(_tbDate), calc = tbCalcDay(day);
+    Array.prototype.forEach.call(document.querySelectorAll('#tbArea .rd-wa'), function(w){
+      const id = w.getAttribute('data-rbat'), b = tbById(id), cell = day.tbs[id], c = calc.per[id];
+      if(!b || !cell || !c) return;
+      const pre = w.querySelector('.ms-msg');
+      if(pre) pre.textContent = tbReadMsg(b, cell, c);
+    });
+  }
+  function tbReadWire(el){
+    if(el._rdWired) return;
+    el._rdWired = true;
+    el.addEventListener('click', function(e){
+      const w = e.target.closest ? e.target.closest('.rd-wa') : null;
+      if(!w || !e.target.closest('button[data-rcp]')) return;
+      const id = w.getAttribute('data-rbat'), day = tbGetDay(_tbDate);
+      tbCopyText(tbReadMsg(tbById(id), day.tbs[id], tbCalcDay(day).per[id]));
+    });
+    // After the app has taken the value in, rewrite the message.
+    ['input', 'change'].forEach(function(ev){
+      el.addEventListener(ev, function(e){
+        const k = e.target && e.target.getAttribute && e.target.getAttribute('data-k');
+        if(k && 'swcxd'.indexOf(k) !== -1) setTimeout(tbReadRefresh, 0);
+      });
+    });
   }
   // A hosted station inside its host's panel: its own two parts — station
   // measurements and station status — behind a small switch of its own.
@@ -5135,6 +5221,7 @@ document.addEventListener('DOMContentLoaded', function(){
       tbRepaintDerived();
       return;
     }
+    tbReadWire(el);
     el.innerHTML = tbVisible().map(function(b){ return tbPanel(b, day, calc); }).join('') +
       tbVisibleAll().filter(function(b){ return b.station && !b.host; }).map(function(b){ return tbStationPanel(b, day); }).join('');
     el.setAttribute('data-layout', layout);
@@ -9413,6 +9500,7 @@ tbRemarksHTML(day.date, true) +
       const yt = panel.querySelector('.hd .ytot');
       if(yt) yt.innerHTML = tbYesterdayLike(b.id, _tbDate, c);
     });
+    tbReadRefresh();
     tbRenderTotals();
   }
 
