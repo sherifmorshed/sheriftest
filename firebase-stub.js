@@ -11,7 +11,9 @@
   var SEED=window.__SEED__||{}; var STORE=SEED.store||{}; var listeners=[];
   window.__STUB__={store:STORE, setUser:function(email){ SEED.user={email:email,uid:'x'}; a.currentUser=SEED.user; }};
   function clone(o){var c=JSON.parse(JSON.stringify(o));
-    if(c&&c.updatedAt&&c.updatedAt.__ts!==undefined){var _v=c.updatedAt.__v||1754000000000;c.updatedAt={toMillis:function(){return _v;}};}return c;}
+    if(c&&c.updatedAt&&c.updatedAt.__ts!==undefined){var _v=c.updatedAt.__v||1754000000000;c.updatedAt={toMillis:function(){return _v;}};}
+    if(c&&c.sites){Object.keys(c.sites).forEach(function(k){var t=c.sites[k];if(t&&t.__ts!==undefined){(function(v){c.sites[k]={toMillis:function(){return v;}};})(t.__v||1754000000000);}});}
+    return c;}
   function pend(o){var c=JSON.parse(JSON.stringify(o)); if(c)c.updatedAt=null; return c;}
   window.__IO__={docReads:0,collReads:0,docWrites:0,byColl:{},denied:[]};
   function bump(k,c,n){window.__IO__[k]+=n;window.__IO__.byColl[c]=window.__IO__.byColl[c]||{reads:0,writes:0};
@@ -89,7 +91,7 @@
       if(isMech()) return op==='read';
       if(!mine()) return false;
       if(op==='read') return !existing || owns(existing.battery);
-      var ok=(incoming&&owns(incoming.battery));
+      var ok=(incoming&&owns(incoming.battery)&&new RegExp('^[0-9]{4}-[0-9]{2}-[0-9]{2}__'+incoming.battery+'$').test(path.split('/')[1]));
       return existing ? (owns(existing.battery) && ok) : ok;
     }
     return false;
@@ -113,7 +115,9 @@
         var d=Object.keys(STORE).filter(function(k){return k.indexOf(n+'/')===0;})
           .map(function(k){return{id:k.slice(n.length+1),exists:true,data:function(){return clone(STORE[k]);}};})
           .filter(function(doc){var v=doc.data();
-            return filters.every(function(f){return v[f.field]===f.value;});});
+            return filters.every(function(f){
+              if(f.op==='>'){var a=v[f.field]&&v[f.field].toMillis?v[f.field].toMillis():null,b=f.value&&f.value.toMillis?f.value.toMillis():f.value;return a!=null&&a>b;}
+              return v[f.field]===f.value;});});
         bump('collReads',n,d.length||1);
         return Promise.resolve({size:d.length,empty:!d.length,docs:d,forEach:function(f){d.forEach(f);}});
       }
@@ -127,6 +131,7 @@
   var fsFn=function(){return{collection:collRef,enablePersistence:function(){return Promise.resolve();},
     batch:function(){var o=[];return{set:function(r,d,opt){o.push(function(){return r.set(d,opt);});return this;},update:function(r,d){o.push(function(){return r.update(d);});return this;},
       delete:function(r){o.push(function(){return r.delete();});return this;},commit:function(){return Promise.all(o.map(function(f){return f();}));}};}};};
+  fsFn.Timestamp={fromMillis:function(ms){return {toMillis:function(){return ms;}};}};
   fsFn.FieldValue={serverTimestamp:function(){return {__ts:1,__v:Date.now()};},delete:function(){return null;}};
   var u=SEED.user||{email:'sherifmorshed@gmail.com',uid:'u1'}; SEED.user=u;
   var a={currentUser:u,setPersistence:function(){return Promise.resolve();},onAuthStateChanged:function(cb){setTimeout(function(){cb(u);},50);return function(){};},

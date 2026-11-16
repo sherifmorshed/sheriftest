@@ -1,5 +1,97 @@
 # Sinai Field — Changelog
 
+## v56 — Follow-up board and monthly Excel export (admin)
+
+Service-worker cache `sinai-field-v56`. Only `index.html` and `sw.js` change;
+**no rules change**.
+
+New admin tab **Follow-up** (A/R Production), with a red count on the tab of
+the sites behind today.
+
+**Missing-entries board** for the chosen shift day:
+- per site: Readings by round (scanner, line pressure, temperature, chemical
+  on its six-hourly rounds), Station measurements by round (10/1, 2020),
+  Station status (not reported / which items are blank), and Water Disposal
+  pump readings (a running pump without pressure / flow / Hz);
+- a round is missing 30 minutes after its time (`TB_DUE_GRACE`); the daily
+  status is expected 3 hours into the shift (`TB_STATUS_BY`); a past day
+  expects everything; an imported day total is not flagged;
+- sites behind first, with what is missing in red and who saved last and when;
+- **Copy missing list** — a WhatsApp-ready chase list;
+- refreshes itself every minute.
+
+**Monthly Excel export** — pick a month → `SinaiField_YYYY-MM.xlsx`:
+Daily production (per battery + month total) · Readings · Station status
+(with reasons and W.D. pump readings) · Station measurements (10/1, 2020) ·
+Out of service episodes · Remarks.
+
+Each site's last-saved time is now kept per site (`cell.ua` / `ub`); the first
+start after this update reads the full history once to fill it.
+
+## v55 — Review release: five fixes found by a full review
+
+Service-worker cache `sinai-field-v55`. `index.html`, `sw.js` **and
+`firestore.rules`** change — publish the rules.
+
+Reviewed: syntax and duplicate checks on all scripts, a crawl of every account
+× every tab × Day/Night × phone/desktop (errors, refused reads, bad text,
+sideways scroll — all clean), then the sync, save, PM and rules logic by hand.
+
+1. **Day rollover (all three modules).** An app left open overnight kept
+   showing yesterday's sheet, so the morning's first readings could be typed
+   onto yesterday. A sheet that is on the current shift day now follows the
+   day when it changes (checked every minute and whenever the app comes back
+   to the front), with a "New shift day" notice. A sheet opened on an older
+   day is left alone; nothing moves while a box is being typed in.
+   `watchShiftDay` / `checkShiftDay`.
+2. **Sync load (tank batteries module).** Every save by any site made every
+   open device download its whole history again — reads grew with history ×
+   saves × devices, heading for the Firestore daily quota and slow phones.
+   Now the stamp document records WHICH sites a save touched
+   (`tbReadingsMeta/info.sites`): an operator's phone reads only when its own
+   site(s) changed; admin and mechanical read only the documents written since
+   their last sync (`where updatedAt > …`), with a full read when there is no
+   cache and once a week as a safety net. The "synced from cloud" toast no
+   longer fires on these quiet top-ups. The skip of a device's own save echo
+   now checks it really is its own, and expires after 15 s.
+3. **PM running hours.** A day with no status report counted as zero hours,
+   so every missed report pushed PMs later than the pump's real hours. The
+   last reported status is now carried over unreported days (7 days per gap at
+   most), and the card says how many days are estimated. `tbPumpSlotsPM`.
+4. **Local cache.** The whole history was rewritten to phone storage on every
+   keystroke; now half a second after the last change. When it outgrows the
+   browser's storage the newest 120 days are kept and the next start reads the
+   full history from the cloud (before: an error toast on every keystroke).
+5. **Rules.** A tank battery account could create a document under another
+   battery's ID (with its own battery name inside) and lock that battery out
+   of that day's sheet. Document IDs must now match the battery written inside
+   (`tbIdMatches`).
+
+Also removed two unused constants from the old Pumps range chips.
+Not changed, noted for later: R/G and PETRECO still re-read their whole
+collection on each change (one small document per day, few accounts).
+
+## v54 — Fieran Terminal (admin tab); remarks at the Water Disposal Plant
+
+Service-worker cache `sinai-field-v54`. Only `index.html` and `sw.js` change;
+**no rules change** (admin already writes every document; no new account).
+
+**Fieran Terminal** — a new admin tab (A/R Production → *Fieran Terminal*),
+updated by the engineers on the admin account. Shift day, the station status
+of its 16 pumps with reasons, remarks, and its WhatsApp message:
+- Shipping pumps: Powerhouse Pump 1, 2; Gas Pump 706, 707, 708
+- Fire fighting: Diesel Pump A–F; Jockey Pump 1, 2
+- API skimmer: API Skimmer Pump 1
+- Waste water pumps: Waste Water Pump 2, 3
+Stored as `{date}__fieran` (battery `fieran`); a station with `adminTab:true`
+— not on the Entry page, no operator sees it. In the admin Pumps page and the
+Machinery update (status, out of service, changes, WhatsApp / PDF); its pumps
+are on the mechanical PM page (kinds Shipping and API skimmer, 4,000 h).
+The Entry page's delegated handlers now serve `#tbFieranArea` too.
+
+**Water Disposal Plant** — a **Remarks / ملاحظات اليوم** box under the station
+status (any station panel now has one); saved as the day's remarks.
+
 ## v53 — Readings WhatsApp message, simplified
 
 Service-worker cache `sinai-field-v53`. Only `index.html` and `sw.js` change.

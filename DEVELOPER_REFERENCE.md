@@ -464,6 +464,33 @@ counts slots whose START (`tbSlotStart`) is at or after the last PM, by state;
 the due date divides hours left by the last 14 days' running hours per day.
 Pre-v40 day-flags (`pmd`, `dpm`) still count as a PM at the end of that day.
 
+**Follow-up (v56, admin).** Sub-page `follow`. `tbFollowSite(b, date)` builds a
+site's parts (Readings / Station measurements / Station status / Pump readings)
+with `due`, `done`, `miss[{h, what[]}]`; due-ness from `tbHoursInto` against the
+clock (`TB_DUE_GRACE`, `TB_STATUS_BY`). `tbFollowBadge` puts the count on the
+sub-tab. `tbMonthBook(ym)` returns the sheets as arrays (testable without
+XLSX); `tbExportMonth` writes them. Per-site last save: `cell.ua` / `cell.ub`,
+set in the loader and after a push (raw `TB_DAYS` only — `tbGetDay` does not
+copy them).
+
+**Sync and rollover (v55).** `tbPushToCloud` writes `sites.{id}` server stamps
+on the meta document. Listener: an operator skips a snapshot whose own-site
+stamps are not newer than `_tbOwnSeen`; admin/mechanical read
+`where('updatedAt','>', syncedVersion − 2 min)` and lay the result over
+`TB_DAYS` (`inc`), full read when no cache / `TB_PARTIAL` / older than 7 days
+(`TB_FULL`). `tbSaveLocal` is debounced (`tbSaveLocalNow` on flush). Shift-day
+rollover: each module calls `watchShiftDay({today,get,set,shown})`;
+`checkShiftDay` runs every minute and on resume. PM hours come from
+`tbPumpSlotsPM` (carry over unreported days, `TB_PM_CARRY`).
+Test suites: `regression*.js` (general, mech, wdp, tb2020, readings_wa, fieran,
+review) and `regression_crawl.js`.
+
+**Admin-tab stations (v54).** `adminTab:true` (Fieran Terminal): not on the
+Entry page; the admin sub-page `fieran` renders it into `#tbFieranArea` via
+`tbRenderFieran` (called from `tbRenderArea`; skipped while a box in it has
+focus). The Entry delegated handlers are attached to both `#tbArea` and
+`#tbFieranArea`. No account and no rule — admin writes it.
+
 **Hosted stations (v51).** A station with `host:'<site id>'` (T.B. 2020 →
 `tb10_1`) has no panel of its own: `tbPanel` adds a tab `h:<id>` for it and
 `tbHostedHTML` renders its measurements + status behind a `.h2tabs` switch

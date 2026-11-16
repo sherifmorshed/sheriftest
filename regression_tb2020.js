@@ -81,7 +81,7 @@ const sleep = ms => new Promise(r=>setTimeout(r,ms));
   await a.fill('.ptab-hosted textarea.pd-why[data-tb="tb2020"][data-i="3"]', 'Seal leak'); await sleep(1200);
   await a.evaluate(() => document.querySelector('#tbSubTabs button[data-sub="pumps"]').click()); await sleep(500);
   const prow = await a.evaluate(() => [...document.querySelectorAll('#tbPumpSummary .prow')].map(x => x.querySelector('.pb').textContent));
-  check('Admin Pumps: T.B. 2020 right after T.B. 10/1', prow.join('|') === 'T.B. 6/1|T.B. 6/2|T.B. 8/1|T.B. 8/2|T.B. 10/1|T.B. 2020|Water Disposal Plant', prow.join('|'));
+  check('Admin Pumps: T.B. 2020 right after T.B. 10/1', prow.join('|') === 'T.B. 6/1|T.B. 6/2|T.B. 8/1|T.B. 8/2|T.B. 10/1|T.B. 2020|Water Disposal Plant|Fieran Terminal', prow.join('|'));
   await a.evaluate(() => document.querySelector('#tbSubTabs button[data-sub="mach"]').click()); await sleep(500);
   const mc = await a.evaluate(() => ({ card:document.getElementById('tbMachCard').innerText.replace(/\s+/g,' '), msg:window.__MACH__.msg('2026-08-21') }));
   check('Machinery update: T.B. 2020 block with its pumps / compressors', /T\.B\. 2020 GROUP IN SERVICE \/ ON STANDBY \/ OFF OUT OF SERVICE Pumps Transfer Pump — — Compressors — Air Compressor — /i.test(mc.card), mc.card.slice(mc.card.indexOf('T.B. 2020'), mc.card.indexOf('T.B. 2020') + 260));

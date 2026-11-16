@@ -42,6 +42,10 @@ const sleep = ms => new Promise(r=>setTimeout(r,ms));
   await p.selectOption(sel(7), 'sb'); await sleep(1500);
   const st2 = await p.evaluate(() => { const k = Object.keys(window.__STUB__.store).find(x => /^tbReadings\/.*__wdp$/.test(x)); return JSON.parse(JSON.stringify(window.__STUB__.store[k])); });
   check('Pump leaves service → its readings are cleared', st2.pumpsDailyMeas['7'].q == null && st2.pumpsDailyMeas['7'].hz == null, JSON.stringify(st2.pumpsDailyMeas['7']));
+  // remarks
+  await p.fill('#tbArea .tb-station textarea[data-k="r"]', 'Vertical C motor sent to workshop'); await sleep(1500);
+  const rm = await p.evaluate(() => { const k = Object.keys(window.__STUB__.store).find(x => /^tbReadings\/.*__wdp$/.test(x)); return window.__STUB__.store[k].note || window.__STUB__.store[k].remarks; });
+  check('W.D. Plant: remarks box saves the operator\'s note', rm === 'Vertical C motor sent to workshop', String(rm));
   // rules
   const ru = await p.evaluate(async () => { const f = firebase.firestore(), o = {};
     try { await f.collection('tbReadings').doc('2026-08-20__tb6_1').set({ battery:'tb6_1', x:1 }, { merge:true }); o.w = 'allowed'; } catch(e){ o.w = e.code; }

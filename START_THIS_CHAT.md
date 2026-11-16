@@ -1,6 +1,6 @@
 # Sinai Field — start here
 
-**Attach `sinai-field-v53.zip` to the new chat and paste the block below as your
+**Attach `sinai-field-v56.zip` to the new chat and paste the block below as your
 first message.** Everything Claude needs is in the zip; nothing from any other
 conversation is required.
 
@@ -16,7 +16,7 @@ conversation is required.
 > The attached zip is the whole project. Read `README.md`, then
 > `DEVELOPER_REFERENCE.md`, then `CHANGELOG.md` before changing anything.
 >
-> Current release: **v53**, service-worker cache `sinai-field-v53`.
+> Current release: **v56**, service-worker cache `sinai-field-v56`.
 >
 > How I work: show me the change, test it before you say it is done, and tell me
 > plainly when something I asked for is a bad idea.
@@ -72,6 +72,11 @@ tank battery total to a Ras Gara total.
 
 ## Where things stand
 
+v56: admin **Follow-up** tab — missing-entries board (`tbFollowData`, badge, copy
+list) and monthly Excel export (`tbMonthBook`, `tbExportMonth`). v55: review release — day rollover (`watchShiftDay`), incremental sync with per-site
+stamps, PM hours carried over unreported days, debounced local cache, rules
+`tbIdMatches`. v54: **Fieran Terminal** admin tab (station `fieran`, `adminTab:true`, 16 pumps,
+engineers on the admin account); remarks on station panels (W.D. Plant).
 v53: readings WhatsApp message follows the latest scanner reading and lists all the
 day's readings + total (`tbReadMsg`, `tbReadLatest`); copy button only. v52 added it. v51: **T.B. 2020** — a hosted station (`host:'tb10_1'`) shown as a tab in the 10/1
 panel, run with the tb10-1 account; own measurements (`TB_MEAS2`) and daily status;
