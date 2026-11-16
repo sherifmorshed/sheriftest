@@ -563,6 +563,12 @@ body:not(.light-mode) .ms-wa{border-color:rgba(74,222,128,.35);background:rgba(7
 .tb-station .st-out{color:var(--red);font-weight:800;}
 .rd-wa{margin-top:12px;}
 .rd-wa .ms-btns button{flex:1;}
+.st-op{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:9px 11px;margin-bottom:10px;}
+.st-op label{display:flex;flex-direction:column;font-weight:800;font-size:13.5px;}
+.st-op label .ar{font-size:12.5px;color:var(--muted);font-family:'Segoe UI','Noto Naskh Arabic',Tahoma,sans-serif;}
+.st-op .ms-in{flex:0 0 auto;}
+.st-op .rg-in{width:110px;}
 .h2tabs{display:flex;gap:4px;margin:0 0 10px;border-bottom:2px solid var(--border);}
 .h2tabs button{flex:1;background:transparent;border:0;border-bottom:3px solid transparent;margin-bottom:-2px;padding:7px 4px;
   font-weight:800;font-size:13.5px;color:var(--muted);cursor:pointer;font-family:'Segoe UI','Noto Naskh Arabic',Tahoma,sans-serif;}
@@ -1207,7 +1213,6 @@ document.addEventListener('click', function(e){
         <label class="rg-lbl" for="tbFuDate">Shift day</label>
         <input type="date" id="tbFuDate" class="rg-date">
         <button class="rg-btn" id="tbFuToday" type="button">Today</button>
-        <button class="rg-btn" id="tbFuCopy" type="button">Copy missing list</button>
       </div>
       <div id="tbFollow"></div>
       <div class="rg-sec-title" style="margin-top:16px;">Monthly Excel export</div>
@@ -3642,8 +3647,9 @@ document.addEventListener('DOMContentLoaded', function(){
   const TB_STATIONS = [
     { id:'tb2020', name:'T.B. 2020', start:5, pumpTab:true, station:true, host:'tb10_1',
       wa:'T.B 2020', meas2:'tb2020' },
+    // `outletPr` (v57): the plant's outlet pressure, one figure a day (psi).
     { id:'wdp', name:'Water Disposal Plant', short:'W.D. Plant', start:5, pumpTab:true, station:true,
-      wa:'Water Disposal Plant' },
+      wa:'Water Disposal Plant', outletPr:true },
     // Fieran Terminal (v54) — the terminal that receives the oil. Updated by
     // the engineers on the ADMIN account, on an admin tab of its own
     // (`adminTab`), not on the Entry page; no operator account. Admin writes
@@ -4173,10 +4179,11 @@ document.addEventListener('DOMContentLoaded', function(){
       const bar = key.indexOf('|');
       const id = key.slice(0, bar), kind = key.charAt(bar + 1);
       const i = parseInt(key.slice(bar + 2), 10);
-      if(!tbById(id) || 'swdcxrqymguvnh'.indexOf(kind) === -1) return;
+      if(!tbById(id) || 'swdcxrqymguvnho'.indexOf(kind) === -1) return;
       if(!days[dt]) days[dt] = tbBlankDay(dt);
       const cell = tbCellIn(days[dt], id);
       if(kind === 'r'){ cell.note = val || ''; return; }
+      if(kind === 'o'){ cell.op = (val == null || val === '') ? null : val; return; }
       if(kind === 'h'){
         const k = Math.floor(i / 10), f = TB_PUMP_MEAS[i % 10];
         if(f && k >= 0 && k < TB_PUMPD_MAX){ if(val == null || val === '') delete cell.dpx[k][f.k]; else cell.dpx[k][f.k] = val; }
@@ -4348,7 +4355,7 @@ document.addEventListener('DOMContentLoaded', function(){
     // dpx[k] = { p, q, hz }: a station pump's pressure, flow and frequency.
     const dps = [], dpy = [], dpm = [], dpx = [];
     for(let k = 0; k < TB_PUMPD_MAX; k++){ dps.push(null); dpy.push(''); dpm.push(false); dpx.push({}); }
-    return { s:s, w:w, d:d, c:c, x:x, ps:ps, py:py, pmd:pmd, dps:dps, dpy:dpy, dpm:dpm, dpx:dpx, meas:meas, note:'', t:null, src:'' };
+    return { s:s, w:w, d:d, c:c, x:x, ps:ps, py:py, pmd:pmd, dps:dps, dpy:dpy, dpm:dpm, dpx:dpx, meas:meas, op:null, note:'', t:null, src:'' };
   }
   function tbBlankDay(dateStr){
     const tbs = {};
@@ -4434,6 +4441,7 @@ document.addEventListener('DOMContentLoaded', function(){
         out.tbs[b.id].dpm[k] = !!(src.dpm && src.dpm[k]);
         out.tbs[b.id].dpx[k] = Object.assign({}, (src.dpx && src.dpx[k]) || {});
       }
+      out.tbs[b.id].op = (src.op != null) ? src.op : null;
       for(let i = 0; i < TB_READS; i++){
         out.tbs[b.id].s[i] = (src.s && src.s[i] != null) ? src.s[i] : null;
         out.tbs[b.id].w[i] = (src.w && src.w[i] != null) ? src.w[i] : null;
@@ -5154,6 +5162,7 @@ document.addEventListener('DOMContentLoaded', function(){
       .sort(function(a, z){ return (a.pm.ord || 0) - (z.pm.ord || 0); });
     const L = [ '*`' + (b.wa || b.name) + '`*', '', '*Station Status*',
                 '*Date : ' + _tbDate.split('-').reverse().join('/') + '*', '~ـــــــــــــــــــــــــــــــــــــــــــــ~' ];
+    if(b.outletPr && cell.op != null) L.push('', '*Outlet Pressure : ' + tbFmt(cell.op, 1) + ' psi*');
     let group = null, any = false;
     order.forEach(function(o){
       const v = cell.dps[o.k];
@@ -5229,7 +5238,14 @@ document.addEventListener('DOMContentLoaded', function(){
           return '<div class="st-fl ' + (f.en.charAt(0) === 'I' ? 'inj' : 'vert') + '"><span>' + f.en + '</span><b>' + tbFmt(f.q, 1) + '</b><i>m³/hr · ' + f.n + ' pump' + (f.n > 1 ? 's' : '') + '</i>' +
             '<em>Average ' + tbFmt(f.day, 0) + ' m³/day</em></div>';
         }).join('') + '</div>' : '') +
-      '<div class="bd">' + tbDailyPumpsHTML(b, cell, ed) +
+      '<div class="bd">' +
+      // The plant's outlet pressure, one figure for the day (v57).
+      (b.outletPr ? '<div class="st-op"><label for="op-' + escAttr(b.id) + '"><span>Outlet Pressure</span>' +
+          '<span class="ar" dir="rtl" lang="ar">خارج ضغط المحطة</span></label>' +
+          '<div class="ms-in"><input id="op-' + escAttr(b.id) + '" class="rg-in" type="number" inputmode="decimal" step="any"' +
+          ' data-tb="' + escAttr(b.id) + '" data-k="o" data-i="0" value="' + (cell.op == null ? '' : cell.op) + '"' +
+          (ed ? '' : ' disabled') + '><span class="u">psi</span></div></div>' : '') +
+      tbDailyPumpsHTML(b, cell, ed) +
       // Remarks (v54), as on a battery: the operators' notes for the day.
       '<div class="tb-note-wrap"><div class="rg-sec-title">Remarks' + arSpan('ملاحظات اليوم') + '</div>' +
       '<textarea class="pf-remarks" rows="2" data-tb="' + escAttr(b.id) + '" data-k="r" data-i="0"' +
@@ -5313,6 +5329,12 @@ document.addEventListener('DOMContentLoaded', function(){
           return;
         }
         if(k === 'y' || k === 'q' || k === 'u') return;  // pump station: redrawn on change
+        if(k === 'o'){
+          const c5 = tbGetDay(_tbDate).tbs[inp.getAttribute('data-tb')] || {};
+          const v5 = c5.op != null ? String(c5.op) : '';
+          if(inp.value !== v5) inp.value = v5;
+          return;
+        }
         if(k === 'h'){
           const n4 = parseInt(inp.getAttribute('data-i'), 10), f4 = TB_PUMP_MEAS[n4 % 10];
           const c4 = tbGetDay(_tbDate).tbs[inp.getAttribute('data-tb')] || {};
@@ -5492,8 +5514,6 @@ document.addEventListener('DOMContentLoaded', function(){
           '<div class="fu-l">' + (s.last ? 'last saved ' + new Date(s.last.at).toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }) +
             (s.last.by ? ' by ' + escHtml(String(s.last.by).split('@')[0]) : '') : 'nothing saved for this day') + '</div></div>';
       }).join('');
-    const cp = document.getElementById('tbFuCopy');
-    if(cp && !cp._wired){ cp._wired = true; cp.addEventListener('click', function(){ tbCopyText(tbFollowMsg(_tbDate)); }); }
     const mo = document.getElementById('tbFuMonth');
     if(mo && !mo.value) mo.value = _tbDate.slice(0, 7);
     const xb = document.getElementById('tbFuXlsx');
@@ -5562,6 +5582,7 @@ document.addEventListener('DOMContentLoaded', function(){
           const mx = (pm.meas && cell.dpx && cell.dpx[k]) || {};
           stat.push([d, b.name, pm.group || '', pm.name, st.en, (cell.dpy && cell.dpy[k]) || '', num(mx.p), num(mx.q), num(mx.hz)]);
         });
+        if(b.outletPr && cell.op != null) stat.push([d, b.name, 'PLANT', 'Outlet pressure', '', '', num(cell.op), null, null]);
         if(meas[b.id]){
           const F = tbMF(b.id);
           for(let k = 0; k < TB_MEAS_N; k++){
@@ -7787,6 +7808,8 @@ document.addEventListener('DOMContentLoaded', function(){
           n.out ? '<b class="out">' + n.out + ' out</b>' : '', n.none ? '<b class="none">' + n.none + ' not reported</b>' : ''
         ].filter(Boolean).join(' · ');
         const sfl = b.station ? tbStationFlow(b.id, tbGetDay(asOf).tbs[b.id]) : { n:0 };
+        const sop = b.outletPr ? (tbGetDay(asOf).tbs[b.id] || {}).op : null;
+        if(sop != null) counts += ' · <b>outlet pressure ' + tbFmt(sop, 1) + ' psi</b>';
         if(sfl.n) tbFlowLines(sfl).forEach(function(f){ counts += ' · <b>' + f.en.toLowerCase() + ' ' + tbFmt(f.q, 1) + ' m³/hr</b> (average ' + tbFmt(f.day, 0) + ' m³/day)'; });
         rows += '<div class="prow' + (n.out ? ' alarm' : '') + '"><div class="pb">' + escHtml(b.name) +
                 '</div><div class="pc">' + chips + '</div><div class="pn">' + counts + '</div></div>';
@@ -9261,6 +9284,13 @@ tbRemarksHTML(day.date, true) +
   function tbApplyInput(id, kind, i, raw){
     if(!tbMayWrite(id, kind)) return;
     const cell = tbCellOn(_tbDate, id);
+    if(kind === 'o'){
+      const v = tbNum(raw);
+      cell.op = v;
+      _tbPend.mark(_tbDate, tbPendKey(id, 'o', 0), v);
+      tbSaveLocal();
+      return;
+    }
     if(kind === 'h'){
       const k = Math.floor(i / 10), f = TB_PUMP_MEAS[i % 10];
       if(!f || !(k >= 0 && k < tbPumpsDaily(id).length)) return;
@@ -9409,6 +9439,7 @@ tbRemarksHTML(day.date, true) +
           if(kind === 'u') (doc.pumpsDaily = doc.pumpsDaily || {})[i] = val || null;
           else if(kind === 'v') (doc.pumpsDailyWhy = doc.pumpsDailyWhy || {})[i] = val || '';
           else if(kind === 'n') (doc.pumpsDailyPM = doc.pumpsDailyPM || {})[i] = !!val;
+          else if(kind === 'o') doc.outletPr = (val === undefined ? null : val);
           else if(kind === 'h'){
             const n = Number(i), f = TB_PUMP_MEAS[n % 10], kk = String(Math.floor(n / 10));
             if(f){ doc.pumpsDailyMeas = doc.pumpsDailyMeas || {};
@@ -9632,6 +9663,7 @@ tbRemarksHTML(day.date, true) +
               else obj[date].tbs[bid].dpm[kk] = !!src[k];
             });
           });
+          if(dd.outletPr != null) obj[date].tbs[bid].op = Number(dd.outletPr);
           if(dd.pumpsDailyMeas && typeof dd.pumpsDailyMeas === 'object'){
             Object.keys(dd.pumpsDailyMeas).forEach(function(k){
               const kk = Number(k), m = dd.pumpsDailyMeas[k] || {};
@@ -9937,7 +9969,7 @@ tbRemarksHTML(day.date, true) +
       });
       area.addEventListener('input', function(e){
         const t = e.target;
-        if(!t || !t.getAttribute || (t.getAttribute('data-k') !== 'v' && t.getAttribute('data-k') !== 'h')) return;
+        if(!t || !t.getAttribute || ['v', 'h', 'o'].indexOf(t.getAttribute('data-k')) === -1) return;
         setTimeout(function(){
           const id = t.getAttribute('data-tb'), box = area.querySelector('.pd-wa[data-pdwa="' + id + '"] .ms-msg');
           if(box) box.textContent = tbStationMsg(tbById(id), tbGetDay(_tbDate).tbs[id]);

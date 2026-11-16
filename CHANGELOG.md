@@ -1,5 +1,16 @@
 # Sinai Field — Changelog
 
+## v57 — Plant outlet pressure; Follow-up without the copy button
+
+Service-worker cache `sinai-field-v57`. Only `index.html` and `sw.js` change;
+**no rules change**.
+
+- **Water Disposal Plant — Outlet Pressure / خارج ضغط المحطة**: one figure a
+  day in psi, at the top of the plant panel. Saved as `outletPr` (queue kind
+  `o`, cell `op`); in the plant's WhatsApp message under the date, on the admin
+  Pumps row, and in the monthly workbook (Station status sheet, group PLANT).
+- **Follow-up**: the "Copy missing list" button is removed.
+
 ## v56 — Follow-up board and monthly Excel export (admin)
 
 Service-worker cache `sinai-field-v56`. Only `index.html` and `sw.js` change;

@@ -45,9 +45,7 @@ const sleep = ms => new Promise(r=>setTimeout(r,ms));
   check('Station status reported clears its line; card shows who saved last'+tag, d1.st.miss.length === 0 && !!d1.last && /2 \/ 4 due/.test(d1.card) && /last saved 16 Nov/.test(d1.card), d1.card.slice(0, 260));
   const order = await a.evaluate(() => [...document.querySelectorAll('.fu-card .pchip')].map(x => x.textContent).join('|'));
   check('Sites behind are listed first, with their count'+tag, /^\d+ missing/.test(order), order);
-  await a.click('#tbFuCopy'); await a.clock.runFor(200);
-  const clip = await a.evaluate(() => navigator.clipboard.readText());
-  check('Copy missing list: WhatsApp text per site'+tag, /^\*Sinai Field — Missing entries\*\nShift day 16\/11\/2026 · as of 15:1\d/.test(clip) && /\*T\.B\. 6\/1\*\n• Readings: 11:00 — scanner, line pressure, temperature, chemical ; 14:00 — line pressure, temperature/.test(clip), clip.slice(0, 220));
+  check('No "Copy missing list" button'+tag, await a.evaluate(() => !document.getElementById('tbFuCopy')));
   // time moves on: 17:00 round becomes due at 17:30
   await a.clock.setFixedTime(new Date('2026-11-16T17:40:00+02:00')); await a.evaluate(() => document.querySelector('#tbSubTabs button[data-sub="follow"]').click());
   const d2 = await a.evaluate(() => window.__FOLLOW__.data('2026-11-16').sites.find(x => x.b.id === 'tb6_1').parts[0].due);

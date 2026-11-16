@@ -42,6 +42,13 @@ const sleep = ms => new Promise(r=>setTimeout(r,ms));
   await p.selectOption(sel(7), 'sb'); await sleep(1500);
   const st2 = await p.evaluate(() => { const k = Object.keys(window.__STUB__.store).find(x => /^tbReadings\/.*__wdp$/.test(x)); return JSON.parse(JSON.stringify(window.__STUB__.store[k])); });
   check('Pump leaves service → its readings are cleared', st2.pumpsDailyMeas['7'].q == null && st2.pumpsDailyMeas['7'].hz == null, JSON.stringify(st2.pumpsDailyMeas['7']));
+  // outlet pressure
+  const opBox = await p.evaluate(() => { const i = document.querySelector('#tbArea .tb-station input[data-k="o"]'); return i ? i.closest('.st-op').innerText.replace(/\s+/g,' ') : null; });
+  check('Outlet Pressure box with its Arabic, in psi', opBox && /Outlet Pressure/.test(opBox) && /خارج ضغط المحطة/.test(opBox) && /psi/.test(opBox), String(opBox));
+  await p.fill('#tbArea .tb-station input[data-k="o"]', '1250'); await sleep(1500);
+  const op = await p.evaluate(() => { const k = Object.keys(window.__STUB__.store).find(x => /^tbReadings\/.*__wdp$/.test(x));
+    return { v:window.__STUB__.store[k].outletPr, msg:document.querySelector('#tbArea .pd-wa .ms-msg').textContent }; });
+  check('Outlet pressure saved and in the WhatsApp message', op.v === 1250 && /\*Outlet Pressure : 1,250 psi\*/.test(op.msg), JSON.stringify(op).slice(0, 200));
   // remarks
   await p.fill('#tbArea .tb-station textarea[data-k="r"]', 'Vertical C motor sent to workshop'); await sleep(1500);
   const rm = await p.evaluate(() => { const k = Object.keys(window.__STUB__.store).find(x => /^tbReadings\/.*__wdp$/.test(x)); return window.__STUB__.store[k].note || window.__STUB__.store[k].remarks; });
@@ -67,10 +74,13 @@ const sleep = ms => new Promise(r=>setTimeout(r,ms));
   await a.fill('#tbArea .tb-station input[data-k="h"][data-i="0"]', '850'); await a.fill('#tbArea .tb-station input[data-k="h"][data-i="1"]', '12000'); await a.fill('#tbArea .tb-station input[data-k="h"][data-i="2"]', '50');
   await a.selectOption(S(1), 'sb'); await sleep(300);
   await a.selectOption(S(8), 'out'); await sleep(300);
-  await a.fill('#tbArea .tb-station textarea.pd-why[data-i="8"]', 'Cable fault'); await sleep(1500);
+  await a.fill('#tbArea .tb-station textarea.pd-why[data-i="8"]', 'Cable fault'); await sleep(300);
+  await a.fill('#tbArea .tb-station input[data-k="o"]', '1180'); await sleep(1500);
   const today = '2026-08-21';
   await a.evaluate(d => { window.__TB__.setDate(d); document.querySelector('#tbSubTabs button[data-sub="pumps"]').click(); }, today); await sleep(600);
   const pr = await a.evaluate(() => { const row = [...document.querySelectorAll('#tbPumpSummary .prow')].find(x => /Water Disposal Plant/.test(x.innerText)); return row ? row.innerText.replace(/\s+/g,' ') : ''; });
+  const pr2 = pr;
+  check('Admin Pumps: W.D. Plant row shows outlet pressure', /outlet pressure 1,180 psi/.test(pr2), pr2.slice(0, 200));
   check('Admin Pumps: W.D. Plant row with readings and flow', /Vertical A P 850 psi · Q 12,000 m³\/hr · 50 Hz/.test(pr) && /vertical pumps flow rate 12,000 m³\/hr/.test(pr) && /1 out/.test(pr), pr.slice(0, 300));
   await a.evaluate(() => document.querySelector('#tbSubTabs button[data-sub="mach"]').click()); await sleep(600);
   const mc = await a.evaluate(d => ({ card:document.getElementById('tbMachCard').innerText.replace(/\s+/g,' '), msg:window.__MACH__.msg(d) }), today);
